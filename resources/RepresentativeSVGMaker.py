@@ -224,10 +224,10 @@ def render(stator_path, rotor_path, out=None, title=None, air_gap=None):
         label = f"Rotor copper, {WORD[lay]} ({sector_text(r_title, n) if lay == 'F.Cu' else sector_text('', n)})"
         items.append(("patch", ROTOR_COPPER[lay][0], label))
     rows = ([i for i in items if i[0] != "patch"], [i for i in items if i[0] == "patch"])   # stator row, rotor row
-    for row, ly in zip(rows, (H - bottom * 0.86, H - bottom * 0.58)):
+    for row, ly in zip(rows, (H - bottom * 0.86, H - bottom * 0.58), strict=True):
         widths = [u * (4.5 + 0.95 * len(label)) + u * 3 for _k, _c, label in row]
         x = (W - sum(widths)) / 2
-        for (kind, colour, label), w in zip(row, widths):
+        for (kind, colour, label), w in zip(row, widths, strict=True):
             if kind == "line":
                 o.append(f'<line x1="{f(x)}" y1="{f(ly)}" x2="{f(x + u * 2.6)}" y2="{f(ly)}" stroke="{colour}" '
                          f'stroke-width="{f(u * 0.45)}" stroke-linecap="round"/>')
@@ -275,7 +275,7 @@ def main(argv=None):
         else:
             ap.error("give one folder, or the stator file and the rotor file")
     except (OSError, ValueError) as e:
-        raise SystemExit(f"cannot draw the picture: {e}")
+        raise SystemExit(f"cannot draw the picture: {e}") from e
 
 
 if __name__ == "__main__":

@@ -158,7 +158,7 @@ def main(argv=None):
         else:
             ap.error("give one folder, or the stator file and the rotor file")
     except (OSError, ValueError) as e:
-        raise SystemExit(f"cannot write the SVG: {e}")
+        raise SystemExit(f"cannot write the SVG: {e}") from e
 
 
 if __name__ == "__main__":

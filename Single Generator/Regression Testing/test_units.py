@@ -327,11 +327,11 @@ class GeometryHelpers(unittest.TestCase):
         C = rng.uniform(-5, 5, (200, 2))
         D = rng.uniform(-5, 5, (200, 2))
         ours = RT.segment_segment_distance(A, B, C, D)
-        theirs = np.array([Geometry.segment_distance(a, b, c, d) for a, b, c, d in zip(A, B, C, D)])
+        theirs = np.array([Geometry.segment_distance(a, b, c, d) for a, b, c, d in zip(A, B, C, D, strict=True)])
         self.assertTrue(np.allclose(ours, theirs, atol=1e-9), f"max difference {np.abs(ours - theirs).max()}")
         P = rng.uniform(-5, 5, (200, 2))
         ours = RT.point_segment_distance(P, A, B)
-        theirs = np.array([float(np.min(Geometry.point_segments_distance(p, a[None, :], b[None, :]))) for p, a, b in zip(P, A, B)])
+        theirs = np.array([float(np.min(Geometry.point_segments_distance(p, a[None, :], b[None, :]))) for p, a, b in zip(P, A, B, strict=True)])
         self.assertTrue(np.allclose(ours, theirs, atol=1e-9))
 
     def test_elliptic_integrals(self):
@@ -414,14 +414,15 @@ class Harness(unittest.TestCase):
         self.assertEqual(H.P.TX_TURNS, 3)
 
     def test_no_pycache_is_written(self):
-        """The suite and the generator leave no __pycache__ folders that are not already part of the repository."""
+        """The suite and the generator leave no __pycache__ folders (new files only: untracked, or ignored by
+        .gitignore, which keeps bytecode out of git and so would hide it from a plain git status)."""
         import subprocess
         try:
-            out = subprocess.run(["git", "status", "--porcelain", "--", H.PROJECT, H.RESOURCES], capture_output=True,
-                                 text=True, cwd=H.REPO, timeout=30).stdout
+            out = subprocess.run(["git", "status", "--porcelain", "--ignored", "--", H.PROJECT, H.RESOURCES],
+                                 capture_output=True, text=True, cwd=H.REPO, timeout=30).stdout
         except (OSError, subprocess.SubprocessError):
             self.skipTest("git is not available")
-        strays = [l for l in out.splitlines() if "__pycache__" in l or l.endswith(".pyc")]
+        strays = [l for l in out.splitlines() if l[:2] in ("??", "!!") and ("__pycache__" in l or l.endswith(".pyc"))]
         self.assertEqual(strays, [])
 
 

@@ -130,7 +130,7 @@ def resolve(get, room):
     else:
         mode = "board"
         if e_in is None or e_out is None:
-            unset = " and ".join(n for n, e in zip(EDGES, (e_in, e_out)) if e is None)
+            unset = " and ".join(n for n, e in zip(EDGES, (e_in, e_out), strict=True) if e is None)
             raise ParameterConflict(RADII + CENTRE + EDGES, f"the RX band is not given (the radii and centre + swing are all "
                                     f"None), so it has to come from the board edges, but {unset} "
                                     f"{'is' if ' and ' not in unset else 'are'} None too. Set the RX band "
@@ -188,7 +188,7 @@ def rx_band(P):
             return outer_edge_room(P)
         except (TypeError, ValueError, AttributeError) as e:
             raise ValueError(f"the room for the TX turns and the TX tail outside the RX band cannot be worked out "
-                             f"(a TX / RX tab / margin setting is not a number: {e})")
+                             f"(a TX / RX tab / margin setting is not a number: {e})") from e
     return resolve(lambda n: getattr(P, n, None), room)
 
 

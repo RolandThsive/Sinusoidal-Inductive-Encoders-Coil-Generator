@@ -1,0 +1,431 @@
+{
+ "10.0": {
+  "Dual Generator fresh run/Rotor.kicad_pcb": {},
+  "Dual Generator fresh run/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4,
+   "track_width (error)": 199
+  },
+  "Dual Generator/blind_vias/Rotor.kicad_pcb": {},
+  "Dual Generator/blind_vias/Stator.kicad_pcb": {
+   "drill_out_of_range (error)": 146,
+   "track_dangling (warning)": 4,
+   "via_diameter (error)": 146
+  },
+  "Dual Generator/custom_rotor/Rotor.kicad_pcb": {},
+  "Dual Generator/custom_rotor/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4,
+   "track_width (error)": 199
+  },
+  "Dual Generator/default/Rotor.kicad_pcb": {},
+  "Dual Generator/default/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4,
+   "track_width (error)": 199
+  },
+  "Dual Generator/edges_30_60/Rotor.kicad_pcb": {},
+  "Dual Generator/edges_30_60/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/edges_90_150_loops_4x16_parallel/Rotor.kicad_pcb": {},
+  "Dual Generator/edges_90_150_loops_4x16_parallel/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/loops_2x8_rotor_from_board/Rotor.kicad_pcb": {},
+  "Dual Generator/loops_2x8_rotor_from_board/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4,
+   "track_width (error)": 199
+  },
+  "Dual Generator/mode1_fitted_bands/Rotor.kicad_pcb": {},
+  "Dual Generator/mode1_fitted_bands/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/mode3_rx1_band_gap/Rotor.kicad_pcb": {},
+  "Dual Generator/mode3_rx1_band_gap/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/mode4_all_given/Rotor.kicad_pcb": {},
+  "Dual Generator/mode4_all_given/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/parallel_both_sets/Rotor.kicad_pcb": {},
+  "Dual Generator/parallel_both_sets/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/silkscreen_bottom_no_labels/Rotor.kicad_pcb": {},
+  "Dual Generator/silkscreen_bottom_no_labels/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4,
+   "track_width (error)": 199
+  },
+  "Dual Generator/silkscreen_off/Rotor.kicad_pcb": {},
+  "Dual Generator/silkscreen_off/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4,
+   "track_width (error)": 199
+  },
+  "Dual Generator/terminals_90_270/Rotor.kicad_pcb": {},
+  "Dual Generator/terminals_90_270/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Single Generator fresh run/Rotor.kicad_pcb": {},
+  "Single Generator fresh run/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/band_from_centre/Rotor.kicad_pcb": {},
+  "Single Generator/band_from_centre/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/cosine_r_loops_4/Rotor.kicad_pcb": {},
+  "Single Generator/cosine_r_loops_4/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/custom_rotor_no_cover/Rotor.kicad_pcb": {},
+  "Single Generator/custom_rotor_no_cover/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/default/Rotor.kicad_pcb": {},
+  "Single Generator/default/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/edges_20_40_loops_4/Rotor.kicad_pcb": {},
+  "Single Generator/edges_20_40_loops_4/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/edges_90_150_loops_8_subcoils_2/Rotor.kicad_pcb": {},
+  "Single Generator/edges_90_150_loops_8_subcoils_2/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/four_layer_blind_parallel_fingers/Rotor.kicad_pcb": {},
+  "Single Generator/four_layer_blind_parallel_fingers/Stator.kicad_pcb": {
+   "drill_out_of_range (error)": 19,
+   "track_dangling (warning)": 2,
+   "via_diameter (error)": 19
+  },
+  "Single Generator/four_layer_blind_vias/Rotor.kicad_pcb": {},
+  "Single Generator/four_layer_blind_vias/Stator.kicad_pcb": {
+   "drill_out_of_range (error)": 13,
+   "track_dangling (warning)": 2,
+   "via_diameter (error)": 13
+  },
+  "Single Generator/four_layer_parallel_staggered/Rotor.kicad_pcb": {},
+  "Single Generator/four_layer_parallel_staggered/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/four_layer_series/Rotor.kicad_pcb": {},
+  "Single Generator/four_layer_series/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/loops_16_tabs_single/Rotor.kicad_pcb": {},
+  "Single Generator/loops_16_tabs_single/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/loops_4_subcoils_2/Rotor.kicad_pcb": {},
+  "Single Generator/loops_4_subcoils_2/Stator.kicad_pcb": {
+   "clearance (error)": 75,
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/rotor_two_layers_mask_open/Rotor.kicad_pcb": {},
+  "Single Generator/rotor_two_layers_mask_open/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/series_two_layers_no_fingers/Rotor.kicad_pcb": {},
+  "Single Generator/series_two_layers_no_fingers/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/silkscreen_off/Rotor.kicad_pcb": {},
+  "Single Generator/silkscreen_off/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/silkscreen_top_dots_on_all/Rotor.kicad_pcb": {},
+  "Single Generator/silkscreen_top_dots_on_all/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/spiral_tx/Rotor.kicad_pcb": {},
+  "Single Generator/spiral_tx/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/stepped_arc_tx/Rotor.kicad_pcb": {},
+  "Single Generator/stepped_arc_tx/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  }
+ },
+ "8.0": {
+  "Dual Generator fresh run/Rotor.kicad_pcb": {},
+  "Dual Generator fresh run/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/blind_vias/Rotor.kicad_pcb": {},
+  "Dual Generator/blind_vias/Stator.kicad_pcb": {
+   "drill_out_of_range (error)": 146,
+   "track_dangling (warning)": 4,
+   "via_diameter (error)": 146
+  },
+  "Dual Generator/custom_rotor/Rotor.kicad_pcb": {},
+  "Dual Generator/custom_rotor/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/default/Rotor.kicad_pcb": {},
+  "Dual Generator/default/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/edges_30_60/Rotor.kicad_pcb": {},
+  "Dual Generator/edges_30_60/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/edges_90_150_loops_4x16_parallel/Rotor.kicad_pcb": {},
+  "Dual Generator/edges_90_150_loops_4x16_parallel/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/loops_2x8_rotor_from_board/Rotor.kicad_pcb": {},
+  "Dual Generator/loops_2x8_rotor_from_board/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/mode1_fitted_bands/Rotor.kicad_pcb": {},
+  "Dual Generator/mode1_fitted_bands/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/mode3_rx1_band_gap/Rotor.kicad_pcb": {},
+  "Dual Generator/mode3_rx1_band_gap/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/mode4_all_given/Rotor.kicad_pcb": {},
+  "Dual Generator/mode4_all_given/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/parallel_both_sets/Rotor.kicad_pcb": {},
+  "Dual Generator/parallel_both_sets/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/silkscreen_bottom_no_labels/Rotor.kicad_pcb": {},
+  "Dual Generator/silkscreen_bottom_no_labels/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/silkscreen_off/Rotor.kicad_pcb": {},
+  "Dual Generator/silkscreen_off/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/terminals_90_270/Rotor.kicad_pcb": {},
+  "Dual Generator/terminals_90_270/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Single Generator fresh run/Rotor.kicad_pcb": {},
+  "Single Generator fresh run/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/band_from_centre/Rotor.kicad_pcb": {},
+  "Single Generator/band_from_centre/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/cosine_r_loops_4/Rotor.kicad_pcb": {},
+  "Single Generator/cosine_r_loops_4/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/custom_rotor_no_cover/Rotor.kicad_pcb": {},
+  "Single Generator/custom_rotor_no_cover/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/default/Rotor.kicad_pcb": {},
+  "Single Generator/default/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/edges_20_40_loops_4/Rotor.kicad_pcb": {},
+  "Single Generator/edges_20_40_loops_4/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/edges_90_150_loops_8_subcoils_2/Rotor.kicad_pcb": {},
+  "Single Generator/edges_90_150_loops_8_subcoils_2/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/four_layer_blind_parallel_fingers/Rotor.kicad_pcb": {},
+  "Single Generator/four_layer_blind_parallel_fingers/Stator.kicad_pcb": {
+   "drill_out_of_range (error)": 19,
+   "track_dangling (warning)": 2,
+   "via_diameter (error)": 19
+  },
+  "Single Generator/four_layer_blind_vias/Rotor.kicad_pcb": {},
+  "Single Generator/four_layer_blind_vias/Stator.kicad_pcb": {
+   "drill_out_of_range (error)": 13,
+   "track_dangling (warning)": 2,
+   "via_diameter (error)": 13
+  },
+  "Single Generator/four_layer_parallel_staggered/Rotor.kicad_pcb": {},
+  "Single Generator/four_layer_parallel_staggered/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/four_layer_series/Rotor.kicad_pcb": {},
+  "Single Generator/four_layer_series/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/loops_16_tabs_single/Rotor.kicad_pcb": {},
+  "Single Generator/loops_16_tabs_single/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/loops_4_subcoils_2/Rotor.kicad_pcb": {},
+  "Single Generator/loops_4_subcoils_2/Stator.kicad_pcb": {
+   "clearance (error)": 96,
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/rotor_two_layers_mask_open/Rotor.kicad_pcb": {},
+  "Single Generator/rotor_two_layers_mask_open/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/series_two_layers_no_fingers/Rotor.kicad_pcb": {},
+  "Single Generator/series_two_layers_no_fingers/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/silkscreen_off/Rotor.kicad_pcb": {},
+  "Single Generator/silkscreen_off/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/silkscreen_top_dots_on_all/Rotor.kicad_pcb": {},
+  "Single Generator/silkscreen_top_dots_on_all/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/spiral_tx/Rotor.kicad_pcb": {},
+  "Single Generator/spiral_tx/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/stepped_arc_tx/Rotor.kicad_pcb": {},
+  "Single Generator/stepped_arc_tx/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  }
+ },
+ "9.0": {
+  "Dual Generator fresh run/Rotor.kicad_pcb": {},
+  "Dual Generator fresh run/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/blind_vias/Rotor.kicad_pcb": {},
+  "Dual Generator/blind_vias/Stator.kicad_pcb": {
+   "drill_out_of_range (error)": 146,
+   "track_dangling (warning)": 4,
+   "via_diameter (error)": 146
+  },
+  "Dual Generator/custom_rotor/Rotor.kicad_pcb": {},
+  "Dual Generator/custom_rotor/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/default/Rotor.kicad_pcb": {},
+  "Dual Generator/default/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/edges_30_60/Rotor.kicad_pcb": {},
+  "Dual Generator/edges_30_60/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/edges_90_150_loops_4x16_parallel/Rotor.kicad_pcb": {},
+  "Dual Generator/edges_90_150_loops_4x16_parallel/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/loops_2x8_rotor_from_board/Rotor.kicad_pcb": {},
+  "Dual Generator/loops_2x8_rotor_from_board/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/mode1_fitted_bands/Rotor.kicad_pcb": {},
+  "Dual Generator/mode1_fitted_bands/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/mode3_rx1_band_gap/Rotor.kicad_pcb": {},
+  "Dual Generator/mode3_rx1_band_gap/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/mode4_all_given/Rotor.kicad_pcb": {},
+  "Dual Generator/mode4_all_given/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/parallel_both_sets/Rotor.kicad_pcb": {},
+  "Dual Generator/parallel_both_sets/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/silkscreen_bottom_no_labels/Rotor.kicad_pcb": {},
+  "Dual Generator/silkscreen_bottom_no_labels/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/silkscreen_off/Rotor.kicad_pcb": {},
+  "Dual Generator/silkscreen_off/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/terminals_90_270/Rotor.kicad_pcb": {},
+  "Dual Generator/terminals_90_270/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Single Generator fresh run/Rotor.kicad_pcb": {},
+  "Single Generator fresh run/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/band_from_centre/Rotor.kicad_pcb": {},
+  "Single Generator/band_from_centre/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/cosine_r_loops_4/Rotor.kicad_pcb": {},
+  "Single Generator/cosine_r_loops_4/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/custom_rotor_no_cover/Rotor.kicad_pcb": {},
+  "Single Generator/custom_rotor_no_cover/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/default/Rotor.kicad_pcb": {},
+  "Single Generator/default/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/edges_20_40_loops_4/Rotor.kicad_pcb": {},
+  "Single Generator/edges_20_40_loops_4/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/edges_90_150_loops_8_subcoils_2/Rotor.kicad_pcb": {},
+  "Single Generator/edges_90_150_loops_8_subcoils_2/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/four_layer_blind_parallel_fingers/Rotor.kicad_pcb": {},
+  "Single Generator/four_layer_blind_parallel_fingers/Stator.kicad_pcb": {
+   "drill_out_of_range (error)": 19,
+   "track_dangling (warning)": 2,
+   "via_diameter (error)": 19
+  },
+  "Single Generator/four_layer_blind_vias/Rotor.kicad_pcb": {},
+  "Single Generator/four_layer_blind_vias/Stator.kicad_pcb": {
+   "drill_out_of_range (error)": 13,
+   "track_dangling (warning)": 2,
+   "via_diameter (error)": 13
+  },
+  "Single Generator/four_layer_parallel_staggered/Rotor.kicad_pcb": {},
+  "Single Generator/four_layer_parallel_staggered/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/four_layer_series/Rotor.kicad_pcb": {},
+  "Single Generator/four_layer_series/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/loops_16_tabs_single/Rotor.kicad_pcb": {},
+  "Single Generator/loops_16_tabs_single/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/loops_4_subcoils_2/Rotor.kicad_pcb": {},
+  "Single Generator/loops_4_subcoils_2/Stator.kicad_pcb": {
+   "clearance (error)": 96,
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/rotor_two_layers_mask_open/Rotor.kicad_pcb": {},
+  "Single Generator/rotor_two_layers_mask_open/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/series_two_layers_no_fingers/Rotor.kicad_pcb": {},
+  "Single Generator/series_two_layers_no_fingers/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/silkscreen_off/Rotor.kicad_pcb": {},
+  "Single Generator/silkscreen_off/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/silkscreen_top_dots_on_all/Rotor.kicad_pcb": {},
+  "Single Generator/silkscreen_top_dots_on_all/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/spiral_tx/Rotor.kicad_pcb": {},
+  "Single Generator/spiral_tx/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Generator/stepped_arc_tx/Rotor.kicad_pcb": {},
+  "Single Generator/stepped_arc_tx/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  }
+ }
+}

@@ -1,0 +1,63 @@
+# Security checks of the dependencies: on every pull request, after each push to main and every Monday.
+#
+#   pip-audit           the pins of requirements.txt (one numpy for Python 3.11, one for 3.12 to 3.15) against the
+#                       known vulnerabilities of PyPI's advisory database
+#   Dependency review   a pull request that adds or changes a dependency (a requirements file, an action) with a known
+#                       vulnerability of moderate severity or worse fails
+#
+# CodeQL (codeql.yml) checks the code itself; Dependabot (dependabot.yml) proposes updates of the pins and actions.
+
+name: Security
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "41 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+
+jobs:
+  pip-audit:
+    name: pip-audit (Python ${{ matrix.python }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.15"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install pip-audit (the version in requirements-dev.txt)
+        run: |
+          python -m pip install --only-binary=:all: "$(grep -E '^pip-audit==' requirements-dev.txt)"
+      - name: Audit requirements.txt
+        run: pip-audit --requirement requirements.txt --progress-spinner off --desc on
+
+  dependency-review:
+    name: Dependency review
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          fail-on-severity: moderate

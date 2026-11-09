@@ -397,7 +397,7 @@ def connectivity(board, net_id, tol=1e-3):
     uf = _UnionFind()
     degree = {}
     nodes_a = []
-    for (x1, y1, x2, y2, _w), layer in zip(seg, layers):
+    for (x1, y1, x2, y2, _w), layer in zip(seg, layers, strict=True):
         a, b = (x1, y1, layer), (x2, y2, layer)
         uf.union(a, b)
         nodes_a.append(a)
@@ -448,7 +448,7 @@ def compare_text(expected, actual, tol=1e-5, limit=12):
         ta, tb = _TOKEN.findall(a), _TOKEN.findall(b)
         same = len(ta) == len(tb)
         if same:
-            for x, y in zip(ta, tb):
+            for x, y in zip(ta, tb, strict=True):
                 if x == y:
                     continue
                 try:

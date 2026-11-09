@@ -534,7 +534,7 @@ def suggest(text, P, settings, font=None, sets=None):
                                 f"at {_mm(e)} have room (copper on every layer, the board edge); extend the ends by hand")
             continue
         a, b, room = sites
-        for i, (q, lay) in enumerate(zip((a, b), layers), 1):
+        for i, (q, lay) in enumerate(zip((a, b), layers, strict=False), 1):
             silk.dot(q, dot_r)
             silk.line(e, q, dashed=True)
             if placer is not None:

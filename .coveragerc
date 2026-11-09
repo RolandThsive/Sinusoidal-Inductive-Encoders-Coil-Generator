@@ -1,0 +1,10 @@
+# Coverage settings of the CI: line and branch coverage of the generator code, measured while a regression suite
+# runs (the suite passes --source).  The CI fails when a suite's total drops below its number in
+# .github/coverage-baseline.json; see .github/scripts/coverage_ratchet.py.
+[run]
+branch = True
+parallel = False
+
+[report]
+precision = 1
+skip_empty = True

@@ -39,8 +39,10 @@ contributions of every kind are welcome, from a measurement on a real board to a
 - **Check before you send.** Run the checks of the generator you changed (`python Generator/Run/RunCoilGenerator.py
   --check` from the `Single Generator` folder, `python Dual_Generator/Run/Dual_RunCoilGenerator.py --check` from the
   `Dual Generator` folder) and its regression tests (`python "Single Generator/Regression Testing/run_regression.py"`
-  and `python "Dual Generator/Regression Testing/run_regression.py"` from the repository root). Every pull request runs
-  both suites on GitHub.
+  and `python "Dual Generator/Regression Testing/run_regression.py"` from the repository root), and the lint
+  (`python -m pip install -r requirements-dev.txt`, then `ruff check .`). Every pull request runs the CI on GitHub: both
+  suites on Ubuntu, Windows and macOS, the install on Python 3.11 to 3.15, the boards in KiCad 7 to 10, the lint and the
+  repository checks (see [Regression Testing](docs/wiki/Regression-Testing.md)).
 - **Parameters stay in the parameter files.** The only files a user edits are in `Single Generator/Parameters/` and
   `Dual Generator/Parameters/`.
 - **Update the documentation with the code.** If a parameter, command or output changes, change the wiki and README to

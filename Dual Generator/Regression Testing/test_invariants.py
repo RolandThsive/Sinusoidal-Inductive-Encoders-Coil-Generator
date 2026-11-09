@@ -246,7 +246,7 @@ class Vias(unittest.TestCase):
                     self.assertLess(RT.LAYER_INDEX[pair[0]], RT.LAYER_INDEX[pair[1]], f"via {i}: {pair} not top-most first")
                     m = b.seg_net == b.via_net[i]
                     d = RT.point_segment_distance(np.repeat(centre[None, :], int(m.sum()), axis=0), b.seg[m, 0:2], b.seg[m, 2:4])
-                    touching = {b.seg_layer[j] for j, k in zip(np.flatnonzero(m), d <= radius + 1e-3) if k}
+                    touching = {b.seg_layer[j] for j, k in zip(np.flatnonzero(m), d <= radius + 1e-3, strict=True) if k}
                     self.assertEqual(set(pair), touching, f"via {i} at {centre.tolist()}: written as {pair}, the copper of "
                                                           f"its net there is on {sorted(touching)}")
                     if set(pair) == {"F.Cu", "B.Cu"}:

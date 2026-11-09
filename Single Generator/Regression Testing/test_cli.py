@@ -46,7 +46,7 @@ class CommandLine(unittest.TestCase):
         self.assertNotIn("\x1b[", p.stdout)
 
     def test_python_version_is_supported(self):
-        self.assertGreaterEqual(sys.version_info[:2], (3, 8))
+        self.assertGreaterEqual(sys.version_info[:2], (3, 11))
 
 
 if __name__ == "__main__":

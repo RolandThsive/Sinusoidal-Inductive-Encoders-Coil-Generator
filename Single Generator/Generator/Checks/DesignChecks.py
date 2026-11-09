@@ -49,7 +49,7 @@ def check_arc_region(tx, arc_polys, via):
         if min(np.hypot(*(a - V)), np.hypot(*(b - V))) <= reach:
             pieces.setdefault((layer, name), []).append((a, b))
     for layer, _sg, n, pts in arc_polys:
-        for a, b in zip(pts[:-1], pts[1:]):
+        for a, b in zip(pts[:-1], pts[1:], strict=True):
             put(layer, ("arc", n), a, b)
     for a, b, layer, _net, _curve, tid, kind in tx.tx_segments:
         if layer not in sig:
@@ -300,7 +300,7 @@ def check_stator_clearances(stator):
             ta_ = np.array([t[0] for t in tail]); tb_ = np.array([t[1] for t in tail])
             ln = np.hypot(*(tb_ - ta_).T)
             dmin = np.minimum(points_segments_min_distance(ta_, fa, fb), points_segments_min_distance(tb_, fa, fb))
-            tail = [t for t, d, l in zip(tail, dmin, ln) if d < l + 1.0 + P.MIN_CLEARANCE_MM]
+            tail = [t for t, d, l in zip(tail, dmin, ln, strict=True) if d < l + 1.0 + P.MIN_CLEARANCE_MM]
         # finger against TX tail: copper gap between two traces (0 distance when the TX tail crosses a finger)
         g_tail = 1e9
         for ta, tb in tail:

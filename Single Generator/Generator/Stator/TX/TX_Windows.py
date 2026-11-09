@@ -166,7 +166,7 @@ def tx_windows(tx, g, ga=None):
 
 
 def plen(pts):
-    return sum(math.hypot(q[0] - p[0], q[1] - p[1]) for p, q in zip(pts[:-1], pts[1:]))
+    return sum(math.hypot(q[0] - p[0], q[1] - p[1]) for p, q in zip(pts[:-1], pts[1:], strict=True))
 
 
 def side_angle(lam, side, gn, r):

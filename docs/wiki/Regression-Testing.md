@@ -2,7 +2,7 @@
 
 Both generators have a regression test suite that runs the generator the way a user does, with parameter values set in
 memory, and checks what it prints and what it writes. The parameter files, the `Output` folders and the generators are
-never touched by a test run. The suites need what the generators need: Python 3.9 or newer and NumPy (see requirements.txt).
+never touched by a test run. The suites need what the generators need: Python 3.11 to 3.15 and NumPy (see requirements.txt).
 
 ## 29.1 Running The Tests
 
@@ -42,12 +42,39 @@ The parsing and measuring code both suites share is `resources/RegressionTools.p
 back and measures it independently of the generator: the smallest clearance between nets on a cell grid, the
 connectivity of each net, the copper extent of each layer, and a token-by-token comparison with the references.
 
-## 29.3 On Every Pull Request
+## 29.3 On Every Pull Request (CI)
 
-The workflow `.github/workflows/regression.yml` runs both suites on every pull request (opened, updated or reopened), on
-Ubuntu and on Windows, with Python 3.9 and 3.13, so the boards come out the same on every machine the generators are used
-on. The checks read, for example, "Single Generator (ubuntu-latest, Python 3.13)". A push to a branch without a pull
-request runs nothing, and a new push to a pull request cancels the run still going for it.
+The workflow `.github/workflows/ci.yml` runs on every pull request, after every push to `main` and every night (so a new
+Python, NumPy or runner image that breaks the generators is noticed even while no one is changing them). A new push to a
+pull request cancels the run still going for it.
+
+| Check | What it runs | What it catches |
+|---|---|---|
+| Lint | `ruff check .` with the rules in `ruff.toml` (undefined and unused names, likely bugs, Python errors; no formatter), and actionlint on the workflow files | Mistakes in the code and in the workflows |
+| Install | `requirements.txt` installed from wheels alone on Python 3.11, 3.12, 3.13, 3.14 and 3.15, on Ubuntu, Windows and macOS, then both generators' `--check` | A pin with no wheel for a supported Python, a generator that no longer starts there |
+| Tests | Both suites on Python 3.15, on Ubuntu, Windows and macOS. On Ubuntu they run under coverage (line and branch), which may not drop below `.github/coverage-baseline.json` | A changed board or record on any system, code no test reaches. A failed run keeps its boards as a downloadable artifact for 14 days |
+| KiCad | Every reference board and a fresh default board of each generator opened by KiCad 7, 8, 9 and 10 in the official `kicad/kicad` Docker images; KiCad's DRC (8 and newer) compared with `.github/kicad-drc-baseline.json` | A board KiCad cannot open, a DRC report that appears or goes away ([KiCad Compatibility](KiCad-Compatibility.md)) |
+| Repo guard | `.github/scripts/repo_guard.py`: no `__pycache__` or `.pyc`, no generated files in an `Output` folder, no file over 5 MB, no AI session links or session trailers in a file, a commit message or the pull request text | Files that never belong in git |
+| Docs | `.github/scripts/check_docs.py`: every relative link and image of the Markdown files resolves, and every wiki page is in `_Sidebar.md` | Broken wiki links before they reach the wiki |
+
+Two more workflows check the dependencies and the code's security: `security.yml` (pip-audit on the pins, and GitHub's
+dependency review on pull requests) and `codeql.yml` (GitHub's CodeQL analysis). Dependabot (`.github/dependabot.yml`)
+proposes updates of NumPy, the CI tools and the actions once a week. Every action is pinned to a full commit hash and
+the workflows get a read-only token.
+
+The same checks run locally:
+
+```bash
+python -m pip install -r requirements-dev.txt
+ruff check .                                   # the lint (or: pip install pre-commit; pre-commit install)
+python .github/scripts/repo_guard.py           # the repo guard
+python .github/scripts/check_docs.py           # the docs links
+```
+
+When a change adds code that no test reaches, the coverage check fails: add a test, or remove the code. When a change
+raises the coverage by half a point or more, the check suggests raising the number in `.github/coverage-baseline.json`
+so the gain is kept. When KiCad's DRC changes on purpose, the KiCad check is run with `--update` inside the KiCad image
+(the command is in `.github/scripts/kicad_check.py`) and the new baseline is committed with the change.
 
 ## 29.4 When A Test Fails
 

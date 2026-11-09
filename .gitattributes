@@ -1,0 +1,17 @@
+# Text files keep LF line endings on every checkout, Windows included: the generators write LF, and the regression
+# references are compared character for character.
+* text=auto eol=lf
+
+# Binary files are never touched
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.gz binary
+*.pdf binary
+*.ttf binary
+*.otf binary
+*.woff binary
+*.woff2 binary
+*.ico binary

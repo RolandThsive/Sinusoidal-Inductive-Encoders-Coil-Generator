@@ -1,6 +1,6 @@
 # 3. Getting Started
 
-The generator is pure Python 3 and needs only numpy. There is also a
+The generator is pure Python (3.11 to 3.15) and needs only numpy. There is also a
 [Web Tool](Web-Tool.md) that needs no installation.
 
 ## 3.1 Install

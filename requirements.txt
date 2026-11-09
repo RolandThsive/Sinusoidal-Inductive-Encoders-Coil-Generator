@@ -1,4 +1,6 @@
 # Runtime dependencies of both generators.  Install with:  python -m pip install -r requirements.txt
-# No single numpy release installs on both Python 3.9 and 3.13, so each Python gets its own fixed version.
-numpy==2.0.2; python_version < "3.10"
-numpy==2.1.3; python_version >= "3.10"
+# Python 3.11 to 3.15.  No single numpy release has wheels for all of them, so each Python gets its own fixed version:
+# numpy 2.4.6 is the last release for Python 3.11, numpy 2.5.4 covers 3.12 to 3.15.  The CI installs these pins on every
+# supported Python, on Linux, Windows and macOS, without building anything from source.
+numpy==2.4.6; python_version < "3.12"
+numpy==2.5.4; python_version >= "3.12"

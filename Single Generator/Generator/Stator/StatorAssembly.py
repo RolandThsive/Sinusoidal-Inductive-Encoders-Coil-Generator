@@ -82,7 +82,7 @@ class Stator:
         self.rx_segments, self.rx_vias = rotate_copper(rx.rx_segments, rx.rx_vias, self.cx, self.cy, self.rotation_deg)
         self.tx_segments, self.tx_vias = rotate_copper(tx.tx_segments, tx.tx_vias, self.cx, self.cy, self.rotation_deg)
         tabs = {id(s) for s in rx.tab_segments}
-        self.tab_segments = [t for s, t in zip(rx.rx_segments, self.rx_segments) if id(s) in tabs]
+        self.tab_segments = [t for s, t in zip(rx.rx_segments, self.rx_segments, strict=True) if id(s) in tabs]
         self.tx_window_list = [((lo + self.rotation_deg) % 360.0, (hi + self.rotation_deg) % 360.0, t, k)
                                for lo, hi, t, k in tx.tx_window_list]
         for t in self.single_tabs:

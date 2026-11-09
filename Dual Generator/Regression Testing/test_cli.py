@@ -56,8 +56,10 @@ class CommandLine(unittest.TestCase):
         if before.returncode != 0:
             self.skipTest("not a git checkout")
         run(SCRIPT, ["--check", "--no-color"], H.PROJECT)
-        after = subprocess.run(["git", "status", "--porcelain", "--", H.REPO], capture_output=True, text=True, cwd=H.REPO).stdout
-        strays = [l for l in after.splitlines() if "__pycache__" in l or l.endswith(".pyc")]
+        # new files only: untracked, or ignored by .gitignore (which keeps bytecode out of git and would hide it)
+        after = subprocess.run(["git", "status", "--porcelain", "--ignored", "--", H.REPO], capture_output=True,
+                               text=True, cwd=H.REPO).stdout
+        strays = [l for l in after.splitlines() if l[:2] in ("??", "!!") and ("__pycache__" in l or l.endswith(".pyc"))]
         self.assertEqual(strays, [])
 
 

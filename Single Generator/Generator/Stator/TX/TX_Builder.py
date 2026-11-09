@@ -81,7 +81,7 @@ class TXBuilder:
 
     def add_poly(self, pts, layer, turn, kind):
         """Append the pieces of a polyline (turn = TX turn id or -1; kind = turn | arc | step | stub | bracket | tail)."""
-        for a, b in zip(pts[:-1], pts[1:]):
+        for a, b in zip(pts[:-1], pts[1:], strict=True):
             if math.hypot(b[0] - a[0], b[1] - a[1]) > 1e-9:
                 self.segs.append(Segment(a, b, layer, turn=turn, kind=kind))
 

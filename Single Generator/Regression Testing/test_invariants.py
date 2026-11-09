@@ -210,7 +210,7 @@ class Vias(unittest.TestCase):
                     self.assertLess(RT.LAYER_INDEX[pair[0]], RT.LAYER_INDEX[pair[1]], f"via {i}: {pair} not top-most first")
                     m = b.seg_net == b.via_net[i]
                     d = RT.point_segment_distance(np.repeat(centre[None, :], int(m.sum()), axis=0), b.seg[m, 0:2], b.seg[m, 2:4])
-                    touching = {b.seg_layer[j] for j, k in zip(np.flatnonzero(m), d <= radius + 1e-3) if k}
+                    touching = {b.seg_layer[j] for j, k in zip(np.flatnonzero(m), d <= radius + 1e-3, strict=True) if k}
                     self.assertEqual(set(pair), touching, f"via {i} at {centre.tolist()}: written as {pair}, the copper of "
                                                           f"its net there is on {sorted(touching)}")
                     if set(pair) == {"F.Cu", "B.Cu"}:
@@ -237,7 +237,7 @@ class Rotor(unittest.TestCase):
                 sectors = self._sectors(res)
                 self.assertEqual(len(sectors), n * len(layers))
                 self.assertEqual(sorted({l for l, _p in sectors}), sorted(layers))
-                for l, p in sectors:
+                for _l, p in sectors:
                     self.assertGreaterEqual(len(p), 4)
 
     def test_sector_angles_and_radii(self):
@@ -298,7 +298,7 @@ class Rotor(unittest.TestCase):
                     sectors = self._sectors(res)
                     self.assertEqual(len(masks), len(sectors), "one mask opening per sector")
                     self.assertEqual(sorted(l.split(".")[0] for l, _p in masks), sorted(l.split(".")[0] for l, _p in sectors))
-                    for (_l, m), (_k, s) in zip(masks, sectors):
+                    for (_l, m), (_k, s) in zip(masks, sectors, strict=True):
                         lo_m, hi_m = RT.polygon_radii(m, b.centre)
                         lo_s, hi_s = RT.polygon_radii(s, b.centre)
                         self.assertAlmostEqual(hi_m - hi_s, float(e), 3)

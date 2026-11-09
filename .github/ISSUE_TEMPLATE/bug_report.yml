@@ -1,0 +1,35 @@
+name: Bug report
+description: The generator fails, refuses good values, or writes a board that looks wrong.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting.  The Parameters.txt of the run (in its output folder) holds every value used, so
+        attaching it is usually all that is needed to repeat the problem.
+  - type: dropdown
+    id: generator
+    attributes:
+      label: Which generator?
+      options:
+        - Single Generator
+        - Dual Generator
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+      description: The command you ran and the lines it printed (an ERROR or WARNING line, or the whole output).
+    validations:
+      required: true
+  - type: textarea
+    id: record
+    attributes:
+      label: Parameters.txt
+      description: Drag the Parameters.txt of the run here (or paste the parameter files you changed).
+  - type: input
+    id: versions
+    attributes:
+      label: Python, numpy, KiCad and system
+      placeholder: Python 3.15.2, numpy 2.5.4, KiCad 9.0, Windows 11
