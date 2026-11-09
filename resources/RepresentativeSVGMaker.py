@@ -14,6 +14,8 @@ its boards.
 Reads the two KiCad files the generator wrote (nothing else) and draws:
     stator : the board ring, every copper trace in the colour of its layer, the vias
     rotor  : the disc with its bore, the copper sectors of the Top layer and, when there are any, of the Bottom layer
+             (a custom rotor may have no outline or no bore, ROTOR_CUSTOM_OUTLINE_RADIUS_MM / ..._BORE_RADIUS_MM =
+             None: then only what it has is drawn, around the stator's centre, which the generators give both boards)
     title  : from the stator's title block (loops, TX turns, radii), plus the air gap when given
     legend : the stator layers that carry copper, the via, the rotor copper that exists
 
@@ -88,6 +90,21 @@ def edges(circles):
     return cuts[0][0], cuts[0][1], max(c[2] for c in cuts), min(c[2] for c in cuts)
 
 
+def rotor_disc(circles, polys, centre):
+    """(centre x, centre y, outline radius or None, bore radius or None, reach of the copper) of the rotor.  Without an
+    Edge.Cuts circle its centre is the stator's centre; a lone circle is the outline when the copper lies inside it,
+    else the bore."""
+    cuts = [c for c in circles if c[3] == "Edge.Cuts"]
+    cx, cy = (cuts[0][0], cuts[0][1]) if cuts else centre
+    reach = max((math.hypot(x - cx, y - cy) for pts, _l in polys for x, y in pts), default=0.0)
+    if len(cuts) >= 2:
+        return cx, cy, max(c[2] for c in cuts), min(c[2] for c in cuts), reach
+    if not cuts:
+        return cx, cy, None, None, reach
+    r = cuts[0][2]
+    return (cx, cy, r, None, reach) if r >= reach else (cx, cy, None, r, reach)
+
+
 def board_values(comments):
     """(loops per set, TX turns per set, outer radius, inner radius) from the stator's title block comments; the
     turns are listed once per set (the title block names each set's turns twice, once per TX layer)."""
@@ -143,10 +160,10 @@ def render(stator_path, rotor_path, out=None, title=None, air_gap=None):
     segs, vias, circles, _p, s_title, comments = read(stator_path)
     _s, _v, r_circles, r_polys, r_title, _c = read(rotor_path)
     cx, cy, r_out, r_in = edges(circles)
-    rcx, rcy, rr_out, rr_in = edges(r_circles)
+    rcx, rcy, rr_out, rr_in, r_reach = rotor_disc(r_circles, r_polys, (cx, cy))
     title = title or title_from(s_title, comments, air_gap)
     out = out or picture_path(stator_path)
-    R = max(r_out, rr_out) * 1.04                          # half the width of each panel, mm
+    R = max(r_out, rr_out or r_reach) * 1.04               # half the width of each panel, mm
 
     # the sheet is measured in mm: two square panels side by side, a title strip above, a legend strip below
     gap, top, bottom = 0.08 * R, 0.55 * R, 0.85 * R
@@ -197,8 +214,9 @@ def render(stator_path, rotor_path, out=None, title=None, air_gap=None):
 
     # the rotor: the disc and its bore around the rotor's own centre, then the copper, Bottom first
     rx, ry = pos("rotor", rcx, rcy, rc)
-    o.append(f'<circle cx="{f(rx)}" cy="{f(ry)}" r="{f(rr_out)}" fill="white" stroke="{EDGE_LINE}" stroke-width="{f(u * 0.15)}"/>')
-    o.append(f'<circle cx="{f(rx)}" cy="{f(ry)}" r="{f(rr_in)}" fill="white" stroke="{EDGE_LINE}" stroke-width="{f(u * 0.15)}"/>')
+    for r in (rr_out, rr_in):                              # a custom rotor may have no outline or no bore
+        if r is not None:
+            o.append(f'<circle cx="{f(rx)}" cy="{f(ry)}" r="{f(r)}" fill="white" stroke="{EDGE_LINE}" stroke-width="{f(u * 0.15)}"/>')
     rotor_layers = [lay for lay in reversed(DRAW_ORDER) if any(l == lay for _p2, l in r_polys)]    # Top first
     rlevel = {lay: n for n, lay in enumerate(rotor_layers)}      # 0 = Top
     for lay in reversed(rotor_layers):                     # deepest first, Top last

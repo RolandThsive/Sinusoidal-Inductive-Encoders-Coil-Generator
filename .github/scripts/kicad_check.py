@@ -1,6 +1,6 @@
 """
-kicad_check.py  -  the boards as KiCad sees them.  Runs inside the official kicad/kicad Docker image (see
-.github/workflows/kicad.yml), one KiCad version at a time:
+kicad_check.py  -  the boards as KiCad sees them.  Runs inside the official kicad/kicad Docker image (the KiCad job
+of .github/workflows/ci.yml), one KiCad version at a time:
 
     python3 .github/scripts/kicad_check.py --kicad 8.0 DIR [DIR ...]            check
     python3 .github/scripts/kicad_check.py --kicad 8.0 --update DIR [DIR ...]   write this version's baseline anew
@@ -11,12 +11,13 @@ kept) is
   - checked by KiCad's DRC:  `kicad-cli pcb drc --format json --severity-all --all-track-errors` (KiCad 8 and
     newer; KiCad 7's command line has no DRC).  --all-track-errors makes the count repeatable: without it KiCad
     reports only the first error it meets on each track, and which one comes first changes from run to run (KiCad 10
-    gave 61 to 76 clearance reports on the same board).  The number of reports of each type on each board must equal the committed baseline
-    (.github/kicad-drc-baseline.json), so a new violation fails, and so does one that went away (then the baseline is
-    written anew with --update, in the same pull request, so the improvement is kept).
+    gave 61 to 76 clearance reports on the same board).  The number of reports of each type on each board must equal
+    the committed baseline (.github/kicad-drc-baseline.json), so a new violation fails, and so does one that went away
+    (then the baseline is written anew with --update, in the same pull request, so the improvement is kept).
 
 The board's name in the baseline is its path below the folder it was found in, without .gz, e.g.
-"Single Generator/default/Stator.kicad_pcb".  Needs only the standard library (Python 3.9 or newer) and kicad-cli.
+"Single Generator/Board001-default/Stator.kicad_pcb".  Needs only the standard library (Python 3.9 or newer) and
+kicad-cli.
 """
 
 import argparse
@@ -100,8 +101,8 @@ def main(argv=None):
     ap.add_argument("--kicad", required=True, help='the KiCad version of the image, e.g. "8.0"')
     ap.add_argument("--update", action="store_true", help="write this version's baseline from this run")
     ap.add_argument("--baseline", default=BASELINE)
-    ap.add_argument("folders", nargs="+", help='LABEL=FOLDER, e.g. "Single Generator=Single Generator/Regression '
-                                               'Testing/References"')
+    ap.add_argument("folders", nargs="+", help='LABEL=FOLDER, e.g. "Single Generator=regression/'
+                                               'SingleGenerator_regression"')
     args = ap.parse_args(argv)
     roots = [tuple(f.split("=", 1)) if "=" in f else (os.path.basename(os.path.normpath(f)), f) for f in args.folders]
     for _label, root in roots:

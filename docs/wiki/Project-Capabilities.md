@@ -22,7 +22,7 @@
 | Silkscreen | A lead-cutting suggestion on the stator's silkscreen: where to break each RX coil and where the TX ends get their vias, with the lead names; no copper changed |
 | Checks | Parameter rules, finished-geometry rules and the generator's own TX self-clearance check, with named conflicts; `GENERATOR_MODE` `normal` or `strict` |
 | Electrical Estimate | TX inductance, resistance, Q, tank capacitors, oscillator frequency and tank resistance against the IC limits in `IC_Parameters.py` (no receiver voltage); on a dual board for each set against its own IC |
-| Regression Testing | A test suite for each generator, run on every pull request on Ubuntu and Windows (see [Regression Testing](Regression-Testing.md)) |
+| Regression Testing | A test suite for each generator with its own test boards, run on every pull request on Ubuntu, Windows and macOS (see [Regression Testing](Regression-Testing.md)) |
 | Analysis | Under construction on the `analyser_and_optimizer` branch: angle error, signal, harmonics and a tolerance window (air gap, eccentricity, tilt, etching) |
 | Optimization | Under construction on the `analyser_and_optimizer` branch: searches profile, sub-coils, split, rotor metal fraction and rotor outer edge |
 

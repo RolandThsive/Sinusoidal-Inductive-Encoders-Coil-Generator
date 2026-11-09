@@ -13,7 +13,7 @@ import re
 import sys
 
 HEAD = re.compile(r"regression tests\s+-\s+Python (\S+) \(([^)]*)\), numpy (\S+)")
-TAIL = re.compile(r"^(\d+) tests in ([\d.]+) s: (\d+) failed, (\d+) errors, (\d+) skipped", re.M)
+TAIL = re.compile(r"^(?:[A-Za-z ]+: )?(\d+) tests in ([\d.]+) s: (\d+) failed, (\d+) errors, (\d+) skipped", re.M)
 FAILED = re.compile(r"^(?:FAIL|ERROR): (\S+) \(([^)]+)\)", re.M)
 
 

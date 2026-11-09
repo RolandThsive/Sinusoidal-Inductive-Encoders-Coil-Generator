@@ -13,7 +13,9 @@ in mm (the SVG is 1:1, its width and height are in mm) with the coordinates copi
     vias      (via ...)     : a copper ring (size, with the drill as a hole) on every copper layer the via passes through
     copper    (gr_poly ...) on a copper layer : the filled polygon (the rotor sectors)
     outline   (gr_circle ...) on Edge.Cuts : the board edge, as a line of its own width
-Silkscreen, solder mask and anything else that is not copper or the board edge is left out.
+Silkscreen, solder mask and anything else that is not copper or the board edge is left out.  A custom rotor may have
+no outline and no bore (ROTOR_CUSTOM_OUTLINE_RADIUS_MM / ROTOR_CUSTOM_BORE_RADIUS_MM = None): it is then drawn around
+the stator's centre, which the generators give both boards, and placed by the reach of its copper.
 
 Each board is one group (Stator, Rotor) holding one group per layer, labelled F_Cu, Inner_1, Inner_2, B_Cu and
 Edge_Cuts (only the layers the board has copper on).  The groups are Inkscape layers, so Inkscape shows and hides them
@@ -49,8 +51,9 @@ NOT_DRAWN = re.compile(r'\((arc|zone|footprint) ')
 STATOR_FILE, ROTOR_FILE = "Stator.kicad_pcb", "Rotor.kicad_pcb"
 
 
-def read(path):
-    """The copper and the board edge of one KiCad file, with every number kept as the text in the file."""
+def read(path, edge_needed=True):
+    """The copper and the board edge of one KiCad file, with every number kept as the text in the file.  A stator always
+    has its Edge.Cuts circles; a rotor may have none (edge_needed=False)."""
     with open(path, encoding="utf-8") as fh:
         text = fh.read()
     board = [l for l in STACK if l in set(BOARD_LAYERS.findall(text))] or list(STACK)
@@ -62,7 +65,7 @@ def read(path):
         if lay == "Edge.Cuts":
             w = WIDTH.search(rest)
             edges.append((cx, cy, math.hypot(float(ex) - float(cx), float(ey) - float(cy)), w.group(1) if w else "0.05"))
-    if not edges:
+    if not edges and edge_needed:
         raise ValueError(f"no Edge.Cuts circle in {path}: is this a board the generator wrote?")
     skipped = sorted({k for k in NOT_DRAWN.findall(text)})
     return board, segs, vias, polys, edges, skipped
@@ -112,12 +115,27 @@ def board_group(name, data, transform=""):
     return out
 
 
+def reach(data, cx, cy):
+    """How far the board's copper reaches from the centre (cx, cy), in mm."""
+    _board, segs, vias, polys, _edges, _skipped = data
+    far = [math.hypot(float(x) - cx, float(y) - cy) for pts, _l in polys for x, y in pts]
+    far += [math.hypot(float(x) - cx, float(y) - cy) + float(w) / 2
+            for x1, y1, x2, y2, w, _l in segs for x, y in ((x1, y1), (x2, y2))]
+    far += [math.hypot(float(x) - cx, float(y) - cy) + float(s) / 2 for x, y, s, _d, _a, _b in vias]
+    return max(far, default=0.0)
+
+
 def render(stator_path, rotor_path, out=None):
-    stator, rotor = read(stator_path), read(rotor_path)
+    stator, rotor = read(stator_path), read(rotor_path, edge_needed=False)
     s_out = max(stator[4], key=lambda e: e[2])
-    r_out = max(rotor[4], key=lambda e: e[2])
     scx, scy, sr = float(s_out[0]), float(s_out[1]), s_out[2]
-    rcx, rcy, rr = float(r_out[0]), float(r_out[1]), r_out[2]
+    if rotor[4]:
+        r_out = max(rotor[4], key=lambda e: e[2])
+        rcx, rcy = float(r_out[0]), float(r_out[1])
+        rr = max(r_out[2], reach(rotor, rcx, rcy))
+    else:                                                  # no outline: around the stator's centre, as far as its copper
+        rcx, rcy = scx, scy
+        rr = reach(rotor, rcx, rcy)
     dx = (scx + sr + GAP_MM + rr) - rcx                    # the rotor's centre goes this far right of where it is
     dy = scy - rcy
     x0, y0 = scx - sr - MARGIN_MM, scy - max(sr, rr) - MARGIN_MM

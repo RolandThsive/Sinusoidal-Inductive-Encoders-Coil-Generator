@@ -4,9 +4,10 @@
 
 ## Do the boards change?
 
-<!-- "No": every reference board and record is unchanged.
-     "Yes": which boards or records change, why, and that the references were rewritten on purpose
-     (run_regression.py --update-references) after reading the differences. -->
+<!-- "No": every test board and record is unchanged.
+     "Yes": which boards or records change, why, and that their files were written anew on purpose
+     (regression/run_regression.py --update-references) after reading the differences.
+     New test boards (regression/boards.py new): which, and what each one tests. -->
 
 ## Tests
 

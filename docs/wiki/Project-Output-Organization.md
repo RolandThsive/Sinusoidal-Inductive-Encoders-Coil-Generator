@@ -26,7 +26,6 @@ Single Generator/
 │   │   └── LeadCutting_SilkscreenSuggestion.py   The last step: the silkscreen suggestion
 │   ├── Rotor/                    RotorBuilder.py
 │   └── Core/                     Geometry, board layout, layers, copper, KiCad writer, conflict messages
-├── Regression Testing/           run_regression.py, the tests and their References/
 └── Output/
     └── Coil_<Inner Radius>_<Outer Radius>_<Loops>_<Sub-Coils>_<TX Turns>_<Single|Series|Parallel>_<SteppedDiagonal|SteppedArc|Spiral>/
         ├── Stator.kicad_pcb
@@ -51,7 +50,6 @@ Dual Generator/
 │   ├── Core/                     Dual_SetParameters.py (one Single Generator parameter set per coil set), Dual_TrackLayout.py (DUAL_MODE)
 │   ├── Stator/                   Dual_StatorAssembler.py, Dual_LeadCutting_SilkscreenSuggestion.py
 │   └── Rotor/                    Dual_RotorBuilder.py
-├── Regression Testing/           run_regression.py, the tests and their References/
 └── Output/
     └── DualCoil_<Bore Radius>_<Outline Radius>_<Set 1 Loops>x<Set 2 Loops>_<Set 1 TX Turns>x<Set 2 TX Turns>/
         ├── Stator.kicad_pcb
@@ -62,9 +60,16 @@ Dual Generator/
 
 resources/                      Shared by both generators
 ├── SilkscreenFont.py             The stroke font of the silkscreen lead names
-├── RegressionTools.py            The parser and measuring code of both test suites
 ├── RepresentativeSVGMaker.py     Draws <Folder Name>_Representative.svg from the written boards
 └── ActualSVGMaker.py             Draws <Folder Name>_Actual.svg from the written boards
+
+regression/                     The regression tests of both generators (see Regression Testing)
+├── run_regression.py             Runs the tests: python regression/run_regression.py [single|dual]
+├── boards.py                     Makes a new test board
+├── RegressionHarness.py          What both suites share
+├── RegressionTools.py            The parser and measuring code of both suites
+├── SingleGenerator_regression/   tests/ and one folder per test board (Board001-default, Board002-..., ...)
+└── DualGenerator_regression/     The same for the Dual Generator
 ```
 
 The Dual Generator imports the Single Generator's `Generator` package from the `Single Generator` folder next to it,

@@ -121,13 +121,14 @@ jobs:
           TEMP: ${{ runner.temp }}/regression
           TMP: ${{ runner.temp }}/regression
           REGRESSION_KEEP_OUTPUT: "1"
-          SUITE: ${{ matrix.suite }} Generator/Regression Testing/run_regression.py
+          NAME: ${{ matrix.suite }}
           SOURCE: ${{ matrix.source }}
         run: |
           if [ "$RUNNER_OS" = "Linux" ]; then
-            python -m coverage run --rcfile=.coveragerc --source="$SOURCE" "$SUITE" -v 2>&1 | tee "$RUNNER_TEMP/tests.log"
+            python -m coverage run --rcfile=.coveragerc --source="$SOURCE" regression/run_regression.py "${NAME,,}" -v \
+              2>&1 | tee "$RUNNER_TEMP/tests.log"
           else
-            python "$SUITE" -v 2>&1 | tee "$RUNNER_TEMP/tests.log"
+            python regression/run_regression.py "${NAME,,}" -v 2>&1 | tee "$RUNNER_TEMP/tests.log"
           fi
       - name: Coverage may not drop
         if: runner.os == 'Linux'
@@ -188,8 +189,8 @@ jobs:
           docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -e GITHUB_STEP_SUMMARY=/summary.md \
             -v "$PWD:/repo" -v "$GITHUB_STEP_SUMMARY:/summary.md" -w /repo "kicad/kicad:${{ matrix.kicad }}" \
             python3 .github/scripts/kicad_check.py --kicad "${{ matrix.kicad }}" \
-              "Single Generator=Single Generator/Regression Testing/References" \
-              "Dual Generator=Dual Generator/Regression Testing/References" \
+              "Single Generator=regression/SingleGenerator_regression" \
+              "Dual Generator=regression/DualGenerator_regression" \
               "Single Generator fresh run=.fresh/Single" \
               "Dual Generator fresh run=.fresh/Dual"
 

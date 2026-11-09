@@ -1,48 +1,104 @@
 # 29. Regression Testing
 
 Both generators have a regression test suite that runs the generator the way a user does, with parameter values set in
-memory, and checks what it prints and what it writes. The parameter files, the `Output` folders and the generators are
-never touched by a test run. The suites need what the generators need: Python 3.11 to 3.15 and NumPy (see requirements.txt).
+memory, and checks what it prints and what it writes. Both suites live in the [`regression`](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/tree/main/regression) folder at the root
+of the repository, each next to its test boards: a test board is a folder with a complete set of parameter files and
+the boards the generator wrote from them. No test run touches the parameter files, the `Output` folders or the
+generators. The suites need what the generators need: Python 3.11 to 3.15 and NumPy (see requirements.txt).
 
 ## 29.1 Running The Tests
 
 From the root of the repository:
 
 ```bash
-python "Single Generator/Regression Testing/run_regression.py"      # everything, about 3 minutes
-python "Dual Generator/Regression Testing/run_regression.py"        # everything, about 10 minutes
+python regression/run_regression.py                # both suites, about 30 minutes
+python regression/run_regression.py single         # the Single Generator's suite only
+python regression/run_regression.py dual           # the Dual Generator's suite only
 ```
 
 | Option | Effect |
 |---|---|
 | `-v` | One line per test |
-| `-k <word>` | Only the tests whose name contains the word, for example `-k checker` or `-k silkscreen` |
-| `--update-references` | Rewrite `References/` from the generator as it is now |
+| `-k <word>` | Only the tests whose name contains the word, for example `-k checker` or `-k silkscreen` (may be given more than once) |
+| `--board <name>` | The board tests on this board only, for example `--board Board007`; the other tests as usual |
+| `--update-references` | Write each board's saved files anew from the generator as it is now |
 | `--keep` | Keep the temporary output folder the boards are written to |
 
 The exit code is 0 when every test passed.
 
-## 29.2 What Is Tested
+## 29.2 The Test Boards
 
-Each suite has the same files:
+```
+regression/
+├── run_regression.py             Runs the tests
+├── boards.py                     Makes a new test board; keeps the board folders in step with the generators
+├── RegressionHarness.py          What both suites share: runs a generator in memory, finds the board folders
+├── RegressionTools.py            Reads a written .kicad_pcb back and measures it, independently of the generators
+├── SingleGenerator_regression/
+│   ├── README.md                 What each test checks, and the table of the boards
+│   ├── tests/                    The test files
+│   ├── Board001-default/          The six parameter files, Stator.kicad_pcb.gz, Rotor.kicad_pcb.gz, Parameters.txt
+│   ├── Board002-loops-4-subcoils-2/
+│   └── ...
+└── DualGenerator_regression/
+    ├── README.md
+    ├── tests/
+    ├── Board001-default/          The eleven Dual_..._Parameters.py files and the same three written files
+    └── ...
+```
+
+Each board folder is named `BoardNNN-<what it tests>`. Its parameter files are a complete copy of the generator's own,
+with the board's values, so a board can be read, copied into the generator's `Parameters` folder and run by hand.
+Each suite's README has a table of its boards with the values each one sets differently from `Board001-default`.
+
+Every board is written again from its own parameter files, and the three files that come out must equal the ones in
+its folder character for character: `Stator.kicad_pcb.gz` and `Rotor.kicad_pcb.gz` (kept gzipped) and
+`Parameters.txt` (without the lines that change with every run: the time, the folder, the command and the verbatim
+copies of the parameter files). The same boards are measured by the invariant tests, and opened by KiCad 7 to 10 in the
+CI. Every other test starts from the values of `Board001-default`, so the values in a generator's own `Parameters`
+folder, the ones you design with, never change a test.
+
+A new board:
+
+```bash
+python regression/boards.py new single "spiral-tx-8-turns" TX_SHAPE=spiral TX_TURNS=8
+python regression/boards.py new dual "rx2-cosine-r" RX2.RX_PROFILE=cosine_r
+```
+
+The folder gets the next free number. Each `NAME=VALUE` is written as in a parameter file; a Dual Generator name starts
+with its file (`BOARD.`, `RX1.`, `TX2.`, `ROTOR1.`, `FIXED.`, `SILK.` and so on). The parameter files are copied from
+`Board001-default` (or from another board with `--from`), each value is replaced where it stands, then the board is
+written, its files saved, its tests run and the README table written anew. A board that does not build, or fails its
+tests, is removed again.
+
+| Command | What it does |
+|---|---|
+| `python regression/boards.py new ...` | Makes a new test board, as above |
+| `python regression/boards.py sync` | After a generator gained or lost a parameter: copies the new name, with its value and comment, into every board folder, and removes a name the generator no longer has |
+| `python regression/boards.py table` | Writes the board table of each suite's README anew |
+| `python regression/boards.py unpack single Board007` | Puts the board's Stator and Rotor as plain `.kicad_pcb` files in a folder, to open in KiCad |
+
+## 29.3 What Is Tested
+
+Each suite has the same files in its `tests` folder:
 
 | File | Single Generator | Dual Generator |
 |---|---|---|
 | `test_checker.py` | One value of every kind set wrongly, missing and unknown names, inactive values left alone, the conflicts between values (vias, layers, nets, edges, fingers, rotor), the geometry that stops a run, strict mode. Each case states the return code and the lines the run must print | The four `DUAL_MODE` layouts and every way they can be set wrongly, the fixed file, the dual rules (nets, frequencies, layers, rings), the Single Generator's own checks on each set, strict mode |
-| `test_boards.py` | Every board case written and compared with `References/` (stator, rotor, record), numbers within 1e-5; its folder must hold exactly these three files and the two [output pictures](Output-Pictures.md) | The same, for the dual board cases |
+| `test_boards.py` | Every board folder written again and compared with the files saved in it (stator, rotor, record), character for character; the run's output folder must hold exactly these three files and the two [output pictures](Output-Pictures.md); every board folder must set exactly the generator's parameter names, hold nothing else and be in the README table | The same, for the dual boards |
 | `test_invariants.py` | What every written board must obey: the file format, the layer table, the nets, copper inside the edges with the right widths, the clearance between nets, closed RX coils, the TX in one piece with its terminal at 0°, the rotor sectors, the record; the same values written twice are identical | The same for a dual board: four layers, six nets, set 1 inside set 2 by the recorded gap, the TX ends at `TERMINAL_1_DEG` / `TERMINAL_2_DEG`, the two rotor rings |
 | `test_silkscreen.py` | The lead-cutting silkscreen: three suggestions on both sides, via sites with room, lettering off the vias and mirrored on the bottom, the settings with their fallbacks, the font, the name placer | Six suggestions, names with the set number, breaks near each set's terminal, sides and labels options |
 | `test_cli.py` | The generator started as a script in a fresh Python process, from its folder and from elsewhere, with `--check`, `--help` and a bad option | The same, plus the checker on its own and the promise that a dual run leaves no `__pycache__` in the Single Generator |
 | `test_units.py` | The folder names, the OUTPUT_DIR rule, the KiCad writer, the report and colour classes, the parameter and geometry helpers, and the hooks the Dual Generator builds on | The set parameters handed to the Single Generator and the "set k:" findings, the layout modes, the folder names, the Single's OUTPUT_DIR rule, and a guard that the dual files supply every name the Single Generator knows |
 
-`harness.py` loads the generator, applies the overrides, runs it and keeps the written boards of each case
-(`BOARD_CASES`). `References/` holds the frozen output of each board case (`.kicad_pcb.gz` and `Parameters.txt`).
+`harness.py` loads the generator, applies the overrides, runs it, and writes each board once per run for all the tests
+that need it.
 
-The parsing and measuring code both suites share is `resources/RegressionTools.py`. It reads the written `.kicad_pcb`
+The parsing and measuring code both suites share is `regression/RegressionTools.py`. It reads the written `.kicad_pcb`
 back and measures it independently of the generator: the smallest clearance between nets on a cell grid, the
-connectivity of each net, the copper extent of each layer, and a token-by-token comparison with the references.
+connectivity of each net, the copper extent of each layer, and the comparison with the saved files.
 
-## 29.3 On Every Pull Request (CI)
+## 29.4 On Every Pull Request (CI)
 
 The workflow `.github/workflows/ci.yml` runs on every pull request, after every push to `main` and every night (so a new
 Python, NumPy or runner image that breaks the generators is noticed even while no one is changing them). A new push to a
@@ -53,7 +109,7 @@ pull request cancels the run still going for it.
 | Lint | `ruff check .` with the rules in `ruff.toml` (undefined and unused names, likely bugs, Python errors; no formatter), and actionlint on the workflow files | Mistakes in the code and in the workflows |
 | Install | `requirements.txt` installed from wheels alone on Python 3.11, 3.12, 3.13, 3.14 and 3.15, on Ubuntu, Windows and macOS, then both generators' `--check` | A pin with no wheel for a supported Python, a generator that no longer starts there |
 | Tests | Both suites on Python 3.15, on Ubuntu, Windows and macOS. On Ubuntu they run under coverage (line and branch), which may not drop below `.github/coverage-baseline.json` | A changed board or record on any system, code no test reaches. A failed run keeps its boards as a downloadable artifact for 14 days |
-| KiCad | Every reference board and a fresh default board of each generator opened by KiCad 7, 8, 9 and 10 in the official `kicad/kicad` Docker images; KiCad's DRC (8 and newer) compared with `.github/kicad-drc-baseline.json` | A board KiCad cannot open, a DRC report that appears or goes away ([KiCad Compatibility](KiCad-Compatibility.md)) |
+| KiCad | Every test board and a fresh default board of each generator opened by KiCad 7, 8, 9 and 10 in the official `kicad/kicad` Docker images; KiCad's DRC (8 and newer) compared with `.github/kicad-drc-baseline.json` | A board KiCad cannot open, a DRC report that appears or goes away ([KiCad Compatibility](KiCad-Compatibility.md)) |
 | Repo guard | `.github/scripts/repo_guard.py`: no `__pycache__` or `.pyc`, no generated files in an `Output` folder, no file over 5 MB, no AI session links or session trailers in a file, a commit message or the pull request text | Files that never belong in git |
 | Docs | `.github/scripts/check_docs.py`: every relative link and image of the Markdown files resolves, and every wiki page is in `_Sidebar.md` | Broken wiki links before they reach the wiki |
 
@@ -76,21 +132,22 @@ raises the coverage by half a point or more, the check suggests raising the numb
 so the gain is kept. When KiCad's DRC changes on purpose, the KiCad check is run with `--update` inside the KiCad image
 (the command is in `.github/scripts/kicad_check.py`) and the new baseline is committed with the change.
 
-## 29.4 When A Test Fails
+## 29.5 When A Test Fails
 
-When a test in `test_boards.py` fails, the generator writes something different from what it wrote when the references
-were frozen. Read the printed differences; if the change is intended, run `--update-references` and commit the new
-`References/` with the change. The other tests do not depend on the references.
+When a test in `test_boards.py` fails, the generator writes something different from what it wrote when the board was
+saved; the test prints the lines that differ. Read them; if the change is intended, run `--update-references` and
+commit the new files with the change. The other tests do not depend on the saved files.
 
 A change that adds a feature brings its tests with it, in the same commit:
 
 1. A case in `test_checker.py` for every new rule and every new error or warning text (one case that triggers it, one
    that does not). A new parameter gets a case with it set and one with it missing.
-2. A case in `harness.BOARD_CASES` when the feature changes the copper, the rotor or the record, so its output is frozen
-   in `References/` from then on.
-3. An invariant in `test_invariants.py` when there is a rule the written files must always obey.
-4. A unit test in `test_units.py` for a new helper.
-5. `--update-references` last, after every printed difference has been read and found intended.
+2. `python regression/boards.py sync` when the change adds or removes a parameter, so every board folder has it.
+3. A new test board (`python regression/boards.py new ...`) when the feature changes the copper, the rotor or the
+   record, so its output is kept from then on.
+4. An invariant in `test_invariants.py` when there is a rule the written files must always obey.
+5. A unit test in `test_units.py` for a new helper.
+6. `--update-references` last, after every printed difference has been read and found intended.
 
 The suite cannot notice a feature that arrived without a test; that part is the review's job.
 
