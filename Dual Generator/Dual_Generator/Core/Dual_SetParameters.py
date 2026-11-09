@@ -20,6 +20,7 @@ import re
 import types
 
 from Generator.Checks import ParameterRules as SingleRules          # read only: the Single Generator's table
+from Generator.Core.Conflict import Report
 
 # what a dual board fixes: name -> (the only allowed value, why), all in Dual_Fixed_Parameters.py
 FIXED_FILE = "Dual_Fixed_Parameters.py"
@@ -180,3 +181,11 @@ def rename_single_files(text, k):
     if file is not None:
         text = _FILE_AT_END.sub(f"({file})", text)
     return text
+
+
+def for_set(rep, k):
+    """A Single Generator report as findings of set k: each message with "set k: " in front and the Single
+    Generator's file names replaced by set k's dual files (rename_single_files).  Returns a new Report."""
+    out = Report()
+    out.items = [(level, f"set {k}: " + rename_single_files(msg, k), names) for level, msg, names in rep.items]
+    return out

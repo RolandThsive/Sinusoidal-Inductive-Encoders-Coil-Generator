@@ -139,8 +139,13 @@ def offset_polygon(points, distance, corner_step_deg=MASK_CORNER_STEP_DEG):
 
 
 class RotorDesign:
-    def __init__(self, P=P_DEFAULT, stator=None):
+    """The rotor.  start_offset_deg is added to the start angle (ROTOR_AUTO_START_ANGLE_DEG or
+    ROTOR_CUSTOM_START_ANGLE_DEG): the Dual Generator measures each ring's start from its own set's RX pattern
+    zero with it.  The Single Generator leaves it at 0."""
+
+    def __init__(self, P=P_DEFAULT, stator=None, start_offset_deg=0.0):
         self.P = P
+        self.start_offset_deg = float(start_offset_deg)
         mode = str(P.ROTOR_MODE).lower()
         if mode == "according_to_stator":
             self.mode = mode
@@ -164,7 +169,7 @@ class RotorDesign:
         P, st = self.P, self.stator
         self.sectors = st.N
         self.duty = float(P.ROTOR_AUTO_DUTY)
-        self.start_angle = math.radians(P.ROTOR_AUTO_START_ANGLE_DEG)
+        self.start_angle = math.radians(float(P.ROTOR_AUTO_START_ANGLE_DEG) + self.start_offset_deg)
         # how far the copper reaches past the RX band: both edges together, or each edge on its own
         ext = P.AIR_GAP_MM if P.ROTOR_AUTO_EXTENSION_MM is None else float(P.ROTOR_AUTO_EXTENSION_MM)
         given_in = getattr(P, "ROTOR_AUTO_EXTENSION_INNER_MM", None)
@@ -222,7 +227,7 @@ class RotorDesign:
         P = self.P
         self.sectors = int(P.ROTOR_CUSTOM_SECTORS)
         self.duty = float(P.ROTOR_CUSTOM_DUTY)
-        self.start_angle = math.radians(P.ROTOR_CUSTOM_START_ANGLE_DEG)
+        self.start_angle = math.radians(float(P.ROTOR_CUSTOM_START_ANGLE_DEG) + self.start_offset_deg)
         self.r_in = float(P.ROTOR_CUSTOM_INNER_RADIUS_MM)
         self.r_out = float(P.ROTOR_CUSTOM_OUTER_RADIUS_MM)
         self.layers = list(P.ROTOR_CUSTOM_COPPER_LAYERS)
@@ -444,6 +449,17 @@ class RotorDesign:
             thickness = P.PCB_THICKNESS_MM                # None = the same board thickness as the stator
         board = KiCadBoard(title="Rotor %d sector%s" % (self.sectors, "" if self.sectors == 1 else "s"),
                            comments=comments, page=self.page_size(), thickness=thickness)
+        self.add_copper(board)
+        if self.bore_radius is not None:
+            board.circle((self.cx, self.cy), self.bore_radius, "Edge.Cuts", P.EDGE_LINE_WIDTH_MM)
+        if self.outline_radius is not None:
+            board.circle((self.cx, self.cy), self.outline_radius, "Edge.Cuts", P.EDGE_LINE_WIDTH_MM)
+        board.save(path)
+        return path
+
+    def add_copper(self, board):
+        """Put the rotor's copper sectors on `board` (a PCBWriter.KiCadBoard), then their solder-mask openings.
+        The Dual Generator puts both of its rings on one disc with it."""
         for layer in self.layers:
             for k in range(self.sectors):
                 board.polygon(self.sector_polygon(k), layer)
@@ -451,9 +467,3 @@ class RotorDesign:
             for layer in self.layers:
                 for k in range(self.sectors):
                     board.polygon(self.mask_polygon(k), MASK_LAYER[layer])
-        if self.bore_radius is not None:
-            board.circle((self.cx, self.cy), self.bore_radius, "Edge.Cuts", P.EDGE_LINE_WIDTH_MM)
-        if self.outline_radius is not None:
-            board.circle((self.cx, self.cy), self.outline_radius, "Edge.Cuts", P.EDGE_LINE_WIDTH_MM)
-        board.save(path)
-        return path

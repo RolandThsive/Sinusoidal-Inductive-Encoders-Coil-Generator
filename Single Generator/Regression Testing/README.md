@@ -17,7 +17,7 @@ Needs what the generator needs: Python 3.9 or newer and numpy (see requirements.
 | `test_boards.py` | every board case written and compared with `References/` (stator, rotor, record), numbers within 1e-5 |
 | `test_invariants.py` | what must hold for every written board: the file format, the layer table, the nets, copper inside the edges with the right widths, the clearance between nets, closed RX coils, the TX in one piece with its terminal at 0 deg, the rotor sectors (count, angle, radii, mask, edges), the record; the same values written twice are identical; --stator and --rotor |
 | `test_silkscreen.py` | the lead-cutting silkscreen: three suggestions on both sides, via sites with room, lettering off the vias and mirrored on the bottom, the settings with their fallbacks, the font, the name placer |
-| `test_units.py` | the folder names, the KiCad writer, the report and colour classes, the parameter helpers, the geometry helpers (checked against the suite's own) |
+| `test_units.py` | the folder names, the OUTPUT_DIR rule, the KiCad writer, the report and colour classes, the parameter helpers, the geometry helpers (checked against the suite's own), and the hooks the Dual Generator builds on (a stator turned to any terminal angle, its copper on a shared board, the rotor's start offset) |
 | `harness.py` | loads the generator, applies overrides, runs it, keeps the written boards per case (`BOARD_CASES`) |
 | `References/` | the frozen output of each board case (`.kicad_pcb.gz`, `Parameters.txt`) |
 

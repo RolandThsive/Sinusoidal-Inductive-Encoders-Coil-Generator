@@ -14,7 +14,7 @@ import numpy as np
 
 import harness as H
 import RegressionTools as RT
-from Generator.Checks import DesignChecks
+from Generator.Checks import DesignChecks, ParameterRules
 from Generator.Core import BoardLayout, Geometry, Layers
 from Generator.Core.Conflict import Colour, ParameterConflict, Report, conflict_title
 from Generator.Core.PCBWriter import KiCadBoard, page_size
@@ -23,11 +23,11 @@ from Generator.Run import OutputFolders as OF
 
 class OutputFolderNames(unittest.TestCase):
     def test_numbers_in_names(self):
-        self.assertEqual(OF._num(15.0), "15")
-        self.assertEqual(OF._num(36.8), "36.8")
-        self.assertEqual(OF._num(28.2), "28.2")
-        self.assertEqual(OF._num(8), "8")
-        self.assertEqual(OF._num(1.23456), "1.235")
+        self.assertEqual(OF.folder_number(15.0), "15")
+        self.assertEqual(OF.folder_number(36.8), "36.8")
+        self.assertEqual(OF.folder_number(28.2), "28.2")
+        self.assertEqual(OF.folder_number(8), "8")
+        self.assertEqual(OF.folder_number(1.23456), "1.235")
 
     def test_folder_name_pattern(self):
         H.restore()
@@ -73,6 +73,38 @@ class OutputFolderNames(unittest.TestCase):
             self.assertTrue(os.path.isdir(b), "a folder with files is never removed")
         finally:
             H.restore()
+
+
+class OutputDirRule(unittest.TestCase):
+    """ParameterRules.check_output_dir: the OUTPUT_DIR rule of both generators, on the folder as a usable path."""
+
+    def check(self, d, word="Coil_..."):
+        rep = Report()
+        ParameterRules.check_output_dir(d, rep, word)
+        return rep
+
+    def test_usable_and_new_folders(self):
+        root = tempfile.mkdtemp(dir=H.temp_root())
+        self.assertEqual(self.check(root).items, [], "an existing writable folder: nothing to say")
+        rep = self.check(os.path.join(root, "a", "b"), "DualCoil_...")
+        self.assertEqual(rep.errors, [])
+        self.assertIn("will be created (the DualCoil_... folder goes inside it)", rep.items[0][1])
+
+    def test_unusable_folders(self):
+        root = tempfile.mkdtemp(dir=H.temp_root())
+        f = os.path.join(root, "file.txt")
+        open(f, "w").close()
+        self.assertIn("exists but is not a folder", self.check(f).errors[0])
+        self.assertIn(f"cannot be created: {f!r} is not a folder", self.check(os.path.join(f, "sub", "deeper")).errors[0])
+
+    def test_link_to_nothing(self):
+        root = tempfile.mkdtemp(dir=H.temp_root())
+        link = os.path.join(root, "link")
+        try:
+            os.symlink(os.path.join(root, "nowhere"), link)
+        except (OSError, NotImplementedError):
+            self.skipTest("symbolic links cannot be made here")
+        self.assertIn("is a link to something that does not exist", self.check(link).errors[0])
 
 
 class Writer(unittest.TestCase):
@@ -231,6 +263,26 @@ class ParameterHelpers(unittest.TestCase):
         self.assertAlmostEqual(band["ro"], 21.4)
         self.assertEqual(band["mode"], "centre")
 
+    def test_given_band_rules(self):
+        """BoardLayout.given_band: the RX band rules of the Single's layout, used for each set of the Dual too."""
+        get = lambda **kw: (lambda n: kw.get(n))
+        self.assertIsNone(BoardLayout.given_band(get()))
+        b = BoardLayout.given_band(get(RX_R_BASE_MM=10.0, RX_A_MM=2.0))
+        self.assertEqual((b["ri"], b["ro"], b["mode"], b["given"]),
+                         (8.0, 12.0, "centre", {"RX_R_BASE_MM": 10.0, "RX_A_MM": 2.0}))
+        b = BoardLayout.given_band(get(INSIDE_RADIUS_MM=9, OUTSIDE_RADIUS_MM=16.5))
+        self.assertEqual((b["ri"], b["ro"], b["mode"]), (9.0, 16.5, "radii"))
+        for kw in (dict(INSIDE_RADIUS_MM=9.7), dict(RX_A_MM=2.0), dict(RX_R_BASE_MM=2.0, RX_A_MM=3.0),
+                   dict(INSIDE_RADIUS_MM=9.7, OUTSIDE_RADIUS_MM=16.0, RX_R_BASE_MM=10.0, RX_A_MM=2.0),
+                   dict(INSIDE_RADIUS_MM=16.0, OUTSIDE_RADIUS_MM=9.7), dict(INSIDE_RADIUS_MM=float("inf"), OUTSIDE_RADIUS_MM=30.0),
+                   dict(INSIDE_RADIUS_MM=True, OUTSIDE_RADIUS_MM=30.0), dict(RX_R_BASE_MM="10", RX_A_MM=2.0)):
+            with self.assertRaises(ParameterConflict, msg=repr(kw)):
+                BoardLayout.given_band(get(**kw))
+        with self.assertRaises(ParameterConflict) as cm:
+            BoardLayout.given_band(get(INSIDE_RADIUS_MM=16.0, OUTSIDE_RADIUS_MM=9.7), "RX2 band", "Dual_RX2_Parameters.py")
+        self.assertEqual(cm.exception.message, "the RX2 band's inside radius (16 mm) must be smaller than its outside "
+                                               "radius (9.7 mm) (Dual_RX2_Parameters.py)")
+
     def test_layer_names(self):
         self.assertEqual(Layers.LAYER_NAMES, {1: "F.Cu", 2: "In1.Cu", 3: "In2.Cu", 4: "B.Cu"})
         self.assertEqual(Layers.rx_layer_names(H.P), ("F.Cu", "B.Cu"))
@@ -289,6 +341,65 @@ class GeometryHelpers(unittest.TestCase):
         K, E = Geometry.ellipk_ellipe(0.5)
         self.assertAlmostEqual(float(K), 1.8540746773, 5)
         self.assertAlmostEqual(float(E), 1.3506438810, 5)
+
+
+class SharedHooks(unittest.TestCase):
+    """The hooks the Dual Generator builds each set with: the stator turned to any terminal angle, the rotor's
+    start offset."""
+
+    @classmethod
+    def setUpClass(cls):
+        H.restore()
+        from Generator.Stator import StatorAssembly
+        cls.SA = StatorAssembly
+        with contextlib.redirect_stderr(io.StringIO()):
+            cls.s0 = StatorAssembly.build_stator(H.P)
+            cls.s90 = StatorAssembly.build_stator(H.P, 90.0)
+
+    def tearDown(self):
+        H.restore()
+
+    def test_stator_turned_to_any_terminal_angle(self):
+        s0, s90 = self.s0, self.s90
+        self.assertEqual((s0.terminal_deg, s90.terminal_deg, s90.angle_deg), (0.0, 90.0, 90.0))
+        self.assertEqual(self.SA.TERMINAL_DEG, 0.0, "the module's angle is never changed")
+        self.assertAlmostEqual(s90.rotation_deg, (s0.rotation_deg + 90.0) % 360.0, 9)
+        for name in ("rx_segments", "tx_segments"):
+            turned, _vias = self.SA.rotate_copper(getattr(s0, name), [], s0.cx, s0.cy, 90.0)
+            ours = np.array([(g.a, g.b) for g in turned])
+            theirs = np.array([(g.a, g.b) for g in getattr(s90, name)])
+            self.assertEqual(ours.shape, theirs.shape, name)
+            self.assertTrue(np.allclose(ours, theirs, atol=1e-9), name)
+        self.assertIn("so that it sits at 90 deg", s90.summary())
+        self.assertEqual(s0.nets(), [H.P.TX_NET, H.P.RX_NET_PHASE_1_3, H.P.RX_NET_PHASE_0_2])
+
+    def test_add_copper_is_the_copper_of_write(self):
+        """Stator.add_copper puts on a board exactly the nets, segments and vias that Stator.write puts in its file,
+        in the same order (the Dual Generator writes each set with it)."""
+        board = KiCadBoard(title="t", comments=[], page=(297, 210), thickness=1.6, copper_layers=H.P.PCB_LAYERS)
+        for net in self.s0.nets():
+            board.net(net)
+        self.s0.add_copper(board)
+        path = os.path.join(tempfile.mkdtemp(dir=H.temp_root()), "s.kicad_pcb")
+        self.s0.write(path)
+        with open(path, encoding="utf-8") as fh:
+            written = fh.read().splitlines()
+        copper = lambda lines: [l for l in lines if l.startswith(("  (net ", "  (segment ", "  (via "))]
+        ours = copper(board.text().splitlines())
+        self.assertEqual(ours, copper(written))
+        self.assertEqual(len(ours), 4 + len(self.s0.rx_segments) + len(self.s0.tx_segments) + len(self.s0.rx_vias)
+                         + len(self.s0.tx_vias), "the empty net and the three nets, then every piece of copper")
+
+    def test_rotor_start_offset(self):
+        from Generator.Rotor import RotorBuilder as RB
+        a = RB.RotorDesign(H.P, stator=self.s0, start_offset_deg=30.0)
+        start = H.P.ROTOR_AUTO_START_ANGLE_DEG
+        H.apply({"ROTOR_AUTO_START_ANGLE_DEG": start + 30.0})
+        b = RB.RotorDesign(H.P, stator=self.s0)
+        H.restore()
+        self.assertEqual(a.start_angle, b.start_angle)
+        self.assertEqual(a.sector_polygon(0), b.sector_polygon(0))
+        self.assertEqual(a.P.ROTOR_AUTO_START_ANGLE_DEG, start, "the parameters are not changed")
 
 
 class Harness(unittest.TestCase):

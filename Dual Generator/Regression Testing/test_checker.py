@@ -228,8 +228,8 @@ class CheckerBehaviour(unittest.TestCase):
         self.assertFalse(res.has("WARNING"))
 
     def test_single_generator_is_left_as_it_was(self):
-        """A dual run turns each set to its own terminal angle; the Single Generator's own setting is back at
-        0 deg afterwards, and its parameter module still holds the Single Generator's values."""
+        """A dual run turns each set to its own terminal angle without touching the Single Generator's own
+        setting (still 0 deg), and the Single's parameter module still holds the Single Generator's values."""
         from Generator.Stator import StatorAssembly
         import Parameters as SingleP
         H.check()

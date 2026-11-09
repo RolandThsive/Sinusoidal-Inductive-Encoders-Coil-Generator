@@ -9,7 +9,6 @@ Nothing to edit here.
 
 import difflib
 import math
-import os
 
 from Generator.Checks import ParameterRules as SingleRules
 from Generator.Rotor import RotorBuilder as RB
@@ -207,10 +206,4 @@ def dual_rules(P, v, rep):
     # the output folder
     if hasattr(B, "OUTPUT_DIR") and isinstance(B.OUTPUT_DIR, str) and B.OUTPUT_DIR.strip():
         from Dual_Generator.Run import Dual_OutputFolders
-        d = Dual_OutputFolders.output_dir(B)
-        if os.path.exists(d) and not os.path.isdir(d):
-            rep.error(f"OUTPUT_DIR {d!r} exists but is not a folder")
-        elif os.path.isdir(d) and not os.access(d, os.W_OK):
-            rep.error(f"OUTPUT_DIR {d!r} is not writable")
-        elif not os.path.exists(d):
-            rep.info(f"OUTPUT_DIR {d!r} does not exist yet and will be created (the DualCoil_... folder goes inside it)")
+        SingleRules.check_output_dir(Dual_OutputFolders.output_dir(B), rep, "DualCoil_...")

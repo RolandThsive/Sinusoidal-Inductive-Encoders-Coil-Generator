@@ -55,6 +55,52 @@ def _number(name, val, positive=True):
     return float(val)
 
 
+def given_band(get, band="RX band", file=None):
+    """The RX band as the parameters give it (the two ways above): None when it is not given (all four None), else
+    dict(ri, ro, mode, given): mode "radii" or "centre", given = {name: value} of the pair that was set.
+    get(name) -> the value (None when it is None or missing).  Raises ParameterConflict for a half pair, for both
+    pairs, for a value that is not a number greater than 0, for an inside radius not below the outside radius and for
+    a swing not below the centre.  band names the band in the messages; file, when given, is the file that holds it
+    (the Dual Generator: band="RX1 band", file="Dual_RX1_Parameters.py")."""
+    at = f" in {file}" if file else ""
+    end = f" ({file})" if file else ""
+
+    def number(name, val):
+        if isinstance(val, bool) or not isinstance(val, (int, float)) or not math.isfinite(val) or val <= 0:
+            raise ParameterConflict((name,), f"{name} must be a number greater than 0, or None; it is {val!r}{end}")
+        return float(val)
+
+    ins, out = get(RADII[0]), get(RADII[1])
+    rb, a = get(CENTRE[0]), get(CENTRE[1])
+    have_r = (ins is not None, out is not None)
+    have_c = (rb is not None, a is not None)
+    if any(have_r) and not all(have_r):
+        missing = RADII[have_r.index(False)]
+        raise ParameterConflict(RADII, f"the two RX band radii go together, but {missing} is None{at}. Set both (the RX "
+                                f"band), or both to None" + ("" if file else " (the band then comes from RX_R_BASE_MM / "
+                                                             "RX_A_MM or the board edges)"))
+    if any(have_c) and not all(have_c):
+        missing = CENTRE[have_c.index(False)]
+        raise ParameterConflict(CENTRE, f"the band centre and its swing go together, but {missing} is None{at}. Set "
+                                f"both (the RX band is RX_R_BASE_MM - RX_A_MM ... RX_R_BASE_MM + RX_A_MM), or both to None")
+    if all(have_r) and all(have_c):
+        raise ParameterConflict(RADII + CENTRE, f"the {band} is given twice{at}: as two radii and as centre + swing. "
+                                f"Set one pair to None" + ("" if file else " (RX_Parameters.py)"))
+    if all(have_r):
+        ri, ro = number(RADII[0], ins), number(RADII[1], out)
+        if ri >= ro:
+            raise ParameterConflict(RADII, f"the {band}'s inside radius ({ri:g} mm) must be smaller than its outside "
+                                    f"radius ({ro:g} mm){end}")
+        return dict(ri=ri, ro=ro, mode="radii", given={RADII[0]: ri, RADII[1]: ro})
+    if all(have_c):
+        rb, a = number(CENTRE[0], rb), number(CENTRE[1], a)
+        if rb - a <= 0:
+            raise ParameterConflict(CENTRE, f"the swing ({a:g} mm) must be smaller than the band centre radius ({rb:g} "
+                                    f"mm): the {band} would start at r = {rb - a:g} mm{end}")
+        return dict(ri=rb - a, ro=rb + a, mode="centre", given={CENTRE[0]: rb, CENTRE[1]: a})
+    return None
+
+
 def resolve(get, room):
     """get(name) -> the parameter value (None when it is None or missing); room() -> the room outside the band for the
     TX turns, the TX tail, the fingers and the margins (mm; outer_edge_room), called only when needed.
@@ -68,24 +114,9 @@ def resolve(get, room):
       inner_from / outer_from   "band" (the edge follows the band), "both" (both given) or "edge" (the band follows
                                 the edge)
     Raises ParameterConflict (a ValueError that names the parameters) with a message that says what to change."""
-    ins, out = get(RADII[0]), get(RADII[1])
-    rb, a = get(CENTRE[0]), get(CENTRE[1])
     e_in, e_out = get(EDGES[0]), get(EDGES[1])
     inset = float(get("INNER_EDGE_INSET_MM"))
-    have_r = (ins is not None, out is not None)
-    have_c = (rb is not None, a is not None)
-    if any(have_r) and not all(have_r):
-        missing = RADII[have_r.index(False)]
-        raise ParameterConflict(RADII, f"the two RX band radii go together, but {missing} is None. Set both (the RX "
-                                f"band), or both to None (the band then comes from RX_R_BASE_MM / RX_A_MM or the board "
-                                f"edges)")
-    if any(have_c) and not all(have_c):
-        missing = CENTRE[have_c.index(False)]
-        raise ParameterConflict(CENTRE, f"the band centre and its swing go together, but {missing} is None. Set both (the "
-                                f"RX band is RX_R_BASE_MM - RX_A_MM ... RX_R_BASE_MM + RX_A_MM), or both to None")
-    if all(have_r) and all(have_c):
-        raise ParameterConflict(RADII + CENTRE, "the RX band is given twice: as two radii and as centre + swing. Set one "
-                                "pair to None (RX_Parameters.py)")
+    given = given_band(get)                            # the band as given, or None (then it comes from the edges)
     if e_in is not None:
         e_in = _number(EDGES[0], e_in)
     if e_out is not None:
@@ -94,19 +125,8 @@ def resolve(get, room):
         raise ParameterConflict(EDGES, f"the board's inner radius (the centre hole, {e_in:g} mm) cannot be larger than its "
                                 f"outer radius ({e_out:g} mm)")
 
-    if all(have_r):
-        mode = "radii"
-        ri, ro = _number(RADII[0], ins), _number(RADII[1], out)
-        if ri >= ro:
-            raise ParameterConflict(RADII, f"the RX band's inside radius ({ri:g} mm) must be smaller than its outside "
-                                    f"radius ({ro:g} mm)")
-    elif all(have_c):
-        mode = "centre"
-        rb, a = _number(CENTRE[0], rb), _number(CENTRE[1], a)
-        ri, ro = rb - a, rb + a
-        if ri <= 0:
-            raise ParameterConflict(CENTRE, f"the swing ({a:g} mm) must be smaller than the band centre radius ({rb:g} "
-                                    f"mm): the RX band would start at r = {ri:g} mm")
+    if given is not None:
+        mode, ri, ro = given["mode"], given["ri"], given["ro"]
     else:
         mode = "board"
         if e_in is None or e_out is None:

@@ -21,8 +21,14 @@ never fails a generation: anything it cannot do is printed as a warning and the 
 
     result = add_to_file(path, P)       path: the written Stator.kicad_pcb;  P: Parameters
     append_record(record_path, result)  adds the result to Parameters.txt
+
+The Dual Generator uses this same module for its two sets (Dual_LeadCutting_SilkscreenSuggestion.py): `sets`
+lists the coil sets on the board as (label, terminal angle, RX values, TX values), `settings` reads its own
+parameter file.  With the label "" (the Single Generator's one set) the names carry no set number (SIN_1, TX_2);
+with a label k they do (SIN1_1, TX2_2) and every warning starts with "set k: ".
 """
 
+import importlib
 import importlib.util
 import math
 import os
@@ -33,7 +39,8 @@ import numpy as np
 from Generator.Core.Conflict import Colour
 from Generator.Stator.StatorAssembly import TERMINAL_DEG
 
-PARAMETER_FILE = "SilkScreenSuggestion_Parameters.py"
+PARAMETER_MODULE = "SilkScreenSuggestion_Parameters"
+PARAMETER_FILE = PARAMETER_MODULE + ".py"
 
 # the stroke font: resources/SilkscreenFont.py at the root of the repository (this file is four folders below it)
 FONT_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))),
@@ -74,31 +81,33 @@ _EDGE = re.compile(r'\(gr_circle \(center ([-\d.]+) ([-\d.]+)\) \(end ([-\d.]+) 
 
 # ====================================================================== settings
 class Settings:
-    """The values of SilkScreenSuggestion_Parameters.py, checked; a wrong value falls back to its default with a
-    warning (the step never stops a generation)."""
+    """The values of SilkScreenSuggestion_Parameters.py (or the parameter module named), checked; a wrong value
+    falls back to its default with a warning (the step never stops a generation)."""
 
-    def __init__(self):
+    def __init__(self, module=PARAMETER_MODULE, defaults=None):
         self.warnings = []
+        self.file = module + ".py"
+        self.defaults = DEFAULTS if defaults is None else defaults
         try:
-            import SilkScreenSuggestion_Parameters as M
+            M = importlib.import_module(module)
         except ImportError:
             M = None
-            self.warnings.append(f"{PARAMETER_FILE} was not found in the Parameters folder: the defaults are used")
+            self.warnings.append(f"{self.file} was not found in the Parameters folder: the defaults are used")
         except Exception as e:                                             # a syntax error in the file
             M = None
-            self.warnings.append(f"{PARAMETER_FILE} cannot be loaded ({type(e).__name__}: {e}): the defaults are used")
-        for name, default in DEFAULTS.items():
+            self.warnings.append(f"{self.file} cannot be loaded ({type(e).__name__}: {e}): the defaults are used")
+        for name, default in self.defaults.items():
             value = getattr(M, name, default) if M is not None else default
             ok, value = self._check(name, value, default)
             setattr(self, name, value)
         if M is not None:
-            for name in sorted(n for n in dir(M) if n.isupper() and not n.startswith("_") and n not in DEFAULTS):
-                self.warnings.append(f"{name} in {PARAMETER_FILE} is not a setting of the silkscreen suggestion and is ignored")
+            for name in sorted(n for n in dir(M) if n.isupper() and not n.startswith("_") and n not in self.defaults):
+                self.warnings.append(f"{name} in {self.file} is not a setting of the silkscreen suggestion and is ignored")
         self.rgb = self._rgb(self.SILKSCREEN_COLOR)
 
     def _check(self, name, value, default):
         def bad(what):
-            self.warnings.append(f"{name} = {value!r} in {PARAMETER_FILE}: {what}; using {default!r}")
+            self.warnings.append(f"{name} = {value!r} in {self.file}: {what}; using {default!r}")
             return False, default
         if isinstance(default, bool):
             if not isinstance(value, bool):
@@ -114,7 +123,7 @@ class Settings:
         elif name == "SILKSCREEN_BREAK_LAYERS":
             if not isinstance(value, (list, tuple)) or not value \
                     or any(v not in ("F.Cu", "In1.Cu", "In2.Cu", "B.Cu") for v in value):
-                return bad('must be a list of copper layers, e.g. ["F.Cu", "B.Cu"]')
+                return bad("must be a list of copper layers, e.g. [" + ", ".join(f'"{v}"' for v in default) + "]")
             value = list(value)
         else:
             if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value <= 0:
@@ -131,10 +140,9 @@ class Settings:
 # ====================================================================== the board as written
 class Board:
     """The copper of the written stator file: segments (n, 5: x1 y1 x2 y2 width) with their layer and net, the vias,
-    the net names and the two Edge.Cuts circles."""
+    the net names and the two Edge.Cuts circles.  B: the board values (CENTER_X_MM, VIA_DIAMETER_MM, ...)."""
 
-    def __init__(self, text, P):
-        B = P
+    def __init__(self, text, B):
         self.cx, self.cy = float(B.CENTER_X_MM), float(B.CENTER_Y_MM)
         self.net_name = {int(n): name for n, name in _NET.findall(text)}
         self.net_id = {name: n for n, name in self.net_name.items()}
@@ -439,8 +447,14 @@ def _mm(p):
     return f"({_f(p[0])}, {_f(p[1])})"
 
 
-def suggest(text, P, settings, font=None):
-    """The marks for the written stator text.  Returns (new text or None, Result)."""
+def single_set(P):
+    """The Single Generator's one coil set: no set number in the names, the TX terminal at TERMINAL_DEG."""
+    return [("", float(TERMINAL_DEG), P, P)]
+
+
+def suggest(text, P, settings, font=None, sets=None):
+    """The marks for the written stator text.  P: the board values; sets: [(label, terminal angle, RX, TX), ...]
+    (None = the Single Generator's one set, single_set(P)).  Returns (new text or None, Result)."""
     res = Result()
     s = settings
     board = Board(text, P)
@@ -454,8 +468,9 @@ def suggest(text, P, settings, font=None):
     edge_clear = s.SILKSCREEN_VIA_EDGE_CLEARANCE_MM
     dot_r = s.SILKSCREEN_DOT_RADIUS_MM
     margin = s.SILKSCREEN_BOX_MARGIN_MM
-    terminal = {"": float(TERMINAL_DEG)}          # the board is turned so that the TX terminal sits there
-    modules = {"": (P, P)}                        # one set: the names carry no set number (SIN_1, TX_2, ...)
+    sets = single_set(P) if sets is None else sets
+    terminal = {k: float(deg) for k, deg, _rx, _tx in sets}     # each set is turned so that its TX ends sit there
+    modules = {k: (rx, tx) for k, _deg, rx, tx in sets}         # label "": the names carry no set number (SIN_1, ...)
     labels = s.SILKSCREEN_LABELS and font is not None
     placer = Placer(board, font, s.SILKSCREEN_TEXT_SIZE_MM) if labels else None
     names = []                      # (site, wanted direction, name, keep-off): placed after all marks are known
@@ -464,24 +479,25 @@ def suggest(text, P, settings, font=None):
     centre = np.array([board.cx, board.cy])
     for k in modules:
         RX, TX = modules[k]
+        pre = f"set {k}: " if k != "" else ""
         tx_nid = board.net_id.get(TX.TX_NET)
         end = find_tx_end(board, tx_nid) if tx_nid is not None else None
         avoid = [end[0]] if end is not None else []
         for coil, net_name in (("SIN", RX.RX_NET_PHASE_0_2), ("COS", RX.RX_NET_PHASE_1_3)):
             nid = board.net_id.get(net_name)
             if nid is None:
-                res.warnings.append(f"net {net_name!r} is not in the stator file; no break suggested for {coil}{k}")
+                res.warnings.append(pre + f"net {net_name!r} is not in the stator file; no break suggested for {coil}{k}")
                 continue
             on = sorted(set(board.layer[board.net == nid].tolist()))
             if not any(l in on for l in s.SILKSCREEN_BREAK_LAYERS):
-                res.warnings.append(f"net {net_name!r} has no copper on {', '.join(s.SILKSCREEN_BREAK_LAYERS)} "
+                res.warnings.append(pre + f"net {net_name!r} has no copper on {', '.join(s.SILKSCREEN_BREAK_LAYERS)} "
                                     f"(SILKSCREEN_BREAK_LAYERS); the coil runs on {', '.join(on)}: set "
                                     f"SILKSCREEN_BREAK_LAYERS to its layers. No break suggested for {coil}{k}")
                 continue
             br = find_rx_break(board, nid, s.SILKSCREEN_BREAK_LAYERS, terminal[k], s.SILKSCREEN_SEARCH_SPAN_DEG, gap,
                                edge_clear, avoid, sep)
             if br is None:
-                res.warnings.append(f"no spot on {net_name} within {s.SILKSCREEN_SEARCH_SPAN_DEG:g} deg of "
+                res.warnings.append(pre + f"no spot on {net_name} within {s.SILKSCREEN_SEARCH_SPAN_DEG:g} deg of "
                                     f"{terminal[k]:g} deg, {sep:g} mm from the other marks, has room for two vias "
                                     f"(layers {', '.join(s.SILKSCREEN_BREAK_LAYERS)}); widen SILKSCREEN_SEARCH_SPAN_DEG, "
                                     f"lower SILKSCREEN_BREAK_SEPARATION_MM, or cut the coil by hand")
@@ -505,16 +521,16 @@ def suggest(text, P, settings, font=None):
                              f"{coil}{k}_2 at {_mm(sites[1])}, clearance {br['room']:.2f} mm (at least {need:g} needed)")
         # the TX ends
         if tx_nid is None:
-            res.warnings.append(f"net {TX.TX_NET!r} is not in the stator file; no via sites suggested for TX{k}")
+            res.warnings.append(pre + f"net {TX.TX_NET!r} is not in the stator file; no via sites suggested for TX{k}")
             continue
         if end is None:
-            res.warnings.append(f"the two ends of {TX.TX_NET} were not found stacked on two layers; no via "
+            res.warnings.append(pre + f"the two ends of {TX.TX_NET} were not found stacked on two layers; no via "
                                 f"sites suggested for TX{k}")
             continue
         e, layers = end
         sites = find_tx_sites(board, e, s.SILKSCREEN_TX_SITE_REACH_MM, edge_clear)
         if sites is None:
-            res.warnings.append(f"no two via sites within {s.SILKSCREEN_TX_SITE_REACH_MM:g} mm of the TX{k} end "
+            res.warnings.append(pre + f"no two via sites within {s.SILKSCREEN_TX_SITE_REACH_MM:g} mm of the TX{k} end "
                                 f"at {_mm(e)} have room (copper on every layer, the board edge); extend the ends by hand")
             continue
         a, b, room = sites
@@ -568,9 +584,10 @@ def suggest(text, P, settings, font=None):
     return new, res
 
 
-def add_to_file(path, P, quiet=False):
-    """Read the written stator file, add the suggestion, write it back.  Prints what it did.  Returns the Result."""
-    settings = Settings()
+def add_to_file(path, P, quiet=False, sets=None, settings=None):
+    """Read the written stator file, add the suggestion, write it back.  Prints what it did.  Returns the Result.
+    P: the board values; sets, settings: as suggest() (None = the Single Generator's own)."""
+    settings = Settings() if settings is None else settings
     res = Result()
     res.warnings += settings.warnings
     font = None
@@ -579,7 +596,7 @@ def add_to_file(path, P, quiet=False):
         if why:
             res.warnings.append(why)
     if not settings.SILKSCREEN_SUGGESTION:
-        res.lines.append(f"  SILKSCREEN_SUGGESTION = False ({PARAMETER_FILE}): no silkscreen added")
+        res.lines.append(f"  SILKSCREEN_SUGGESTION = False ({settings.file}): no silkscreen added")
         _print(res, quiet)
         return res
     try:
@@ -590,7 +607,7 @@ def add_to_file(path, P, quiet=False):
         _print(res, quiet)
         return res
     try:
-        new, r = suggest(text, P, settings, font)
+        new, r = suggest(text, P, settings, font, sets)
     except Exception as e:                                               # never fail the generation
         res.warnings.append(f"the suggestion failed ({type(e).__name__}: {e}); the stator file is unchanged")
         _print(res, quiet)
@@ -629,17 +646,17 @@ def record_lines(res):
     return out
 
 
-def append_record(record_path, res):
-    """Append the result and a verbatim copy of the settings file to Parameters.txt."""
+def append_record(record_path, res, module=PARAMETER_MODULE):
+    """Append the result and a verbatim copy of the settings file (the parameter module named) to Parameters.txt."""
     lines = record_lines(res) + [""]
     pdir = None
+    name = module + ".py"
     try:
-        import SilkScreenSuggestion_Parameters as M
-        pdir = M.__file__
+        pdir = importlib.import_module(module).__file__
     except Exception:
         pass
     if pdir and os.path.isfile(pdir):
-        lines.append(f"########## {PARAMETER_FILE} " + "#" * max(0, 60 - len(PARAMETER_FILE)))
+        lines.append(f"########## {name} " + "#" * max(0, 60 - len(name)))
         try:
             with open(pdir, encoding="utf-8") as fh:
                 lines.append(fh.read().rstrip("\n"))

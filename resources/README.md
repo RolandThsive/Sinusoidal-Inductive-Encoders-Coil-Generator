@@ -4,7 +4,8 @@ Files that more than one generator uses, outside the generator folders.
 
 - `SilkscreenFont.py`: the stroke font of the silkscreen suggestions (lead names drawn as lines, no KiCad text).
   Capitals, digits and a few signs on a 4 x 6 grid, drawn for this repository; see the docstring for the two
-  functions (`layout`, `width`).  Used by the Dual Generator's `Dual_LeadCutting_SilkscreenSuggestion.py`.
+  functions (`layout`, `width`).  Used by the lead-cutting silkscreen step
+  (`Single Generator/Generator/Stator/LeadCutting_SilkscreenSuggestion.py`), which both generators run.
 - `RepresentativeSVGMaker.py`: a picture of a generated board for people: the stator on the left, the rotor on the
   right, layer colours, a title and a legend.  Copper under another layer is made visible (wider stator traces,
   dashed rotor outlines).  Writes `<folder name>_Representative.svg`.

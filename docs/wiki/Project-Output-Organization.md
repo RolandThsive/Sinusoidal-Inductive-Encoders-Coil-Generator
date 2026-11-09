@@ -17,7 +17,7 @@ Single Generator/
 │   └── Parameters.py             Gathers the five coil parameter files (do not edit)
 ├── Generator/
 │   ├── Run/                      RunCoilGenerator.py (the program to run; the only one that writes files),
-│   │                             CheckParameters.py, OutputFolders.py
+│   │                             RunSteps.py (the run steps both generators share), CheckParameters.py, OutputFolders.py
 │   ├── Checks/                   ParameterRules.py, ConflictRules.py, DesignChecks.py
 │   ├── Stator/
 │   │   ├── RX/                   RX_Builder, RX_Coils, RX_Profiles, RX_Fingers
@@ -68,7 +68,9 @@ resources/                      Shared by both generators
 ```
 
 The Dual Generator imports the Single Generator's `Generator` package from the `Single Generator` folder next to it,
-so the two folders must stay side by side. It changes nothing in the Single Generator and leaves no `__pycache__` there.
+so the two folders must stay side by side. It builds every coil, rotor ring and silkscreen mark with the Single
+Generator's own code and shares its run steps and output-folder helpers; it changes nothing in the Single Generator
+and leaves no `__pycache__` there.
 Its folder name carries the radii, the loops of both sets and the TX turns of both sets, for example
 `DualCoil_7.25_26.875_1x16_4x4`.
 

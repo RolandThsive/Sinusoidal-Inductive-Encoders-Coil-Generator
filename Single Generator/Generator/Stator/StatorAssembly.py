@@ -6,6 +6,10 @@ one board, with its edges, its title block and its KiCad file.
     tx = TX_Builder.build_tx(rx)         TX coil, its terminal where it fits best
     stator = assemble(P, rx, tx)         the board, turned so that the terminal sits at 0 deg (the right)
 
+    stator = build_stator(P)             all of it in one call, with the checks of DesignChecks.py between the
+                                         steps (RunCoilGenerator.py, and the Dual Generator for each of its sets)
+    stator = build_stator(P, 90.0)       the same, turned so that the terminal sits at 90 deg instead
+
 THE LINKS BETWEEN RX AND TX, ALL OF THEM:
   * THE RX READS ONLY THE PARAMETERS.  NOTHING OF THE TX.
   * THE TX IS BUILT AFTER THE RX AND READS FROM IT THE CENTRE, THE RX OUTSIDE RADIUS, THE FINGERS (FOR ITS
@@ -17,19 +21,34 @@ Nothing to edit here.
 
 import math
 
+from Generator.Checks import DesignChecks
 from Generator.Core import BoardLayout, Layers
 from Generator.Core.BoardLayout import outer_edge_room
 from Generator.Core.Geometry import chord_tolerance
 from Generator.Core.PCBWriter import KiCadBoard, page_size
+from Generator.Stator.RX import RX_Builder
 from Generator.Stator.TX import TX_Builder
 
 
 TERMINAL_DEG = 0.0             # where the TX terminal ends up on the finished board (the right, horizontal axis)
 
 
-def assemble(P, rx, tx):
-    """The stator: RX and TX put together and turned so that the TX terminal sits at TERMINAL_DEG."""
-    return Stator(P, rx, tx)
+def assemble(P, rx, tx, terminal_deg=TERMINAL_DEG):
+    """The stator: RX and TX put together and turned so that the TX terminal sits at terminal_deg."""
+    return Stator(P, rx, tx, terminal_deg)
+
+
+def build_stator(P, terminal_deg=TERMINAL_DEG):
+    """THE CHAIN, all of it: RX -> TX -> the terminal check -> assemble -> the clearance checks.  THE RX READS ONLY
+    THE PARAMETERS; THE TX READS THE RX; THE ASSEMBLY TURNS THE BOARD SO THAT THE TERMINAL SITS AT terminal_deg;
+    THE CHECKS MEASURE THE RESULT (their warnings go to stderr, as WARNING: lines).  Raises ValueError or
+    RuntimeError when the stator cannot be built."""
+    rx = RX_Builder.build_rx(P)
+    tx = TX_Builder.build_tx(rx)
+    DesignChecks.check_tx_terminal(tx)
+    stator = assemble(P, rx, tx, terminal_deg)
+    DesignChecks.check_stator_clearances(stator)
+    return stator
 
 
 def rotate_copper(segments, vias, cx, cy, deg):
@@ -51,14 +70,15 @@ class Stator:
                   "tx_outer_radius", "tx_tail_end_radius", "tx_shape", "tx_mode", "tx_lay", "tx_goaround",
                   "tx_windows_on", "tx_layer_p", "tx_layer_q")
 
-    def __init__(self, P, rx, tx):
+    def __init__(self, P, rx, tx, terminal_deg=TERMINAL_DEG):
         self.P, self.rx, self.tx = P, rx, tx
+        self.terminal_deg = float(terminal_deg)            # where the TX terminal sits on the finished board
         self.__dict__.update({k: v for k, v in rx.__dict__.items() if k != "P"})
         for name in self.TX_RESULTS:
             if hasattr(tx, name):
                 setattr(self, name, getattr(tx, name))
-        # the whole board is turned so that the TX terminal ends up at TERMINAL_DEG
-        self.rotation_deg = (TERMINAL_DEG - tx.angle_deg) % 360.0
+        # the whole board is turned so that the TX terminal ends up at terminal_deg
+        self.rotation_deg = (self.terminal_deg - tx.angle_deg) % 360.0
         self.rx_segments, self.rx_vias = rotate_copper(rx.rx_segments, rx.rx_vias, self.cx, self.cy, self.rotation_deg)
         self.tx_segments, self.tx_vias = rotate_copper(tx.tx_segments, tx.tx_vias, self.cx, self.cy, self.rotation_deg)
         tabs = {id(s) for s in rx.tab_segments}
@@ -67,7 +87,7 @@ class Stator:
                                for lo, hi, t, k in tx.tx_window_list]
         for t in self.single_tabs:
             t["angle_deg"] = (t["angle_deg"] + self.rotation_deg) % 360.0
-        self.angle_deg = TERMINAL_DEG
+        self.angle_deg = self.terminal_deg
         self.tx_inner_edge = BoardLayout.tx_ring(P, self.ro)["inner_edge"]
         edge_formula = self.ro + P.OUTER_EDGE_OFFSET_MM
         if self.band["outer_edge"] is not None:
@@ -93,8 +113,23 @@ class Stator:
         self.page_mm = page_size(P, self.cx, self.cy, self.outer_edge_radius)
         board = KiCadBoard(title=title, comments=comments, page=self.page_mm, thickness=P.PCB_THICKNESS_MM,
                            copper_layers=P.PCB_LAYERS)
-        for net in (P.TX_NET, P.RX_NET_PHASE_1_3, P.RX_NET_PHASE_0_2):
+        for net in self.nets():
             board.net(net)
+        self.add_copper(board)
+        board.circle((self.cx, self.cy), self.inner_edge_radius, "Edge.Cuts", P.EDGE_LINE_WIDTH_MM)
+        board.circle((self.cx, self.cy), self.outer_edge_radius, "Edge.Cuts", P.EDGE_LINE_WIDTH_MM)
+        board.save(path)
+        return path
+
+    def nets(self):
+        """The stator's three nets, in the order they are declared in the file."""
+        P = self.P
+        return [P.TX_NET, P.RX_NET_PHASE_1_3, P.RX_NET_PHASE_0_2]
+
+    def add_copper(self, board):
+        """Put the stator's copper on `board` (a PCBWriter.KiCadBoard, its nets already declared): the RX segments,
+        the TX segments, the RX vias, the TX vias.  The Dual Generator puts both of its sets on one board with it."""
+        P = self.P
         for s in self.rx_segments:
             board.segment(s.a, s.b, P.RX_TRACE_WIDTH_MM, s.layer, s.net)
         for s in self.tx_segments:
@@ -104,10 +139,6 @@ class Stator:
             board.via(v.at, P.VIA_DIAMETER_MM, P.VIA_DRILL_MM, v.net, layers=v.layers, blind=blind)
         for v in self.tx_vias:
             board.via(v.at, P.VIA_DIAMETER_MM, P.VIA_DRILL_MM, P.TX_NET, layers=v.layers, blind=blind)
-        board.circle((self.cx, self.cy), self.inner_edge_radius, "Edge.Cuts", P.EDGE_LINE_WIDTH_MM)
-        board.circle((self.cx, self.cy), self.outer_edge_radius, "Edge.Cuts", P.EDGE_LINE_WIDTH_MM)
-        board.save(path)
-        return path
 
     LAYER_WORDS = Layers.LAYER_WORDS
 
@@ -179,7 +210,7 @@ class Stator:
             f"  board edge: bore r = {self.inner_edge_radius:g} mm, outer r = {self.outer_edge_radius:g} mm",
             f"  TX terminal: found at {self.tx.angle_deg:.2f} deg of the RX pattern ({self.tx.terminal_search_gap:.3f} mm "
             f"from the nearest RX copper); the board is turned by {self.rotation_deg:.2f} deg so that it sits at "
-            f"{TERMINAL_DEG:g} deg (the right, horizontal axis); the RX pattern's zero is at {self.rotation_deg:.2f} deg",
+            f"{self.terminal_deg:g} deg (the right, horizontal axis); the RX pattern's zero is at {self.rotation_deg:.2f} deg",
         ]
         b = self.band
         if b["mode"] != "radii" or b["inner_from"] != "band" or b["outer_from"] != "band":

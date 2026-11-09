@@ -11,13 +11,12 @@ import types
 import unittest
 
 import harness as H
-from Generator.Core.Conflict import ParameterConflict
+from Generator.Core.Conflict import ParameterConflict, Report
 from Generator.Stator import StatorAssembly
 from Dual_Generator.Checks import Dual_DesignChecks as DDC
 from Dual_Generator.Core import Dual_SetParameters as SP
 from Dual_Generator.Core import Dual_TrackLayout as TL
 from Dual_Generator.Run import Dual_OutputFolders as OF
-from Dual_Generator.Stator import Dual_StatorAssembler as DSA
 
 
 class SetParameters(unittest.TestCase):
@@ -65,6 +64,17 @@ class SetParameters(unittest.TestCase):
         v = SP.fixed_values(H.P)
         self.assertEqual(v["RX_TABS"], "none")
         self.assertEqual(v["PCB_LAYERS"], 2, "a changed value is handed on; the checker refuses it")
+
+    def test_for_set(self):
+        """A Single Generator report as findings of one set: 'set k: ' in front, the set's own dual file names."""
+        rep = Report()
+        rep.add("error", "LOOPS = 0: must be a whole number of 1 or more   (RX_Parameters.py)", ("LOOPS",))
+        rep.add("warning", "TX_TURNS (TX_Parameters.py) and Board_Parameters.py")
+        out = SP.for_set(rep, 2)
+        self.assertEqual(out.items, [
+            ("error", "set 2: LOOPS = 0: must be a whole number of 1 or more   (Dual_RX2_Parameters.py)", ("LOOPS",)),
+            ("warning", "set 2: TX_TURNS (Dual_TX2_Parameters.py) and Dual_Board_Parameters.py", ())])
+        self.assertEqual(rep.items[1][1], "TX_TURNS (TX_Parameters.py) and Board_Parameters.py", "the report is not changed")
 
     def test_modules_and_ic_module(self):
         self.assertEqual(SP.modules(H.P, 1), (H.P.RX1, H.P.TX1, H.P.ROTOR1))
@@ -146,6 +156,13 @@ class TrackLayout(unittest.TestCase):
             TL.band_of(types.SimpleNamespace(INSIDE_RADIUS_MM=9.7, OUTSIDE_RADIUS_MM=16.05, RX_R_BASE_MM=10.0, RX_A_MM=2.0), 1)
         with self.assertRaises(ParameterConflict):
             TL.band_of(types.SimpleNamespace(INSIDE_RADIUS_MM=16.05, OUTSIDE_RADIUS_MM=9.7), 1)
+        with self.assertRaises(ParameterConflict, msg="the Single's rule: a band value must be finite"):
+            TL.band_of(types.SimpleNamespace(INSIDE_RADIUS_MM=9.7, OUTSIDE_RADIUS_MM=float("inf")), 1)
+        with self.assertRaises(ParameterConflict) as cm:
+            TL.band_of(types.SimpleNamespace(RX_R_BASE_MM=2.0), 2)
+        self.assertEqual(cm.exception.message, "the band centre and its swing go together, but RX_A_MM is None in "
+                         "Dual_RX2_Parameters.py. Set both (the RX band is RX_R_BASE_MM - RX_A_MM ... RX_R_BASE_MM + "
+                         "RX_A_MM), or both to None")
 
     def test_check_mode_names_the_hint(self):
         with self.assertRaises(ParameterConflict) as cm:
@@ -183,22 +200,10 @@ class TrackLayout(unittest.TestCase):
 
 
 class Assembler(unittest.TestCase):
-    def test_terminal_at_restores(self):
-        self.assertEqual(StatorAssembly.TERMINAL_DEG, 0.0)
-        with DSA.terminal_at(180.0):
-            self.assertEqual(StatorAssembly.TERMINAL_DEG, 180.0)
-        self.assertEqual(StatorAssembly.TERMINAL_DEG, 0.0)
-        try:
-            with DSA.terminal_at(90.0):
-                raise RuntimeError("inside")
-        except RuntimeError:
-            pass
-        self.assertEqual(StatorAssembly.TERMINAL_DEG, 0.0, "restored after an exception too")
-
     def test_folder_names(self):
-        self.assertEqual(OF._num(26.875), "26.875")
-        self.assertEqual(OF._num(8.5), "8.5")
-        self.assertEqual(OF._num(29.0), "29")
+        self.assertEqual(OF.folder_number(26.875), "26.875")
+        self.assertEqual(OF.folder_number(8.5), "8.5")
+        self.assertEqual(OF.folder_number(29.0), "29")
         dual = types.SimpleNamespace(bore=7.25, outline=26.875,
                                      sets=(types.SimpleNamespace(N=1, P=types.SimpleNamespace(TX_TURNS=4)),
                                            types.SimpleNamespace(N=16, P=types.SimpleNamespace(TX_TURNS=4))))
@@ -216,6 +221,24 @@ class Assembler(unittest.TestCase):
             self.assertFalse(os.path.isdir(a))
         finally:
             H.restore()
+
+    def test_output_dir_uses_the_single_rule(self):
+        """The Dual checks OUTPUT_DIR with the Single Generator's own rule, so a folder that cannot be created or a link
+        to nothing is refused before anything is built (the Dual's old copy of the rule let both through)."""
+        root = tempfile.mkdtemp(dir=H.temp_root())
+        f = os.path.join(root, "file.txt")
+        open(f, "w").close()
+        res = H.check({"BOARD.OUTPUT_DIR": os.path.join(f, "sub")})
+        self.assertEqual(res.rc, 1)
+        self.assertTrue(res.has(r"OUTPUT_DIR .* cannot be created: .* is not a folder"), res.out)
+        link = os.path.join(root, "link")
+        try:
+            os.symlink(os.path.join(root, "nowhere"), link)
+        except (OSError, NotImplementedError):
+            return                                     # (no symbolic links here: the rest is the Single's own test)
+        res = H.check({"BOARD.OUTPUT_DIR": link})
+        self.assertEqual(res.rc, 1)
+        self.assertTrue(res.has("is a link to something that does not exist"), res.out)
 
     def test_title_block_names_the_tx_layers_of_both_wirings(self):
         for case, word in (("default", "Series"), ("parallel_both_sets", "Parallel")):
@@ -238,7 +261,7 @@ class Assembler(unittest.TestCase):
     def test_copper_extent_of_a_built_set(self):
         H.restore()
         lay = TL.resolve(H.P)
-        s1 = DSA.build_set(SP.build(H.P, 1, lay.set_band(1), lay.edges()), 180.0)
+        s1 = StatorAssembly.build_stator(SP.build(H.P, 1, lay.set_band(1), lay.edges()), 180.0)
         lo, hi = DDC.copper_extent(s1)
         self.assertAlmostEqual(hi, lay.reach1, 3, "the TX1 ring reaches where the layout said")
         self.assertGreater(lo, lay.bore)
@@ -247,7 +270,10 @@ class Assembler(unittest.TestCase):
         margin = max(H.P.RX1.RX_TRACE_WIDTH_MM, H.P.BOARD.VIA_DIAMETER_MM) / 2.0      # the inner tip vias sit on the band start
         self.assertAlmostEqual(rlo, lay.band1["ri"] - margin, 2)
         self.assertEqual(s1.terminal_deg, 180.0)
-        self.assertEqual(StatorAssembly.TERMINAL_DEG, 0.0)
+        self.assertEqual(s1.angle_deg, 180.0)
+        self.assertAlmostEqual(s1.rotation_deg, (180.0 - s1.tx.angle_deg) % 360.0, 12)
+        self.assertIn("so that it sits at 180 deg", s1.summary(), "the set's own angle in its summary")
+        self.assertEqual(StatorAssembly.TERMINAL_DEG, 0.0, "the Single Generator's angle is never changed")
 
 
 if __name__ == "__main__":

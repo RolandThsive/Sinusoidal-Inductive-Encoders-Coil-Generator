@@ -95,37 +95,11 @@ def _num(name, val, file):
 
 
 def band_of(rx, k):
-    """The RX band of set k as given in its file: None (all four None) or dict(ri, ro, how, names).  Raises
-    ParameterConflict for a half pair or for both pairs."""
-    file = RX_FILES[k]
-    ins, out = getattr(rx, "INSIDE_RADIUS_MM", None), getattr(rx, "OUTSIDE_RADIUS_MM", None)
-    rb, a = getattr(rx, "RX_R_BASE_MM", None), getattr(rx, "RX_A_MM", None)
-    have_r, have_c = (ins is not None, out is not None), (rb is not None, a is not None)
-    if any(have_r) and not all(have_r):
-        missing = BoardLayout.RADII[have_r.index(False)]
-        raise ParameterConflict(BoardLayout.RADII, f"the two RX band radii go together, but {missing} is None in {file}. "
-                                f"Set both (the RX band), or both to None")
-    if any(have_c) and not all(have_c):
-        missing = BoardLayout.CENTRE[have_c.index(False)]
-        raise ParameterConflict(BoardLayout.CENTRE, f"the band centre and its swing go together, but {missing} is None "
-                                f"in {file}. Set both (the RX band is RX_R_BASE_MM - RX_A_MM ... RX_R_BASE_MM + "
-                                f"RX_A_MM), or both to None")
-    if all(have_r) and all(have_c):
-        raise ParameterConflict(BoardLayout.RADII + BoardLayout.CENTRE, f"the RX{k} band is given twice in {file}: as "
-                                f"two radii and as centre + swing. Set one pair to None")
-    if all(have_r):
-        ri, ro = _num("INSIDE_RADIUS_MM", ins, file), _num("OUTSIDE_RADIUS_MM", out, file)
-        if ri >= ro:
-            raise ParameterConflict(BoardLayout.RADII, f"the RX{k} band's inside radius ({ri:g} mm) must be smaller than "
-                                    f"its outside radius ({ro:g} mm) ({file})")
-        return dict(ri=ri, ro=ro, how="radii", names={"INSIDE_RADIUS_MM": ri, "OUTSIDE_RADIUS_MM": ro})
-    if all(have_c):
-        rb, a = _num("RX_R_BASE_MM", rb, file), _num("RX_A_MM", a, file)
-        if rb - a <= 0:
-            raise ParameterConflict(BoardLayout.CENTRE, f"the swing ({a:g} mm) must be smaller than the band centre "
-                                    f"radius ({rb:g} mm): the RX{k} band would start at r = {rb - a:g} mm ({file})")
-        return dict(ri=rb - a, ro=rb + a, how="centre", names={"RX_R_BASE_MM": rb, "RX_A_MM": a})
-    return None
+    """The RX band of set k as given in its file: None (all four None) or dict(ri, ro, how, names).  The Single
+    Generator's own band rules (BoardLayout.given_band): raises ParameterConflict for a half pair, for both pairs and
+    for values that do not make a band."""
+    b = BoardLayout.given_band(lambda n: getattr(rx, n, None), f"RX{k} band", RX_FILES[k])
+    return None if b is None else dict(ri=b["ri"], ro=b["ro"], how=b["mode"], names=b["given"])
 
 
 def _placed(ri, ro):

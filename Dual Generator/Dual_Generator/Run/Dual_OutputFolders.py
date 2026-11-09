@@ -18,31 +18,27 @@ Inside the folder:
                                         electrical estimate of each set, the value of every parameter by dual
                                         file, what the dual board fixes, and a verbatim copy of every parameter
                                         file
+
+The numbers in the name, the new folder (never reused), the record's head, its value lines and its file copies are
+the Single Generator's own (OutputFolders.py); only the dual name and the dual record sections are here.
 """
 
-import datetime
 import os
 
 from Generator.Checks import ParameterRules as SingleRules
+from Generator.Run import OutputFolders as _single
+from Generator.Run.OutputFolders import RECORD_FILE, folder_number, remove_if_empty  # noqa: F401   (used by the run script)
 
 from Dual_Generator import DUAL_GENERATOR
 from Dual_Generator.Core import Dual_SetParameters as SP
 
-RECORD_FILE = "Parameters.txt"
 FOLDER_PREFIX = "DualCoil"
-INCREMENT_SEPARATOR = "__"
 FOLDER_PATTERN = "DualCoil_<bore radius>_<outline radius>_<set 1 loops>x<set 2 loops>_<set 1 TX turns>x<set 2 TX turns>"
-
-
-def _num(x):
-    """Number for a folder name: no needless decimals (36.8, 56.6, 8), at most 3 decimals."""
-    x = round(float(x), 3)
-    return str(int(x)) if x == int(x) else f"{x:g}"
 
 
 def folder_name(dual, P):
     s1, s2 = dual.sets
-    return "_".join((FOLDER_PREFIX, _num(dual.bore), _num(dual.outline), f"{int(s1.N)}x{int(s2.N)}",
+    return "_".join((FOLDER_PREFIX, folder_number(dual.bore), folder_number(dual.outline), f"{int(s1.N)}x{int(s2.N)}",
                      f"{int(s1.P.TX_TURNS)}x{int(s2.P.TX_TURNS)}"))
 
 
@@ -53,33 +49,12 @@ def project_folder():
 
 def output_dir(B):
     """OUTPUT_DIR as a usable path: an absolute one as it is, a relative one from "Dual Generator"."""
-    d = os.path.expanduser(str(B.OUTPUT_DIR))
-    return d if os.path.isabs(d) else os.path.normpath(os.path.join(project_folder(), d))
+    return _single.output_dir(B, project_folder())
 
 
 def create_output_folder(dual, P):
-    """Create the folder for this generation inside OUTPUT_DIR and return its path.  An existing folder of
-    the same name is never reused: the name gets __1, __2, ... (the first one that is free)."""
-    parent = output_dir(P.BOARD)
-    os.makedirs(parent, exist_ok=True)
-    base = folder_name(dual, P)
-    n = 0
-    while True:
-        name = base if n == 0 else f"{base}{INCREMENT_SEPARATOR}{n}"
-        path = os.path.join(parent, name)
-        try:
-            os.mkdir(path)
-            return path
-        except FileExistsError:
-            n += 1
-
-
-def remove_if_empty(folder):
-    try:
-        if folder and os.path.isdir(folder) and not os.listdir(folder):
-            os.rmdir(folder)
-    except OSError:
-        pass
+    """Create the folder for this generation inside OUTPUT_DIR and return its path (never reused: __1, __2, ...)."""
+    return _single.new_folder(output_dir(P.BOARD), folder_name(dual, P))
 
 
 def _parameter_dir():
@@ -111,13 +86,7 @@ def write_record(folder, P, written, dual=None, disc=None, layout=None, sets=Non
                  warnings=None, command=None):
     """Write Parameters.txt into the generation folder: what was made and every value it was made with.
     sets: the two set namespaces (Dual_SetParameters.build) as used; electrical_lines: {1: [...], 2: [...]}."""
-    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    lines = ["DUAL COIL GENERATION RECORD", "=" * 27, "",
-             f"generated   {now}",
-             f"folder      {os.path.abspath(folder)}",
-             f"files       {', '.join(os.path.basename(p) for p in written) or '-'}"]
-    if command:
-        lines.append(f"command     {command}")
+    lines = _single.record_head("DUAL COIL GENERATION RECORD", folder, written, command)
     if dual is not None:
         lines.append(f"name        {folder_name(dual, P)}  = {FOLDER_PATTERN}")
         for k, st in ((1, dual.sets[0]), (2, dual.sets[1])):
@@ -136,12 +105,7 @@ def write_record(folder, P, written, dual=None, disc=None, layout=None, sets=Non
         for k in (1, 2):
             if electrical_lines.get(k):
                 lines += [f"SET {k}: " + electrical_lines[k][0]] + list(electrical_lines[k][1:]) + [""]
-    lines += ["PARAMETER VALUES USED", "-" * 21]
-    for file, items in _values_by_file(P):
-        lines.append(f"[{file}]")
-        width = max(len(n) for n, _ in items)
-        lines += [f"  {n:<{width}s} = {v}" for n, v in items]
-        lines.append("")
+    lines += _single.value_lines(_values_by_file(P))
     if sets:
         lines += ["THE TWO SETS AS HANDED TO THE SINGLE GENERATOR (its names)", "-" * 58]
         order = [name for _f, name, _k, _o, _a in SingleRules.SPEC]
@@ -150,18 +114,5 @@ def write_record(folder, P, written, dual=None, disc=None, layout=None, sets=Non
             width = max(len(n) for n in order)
             lines += [f"  {n:<{width}s} = {getattr(Pk, n)!r}" for n in order if hasattr(Pk, n)]
             lines.append("")
-    pdir = _parameter_dir()
-    lines += ["PARAMETER FILES (verbatim copies)", "-" * 33]
-    for fname in SP.PARAMETER_FILES:
-        path = os.path.join(pdir, fname)
-        lines.append(f"########## {fname} " + "#" * max(0, 60 - len(fname)))
-        try:
-            with open(path, encoding="utf-8") as fh:
-                lines.append(fh.read().rstrip("\n"))
-        except OSError as e:
-            lines.append(f"(could not be read: {e})")
-        lines.append("")
-    path = os.path.join(folder, RECORD_FILE)
-    with open(path, "w", encoding="utf-8", newline="\n") as fh:
-        fh.write("\n".join(lines) + "\n")
-    return path
+    lines += _single.file_copies(_parameter_dir(), SP.PARAMETER_FILES)
+    return _single.save_record(folder, lines)

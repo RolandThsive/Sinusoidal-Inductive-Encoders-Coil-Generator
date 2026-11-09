@@ -17,7 +17,7 @@ Needs what the generator needs: Python 3.9 or newer and numpy (see requirements.
 | `test_boards.py` | every board case written and compared with `References/` (stator, rotor, record), numbers within 1e-5 |
 | `test_invariants.py` | what must hold for every written dual board: the file format, four layers, six nets, copper inside the edges on the layers each set asked for, the clearance between nets, set 1 inside set 2 by the recorded gap, closed RX coils, TX terminals at TERMINAL_1_DEG / TERMINAL_2_DEG, the two rotor rings, the record; the same values written twice are identical |
 | `test_silkscreen.py` | the lead-cutting silkscreen of both sets: six suggestions, names with the set number, breaks near each set's terminal, via sites with room, lettering off the vias, sides and labels options |
-| `test_units.py` | the set parameters handed to the Single Generator, the layout modes, folder names, the guard that the dual files supply every name the Single Generator knows |
+| `test_units.py` | the set parameters handed to the Single Generator and the "set k:" findings, the layout modes, folder names, the Single's OUTPUT_DIR rule, the guard that the dual files supply every name the Single Generator knows |
 | `harness.py` | loads the generator, applies overrides, runs it, keeps the written boards per case (`BOARD_CASES`) |
 | `References/` | the frozen output of each board case (`.kicad_pcb.gz`, `Parameters.txt`) |
 

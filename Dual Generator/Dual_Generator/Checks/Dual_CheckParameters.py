@@ -63,10 +63,11 @@ def check_parameters(P):
         skip = set(SP.BAND_NAMES + SP.EDGE_NAMES)
         named = False
         for k in (1, 2):
-            for level, msg, names in single_check(SP.build(P, k)).items:
-                if level == "error" and not (set(names) & skip) and not msg.startswith(tuple(skip)):
-                    rep.add(level, f"set {k}: " + SP.rename_single_files(msg, k), names)
-                    named = True
+            r = single_check(SP.build(P, k))
+            r.items = [(level, msg, names) for level, msg, names in r.items
+                       if level == "error" and not (set(names) & skip) and not msg.startswith(tuple(skip))]
+            rep.extend(SP.for_set(r, k))
+            named = named or bool(r.items)
         if not named:
             rep.error(f"the layout of the two sets cannot be worked out (a setting is not a number: {e})")
         return rep, None
@@ -75,10 +76,8 @@ def check_parameters(P):
     for k in (1, 2):
         Pk = SP.build(P, k, layout.set_band(k), layout.edges())
         r = single_check(Pk)
-        for level, msg, names in r.items:
-            if "OUTPUT_DIR" in msg:                  # the dual checks its own output folder (dual_rules)
-                continue
-            rep.add(level, f"set {k}: " + SP.rename_single_files(msg, k), names)
+        r.items = [it for it in r.items if "OUTPUT_DIR" not in it[1]]   # the dual checks its own output folder
+        rep.extend(SP.for_set(r, k))                                     # (dual_rules)
     return rep, layout
 
 

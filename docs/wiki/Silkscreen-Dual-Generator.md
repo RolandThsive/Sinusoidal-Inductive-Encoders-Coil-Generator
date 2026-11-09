@@ -8,8 +8,9 @@ side of the cut, extend each TX end to a via of its own, and route from those vi
 As on a single board, the last step of the run draws a **suggestion for these cuts on the silkscreen** of the finished
 `Stator.kicad_pcb`, for both sets. The silkscreen is there for **guidance only**: it shows where the vias of each break
 have room on every layer, next to each set's TX ends, so all leads of a set come together. It changes no copper; the
-marks are drawings on `F.SilkS` and `B.SilkS` that you may follow, move or delete. The step is
-`Dual_LeadCutting_SilkscreenSuggestion.py`, and the [Silkscreen](Silkscreen.md) page describes how the search works.
+marks are drawings on `F.SilkS` and `B.SilkS` that you may follow, move or delete. The step is the Single Generator's
+own `LeadCutting_SilkscreenSuggestion.py`, run on each set; `Dual_LeadCutting_SilkscreenSuggestion.py` only hands it
+the two sets and the dual settings. The [Silkscreen](Silkscreen.md) page describes how the search works.
 
 ## 19.1 What Is Drawn
 
