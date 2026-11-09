@@ -118,7 +118,7 @@
   },
   "Single Generator/loops_4_subcoils_2/Rotor.kicad_pcb": {},
   "Single Generator/loops_4_subcoils_2/Stator.kicad_pcb": {
-   "clearance (error)": 75,
+   "clearance (error)": 96,
    "track_dangling (warning)": 2
   },
   "Single Generator/rotor_two_layers_mask_open/Rotor.kicad_pcb": {},

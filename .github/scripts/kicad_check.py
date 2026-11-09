@@ -8,8 +8,10 @@ kicad_check.py  -  the boards as KiCad sees them.  Runs inside the official kica
 Every Stator / Rotor board found under the folders (.kicad_pcb, or .kicad_pcb.gz as the regression references are
 kept) is
   - loaded by KiCad:  `kicad-cli pcb export svg` must succeed and write a picture (every KiCad version), and
-  - checked by KiCad's DRC:  `kicad-cli pcb drc --format json --severity-all` (KiCad 8 and newer; KiCad 7's
-    command line has no DRC).  The number of reports of each type on each board must equal the committed baseline
+  - checked by KiCad's DRC:  `kicad-cli pcb drc --format json --severity-all --all-track-errors` (KiCad 8 and
+    newer; KiCad 7's command line has no DRC).  --all-track-errors makes the count repeatable: without it KiCad
+    reports only the first error it meets on each track, and which one comes first changes from run to run (KiCad 10
+    gave 61 to 76 clearance reports on the same board).  The number of reports of each type on each board must equal the committed baseline
     (.github/kicad-drc-baseline.json), so a new violation fails, and so does one that went away (then the baseline is
     written anew with --update, in the same pull request, so the improvement is kept).
 
@@ -78,7 +80,8 @@ def load_test(board):
 def drc(board):
     """({report type: count}, None), or (None, what went wrong)."""
     report = board[:-len(".kicad_pcb")] + ".drc.json"
-    rc, out = cli(["pcb", "drc", "--format", "json", "--severity-all", "--units", "mm", "-o", report, board])
+    rc, out = cli(["pcb", "drc", "--format", "json", "--severity-all", "--all-track-errors", "--units", "mm",
+                   "-o", report, board])
     if rc != 0 or not os.path.isfile(report):
         return None, f"kicad-cli pcb drc failed (exit code {rc}): {out[-600:]}"
     with open(report, encoding="utf-8") as fh:
