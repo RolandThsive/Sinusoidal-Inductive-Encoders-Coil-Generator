@@ -95,8 +95,10 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         include:
           - suite: Single
+            key: single          # the name run_regression.py takes (macOS has bash 3.2, which cannot lower a case)
             source: Single Generator/Generator
           - suite: Dual
+            key: dual
             source: Single Generator/Generator,Dual Generator/Dual_Generator
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -121,23 +123,23 @@ jobs:
           TEMP: ${{ runner.temp }}/regression
           TMP: ${{ runner.temp }}/regression
           REGRESSION_KEEP_OUTPUT: "1"
-          NAME: ${{ matrix.suite }}
+          SUITE: ${{ matrix.key }}
           SOURCE: ${{ matrix.source }}
         run: |
           if [ "$RUNNER_OS" = "Linux" ]; then
-            python -m coverage run --rcfile=.coveragerc --source="$SOURCE" regression/run_regression.py "${NAME,,}" -v \
+            python -m coverage run --rcfile=.coveragerc --source="$SOURCE" regression/run_regression.py "$SUITE" -v \
               2>&1 | tee "$RUNNER_TEMP/tests.log"
           else
-            python regression/run_regression.py "${NAME,,}" -v 2>&1 | tee "$RUNNER_TEMP/tests.log"
+            python regression/run_regression.py "$SUITE" -v 2>&1 | tee "$RUNNER_TEMP/tests.log"
           fi
       - name: Coverage may not drop
         if: runner.os == 'Linux'
         shell: bash
         env:
-          NAME: ${{ matrix.suite }}
+          SUITE: ${{ matrix.key }}
         run: |
           python -m coverage report --rcfile=.coveragerc
-          python .github/scripts/coverage_ratchet.py "${NAME,,}"
+          python .github/scripts/coverage_ratchet.py "$SUITE"
       - name: Run summary
         if: always()
         shell: bash
