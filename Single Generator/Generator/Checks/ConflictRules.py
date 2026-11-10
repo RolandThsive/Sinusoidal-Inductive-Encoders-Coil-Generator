@@ -6,11 +6,15 @@ fingers against the TX turns, the rotor against the stator ...).  A finding name
     ERROR   NAME_A conflicts with NAME_B
             why, and what to change
 
-check(P, v, rep) works on the checked values v (ParameterRules.load_values).  Rules about one parameter alone are
-in ParameterRules.py; rules on the finished copper in DesignChecks.py.  Nothing to edit here.
+check(P, v, rep) works on the checked values v (ParameterRules.load_values).  It runs the rule groups of RULE_GROUPS
+in order (the IC, the RX band and the edges, vias, layers, sub-coils, resolution, fingers, TX spacing and shape, nets,
+the outline, the output files, the rotor), each a function of one shared context (_Rules); a new rule goes into the
+group of its subject.  Rules about one parameter alone are in ParameterRules.py; rules on the finished copper in
+DesignChecks.py.  Nothing to edit here.
 """
 
 import math
+import os
 import types
 
 from Generator.Core import BoardLayout, Layers
@@ -185,83 +189,105 @@ def _check_blind_vias(v, rep, has, lay):
                      f"through vias", level="warning")
 
 
-def check(P, v, rep):
-    """Every rule between two or more parameters, on the checked values `v` (ParameterRules.load_values); findings go
-    to `rep`.  The values themselves are never changed."""
-    has = lambda *names: all(n in v and v[n] is not None for n in names)
-    lay = _tx_layout(P, v, rep)                     # TX layers and the finger layer (Layers.py)
+class _Rules:
+    """What the rule groups share: the parameters P, the checked values v, the report rep, the TX layer plan lay
+    (Layers.py), and how the RX band was set, which _band_rules fills in."""
 
-    # the IC's oscillator range (IC_Parameters.py; the electrical estimate checks the TX tank against it)
+    def __init__(self, P, v, rep):
+        self.P, self.v, self.rep = P, v, rep
+        self.lay = _tx_layout(P, v, rep)                    # TX layers and the finger layer (Layers.py)
+        self.band_from = {"INSIDE_RADIUS_MM": ("INSIDE_RADIUS_MM",), "OUTSIDE_RADIUS_MM": ("OUTSIDE_RADIUS_MM",)}
+        self.widen = "Widen the band"                       # what a rule about the band's width tells to change
+        self.inner_derived = self.outer_derived = False     # True when the band's edge follows the board edge
+
+    def has(self, *names):
+        """True when every one of the names has a checked value."""
+        return all(n in self.v and self.v[n] is not None for n in names)
+
+    def bn(self, *names):
+        """The names of a rule about the RX band, with the two radii replaced by what set them."""
+        out = []
+        for n in names:
+            for m in self.band_from.get(n, (n,)):
+                if m not in out:
+                    out.append(m)
+        return tuple(out)
+
+
+def _rotor_duty(v):
+    """The rotor's metal fraction in use (ROTOR_AUTO_DUTY or ROTOR_CUSTOM_DUTY, by ROTOR_MODE), or None."""
+    return v.get("ROTOR_AUTO_DUTY") if v.get("ROTOR_MODE") == "according_to_stator" else v.get("ROTOR_CUSTOM_DUTY")
+
+
+def _ic_rules(c):
+    """The IC's oscillator range (IC_Parameters.py; the electrical estimate checks the TX tank against it)."""
+    v, rep, has = c.v, c.rep, c.has
     if has("IC_OSC_MIN_MHZ", "IC_OSC_MAX_MHZ") and v["IC_OSC_MIN_MHZ"] >= v["IC_OSC_MAX_MHZ"]:
         rep.conflict(("IC_OSC_MIN_MHZ", "IC_OSC_MAX_MHZ"), f"the IC's oscillator range "
                      f"{v['IC_OSC_MIN_MHZ']:g} ... {v['IC_OSC_MAX_MHZ']:g} MHz is empty: the minimum must "
                      f"be below the maximum")
 
-    # the RX band and the board edges (BoardLayout.py): the band from INSIDE_RADIUS_MM / OUTSIDE_RADIUS_MM, from
-    # RX_R_BASE_MM / RX_A_MM, or (both pairs None) from the board edges; an edge that is set is used as given
-    inner_derived = outer_derived = False
-    band = None
+
+def _band_rules(c):
+    """The RX band and the board edges (BoardLayout.py): the band from INSIDE_RADIUS_MM / OUTSIDE_RADIUS_MM, from
+    RX_R_BASE_MM / RX_A_MM, or (both pairs None) from the board edges; an edge that is set is used as given.  The rule
+    groups after it see the band actually used, and name the values that set it (c.bn, c.widen)."""
+    v, rep = c.v, c.rep
     band_names = BoardLayout.RADII + BoardLayout.CENTRE + BoardLayout.EDGES + ("INNER_EDGE_INSET_MM",)
-    band_ok = all(n in v for n in band_names) and v.get("INNER_EDGE_INSET_MM") is not None
-    band_from = {"INSIDE_RADIUS_MM": ("INSIDE_RADIUS_MM",), "OUTSIDE_RADIUS_MM": ("OUTSIDE_RADIUS_MM",)}
-    widen = "Widen the band"
+    if not (all(n in v for n in band_names) and v.get("INNER_EDGE_INSET_MM") is not None):
+        return
 
-    def bn(*names):
-        """The names of a rule about the RX band, with the two radii replaced by what set them."""
-        out = []
-        for n in names:
-            for m in band_from.get(n, (n,)):
-                if m not in out:
-                    out.append(m)
-        return tuple(out)
-    if band_ok:
-        def _room():
-            r = _outer_edge_room(v)
-            if r is None:
-                raise _Skip()
-            return r
-        try:
-            band = BoardLayout.resolve(lambda n: v.get(n), _room)
-        except _Skip:
-            band = None
-        except ValueError as e:
-            rep.add_exception(e)
-            band = None
-        if band is not None:
-            for n in BoardLayout.RADII:
-                v.pop(n, None)                          # every rule below sees the band actually used
-            v["INSIDE_RADIUS_MM"], v["OUTSIDE_RADIUS_MM"] = band["ri"], band["ro"]
-            inner_derived, outer_derived = band["inner_from"] == "edge", band["outer_from"] == "edge"
-            # the rules below name the values that set the band: the edges when the band follows them, the
-            # centre and swing when it is given that way
-            if band["mode"] == "centre":
-                band_from = {"INSIDE_RADIUS_MM": BoardLayout.CENTRE, "OUTSIDE_RADIUS_MM": BoardLayout.CENTRE}
-            if inner_derived:
-                band_from["INSIDE_RADIUS_MM"] = ("INNER_EDGE_RADIUS_MM",)
-            if outer_derived:
-                band_from["OUTSIDE_RADIUS_MM"] = ("OUTER_EDGE_RADIUS_MM",)
-            if inner_derived or outer_derived:
-                widen = ("Enlarge the board (INNER_EDGE_RADIUS_MM, OUTER_EDGE_RADIUS_MM), or lower INNER_EDGE_INSET_MM and "
-                         "the room the TX takes (TX_TURNS, TX_PITCH_MM, OUTER_EDGE_OFFSET_MM)")
-            elif band["mode"] == "centre":
-                widen = "Raise RX_A_MM"
-            if band["mode"] == "centre":
-                rep.info(f"RX_R_BASE_MM = {v['RX_R_BASE_MM']:g}, RX_A_MM = {v['RX_A_MM']:g}: the RX band runs from "
-                         f"r = {band['ri']:g} to {band['ro']:g} mm")
-            if inner_derived:
-                rep.info(f"INNER_EDGE_RADIUS_MM = {v['INNER_EDGE_RADIUS_MM']:g} sets the centre hole: the RX band starts "
-                         f"INNER_EDGE_INSET_MM = {v['INNER_EDGE_INSET_MM']:g} outside it, at r = {band['ri']:g} mm")
-            if outer_derived:
-                rep.info(f"OUTER_EDGE_RADIUS_MM = {v['OUTER_EDGE_RADIUS_MM']:g} sets the outer board edge: the RX band "
-                         f"ends {v['OUTER_EDGE_RADIUS_MM'] - band['ro']:g} mm inside it (room for the TX turns, the TX "
-                         f"tail and the margins), at r = {band['ro']:g} mm")
-            both = [n for n, how in (("INNER_EDGE_RADIUS_MM", band["inner_from"]),
-                                     ("OUTER_EDGE_RADIUS_MM", band["outer_from"])) if how == "both"]
-            if both:
-                rep.info(f"the RX band and {' and '.join(both)} are all set: each is used as given (the board is "
-                         f"not fitted to the band)")
+    def _room():
+        r = _outer_edge_room(v)
+        if r is None:
+            raise _Skip()
+        return r
+    try:
+        band = BoardLayout.resolve(lambda n: v.get(n), _room)
+    except _Skip:
+        return
+    except ValueError as e:
+        rep.add_exception(e)
+        return
+    for n in BoardLayout.RADII:
+        v.pop(n, None)                          # every rule below sees the band actually used
+    v["INSIDE_RADIUS_MM"], v["OUTSIDE_RADIUS_MM"] = band["ri"], band["ro"]
+    inner_derived, outer_derived = band["inner_from"] == "edge", band["outer_from"] == "edge"
+    c.inner_derived, c.outer_derived = inner_derived, outer_derived
+    # the rules below name the values that set the band: the edges when the band follows them, the centre and swing
+    # when it is given that way
+    if band["mode"] == "centre":
+        c.band_from = {"INSIDE_RADIUS_MM": BoardLayout.CENTRE, "OUTSIDE_RADIUS_MM": BoardLayout.CENTRE}
+    if inner_derived:
+        c.band_from["INSIDE_RADIUS_MM"] = ("INNER_EDGE_RADIUS_MM",)
+    if outer_derived:
+        c.band_from["OUTSIDE_RADIUS_MM"] = ("OUTER_EDGE_RADIUS_MM",)
+    if inner_derived or outer_derived:
+        c.widen = ("Enlarge the board (INNER_EDGE_RADIUS_MM, OUTER_EDGE_RADIUS_MM), or lower INNER_EDGE_INSET_MM and "
+                   "the room the TX takes (TX_TURNS, TX_PITCH_MM, OUTER_EDGE_OFFSET_MM)")
+    elif band["mode"] == "centre":
+        c.widen = "Raise RX_A_MM"
+    if band["mode"] == "centre":
+        rep.info(f"RX_R_BASE_MM = {v['RX_R_BASE_MM']:g}, RX_A_MM = {v['RX_A_MM']:g}: the RX band runs from "
+                 f"r = {band['ri']:g} to {band['ro']:g} mm")
+    if inner_derived:
+        rep.info(f"INNER_EDGE_RADIUS_MM = {v['INNER_EDGE_RADIUS_MM']:g} sets the centre hole: the RX band starts "
+                 f"INNER_EDGE_INSET_MM = {v['INNER_EDGE_INSET_MM']:g} outside it, at r = {band['ri']:g} mm")
+    if outer_derived:
+        rep.info(f"OUTER_EDGE_RADIUS_MM = {v['OUTER_EDGE_RADIUS_MM']:g} sets the outer board edge: the RX band "
+                 f"ends {v['OUTER_EDGE_RADIUS_MM'] - band['ro']:g} mm inside it (room for the TX turns, the TX "
+                 f"tail and the margins), at r = {band['ro']:g} mm")
+    both = [n for n, how in (("INNER_EDGE_RADIUS_MM", band["inner_from"]),
+                             ("OUTER_EDGE_RADIUS_MM", band["outer_from"])) if how == "both"]
+    if both:
+        rep.info(f"the RX band and {' and '.join(both)} are all set: each is used as given (the board is "
+                 f"not fitted to the band)")
 
-    # ------------------------------------------------------------ RX geometry
+
+def _rx_band_rules(c):
+    """The RX band against the vias (its width) and against the loops (how tightly the curves pack at the
+    inner radius)."""
+    v, rep, has, bn, widen = c.v, c.rep, c.has, c.bn, c.widen
     if has("INSIDE_RADIUS_MM", "OUTSIDE_RADIUS_MM"):
         ri, ro = v["INSIDE_RADIUS_MM"], v["OUTSIDE_RADIUS_MM"]
         if ri < ro:
@@ -286,6 +312,10 @@ def check(P, v, rep):
                          f"mm of arc for {v['LOOPS']} loops: the RX traces will be tightly packed (trace + clearance = "
                          f"{need:g} mm); check the clearance warnings printed while building", level="warning")
 
+
+def _via_rules(c):
+    """The via drill against the via diameter, and VIA_TYPE = "blind" (4 layers only)."""
+    v, rep, has, lay = c.v, c.rep, c.has, c.lay
     if has("VIA_DIAMETER_MM", "VIA_DRILL_MM"):
         d, dr = v["VIA_DIAMETER_MM"], v["VIA_DRILL_MM"]
         if dr >= d:
@@ -296,12 +326,13 @@ def check(P, v, rep):
                                                                f"about 0.1 mm many fabs cannot guarantee the pad around "
                                                                f"the drill", level="warning")
 
-    # ------------------------------------------------------------ via type (blind vias: 4 layers only)
     if v.get("VIA_TYPE") == "blind":
         _check_blind_vias(v, rep, has, lay)
 
-    # ------------------------------------------------------------ layers
-    rx_l, tx_l = _rx_layers(v), (lay["turn_layers"] if lay else None)
+
+def _layer_rules(c):
+    """The two RX layers of a 4-layer board, TX_WIRING and its layers, RX_TAB_LAYER."""
+    P, v, rep, has, lay = c.P, c.v, c.rep, c.has, c.lay
     if v.get("PCB_LAYERS") == 4 and has("RX_LAYER_A", "RX_LAYER_B"):
         a, b = v["RX_LAYER_A"], v["RX_LAYER_B"]
         if a == b:
@@ -313,7 +344,10 @@ def check(P, v, rep):
                          f"two coil layers weakens and distorts the signal", level="warning")
     _check_tx_layout(P, v, rep, has, lay)
 
-    # ------------------------------------------------------------ RX sub-coils / profile
+
+def _subcoil_rules(c):
+    """RX_SUBCOILS: the split, the via that joins the sub-coils, the room for their junction vias."""
+    v, rep, has = c.v, c.rep, c.has
     n_sub = v.get("RX_SUBCOILS")
     n_sub = None if n_sub is None else int(n_sub)              # (2.0 is accepted as 2)
     if n_sub in (2, 3) and has("RX_SUBCOIL_SPLIT_ELEC_DEG"):
@@ -367,7 +401,10 @@ def check(P, v, rep):
                          "and junction vias are crowded, and only a wide RX band with small vias has been seen to pass "
                          "the clearance checks", level="warning")
 
-    # ------------------------------------------------------------ RX resolution
+
+def _resolution_rules(c):
+    """STEPS_PER_LOOP against the chord error of the RX curves."""
+    v, rep, has, bn = c.v, c.rep, c.has, c.bn
     if has("STEPS_PER_LOOP", "LOOPS", "INSIDE_RADIUS_MM", "OUTSIDE_RADIUS_MM", "RX_PROFILE") \
             and v["STEPS_PER_LOOP"] != "auto" and 0 < v["INSIDE_RADIUS_MM"] < v["OUTSIDE_RADIUS_MM"]:
         # the real chord error of the RX curves (the same measure RX_Coils.pick_steps uses): set mostly by the
@@ -381,7 +418,10 @@ def check(P, v, rep):
                          f"about {sag:.3f} mm chord error on the RX curves for {v['LOOPS']} loops; use \"auto\" or a "
                          f"larger value", level="warning")
 
-    # ------------------------------------------------------------ fingers
+
+def _finger_rules(c):
+    """The bridging fingers: their width against the RX trace, their length against the TX turns."""
+    P, v, rep, has, lay = c.P, c.v, c.rep, c.has, c.lay
     if v.get("RX_TABS") in ("all", "single") and has("RX_TAB_WIDTH_MM", "RX_TRACE_WIDTH_MM", "MIN_CLEARANCE_MM"):
         gap = v["RX_TAB_WIDTH_MM"] - v["RX_TRACE_WIDTH_MM"]
         if gap < v["MIN_CLEARANCE_MM"]:
@@ -411,7 +451,11 @@ def check(P, v, rep):
                              f"RX_TAB_LENGTH_MM to at least {d['tip_off']:.2f}, put the fingers on a layer without TX "
                              f"turns (RX_TAB_LAYER), or use fewer TX_TURNS")
 
-    # ------------------------------------------------------------ TX
+
+def _tx_spacing_rules(c):
+    """The TX turns against each other; the first turn and the terminal via against the RX band."""
+    P, v, rep, has, lay = c.P, c.v, c.rep, c.has, c.lay
+    rx_l, tx_l = _rx_layers(v), (lay["turn_layers"] if lay else None)
     if has("TX_PITCH_MM", "TX_TRACE_WIDTH_MM", "MIN_CLEARANCE_MM"):
         gap = v["TX_PITCH_MM"] - v["TX_TRACE_WIDTH_MM"]
         # (also with one turn: the outer tail / step runs one pitch outside the turn, next to the terminal via)
@@ -455,6 +499,12 @@ def check(P, v, rep):
         elif not arc and dv < 0:
             rep.warn(f"TX_INSIDE_VIA_DISTANCE_MM = {dv:g} moves the TX terminal via outwards, onto the next TX turns; "
                      f"use 0 or a positive value")
+
+
+def _tx_shape_rules(c):
+    """The innermost arc radius of a stepped_arc TX, and TX_STEPS against the chord error of the outermost
+    turn."""
+    P, v, rep, has, bn = c.P, c.v, c.rep, c.has, c.bn
     if _shape(P) == "arc" and has("TX_STEPPED_ARC_RADIUS_MM", "TX_PITCH_MM", "TX_TRACE_WIDTH_MM", "VIA_DIAMETER_MM",
                                   "MIN_CLEARANCE_MM", "TX_TAIL_EXTRA_MM") and v["TX_STEPPED_ARC_RADIUS_MM"] != "auto":
         rho0 = v["TX_STEPPED_ARC_RADIUS_MM"]
@@ -495,28 +545,43 @@ def check(P, v, rep):
             rep.conflict(bn("TX_STEPS", "OUTSIDE_RADIUS_MM"), f"{v['TX_STEPS']} points per turn give about {sag:.3f} mm chord "
                          f"error on the outermost TX turn (r = {r:.2f} mm); raise TX_STEPS", level="warning")
 
-    # ------------------------------------------------------------ nets
+
+def _net_rules(c):
+    """The three net names."""
+    v, rep, has = c.v, c.rep, c.has
     if has("RX_NET_PHASE_0_2", "RX_NET_PHASE_1_3", "TX_NET"):
         names = [v["RX_NET_PHASE_0_2"], v["RX_NET_PHASE_1_3"], v["TX_NET"]]
         if len(set(names)) != 3:
             rep.conflict(("RX_NET_PHASE_0_2", "RX_NET_PHASE_1_3", "TX_NET"), f"the three net names must all be different; "
                          f"they are {names[0]!r}, {names[1]!r} and {names[2]!r}")
 
-    # ------------------------------------------------------------ board outline
-    if (not outer_derived and has("OUTER_EDGE_RADIUS_MM", "OUTSIDE_RADIUS_MM")
+
+def _outline_rules(c):
+    """A given outer board edge against the RX band."""
+    v, rep, has = c.v, c.rep, c.has
+    if (not c.outer_derived and has("OUTER_EDGE_RADIUS_MM", "OUTSIDE_RADIUS_MM")
             and v["OUTER_EDGE_RADIUS_MM"] <= v["OUTSIDE_RADIUS_MM"]):
         rep.conflict(("OUTER_EDGE_RADIUS_MM", "OUTSIDE_RADIUS_MM"), f"the outer board edge ({v['OUTER_EDGE_RADIUS_MM']:g} "
                      f"mm) lies inside the RX band, which ends at {v['OUTSIDE_RADIUS_MM']:g} mm")
 
-    # ------------------------------------------------------------ output files
+
+def _file_rules(c):
+    """The two output file names."""
+    v, rep, has = c.v, c.rep, c.has
     if has("STATOR_FILE", "ROTOR_FILE"):
         if v["STATOR_FILE"] == v["ROTOR_FILE"]:
             rep.conflict(("STATOR_FILE", "ROTOR_FILE"), "both boards have the same file name: the rotor would overwrite "
                                                         "the stator")
+        elif os.path.splitext(v["STATOR_FILE"])[0] == os.path.splitext(v["ROTOR_FILE"])[0]:
+            rep.conflict(("STATOR_FILE", "ROTOR_FILE"), "both boards have the same name before the extension, so they "
+                                                        "would share one KiCad project file (the design rules written "
+                                                        "next to each board): the rotor's would overwrite the stator's")
 
-    # ------------------------------------------------------------ rotor
-    mode = v.get("ROTOR_MODE")
-    duty = v.get("ROTOR_AUTO_DUTY") if mode == "according_to_stator" else v.get("ROTOR_CUSTOM_DUTY")
+
+def _rotor_duty_rules(c):
+    """The rotor's metal fraction: how much of the fundamental signal it keeps, the harmonic it removes."""
+    v, rep = c.v, c.rep
+    duty = _rotor_duty(v)
     if duty is not None:
         factor = math.sin(math.pi * duty)
         # a metal fraction k/h removes the h-th harmonic of the rotor pattern (sin(h*pi*duty) = 0)
@@ -531,6 +596,12 @@ def check(P, v, rep):
         elif factor < 0.9:
             rep.info(f"rotor metal fraction {duty:g}: the fundamental signal is {100 * factor:.0f} % of the "
                      f"maximum (reached at 0.5)")
+
+
+def _rotor_auto_rules(c):
+    """ROTOR_MODE = "according_to_stator": which extension values are used, and rotor copper of no width."""
+    P, v, rep, has, bn = c.P, c.v, c.rep, c.has, c.bn
+    mode = v.get("ROTOR_MODE")
     if mode == "according_to_stator":
         e_all = v.get("ROTOR_AUTO_EXTENSION_MM")
         e_in, e_out = v.get("ROTOR_AUTO_EXTENSION_INNER_MM"), v.get("ROTOR_AUTO_EXTENSION_OUTER_MM")
@@ -561,12 +632,26 @@ def check(P, v, rep):
                              f"the rotor copper would have no width: the RX band is {band:g} mm wide and the copper "
                              f"would reach {w_in:+g} mm (inner edge) and {w_out:+g} mm (outer edge) past it. Raise the "
                              f"extensions (or ROTOR_AUTO_EXTENSION_MM)")
+
+
+def _rotor_custom_rules(c):
+    """ROTOR_MODE = "custom": the sectors against the loops, the copper radii against each other, the
+    bore, the outline and the RX band."""
+    v, rep, has, bn = c.v, c.rep, c.has, c.bn
+    mode = v.get("ROTOR_MODE")
+    duty = _rotor_duty(v)
     if mode == "custom":
         n = v.get("ROTOR_CUSTOM_SECTORS")
         if n is not None and has("LOOPS") and n != v["LOOPS"]:
             rep.conflict(("ROTOR_CUSTOM_SECTORS", "LOOPS"), f"the rotor has {n} sector(s) but the stator {v['LOOPS']} "
                          f"loop(s): the rotor needs one sector per loop, otherwise the sensor does not give a single "
                          f"clean sine period per sector", level="warning")
+        edges = ("ROTOR_CUSTOM_OUTLINE_RADIUS_MM", "ROTOR_CUSTOM_BORE_RADIUS_MM")
+        if all(e in v and v[e] is None for e in edges):
+            rep.conflict(edges, "a custom rotor needs an outline or a bore: with both None the rotor file has no board "
+                                "edge at all, which KiCad's design-rule check reports as an invalid board outline and "
+                                "nobody can cut. Give the disc's outer edge (ROTOR_CUSTOM_OUTLINE_RADIUS_MM), its centre "
+                                "hole (ROTOR_CUSTOM_BORE_RADIUS_MM), or both")
         ri_, ro_ = v.get("ROTOR_CUSTOM_INNER_RADIUS_MM"), v.get("ROTOR_CUSTOM_OUTER_RADIUS_MM")
         if ri_ is not None and ro_ is not None:
             if ri_ >= ro_:
@@ -620,6 +705,13 @@ def check(P, v, rep):
                             rep.info(f"the custom rotor copper reaches r = {ro_:g} mm, over the TX turns (first turn "
                                      f"at {tx_in:g} mm), as the automatic rotor does by default: more signal, and a "
                                      f"larger change of the TX inductance (see the electrical estimate)")
+
+
+def _rotor_edge_rules(c):
+    """The rotor's solder mask opening, and the chord error of its arcs."""
+    P, v, rep, has = c.P, c.v, c.rep, c.has
+    mode = v.get("ROTOR_MODE")
+    duty = _rotor_duty(v)
     e_mask = v.get("ROTOR_SOLDER_MASK_EXPANSION_MM")             # -1 = no mask opening
     if mode == "custom" and e_mask is not None and e_mask > 0 and has("ROTOR_CUSTOM_INNER_RADIUS_MM") \
             and e_mask >= v["ROTOR_CUSTOM_INNER_RADIUS_MM"]:
@@ -635,6 +727,20 @@ def check(P, v, rep):
             rep.conflict(("ROTOR_ARC_STEPS_PER_SECTOR", "LOOPS" if mode != "custom" else "ROTOR_CUSTOM_SECTORS"),
                          f"{v['ROTOR_ARC_STEPS_PER_SECTOR']} chords per arc give about {sag:.3f} mm chord error on the "
                          f"rotor edge at this sector width; raise it", level="warning")
+
+
+RULE_GROUPS = (_ic_rules, _band_rules, _rx_band_rules, _via_rules, _layer_rules, _subcoil_rules, _resolution_rules,
+               _finger_rules, _tx_spacing_rules, _tx_shape_rules, _net_rules, _outline_rules, _file_rules,
+               _rotor_duty_rules, _rotor_auto_rules, _rotor_custom_rules, _rotor_edge_rules)
+
+
+def check(P, v, rep):
+    """Every rule between two or more parameters, on the checked values `v` (ParameterRules.load_values); findings go
+    to `rep`, group by group in the order of RULE_GROUPS.  The parameters themselves are never changed; in `v` the RX
+    band's radii become the band actually used (_band_rules)."""
+    c = _Rules(P, v, rep)
+    for group in RULE_GROUPS:
+        group(c)
 
 
 def _rotor_outer_radius(P, v, mode):

@@ -61,6 +61,7 @@ class TXBuilder:
         self.terminal_pieces_added = 0
 
     def build(self):
+        """Build the TX turns, then place the terminal via.  Returns self."""
         build_placed(self)
         TX_Terminal.place_terminal_via(self)
         return self
@@ -81,7 +82,7 @@ class TXBuilder:
 
     def add_poly(self, pts, layer, turn, kind):
         """Append the pieces of a polyline (turn = TX turn id or -1; kind = turn | arc | step | stub | bracket | tail)."""
-        for a, b in zip(pts[:-1], pts[1:]):
+        for a, b in zip(pts[:-1], pts[1:], strict=True):
             if math.hypot(b[0] - a[0], b[1] - a[1]) > 1e-9:
                 self.segs.append(Segment(a, b, layer, turn=turn, kind=kind))
 
@@ -164,6 +165,8 @@ def prepare(tx):
 
 
 def summary(tx):
+    """The TX lines of the stator summary: the wiring and the turns on each layer, the windows or go-around around
+    the fingers, the arcs of a stepped_arc TX."""
     P = tx.P
     lay, T = tx.tx_lay, int(P.TX_TURNS)
     shape = str(P.TX_SHAPE).lower()

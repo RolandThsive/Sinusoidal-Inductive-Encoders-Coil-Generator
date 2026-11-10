@@ -5,10 +5,11 @@ Units: millimetres, degrees, hertz unless a name says otherwise.
 Nothing in this file is computed - edit values only.
 
 The names are the Single Generator's own (Board_Parameters.py, Rotor_Parameters.py) wherever the meaning is the
-same, so the wiki's Parameter Reference applies.  What a dual board fixes is not here at all: PCB_LAYERS (always 4),
-the RX fingers (none), the TX tails (none) and the TX shape (stepped).  What each coil set has for itself
-(its excitation frequency, its RX band, its TX ring, its rotor ring, its IC) is in the Dual_RX1 / RX2, TX1 / TX2,
-Rotor1 / Rotor2 and IC1 / IC2 files.
+same, so the wiki's Parameter Reference applies.  What each coil set has for itself (its excitation frequency, its
+RX band and fingers, its TX ring, its rotor ring, its IC) is in the Dual_RX1 / RX2, TX1 / TX2, Rotor1 / Rotor2 and
+IC1 / IC2 files.  A set file may also give its own value for a few values of this file (its vias and clearance in
+Dual_RX<k>, TX_AC_RESISTANCE_FACTOR in Dual_TX<k>, TANK_CAP_SERIES in Dual_IC<k>); the value here is the one used
+where it does not.
 """
 
 # =============================================================================
@@ -37,14 +38,22 @@ PAGE_SIZE_MM = (150, 150)           # KiCad "User" page size (width, height)
 
 
 # =============================================================================
-# STATOR BOARD  (always 4 copper layers: 1 = Top, 2 = Inner 1, 3 = Inner 2, 4 = Bottom)
+# STATOR BOARD
 # =============================================================================
+# PCB_LAYERS = copper layers of the stator: 4 (1 = Top, 2 = Inner 1, 3 = Inner 2, 4 = Bottom; each set's RX on
+# RX_LAYER_A / B and TX on TX_LAYER_A / B) or 2 (Top and Bottom: each set's RX rising edges on
+# RX_RISING_EDGE_LAYER, its TX turns on both).  Four layers are the usual dual board: two layers leave no layer
+# free for set 1's leads to cross set 2 (the checker warns).
+PCB_LAYERS = 4
+
 # Via / copper-to-copper rules the generator must respect when it places vias.  Through vias go
 # through every layer, so a via of one set is checked against the copper of the other set on every layer.
+# A set may have its own: VIA_DIAMETER_MM, VIA_DRILL_MM, VIA_TYPE and MIN_CLEARANCE_MM in Dual_RX1 / RX2
+# (None there = these values).  Between the two sets the larger MIN_CLEARANCE_MM applies.
 VIA_DIAMETER_MM   = 0.6             # (the Single Generator's example uses 0.8 / 0.4; 0.6 / 0.3 leaves room in
 VIA_DRILL_MM      = 0.3             #  the inner set's tight TX ring)
 MIN_CLEARANCE_MM  = 0.15
-# VIA_TYPE, for both sets: "through" (plated holes through the board) or "blind" (every via written as a blind via
+# VIA_TYPE: "through" (plated holes through the board) or "blind" (every via written as a blind via
 # between the two layers it joins: the RX layers of its set, or the TX layers / the TX layer and the layer of the
 # inner tail).  Common fabs laser-drill blind vias only between an outer layer and its neighbour (Top + Inner 1,
 # Inner 2 + Bottom) and at most about 0.15 mm wide, so set the via sizes above to match; the checker warns about a
@@ -54,39 +63,35 @@ VIA_TYPE          = "through"
 # ---- board edges (Edge.Cuts circles) and the gap between the sets ----------
 # From the centre out, the stator is:
 #     bore | RX1 band | TX1 ring | TRACK_GAP_MM | RX2 band | TX2 ring | outline
-# Which of these you give and which the generator computes is DUAL_MODE, one of FOUR MODES:
-#
-#   DUAL_MODE = 1  you give TRACK_GAP_MM, INNER_EDGE_RADIUS_MM, OUTER_EDGE_RADIUS_MM and BAND_SPLIT; both RX bands
-#                  stay None (Dual_RX1 / RX2: all four radii None)
-#                  -> both bands are fitted between the edges; BAND_SPLIT shares the free width between them
-#   DUAL_MODE = 2  you give both RX bands (Dual_RX1 and Dual_RX2); TRACK_GAP_MM and both edges stay None
-#                  -> bore and outline come from the bands; the gap is measured and reported
-#   DUAL_MODE = 3  you give ONE RX band (Dual_RX1 or Dual_RX2) and TRACK_GAP_MM; the other band and both edges
-#                  stay None
-#                  -> the other band is placed across the gap with the same half width (RX_A_MM); then as mode 2
-#   DUAL_MODE = 4  you give both RX bands and both edges; TRACK_GAP_MM stays None
-#                  -> everything as given; each edge is checked for room; the gap is measured and reported
-#
-# The checker holds what is set against the chosen mode: a value the mode needs that is None, or a value that
-# must be None for the mode and is set, is an error that names it (and names the mode that matches what is set,
-# when one does).  Change the values, or change DUAL_MODE.
-DUAL_MODE = 2
+# You give what you know and the generator places the rest: there is no mode to choose.  Five things can be given,
+# each one or not (None): the RX1 band and the RX2 band (Dual_RX1 / RX2_Parameters.py), the bore
+# (INNER_EDGE_RADIUS_MM), the outline (OUTER_EDGE_RADIUS_MM) and the gap (TRACK_GAP_MM).  Of the 32 combinations,
+# 26 build, by four rules:
+#   the gap   TRACK_GAP_MM, or the larger of the two sets' MIN_CLEARANCE_MM when it is None.  A band the generator
+#             places sits exactly that far from the other set; with both bands given, the gap must be at least that
+#   a band    one band given: the other is placed across the gap (RX2 outwards, RX1 inwards).  It runs to the board
+#             edge on its side when that edge is given, and is as wide as the given band when it is not
+#   an edge   not given: from the band, as in the Single Generator.  Given: used as given, and checked
+#   no band   needs both edges: the two bands share what is left between them by BAND_SPLIT
+# The 6 combinations with no band and at most one edge leave nothing to size a band from; the checker says what to
+# give.  The record file prints which combination was used and every radius; the wiki page Dual Layout shows all 32.
 
 INNER_EDGE_RADIUS_MM  = None         # the centre hole.  Must sit INNER_EDGE_INSET_MM inside the RX1 band.
 OUTER_EDGE_RADIUS_MM  = None        # the board edge.  Must leave OUTER_EDGE_OFFSET_MM past the RX2 band, and
                                     # OUTER_EDGE_TAIL_MARGIN_MM past the TX2 ring.
 INNER_EDGE_INSET_MM   = 1.2         # bore = RX1 band start - this (the RX1 inner-tip vias sit on the band start)
 OUTER_EDGE_OFFSET_MM  = 2.0         # outline = RX2 band end + this, at least
-OUTER_EDGE_TAIL_MARGIN_MM = 0.7     # outline = TX2 ring end + this, at least (there is no tail: the ring ends one
-                                    # pitch outside the last turn, where the two TX ends sit)
+OUTER_EDGE_TAIL_MARGIN_MM = 0.7     # outline = TX2 tail end (one pitch outside the last turn, plus
+                                    # TX_TAIL_EXTRA_MM) + this, at least; and set 2's fingers + this
 EDGE_LINE_WIDTH_MM    = 0.05
 
-# TRACK_GAP_MM = the copper-free ring between the two sets: from the outermost copper of set 1 (the ends of its
-# TX1 ring, half a trace past one pitch outside the last turn) to the innermost copper of set 2 (the RX2 band
-# start minus half an RX trace or a via radius, whichever is larger).  The TX rooms come from the Single
-# Generator's own TX ring formula and are verified on the built copper.
-#   DUAL_MODE 1 and 3: the gap to leave.  DUAL_MODE 2 and 4: must be None; the measured gap must be at least
-#   MIN_CLEARANCE_MM.
+# TRACK_GAP_MM = the copper-free ring between the two sets: from the outermost copper of set 1 (its TX ring and
+# tail, or its RX fingers and the go-around brackets, whichever reach farther) to the innermost copper of set 2
+# (the RX2 band start minus half an RX trace or a via radius, whichever is larger).  These reaches come from the
+# Single Generator's own formulas and are verified on the built copper.
+#   A number: a band the generator places sits exactly this far from the other set; when you give both bands, the
+#   gap between them must be at least this.  None: the same with MIN_CLEARANCE_MM (the larger of the two sets'
+#   values) in its place.
 #   What the gap does NOT do: it is not what isolates the two sets.  A balanced RX band sees no net flux from a
 #   round TX ring, however close; the residual TX1 -> RX2 coupling comes from asymmetry (the exits, the vias,
 #   layer misregistration) and falls only slowly with distance (dual boards in practice leave 1.1 ... 1.4 mm
@@ -101,19 +106,20 @@ TRACK_GAP_MM = None
 # enough for every board tried; 0 = no allowance.
 LAYOUT_TOLERANCE_MM = 0.05
 
-# BAND_SPLIT (DUAL_MODE = 1 only) = set 1's share of the free radial width: 0.5 = equal RX band widths (a 1x/16x board
-# is usually near 0.5, a 1x/32x board near 0.35: the fine track gets the width).
+# BAND_SPLIT (read only when no band is given) = set 1's share of the free radial width: 0.5 = equal RX band
+# widths (a 1x/16x board is usually near 0.5, a 1x/32x board near 0.35: the fine track gets the width).
 BAND_SPLIT = 0.5
 
 
 # =============================================================================
 # TX TERMINALS
 # =============================================================================
-# Each set is turned on its own so that its TX ends (there is no tail: the two ends of the series TX sit one
-# pitch outside the last turn, on TX_LAYER_A and TX_LAYER_B) end up at this angle.  Different angles keep the
-# two sets' breakouts apart.  The RX pattern's zero of each set lands wherever the turn puts it; the record
-# file prints both.  Angles run from the +x axis of the page towards +y (down the KiCad page), like every
-# other angle of the generators: 0 = the right, 90 = the bottom of the page, 180 = the left, 270 = the top.
+# Each set is turned on its own so that its TX ends end up at this angle (on a series TX without a tail, the
+# default, the two ends sit one pitch outside the last turn, on TX_LAYER_A and TX_LAYER_B; a tail,
+# TX_TAIL_EXTRA_MM, runs them farther out).  Different angles keep the two sets' breakouts apart.  The RX
+# pattern's zero of each set lands wherever the turn puts it; the record file prints both.  Angles run from
+# the +x axis of the page towards +y (down the KiCad page), like every other angle of the generators:
+# 0 = the right, 90 = the bottom of the page, 180 = the left, 270 = the top.
 TERMINAL_1_DEG = 180.0              # set 1 (inner)
 TERMINAL_2_DEG = 0.0                # set 2 (outer)
 
@@ -153,12 +159,13 @@ COPPER_CONDUCTIVITY_S_M = 5.8e7     # copper conductivity in S/m (5.8e7 = anneal
                                     # depth and screening in the rotor summary
 TX_AC_RESISTANCE_FACTOR = 2.0       # at the TX frequency skin and proximity effects raise the TX resistance
                                     # above the DC value: the estimate allows for up to this x the DC value
-                                    # (Q, tank resistance and the IC check use the worst case)
+                                    # (Q, tank resistance and the IC check use the worst case).  A set may
+                                    # have its own (Dual_TX1 / TX2)
 STACKUP_PREPREG_MM   = 0.2          # distance from an outer copper layer to its inner neighbour (the inner
                                     # layers' depth for the TX inductance; on a board thinner than twice this,
                                     # a third of PCB_THICKNESS_MM is used)
 TANK_CAP_SERIES      = "E12"        # standard capacitor values the estimate suggests for the tank: "E6",
-                                    # "E12" or "E24" (any letter case)
+                                    # "E12" or "E24" (any letter case).  A set may have its own (Dual_IC1 / IC2)
 
 
 # =============================================================================

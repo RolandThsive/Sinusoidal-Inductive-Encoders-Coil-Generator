@@ -11,13 +11,14 @@ oscillators) and writes the files.
 |---|---|
 | Coil Sets | Two: set 1 inside (coarse, 1 loop by default) and set 2 outside (fine, 16 loops by default). Each has its own RX pair, its own TX ring and its own receiver IC |
 | Copper Layers | Always 4. Each set's RX and TX layers are chosen freely (`RX_LAYER_A` / `B`, `TX_LAYER_A` / `B`); both sets may use the same layers, since their copper never overlaps radially |
-| Nets | Six, one per coil: `SIN_1`, `COS_1`, `TX_1`, `SIN_2`, `COS_2`, `TX_2` by default. A name used twice is an error, because KiCad would join the two coils |
-| Board Edges | One bore and one outline for both sets, given or computed as `DUAL_MODE` says (see [Quick Guide - Dual Generator](Quick-Guide-To-Parameters-Selections-Dual-Generator.md)) |
+| Nets | Six, one per coil: `SIN_1`, `COS_1`, `TX_1`, `SIN_2`, `COS_2`, `TX_2` by default. A name used twice is a warning, because KiCad would join the two coils into one net |
+| Board Edges | One bore and one outline for both sets, given, or worked out from the bands (see [Dual Layout](Dual-Layout.md)) |
 | Gap Between The Sets | Measured on the built copper, from the outermost copper of set 1 to the innermost copper of set 2 |
-| Vias | Through vias (0.6 / 0.3 mm by default), or (`VIA_TYPE = "blind"`) blind vias between the two layers each via joins. A through via of one set is checked against the other set's copper on every layer |
-| Clearance | Each set gets the Single Generator's own clearance checks. `GENERATOR_MODE`: `"normal"` prints a clearance warning and writes the boards, `"strict"` makes it an error. A short (copper touching copper of another net) is always an error, and so is copper of one set inside the other set's ring |
+| Copper Layers | 4 by default (`PCB_LAYERS`), or 2: each set's RX then runs on Top and Bottom, and no layer is left free for set 1's leads (a warning) |
+| Vias | Through vias (0.6 / 0.3 mm by default), or (`VIA_TYPE = "blind"`) blind vias between the two layers each via joins. A set may have its own via size and type (`Dual_RX1` / `Dual_RX2`). A through via of one set is checked against the other set's copper on every layer |
+| Clearance | Each set gets the Single Generator's own clearance checks, with its own `MIN_CLEARANCE_MM` when its RX file gives one; between the sets the larger one applies. `GENERATOR_MODE`: `"normal"` prints a clearance warning and writes the boards, `"strict"` makes it an error. A short (copper touching copper of another net) is always an error, and so is copper of one set inside the other set's ring |
 | TX Ends | Each set is turned so that its TX ends sit at its own angle: `TERMINAL_1_DEG` (180°, the left) and `TERMINAL_2_DEG` (0°, the right) |
-| RX Fingers, TX Tails | None. Both RX rings are plain bands and each TX ring ends one pitch outside its last turn (fixed in `Dual_Fixed_Parameters.py`) |
+| RX Fingers, TX Tails | None by default: both RX rings are plain bands and each TX ring ends one pitch outside its last turn. Either set may have fingers (`RX_TABS`) and a tail (`TX_TAIL_EXTRA_MM`); set 1's push set 2 outwards, set 2's push the outline out |
 | Title Block | Title `Dual stator <loops 1>x<loops 2> loops`. One comment line per set (loops, RX band, SIN / COS nets, rising and falling layers, TX net, wiring, turns per layer and the angle its ends sit at), then the radii and the measured gap, the trace widths and the layer count. The rotor's title block names the sectors, metal fraction and radii of each ring |
 | Page Size | Chosen automatically, as on a single board, so the title block never overlaps the board |
 | Silkscreen | A lead-cutting suggestion for both sets, drawn on `F.SilkS` and `B.SilkS` as the last step (see [Silkscreen - Dual Generator](Silkscreen-Dual-Generator.md)). No pads are created |
@@ -28,7 +29,7 @@ oscillators) and writes the files.
 The recommended layers, which are the defaults, put each set's RX on Top + Inner-1 and its TX on Top + Inner-2. That
 leaves **Bottom free of both sets' copper**. Set 1's six leads must cross set 2 on their way to set 1's IC; on the free
 Bottom layer, the one farthest from the rotor, they can do that radially, as tight pairs, at one angle. The checker
-warns when set 2 uses all four layers, because then no layer is free for those leads.
+warns when set 2 uses all four layers, or the board has only two, because then no layer is free for those leads.
 
 ![Dual Board 2: The Four Layers](https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/images/dual_board_2_layers.png)
 
@@ -48,10 +49,13 @@ bore | RX1 band | TX1 ring | TRACK_GAP_MM | RX2 band | TX2 ring | outline
 - Each TX ring starts `TX_OFFSET_MM` outside its RX band and ends one pitch outside its last turn, where the two TX ends
   sit. Its room comes from the Single Generator's own TX ring formula and is verified on the built copper.
 - The gap is the copper-free ring from the outermost copper of set 1 (its TX1 ring ends, half a trace past one pitch
-  outside the last turn) to the innermost copper of set 2 (the RX2 band start minus half an RX trace or a via radius,
-  whichever is larger).
+  outside the last turn) to the innermost copper of set 2: its inner-tip vias, or half an RX trace inside the RX2 band
+  start, whichever reaches farther in. The vias are taken where the Single Generator's RX builder puts them: on the
+  band start at `RX_VIA_ELECTRICAL_DEG` = 90, a little inside the band at any other angle (on the curve at the node
+  nearest that angle). So a placed band keeps exactly the gap, whatever the via angle.
 - The outline leaves at least `OUTER_EDGE_OFFSET_MM` (2.0 mm) past the RX2 band and `OUTER_EDGE_TAIL_MARGIN_MM` (0.7 mm)
-  past the TX2 ring. In modes 1 to 3, when ring 2 of the rotor covers the TX2 turns (the default), the outline must also
+  past the TX2 ring. When the generator works out the outline, or places the RX2 band up to a given one, and ring 2 of
+  the rotor covers the TX2 turns (the default), the outline must also
   hold ring 2: the outermost TX2 copper plus `ROTOR_AUTO_TX_OVERHANG_MM` (0.5 mm), `ROTOR_AUTO_EDGE_CLEARANCE_MM`
   (0.5 mm) and `LAYOUT_TOLERANCE_MM` (0.05 mm, or half the edge line plus the sag of the ring's polygon when that is
   more). On the default board this rule sets the outline: 25.825 + 0.5 + 0.5 + 0.05 = 26.875 mm, where the first two
@@ -93,8 +97,8 @@ coupling k below 0.3.
 
 On top of the Single Generator's checks for each set, the Dual Generator checks:
 
-- **The gap between the sets**, on the built copper. Less than `TRACK_GAP_MM` (modes 1 and 3) or `MIN_CLEARANCE_MM`
-  (modes 2 and 4) is an error that says how far to move the RX2 band out.
+- **The gap between the sets**, on the built copper. Less than `TRACK_GAP_MM`, or `MIN_CLEARANCE_MM` when that is `None`,
+  is an error that says how far to move the RX2 band out.
 - **The layout formulas**. When the built copper differs from the formulas by more than `LAYOUT_TOLERANCE_MM`
   (0.05 mm), the run warns; the boards are as built.
 - **The rotor rings**: the bare ring between them (an error below `ROTOR_TRACK_GAP_MM`), each ring's distance from the
@@ -102,10 +106,10 @@ On top of the Single Generator's checks for each set, the Dual Generator checks:
 - **The electrical estimate**, for each set against its own IC (`Dual_IC1_Parameters.py`, `Dual_IC2_Parameters.py`). See
   [Electrical Estimate](Electrical-Estimate.md).
 
-Every message is listed in [Checks, Errors And Warnings](Checks-Errors-And-Warnings.md#236-dual-generator).
+Every message is listed in [Checks, Errors And Warnings](Checks-Errors-And-Warnings.md#246-dual-generator).
 
 [<img align="right" src="https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/logo/Logo_1_V2.png" alt="Sinusoidal Coil Generator logo, click to see it spin" width="72">](https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/logo/Logo_1_V2_rotor_spin_400px.webp)
 
 | Previous | Next |
 |:---|---:|
-| [Rotor Features - Dual Generator](Rotor-Features-Dual-Generator.md) | [Silkscreen - Dual Generator](Silkscreen-Dual-Generator.md) |
+| [Rotor Features - Dual Generator](Rotor-Features-Dual-Generator.md) | [Dual Layout](Dual-Layout.md) |

@@ -19,6 +19,7 @@ def fingers_on(rx):
 
 
 def fingers_single(rx):
+    """RX_TABS = "single": one finger per coil, on two neighbouring outer tips."""
     return str(rx.P.RX_TABS).lower() == "single"
 
 # ------------------------------------------------------------ finger positions

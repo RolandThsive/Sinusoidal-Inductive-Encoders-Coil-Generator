@@ -114,7 +114,7 @@ def tx_settings(P):
     style = str(getattr(P, "TX_PARALLEL_BREAK_STYLE", "stitched")).strip().lower()
     if style not in ("stitched", "staggered"):
         raise ValueError(f'TX_PARALLEL_BREAK_STYLE must be "stitched" or "staggered"; it is '
-                         f'{getattr(P, "TX_PARALLEL_BREAK_STYLE")!r}')
+                         f'{P.TX_PARALLEL_BREAK_STYLE!r}')
     return False, layers, None, style
 
 

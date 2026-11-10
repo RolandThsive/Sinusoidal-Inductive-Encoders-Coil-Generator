@@ -23,11 +23,14 @@ from the folder the program is run from, so the boards always land in the same p
 
 Inside the folder:
     Stator.kicad_pcb, Rotor.kicad_pcb   (STATOR_FILE / ROTOR_FILE)
+    Stator.kicad_pro, Rotor.kicad_pro   the KiCad project file of each board: its design rules (PCBWriter.py)
     Parameters.txt                      what was generated, with which values: the value of every
                                         parameter, the summaries and the electrical estimate of
                                         this run, and a verbatim copy of the four parameter files
 
-Only RunCoilGenerator.py writes boards.
+Only RunCoilGenerator.py writes boards.  The Dual Generator's Dual_OutputFolders.py uses the same helpers for its
+DualCoil_... folders and its record: folder_number, output_dir (with its own project folder), new_folder,
+remove_if_empty, record_head, value_lines, file_copies and save_record.
 """
 
 import datetime
@@ -42,7 +45,7 @@ FOLDER_PREFIX = "Coil"
 INCREMENT_SEPARATOR = "__"
 
 
-def _num(x):
+def folder_number(x):
     """Number for a folder name: no needless decimals (36.8, 56.6, 8), at most 3 decimals."""
     x = round(float(x), 3)
     return str(int(x)) if x == int(x) else f"{x:g}"
@@ -69,7 +72,7 @@ def tx_words(stator, P):
 
 def folder_name(stator, P):
     """Coil_<board inside radius>_<board outside radius>_<RX loops>_<RX sub-coils>_<TX turns>_<TX wiring>_<TX shape>."""
-    parts = (FOLDER_PREFIX, _num(stator.inner_edge_radius), _num(stator.outer_edge_radius),
+    parts = (FOLDER_PREFIX, folder_number(stator.inner_edge_radius), folder_number(stator.outer_edge_radius),
              str(int(P.LOOPS)), str(int(P.RX_SUBCOILS)), str(int(P.TX_TURNS))) + tx_words(stator, P)
     return "_".join(parts)
 
@@ -80,20 +83,24 @@ def project_folder():
     return os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
-def output_dir(P):
-    """OUTPUT_DIR as a usable path: an absolute one as it is, a relative one from "Single Generator"."""
+def output_dir(P, project=None):
+    """OUTPUT_DIR as a usable path: an absolute one as it is, a relative one from `project` (default: the "Single
+    Generator" folder)."""
     d = os.path.expanduser(str(P.OUTPUT_DIR))
     if os.path.isabs(d):
         return d
-    return os.path.normpath(os.path.join(project_folder(), d))
+    return os.path.normpath(os.path.join(project_folder() if project is None else project, d))
 
 
 def create_output_folder(stator, P):
-    """Create the folder for this generation inside OUTPUT_DIR and return its path.  An existing folder of
+    """Create the folder for this generation inside OUTPUT_DIR and return its path (new_folder)."""
+    return new_folder(output_dir(P), folder_name(stator, P))
+
+
+def new_folder(parent, base):
+    """Create the folder `base` inside `parent` (made first if needed) and return its path.  An existing folder of
     the same name is never reused: the name gets __1, __2, ... (the first one that is free)."""
-    parent = output_dir(P)
     os.makedirs(parent, exist_ok=True)
-    base = folder_name(stator, P)
     n = 0
     while True:
         name = base if n == 0 else f"{base}{INCREMENT_SEPARATOR}{n}"
@@ -148,15 +155,55 @@ def _values_by_file(P, stator=None):
     return list(out.items())
 
 
-def write_record(folder, P, written, stator=None, rotor=None, electrical_lines=None, warnings=None, command=None):
-    """Write Parameters.txt into the generation folder: what was made and every value it was made with."""
+def record_head(title, folder, written, command=None):
+    """The first lines of a record: its title, when, where, which files, the command."""
     now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    lines = ["COIL GENERATION RECORD", "=" * 22, "",
+    lines = [title, "=" * len(title), "",
              f"generated   {now}",
              f"folder      {os.path.abspath(folder)}",
              f"files       {', '.join(os.path.basename(p) for p in written) or '-'}"]
     if command:
         lines.append(f"command     {command}")
+    return lines
+
+
+def value_lines(values_by_file):
+    """The PARAMETER VALUES USED section from [(file, [(name, value text), ...]), ...]."""
+    lines = ["PARAMETER VALUES USED", "-" * 21]
+    for file, items in values_by_file:
+        lines.append(f"[{file}]")
+        width = max(len(n) for n, _ in items)
+        lines += [f"  {n:<{width}s} = {v}" for n, v in items]
+        lines.append("")
+    return lines
+
+
+def file_copies(pdir, files):
+    """The PARAMETER FILES section: a verbatim copy of each of `files` in the folder `pdir`."""
+    lines = ["PARAMETER FILES (verbatim copies)", "-" * 33]
+    for fname in files:
+        path = os.path.join(pdir, fname)
+        lines.append(f"########## {fname} " + "#" * max(0, 60 - len(fname)))
+        try:
+            with open(path, encoding="utf-8") as fh:
+                lines.append(fh.read().rstrip("\n"))
+        except OSError as e:
+            lines.append(f"(could not be read: {e})")
+        lines.append("")
+    return lines
+
+
+def save_record(folder, lines):
+    """Write the record's lines to Parameters.txt in `folder` (UTF-8, \\n line ends) and return its path."""
+    path = os.path.join(folder, RECORD_FILE)
+    with open(path, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write("\n".join(lines) + "\n")
+    return path
+
+
+def write_record(folder, P, written, stator=None, rotor=None, electrical_lines=None, warnings=None, command=None):
+    """Write Parameters.txt into the generation folder: what was made and every value it was made with."""
+    lines = record_head("COIL GENERATION RECORD", folder, written, command)
     if stator is not None:
         lines.append(f"name        {folder_name(stator, P)}  = {FOLDER_PATTERN}")
         lines.append(f"rotation    {stator.rotation_deg:.2f} deg: the board is turned by this so that the TX terminal sits "
@@ -170,24 +217,6 @@ def write_record(folder, P, written, stator=None, rotor=None, electrical_lines=N
         lines += ["ROTOR", "-" * 5, rotor.summary(), ""]
     if electrical_lines:
         lines += list(electrical_lines) + [""]
-    lines += ["PARAMETER VALUES USED", "-" * 21]
-    for file, items in _values_by_file(P, stator):
-        lines.append(f"[{file}]")
-        width = max(len(n) for n, _ in items)
-        lines += [f"  {n:<{width}s} = {v}" for n, v in items]
-        lines.append("")
-    pdir = _parameter_dir(P)
-    lines += ["PARAMETER FILES (verbatim copies)", "-" * 33]
-    for fname in PARAMETER_FILES:
-        path = os.path.join(pdir, fname)
-        lines.append(f"########## {fname} " + "#" * max(0, 60 - len(fname)))
-        try:
-            with open(path, encoding="utf-8") as fh:
-                lines.append(fh.read().rstrip("\n"))
-        except OSError as e:
-            lines.append(f"(could not be read: {e})")
-        lines.append("")
-    path = os.path.join(folder, RECORD_FILE)
-    with open(path, "w", encoding="utf-8", newline="\n") as fh:
-        fh.write("\n".join(lines) + "\n")
-    return path
+    lines += value_lines(_values_by_file(P, stator))
+    lines += file_copies(_parameter_dir(P), PARAMETER_FILES)
+    return save_record(folder, lines)

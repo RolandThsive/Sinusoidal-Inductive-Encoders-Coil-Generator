@@ -8,16 +8,13 @@ Dual_RotorBuilder.py  -  the rotor disc of a dual board: two rings of metal sect
     disc.write(path)                         one KiCad file: both rings, their mask openings, bore and outline
 
 Each ring's start angle (ROTOR_AUTO_START_ANGLE_DEG / ROTOR_CUSTOM_START_ANGLE_DEG) is measured from where
-ROTOR_START_ANGLE_ZERO says: "rx_zero" = its own set's RX pattern zero (build_ring adds the angle the set was turned
-by, so that at disc angle 0 both sets read the same electrical phase), "board" = the board's +x axis, as the Single
-Generator measures it.  The record file prints both zeros.
+ROTOR_START_ANGLE_ZERO says: "rx_zero" = its own set's RX pattern zero (build_ring hands the angle the set was
+turned by to RotorDesign as its start_offset_deg, so that at disc angle 0 both sets read the same electrical phase),
+"board" = the board's +x axis, as the Single Generator measures it.  The record file prints both zeros.
 
-The Single Generator's RotorDesign.write makes a file of its own, so the disc writes the copper itself from the
-rings' public geometry (sector_polygon, mask_polygon, layers, mask_layers), with the same lines
-RotorDesign.write uses.  Nothing to edit here.
+Each ring's copper and mask openings are put on the one disc by the Single Generator's own RotorDesign.add_copper;
+this file adds only the bore, the outline and the dual title block.  Nothing to edit here.
 """
-
-import types
 
 from Generator.Core.PCBWriter import KiCadBoard, page_size
 from Generator.Rotor import RotorBuilder as RB
@@ -33,10 +30,7 @@ def build_ring(Pk, stator, zero="rx_zero"):
     if zero not in ZERO_CHOICES:
         raise ValueError(f"ROTOR_START_ANGLE_ZERO = {zero!r}: must be one of {', '.join(repr(z) for z in ZERO_CHOICES)}")
     turn = float(stator.rotation_deg) if zero == "rx_zero" else 0.0
-    Pk = types.SimpleNamespace(**vars(Pk))                 # a copy: the set's own values stay as given (the record)
-    Pk.ROTOR_AUTO_START_ANGLE_DEG = float(Pk.ROTOR_AUTO_START_ANGLE_DEG) + turn
-    Pk.ROTOR_CUSTOM_START_ANGLE_DEG = float(Pk.ROTOR_CUSTOM_START_ANGLE_DEG) + turn
-    ring = RB.RotorDesign(Pk, stator=stator)
+    ring = RB.RotorDesign(Pk, stator=stator, start_offset_deg=turn)   # the set's own values stay as given (the record)
     ring.zero_deg = turn                                   # what was added to the start angle
     ring.set_zero_deg = float(stator.rotation_deg)         # where the set's RX pattern zero is on the board
     ring.zero_from = zero
@@ -44,6 +38,7 @@ def build_ring(Pk, stator, zero="rx_zero"):
 
 
 def assemble(P, dual_stator, rotor1, rotor2):
+    """The dual rotor: the rotor rings of the two sets on one board."""
     return DualRotor(P, dual_stator, rotor1, rotor2)
 
 
@@ -63,6 +58,7 @@ class DualRotor:
         self.gap = rotor2.r_in - rotor1.r_out
 
     def page_size(self):
+        """The KiCad page (width, height) in mm, grown to hold the outline or the widest ring with its mask opening."""
         B = self.P.BOARD
         r = max(x for x in [self.outline] + [rg.r_out + max(0.0, rg.mask_expansion or 0.0) for rg in self.rings]
                 if x is not None)
@@ -89,22 +85,17 @@ class DualRotor:
             thickness = B.PCB_THICKNESS_MM
         board = KiCadBoard(title=f"Dual rotor {r1.sectors} + {r2.sectors} sectors", comments=comments,
                            page=self.page_size(), thickness=thickness)
-        for rg in self.rings:                      # (the same lines as the Single Generator's RotorDesign.write)
-            for layer in rg.layers:
-                for k in range(rg.sectors):
-                    board.polygon(rg.sector_polygon(k), layer)
-            if rg.mask_expansion is not None:
-                for layer in rg.layers:
-                    for k in range(rg.sectors):
-                        board.polygon(rg.mask_polygon(k), RB.MASK_LAYER[layer])
+        for rg in self.rings:
+            rg.add_copper(board)
         if self.bore is not None:
             board.circle((self.cx, self.cy), self.bore, "Edge.Cuts", B.EDGE_LINE_WIDTH_MM)
         if self.outline is not None:
             board.circle((self.cx, self.cy), self.outline, "Edge.Cuts", B.EDGE_LINE_WIDTH_MM)
-        board.save(path)
+        board.save(path, B.MIN_CLEARANCE_MM)
         return path
 
     def summary(self):
+        """The rotor's lines for the run's output and for Parameters.txt."""
         lines = [f"Dual rotor ({self.mode}): ring 1 {self.rings[0].sectors} sector(s), ring 2 {self.rings[1].sectors} "
                  f"sector(s); bore r = {self.bore}, outline r = {self.outline}; {self.gap:.2f} mm bare between the rings"]
         if all(getattr(rg, "zero_from", "rx_zero") == "rx_zero" for rg in self.rings):

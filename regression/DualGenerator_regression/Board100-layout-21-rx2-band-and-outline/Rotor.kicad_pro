@@ -1,0 +1,24 @@
+{
+  "board": {
+    "design_settings": {
+      "rules": {
+        "min_clearance": 0.15
+      }
+    }
+  },
+  "meta": {
+    "filename": "Rotor.kicad_pro",
+    "version": 1
+  },
+  "net_settings": {
+    "classes": [
+      {
+        "clearance": 0.15,
+        "name": "Default"
+      }
+    ],
+    "meta": {
+      "version": 3
+    }
+  }
+}

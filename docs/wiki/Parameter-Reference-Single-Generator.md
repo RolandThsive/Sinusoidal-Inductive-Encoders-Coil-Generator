@@ -1,30 +1,30 @@
-# 21. Parameter Reference Single Generator
+# 22. Parameter Reference Single Generator
 
 Every setting of the Single Generator lives in a parameter file in `Single Generator/Parameters/`. These are the only files you edit. Units are millimetres,
 degrees and hertz unless a name says otherwise. The **Range** column is what the parameter checker accepts; "None"
-usually means the generator works the value out itself (the row says what it does). The Web Tool shows the same names in its Advanced mode, except the output settings of 21.1.1 (`GENERATOR_MODE` is its Strict switch), and the electrical estimate settings of 21.1.4 and 21.5, which it does not use. `VIA_TYPE` and the silkscreen settings of 21.6 are not in it either: the Web Tool runs an older copy of the generator, without blind vias and without the silkscreen suggestion. The Dual Generator's files are described in
+usually means the generator works the value out itself (the row says what it does). The Web Tool shows the same names in its Advanced mode, except the output settings of 22.1.1 (`GENERATOR_MODE` is its Strict switch), and the electrical estimate settings of 22.1.4 and 22.5, which it does not use. `VIA_TYPE` and the silkscreen settings of 22.6 are not in it either: the Web Tool runs an older copy of the generator, without blind vias and without the silkscreen suggestion. The Dual Generator's files are described in
 [Parameter Reference Dual Generator](Parameter-Reference-Dual-Generator.md).
 
-`Parameters.py` only gathers the five coil parameter files and is not edited. `SilkScreenSuggestion_Parameters.py` is read by the last step of a run (21.6). `OptimizerParameters.py` belongs to the optimizer, which is
+`Parameters.py` only gathers the five coil parameter files and is not edited. `SilkScreenSuggestion_Parameters.py` is read by the last step of a run (22.6). `OptimizerParameters.py` belongs to the optimizer, which is
 under construction on the [`analyser_and_optimizer` branch](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/tree/analyser_and_optimizer).
 
 > [!NOTE]
 > Defaults are those of the parameter files in `Single Generator/Parameters/` on `main`. Settings marked *only if* are greyed out ("not used now") in
 > the Web Tool when the design does not use them.
 
-## 21.1 Board (`Board_Parameters.py`)
+## 22.1 Board (`Board_Parameters.py`)
 
-### 21.1.1 Output
+### 22.1.1 Output
 
 | Name | Default | Range | Meaning |
 |---|---|---|---|
 | `OUTPUT_DIR` | `"Output"` | text | Folder in which each run's `Coil_...` folder is made. A relative path is taken from the `Single Generator` folder; a full path is used as it is. |
-| `STATOR_FILE`, `ROTOR_FILE` | `Stator.kicad_pcb`, `Rotor.kicad_pcb` | file names | Names of the two boards inside each run folder. They must differ and should end in `.kicad_pcb`. |
+| `STATOR_FILE`, `ROTOR_FILE` | `Stator.kicad_pcb`, `Rotor.kicad_pcb` | file names | Names of the two boards inside each run folder. They must differ, also without the extension (each board gets a KiCad project file of its own name, ending in `.kicad_pro`, with its design rules), and should end in `.kicad_pcb`. |
 | `GENERATOR_MODE` | `"normal"` | `normal`, `strict` | What a warning about the finished boards does (a clearance, the board edge, the page, the rotor). `normal`: such a warning, for example a gap smaller than `MIN_CLEARANCE_MM`, is printed and the boards are written. `strict`: every such warning is an error and nothing is written. Warnings from the parameter check and from the electrical estimate never stop the run. Copper that overlaps copper of another net (a short) is always an error. Capitals do not matter. |
 | `CENTER_X_MM`, `CENTER_Y_MM` | 100, 100 | number | Position of the sensor axis on the KiCad page. |
 | `PAGE_SIZE_MM` | (200, 200) | pair | Smallest KiCad "User" page size. The generator grows it to the right and down so that the board stays clear of the drawing frame and the title block. A board too close to the top or left edge is only warned about: raise `CENTER_X_MM` / `CENTER_Y_MM`. |
 
-### 21.1.2 Stator board
+### 22.1.2 Stator board
 
 | Name | Default | Range | Meaning |
 |---|---|---|---|
@@ -40,7 +40,7 @@ under construction on the [`analyser_and_optimizer` branch](https://github.com/R
 | `OUTER_EDGE_TAIL_MARGIN_MM` | 0.7 | ≥ 0 | Margin used by the rule above. |
 | `EDGE_LINE_WIDTH_MM` | 0.05 | > 0 up to 1 | Line width of the `Edge.Cuts` outline. |
 
-### 21.1.3 Mechanical assumptions
+### 22.1.3 Mechanical assumptions
 
 | Name | Default | Range | Meaning |
 |---|---|---|---|
@@ -48,7 +48,7 @@ under construction on the [`analyser_and_optimizer` branch](https://github.com/R
 | `PCB_THICKNESS_MM` | 1.6 | > 0 | Stator board thickness. |
 | `EXCITATION_FREQ_HZ` | 3.5e6 | > 0 | TX oscillator frequency aimed for, with the rotor in place. The electrical estimate sizes the tank capacitors for it; the rotor summary uses it for the skin depth. A warning appears far outside 1 to 10 MHz. |
 
-### 21.1.4 Electrical estimate
+### 22.1.4 Electrical estimate
 
 | Name | Default | Range | Meaning |
 |---|---|---|---|
@@ -58,9 +58,9 @@ under construction on the [`analyser_and_optimizer` branch](https://github.com/R
 | `STACKUP_PREPREG_MM` | 0.2 | > 0 up to 5 (*only if* 4 layers) | Distance from an outer copper layer to its inner neighbour. It sets the depth of the inner layers for the TX inductance. On a board not thicker than twice this, a third of `PCB_THICKNESS_MM` is used. |
 | `TANK_CAP_SERIES` | `"E12"` | `"E6"`, `"E12"`, `"E24"` | The standard capacitor values the estimate suggests for the tank. Capitals do not matter. |
 
-## 21.2 RX (`RX_Parameters.py`)
+## 22.2 RX (`RX_Parameters.py`)
 
-### 21.2.1 Size and periodicity
+### 22.2.1 Size and periodicity
 
 | Name | Default | Range | Meaning |
 |---|---|---|---|
@@ -73,7 +73,7 @@ under construction on the [`analyser_and_optimizer` branch](https://github.com/R
 The band is given in **one** of two ways (the other pair None), or from the board edges when all four are None. The
 two values of a pair go together. See [Web Tool](Web-Tool.md) for the None switches.
 
-### 21.2.2 Shape
+### 22.2.2 Shape
 
 | Name | Default | Range | Meaning |
 |---|---|---|---|
@@ -81,14 +81,14 @@ two values of a pair go together. See [Web Tool](Web-Tool.md) for the None switc
 | `STEPS_PER_LOOP` | `"auto"` | "auto" or an integer, a multiple of 8, 48 to 4096 | Chords (polyline segments) per electrical period. "auto" = the smallest multiple of 8 whose midpoint chord error is within `RX_CHORD_TOLERANCE_MM`, at most 1024 (a warning appears if that is not enough). Sub-coils may raise the count. A whole number is used exactly, and the tolerance is then not used. A warning appears when the chord error of the RX curves is above 0.01 mm. It is measured the same way as for "auto". |
 | `RX_CHORD_TOLERANCE_MM` | 0.001 | ≥ 0.001 | How far a straight chord may lie from the true RX curve, in mm (0.001 = 1 micron, also the smallest value allowed; finer adds points, not accuracy). |
 
-### 21.2.3 Sub-coils
+### 22.2.3 Sub-coils
 
 | Name | Default | Range | Meaning |
 |---|---|---|---|
 | `RX_SUBCOILS` | 1 | 1, 2 or 3 | Sub-coils per coil (distributed winding). Each coil stays one closed series loop. |
 | `RX_SUBCOIL_SPLIT_ELEC_DEG` | 45.0 | > 0 (*only if* sub-coils ≥ 2) | Electrical angle between sub-coils. Use 45 for 2, and 30 for 3. Two sub-coils give signal × 2·cos(d/2) (1.85× at 45°); harmonic *h* × 2·cos(h·d/2) (3rd and 5th down about 59 % at 45°, 3rd removed at 60°, 5th removed at 36°). |
 
-### 21.2.4 Layers and vias
+### 22.2.4 Layers and vias
 
 | Name | Default | Range | Meaning |
 |---|---|---|---|
@@ -96,7 +96,7 @@ two values of a pair go together. See [Web Tool](Web-Tool.md) for the None switc
 | `RX_RISING_EDGE_LAYER` | `"F.Cu"` | `F.Cu`, `B.Cu` (*only if* 2 layers) | Which layer carries the rising edges. |
 | `RX_VIA_ELECTRICAL_DEG` | 90.0 | 50 to 130 | Electrical angle of the outer-tip layer-swap via (90 = exactly on the tip). Stay near 90: away from it the vias come close to the neighbouring curves (on the default board about 58 to 122 keeps the clearance, while 50 and 130 put a via onto another net, an error). A small `STEPS_PER_LOOP` limits the via to 45 + 720 / `STEPS_PER_LOOP` to 135 − 720 / `STEPS_PER_LOOP` electrical degrees (60 to 120 at 48): a value outside is moved inside, with a warning. With 2 sub-coils the via that joins them needs it near 90: a warning appears outside about 57 + split / 2 to 123 − split / 2 (79.5 to 100.5 at a split of 45), and the generator then usually stops. |
 
-### 21.2.5 Bridging fingers
+### 22.2.5 Bridging fingers
 
 | Name | Default | Range | Meaning |
 |---|---|---|---|
@@ -105,13 +105,13 @@ two values of a pair go together. See [Web Tool](Web-Tool.md) for the None switc
 | `RX_TAB_LENGTH_MM` | 3.0 | ≥ 0 (*only if* fingers) | The exact finger length: the finger reaches `OUTSIDE_RADIUS_MM` plus this. It is never changed for you. When it is too short to clear the outermost TX turn (or the outermost go-around bracket) the generator stops and names the length it needs ("Set RX_TAB_LENGTH_MM to at least ..."). A longer TX pitch needs longer fingers. A spiral TX (`TX_SHAPE = "spiral"`) needs them one pitch longer, since its last turn ends one pitch farther out. With the defaults that is at least 3.5 mm, so the default 3.0 is too short. |
 | `RX_TAB_WIDTH_MM` | 1.0 | > 0 (*only if* fingers) | Spacing of the finger's two legs. Keep at 0.6 or more for etching; narrower disturbs the signal less. A spacing too wide for the loop count or the finger length is cut back, with a warning that gives the spacing used. The legs may span at most about 90 electrical degrees, and the straight middle piece between them must not dip back into the RX band (a longer finger allows wider legs). |
 
-## 21.3 TX (`TX_Parameters.py`)
+## 22.3 TX (`TX_Parameters.py`)
 
 Layers are numbered 1 = Top, 2 = Inner-1, 3 = Inner-2, 4 = Bottom (a 2-layer board has 1 and 4).
 
 **The TX terminal has no setting.** The generator builds a probe TX at 0°, sweeps the terminal (tail, via, steps or arcs, windows) round the ring against the real RX copper and keeps the place with the largest gap (with `RX_TABS = "single"`, the place nearest the two fingers that keeps `MIN_CLEARANCE_MM`). The whole board is then rotated so that the terminal sits at 0° (to the right). The rotation is printed and written to `Parameters.txt`.
 
-### 21.3.1 Turns
+### 22.3.1 Turns
 
 | Name | Default | Range | Meaning |
 |---|---|---|---|
@@ -128,7 +128,7 @@ Layers are numbered 1 = Top, 2 = Inner-1, 3 = Inner-2, 4 = Bottom (a 2-layer boa
 | `TX_STEPPED_ANGLE_DEG` | 45 | 5 to 90 (*only if* stepped_diagonal) | Angle of the steps, measured from the turn: 90 = radial, smaller = a longer slope. Neighbouring steps have a gap of pitch × cos(angle) − width; above about 45° with the defaults that is below `MIN_CLEARANCE_MM`, and the steps are staggered automatically. |
 | `TX_INSIDE_VIA_DISTANCE_MM` | 0.3 | −3 to 3 (*not used by* stepped_arc) | Moves the TX terminal via towards the centre (negative = outwards). 0 = on the trace ends, which is closer to the next turn than the clearance allows with the default via and pitch. Keep below `TX_OFFSET_MM` − via radius − half an RX trace − clearance (0.4 mm with the defaults). |
 
-### 21.3.2 TX layers
+### 22.3.2 TX layers
 
 | Name | Default | Range | Meaning |
 |---|---|---|---|
@@ -145,13 +145,13 @@ board; series on 1 and 3 suits a 4-layer board with the RX on layers 1 and 2.
 A series TX always makes way for fingers by going around them ("staggered"). All TX turns are one net, so KiCad's DRC
 cannot see a TX turn touching another: the generator checks the clearance itself and warns.
 
-## 21.4 Rotor (`Rotor_Parameters.py`)
+## 22.4 Rotor (`Rotor_Parameters.py`)
 
 | Name | Default | Range | Meaning |
 |---|---|---|---|
 | `ROTOR_MODE` | `"according_to_stator"` | `according_to_stator`, `custom` | Generate the rotor from the stator, or use only the `ROTOR_CUSTOM_*` values. |
 
-### 21.4.1 According to stator
+### 22.4.1 According to stator
 
 | Name | Default | Range | Meaning |
 |---|---|---|---|
@@ -166,7 +166,7 @@ cannot see a TX turn touching another: the generator checks the clearance itself
 | `ROTOR_AUTO_EDGE_CLEARANCE_MM` | 0.5 | ≥ 0 | Copper stays this far from the bore edge and the outline. |
 | `ROTOR_AUTO_COPPER_LAYERS` | `["F.Cu"]` | layer list | Layer(s) carrying the metal sectors. Mount the copper side towards the stator. |
 
-### 21.4.2 Custom
+### 22.4.2 Custom
 
 | Name | Default | Range | Meaning |
 |---|---|---|---|
@@ -175,10 +175,10 @@ cannot see a TX turn touching another: the generator checks the clearance itself
 | `ROTOR_CUSTOM_START_ANGLE_DEG` | 0.0 | number | Mechanical angle of the first sector edge. |
 | `ROTOR_CUSTOM_INNER_RADIUS_MM`, `ROTOR_CUSTOM_OUTER_RADIUS_MM` | 15.53, 24.3 | > 0 | Copper inner and outer radius. |
 | `ROTOR_CUSTOM_COPPER_LAYERS` | `["F.Cu"]` | layer list | Layer(s) carrying the copper. |
-| `ROTOR_CUSTOM_OUTLINE_RADIUS_MM` | 27.0 | > 0 or None | Outer board edge (None = no outline). |
-| `ROTOR_CUSTOM_BORE_RADIUS_MM` | 15.0 | > 0 or None | Centre hole (None = no hole). |
+| `ROTOR_CUSTOM_OUTLINE_RADIUS_MM` | 27.0 | > 0 or None | Outer board edge (None = no outline; the bore must then be given). |
+| `ROTOR_CUSTOM_BORE_RADIUS_MM` | 15.0 | > 0 or None | Centre hole (None = no hole; the outline must then be given). |
 
-### 21.4.3 Both modes
+### 22.4.3 Both modes
 
 | Name | Default | Range | Meaning |
 |---|---|---|---|
@@ -187,7 +187,7 @@ cannot see a TX turn touching another: the generator checks the clearance itself
 | `ROTOR_CHORD_TOLERANCE_MM` | 0.001 | ≥ 0.001 | The largest overshoot of the polygon beyond the true circle, in mm (1 micron, also the smallest value allowed). The vertices sit slightly outside the nominal radius, so the outer edge of the copper is never smaller than requested. On the inner arc the same shift puts the copper edge up to the chord sag outside the nominal inner radius, so the copper can be that much narrower there. |
 | `ROTOR_SOLDER_MASK_EXPANSION_MM` | −1 | up to 5 | Mask opening over the rotor copper: −1 = no opening, the mask stays over the copper (default, recommended: it keeps the copper pristine and protected against oxidation, though some signal may be lost); above 0 = opening that much wider than the copper (for example 0.05); 0 = exactly the copper outline. No other negative value is accepted. |
 
-## 21.5 IC (`IC_Parameters.py`)
+## 22.5 IC (`IC_Parameters.py`)
 
 The receiver IC the TX tank is checked against in the [electrical estimate](Electrical-Estimate.md). These values never
 change a board. The defaults are an example, the IPS2550. A missing line, or a missing file, uses the
@@ -204,7 +204,7 @@ default.
 With the three limits None there are no IC checks. A `RECEIVER_IC` line from an older `Board_Parameters.py` is
 ignored, with a warning.
 
-## 21.6 Silkscreen Suggestion (`SilkScreenSuggestion_Parameters.py`)
+## 22.6 Silkscreen Suggestion (`SilkScreenSuggestion_Parameters.py`)
 
 The lead-cutting suggestion drawn on the silkscreen of the finished stator: where to break each RX coil and where the
 two TX ends get their vias (see [Silkscreen](Silkscreen.md)). These values never change copper. The step never stops a
@@ -229,7 +229,7 @@ generation: a wrong value falls back to its default with a warning, and a missin
 | `SILKSCREEN_VIA_EDGE_CLEARANCE_MM` | 0.25 | > 0 | A via of the suggestion keeps `MIN_CLEARANCE_MM` from every copper on every layer, and this much from the bore and the outline. |
 | `SILKSCREEN_TX_SITE_REACH_MM` | 2.0 | > 0 | The two via sites of the TX ends are looked for up to this far from the stacked end. |
 
-## 21.7 Optimizer (`OptimizerParameters.py`)
+## 22.7 Optimizer (`OptimizerParameters.py`)
 
 > [!NOTE]
 > **Under construction.** The optimizer and its parameter file are not on main. They live on the [`analyser_and_optimizer` branch](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/tree/analyser_and_optimizer).

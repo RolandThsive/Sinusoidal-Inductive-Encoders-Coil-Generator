@@ -14,6 +14,8 @@ its boards.
 Reads the two KiCad files the generator wrote (nothing else) and draws:
     stator : the board ring, every copper trace in the colour of its layer, the vias
     rotor  : the disc with its bore, the copper sectors of the Top layer and, when there are any, of the Bottom layer
+             (a custom rotor may have no outline or no bore, ROTOR_CUSTOM_OUTLINE_RADIUS_MM / ..._BORE_RADIUS_MM =
+             None: then only what it has is drawn, around the stator's centre, which the generators give both boards)
     title  : from the stator's title block (loops, TX turns, radii), plus the air gap when given
     legend : the stator layers that carry copper, the via, the rotor copper that exists
 
@@ -24,7 +26,8 @@ Set UNDER_TOP_WIDTH = 1.0 for true widths.
 On the rotor the Top copper is filled; the copper of every layer under it lies at the same place and is shown as a
 dashed outline in its layer colour, a little heavier for each level further down.
 
-Needs only Python 3 (no third-party package).  The SVG opens in any browser.
+The board files are read by KiCadReader.py, next to this file.  Needs only Python 3 (no third-party package).  The
+SVG opens in any browser.
 """
 
 import argparse
@@ -32,6 +35,11 @@ import math
 import os
 import re
 import sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+if HERE not in sys.path:                                   # KiCadReader.py lies next to this file
+    sys.path.insert(0, HERE)
+import KiCadReader  # noqa: E402
 
 # ---- the look ---------------------------------------------------------------------------------------------
 COLOUR = {"F.Cu": "#d62828",      # Top        red
@@ -50,34 +58,19 @@ BOARD_FILL, EDGE_LINE = "#eef3e8", "#555555"
 FONT = "Inter, Helvetica, Arial, sans-serif"
 SVG_WIDTH_PX = 2240                                        # the size the SVG opens at; it scales without loss
 
-# ---- what is read from the KiCad files --------------------------------------------------------------------
-SEG = re.compile(r'\(segment \(start ([-\d.]+) ([-\d.]+)\) \(end ([-\d.]+) ([-\d.]+)\) \(width ([\d.]+)\) '
-                 r'\(layer "([^"]+)"\) \(net (\d+)\)')
-VIA = re.compile(r'\(via (?:blind |micro )?\(at ([-\d.]+) ([-\d.]+)\) \(size ([\d.]+)\)')
-NET = re.compile(r'\(net (\d+) "([^"]*)"\)')
-CIRCLE = re.compile(r'\(gr_circle \(center ([-\d.]+) ([-\d.]+)\) \(end ([-\d.]+) ([-\d.]+)\) \(layer "([^"]+)"\)')
-POLY = re.compile(r'\(gr_poly \(pts ((?:\(xy [-\d.]+ [-\d.]+\) ?)+)\) \(layer "([^"]+)"\)')
-XY = re.compile(r'\(xy ([-\d.]+) ([-\d.]+)\)')
-TITLE = re.compile(r'\(title "([^"]*)"\)')
-COMMENT = re.compile(r'\(comment (\d) "([^"]*)"\)')
-
 STATOR_FILE, ROTOR_FILE = "Stator.kicad_pcb", "Rotor.kicad_pcb"
 
 
 def read(path):
-    """segments, vias, circles, polygons, title, {comment number: text} of one KiCad board file."""
-    with open(path, encoding="utf-8") as fh:
-        text = fh.read()
-    nets = {int(n): name for n, name in NET.findall(text)}
-    segs = [(float(a), float(b), float(c), float(d), float(w), lay, nets.get(int(n), ""))
-            for a, b, c, d, w, lay, n in SEG.findall(text)]
-    vias = [(float(x), float(y), float(s)) for x, y, s in VIA.findall(text)]
-    circles = [(float(cx), float(cy), math.hypot(float(ex) - float(cx), float(ey) - float(cy)), lay)
-               for cx, cy, ex, ey, lay in CIRCLE.findall(text)]
-    polys = [([(float(x), float(y)) for x, y in XY.findall(pts)], lay) for pts, lay in POLY.findall(text)]
-    title = TITLE.search(text)
-    comments = {int(n): t for n, t in COMMENT.findall(text)}
-    return segs, vias, circles, polys, (title.group(1) if title else ""), comments
+    """segments, vias, circles, polygons, title, {comment number: text} of one KiCad board file (read by
+    KiCadReader.py)."""
+    b = KiCadReader.read(path)
+    segs = [(float(s.start[0]), float(s.start[1]), float(s.end[0]), float(s.end[1]), float(s.width), s.layer,
+             b.nets.get(s.net, "")) for s in b.segments]
+    vias = [(float(v.at[0]), float(v.at[1]), float(v.size)) for v in b.vias]
+    circles = [(float(c.center[0]), float(c.center[1]), c.radius, c.layer) for c in b.circles]
+    polys = [([(float(x), float(y)) for x, y in p.points], p.layer) for p in b.polygons]
+    return segs, vias, circles, polys, b.title, b.comments
 
 
 def edges(circles):
@@ -86,6 +79,21 @@ def edges(circles):
     if not cuts:
         raise ValueError("no Edge.Cuts circle in the file: is this a board the generator wrote?")
     return cuts[0][0], cuts[0][1], max(c[2] for c in cuts), min(c[2] for c in cuts)
+
+
+def rotor_disc(circles, polys, centre):
+    """(centre x, centre y, outline radius or None, bore radius or None, reach of the copper) of the rotor.  Without an
+    Edge.Cuts circle its centre is the stator's centre; a lone circle is the outline when the copper lies inside it,
+    else the bore."""
+    cuts = [c for c in circles if c[3] == "Edge.Cuts"]
+    cx, cy = (cuts[0][0], cuts[0][1]) if cuts else centre
+    reach = max((math.hypot(x - cx, y - cy) for pts, _l in polys for x, y in pts), default=0.0)
+    if len(cuts) >= 2:
+        return cx, cy, max(c[2] for c in cuts), min(c[2] for c in cuts), reach
+    if not cuts:
+        return cx, cy, None, None, reach
+    r = cuts[0][2]
+    return (cx, cy, r, None, reach) if r >= reach else (cx, cy, None, r, reach)
 
 
 def board_values(comments):
@@ -143,10 +151,10 @@ def render(stator_path, rotor_path, out=None, title=None, air_gap=None):
     segs, vias, circles, _p, s_title, comments = read(stator_path)
     _s, _v, r_circles, r_polys, r_title, _c = read(rotor_path)
     cx, cy, r_out, r_in = edges(circles)
-    rcx, rcy, rr_out, rr_in = edges(r_circles)
+    rcx, rcy, rr_out, rr_in, r_reach = rotor_disc(r_circles, r_polys, (cx, cy))
     title = title or title_from(s_title, comments, air_gap)
     out = out or picture_path(stator_path)
-    R = max(r_out, rr_out) * 1.04                          # half the width of each panel, mm
+    R = max(r_out, rr_out or r_reach) * 1.04               # half the width of each panel, mm
 
     # the sheet is measured in mm: two square panels side by side, a title strip above, a legend strip below
     gap, top, bottom = 0.08 * R, 0.55 * R, 0.85 * R
@@ -197,8 +205,9 @@ def render(stator_path, rotor_path, out=None, title=None, air_gap=None):
 
     # the rotor: the disc and its bore around the rotor's own centre, then the copper, Bottom first
     rx, ry = pos("rotor", rcx, rcy, rc)
-    o.append(f'<circle cx="{f(rx)}" cy="{f(ry)}" r="{f(rr_out)}" fill="white" stroke="{EDGE_LINE}" stroke-width="{f(u * 0.15)}"/>')
-    o.append(f'<circle cx="{f(rx)}" cy="{f(ry)}" r="{f(rr_in)}" fill="white" stroke="{EDGE_LINE}" stroke-width="{f(u * 0.15)}"/>')
+    for r in (rr_out, rr_in):                              # a custom rotor may have no outline or no bore
+        if r is not None:
+            o.append(f'<circle cx="{f(rx)}" cy="{f(ry)}" r="{f(r)}" fill="white" stroke="{EDGE_LINE}" stroke-width="{f(u * 0.15)}"/>')
     rotor_layers = [lay for lay in reversed(DRAW_ORDER) if any(l == lay for _p2, l in r_polys)]    # Top first
     rlevel = {lay: n for n, lay in enumerate(rotor_layers)}      # 0 = Top
     for lay in reversed(rotor_layers):                     # deepest first, Top last
@@ -224,10 +233,10 @@ def render(stator_path, rotor_path, out=None, title=None, air_gap=None):
         label = f"Rotor copper, {WORD[lay]} ({sector_text(r_title, n) if lay == 'F.Cu' else sector_text('', n)})"
         items.append(("patch", ROTOR_COPPER[lay][0], label))
     rows = ([i for i in items if i[0] != "patch"], [i for i in items if i[0] == "patch"])   # stator row, rotor row
-    for row, ly in zip(rows, (H - bottom * 0.86, H - bottom * 0.58)):
+    for row, ly in zip(rows, (H - bottom * 0.86, H - bottom * 0.58), strict=True):
         widths = [u * (4.5 + 0.95 * len(label)) + u * 3 for _k, _c, label in row]
         x = (W - sum(widths)) / 2
-        for (kind, colour, label), w in zip(row, widths):
+        for (kind, colour, label), w in zip(row, widths, strict=True):
             if kind == "line":
                 o.append(f'<line x1="{f(x)}" y1="{f(ly)}" x2="{f(x + u * 2.6)}" y2="{f(ly)}" stroke="{colour}" '
                          f'stroke-width="{f(u * 0.45)}" stroke-linecap="round"/>')
@@ -275,7 +284,7 @@ def main(argv=None):
         else:
             ap.error("give one folder, or the stator file and the rotor file")
     except (OSError, ValueError) as e:
-        raise SystemExit(f"cannot draw the picture: {e}")
+        raise SystemExit(f"cannot draw the picture: {e}") from e
 
 
 if __name__ == "__main__":

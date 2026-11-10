@@ -352,6 +352,29 @@ def load_values(P, rep):
 
 
 
+def check_output_dir(d, rep, folder_word="Coil_..."):
+    """The errors about the output folder d (OUTPUT_DIR as a usable path: a link to nothing, not a folder, not
+    writable, cannot be created), or a note that it will be created.  folder_word names the folders that go inside it
+    (the Dual Generator: "DualCoil_...")."""
+    if os.path.islink(d) and not os.path.exists(d):
+        rep.error(f"OUTPUT_DIR {d!r} is a link to something that does not exist")
+    elif os.path.exists(d) and not os.path.isdir(d):
+        rep.error(f"OUTPUT_DIR {d!r} exists but is not a folder")
+    elif os.path.isdir(d) and not os.access(d, os.W_OK):
+        rep.error(f"OUTPUT_DIR {d!r} is not writable")
+    elif not os.path.exists(d):
+        # it is created in step 6: the nearest folder above it that exists must be a writable folder
+        up = os.path.dirname(os.path.abspath(d))
+        while up and not os.path.lexists(up) and os.path.dirname(up) != up:
+            up = os.path.dirname(up)
+        if not os.path.isdir(up):
+            rep.error(f"OUTPUT_DIR {d!r} cannot be created: {up!r} is not a folder")
+        elif not os.access(up, os.W_OK):
+            rep.error(f"OUTPUT_DIR {d!r} cannot be created: {up!r} is not writable")
+        else:
+            rep.info(f"OUTPUT_DIR {d!r} does not exist yet and will be created (the {folder_word} folder goes inside it)")
+
+
 def single_value_warnings(v, rep):
     """Warnings and notes about one value on its own (the value is valid; it is just unusual) - and the errors about
     OUTPUT_DIR (a folder that cannot be written or created)."""
@@ -372,29 +395,14 @@ def single_value_warnings(v, rep):
         rep.warn(f"RX_TAB_WIDTH_MM = {v['RX_TAB_WIDTH_MM']:g}: narrower than about 0.6 mm is hard to etch")
     if has("STATOR_FILE", "ROTOR_FILE"):
         for nm in ("STATOR_FILE", "ROTOR_FILE"):
-            if not v[nm].lower().endswith(".kicad_pcb"):
+            if v[nm].lower().endswith(".kicad_pro"):
+                rep.error(f"{nm} = {v[nm]!r} is the name of a KiCad project file: the board's own project file (its "
+                          f"design rules) is written next to it under that name", (nm,))
+            elif not v[nm].lower().endswith(".kicad_pcb"):
                 rep.warn(f"{nm} = {v[nm]!r} does not end in .kicad_pcb; KiCad will not offer to open it")
     if has("OUTPUT_DIR"):
         from Generator.Run import OutputFolders
-        d = OutputFolders.output_dir(types.SimpleNamespace(OUTPUT_DIR=v["OUTPUT_DIR"]))
-        if os.path.islink(d) and not os.path.exists(d):
-            rep.error(f"OUTPUT_DIR {d!r} is a link to something that does not exist")
-        elif os.path.exists(d) and not os.path.isdir(d):
-            rep.error(f"OUTPUT_DIR {d!r} exists but is not a folder")
-        elif os.path.isdir(d) and not os.access(d, os.W_OK):
-            rep.error(f"OUTPUT_DIR {d!r} is not writable")
-        elif not os.path.exists(d):
-            # it is created in step 6: the nearest folder above it that exists must be a writable folder
-            up = os.path.dirname(os.path.abspath(d))
-            while up and not os.path.lexists(up) and os.path.dirname(up) != up:
-                up = os.path.dirname(up)
-            if not os.path.isdir(up):
-                rep.error(f"OUTPUT_DIR {d!r} cannot be created: {up!r} is not a folder")
-            elif not os.access(up, os.W_OK):
-                rep.error(f"OUTPUT_DIR {d!r} cannot be created: {up!r} is not writable")
-            else:
-                rep.info(f"OUTPUT_DIR {d!r} does not exist yet and will be created (the Coil_... folder goes inside "
-                         f"it)")
+        check_output_dir(OutputFolders.output_dir(types.SimpleNamespace(OUTPUT_DIR=v["OUTPUT_DIR"])), rep)
     e_mask = v.get("ROTOR_SOLDER_MASK_EXPANSION_MM")             # -1 = no mask opening
     if e_mask is not None and e_mask > 0.25:
         rep.warn(f"ROTOR_SOLDER_MASK_EXPANSION_MM = {e_mask:g}: the mask opening is that much wider than the "

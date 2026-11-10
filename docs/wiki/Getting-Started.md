@@ -1,6 +1,6 @@
 # 3. Getting Started
 
-The generator is pure Python 3 and needs only numpy. There is also a
+The generator is pure Python (3.11 to 3.15) and needs only numpy. There is also a
 [Web Tool](Web-Tool.md) that needs no installation.
 
 ## 3.1 Install
@@ -28,7 +28,8 @@ python -m pip install -r requirements.txt
    python Generator/Run/RunCoilGenerator.py
    ```
 
-4. Open `Stator.kicad_pcb` and `Rotor.kicad_pcb` from the new folder in `Single Generator/Output/` with KiCad 7, 8, 9 or 10. See
+4. Open `Stator.kicad_pcb` and `Rotor.kicad_pcb` from the new folder in `Single Generator/Output/` with KiCad 7, 8, 9 or 10.
+   KiCad reads each board's design rules from the project file next to it (`Stator.kicad_pro`, `Rotor.kicad_pro`). See
    [KiCad Compatibility](KiCad-Compatibility.md).
 
 ## 3.3 All Commands
@@ -79,8 +80,7 @@ The Dual Generator builds two coil sets on one stator (a coarse inner set and a 
 and one rotor disc with two rings. It uses the Single Generator's own code, so both folders must stay next to each
 other. Its settings are the files in `Dual Generator/Parameters/` (`Dual_Board_Parameters.py`, `Dual_RX1` / `Dual_RX2`,
 `Dual_TX1` / `Dual_TX2`, `Dual_Rotor1` / `Dual_Rotor2`, `Dual_IC1` / `Dual_IC2` and
-`Dual_SilkScreenSuggestion_Parameters.py`; `Dual_Fixed_Parameters.py` is not to be changed). The defaults build a
-1x / 16x board.
+`Dual_SilkScreenSuggestion_Parameters.py`). The defaults build a 1x / 16x board.
 
 ```bash
 cd "Dual Generator"

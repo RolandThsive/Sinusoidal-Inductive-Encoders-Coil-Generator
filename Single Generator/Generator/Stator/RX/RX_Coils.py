@@ -48,6 +48,8 @@ def chord_error(rx, S):
 
 
 def pick_steps(rx):
+    """The number of polyline segments per loop: STEPS_PER_LOOP, or for "auto" the smallest multiple of 8 from 48 to
+    1024 whose chord error is within the RX chord tolerance."""
     P = rx.P
     if P.STEPS_PER_LOOP != "auto":
         return int(P.STEPS_PER_LOOP)
@@ -67,6 +69,8 @@ def pick_steps(rx):
 
 
 def setup_subcoils(rx):
+    """The sub-coils: their number, the split rounded to whole node pairs, and the shift of each sub-coil in nodes
+    (symmetric about the coil axis)."""
     P, S = rx.P, rx.S
     rx.n_sub = int(P.RX_SUBCOILS)
     if rx.n_sub > 1:
@@ -87,6 +91,8 @@ def setup_subcoils(rx):
 
 
 def phase_nodes(rx):
+    """The nodes of every closed curve (four phases per sub-coil) on the radius law, with each curve's node offset
+    and net."""
     N, S = rx.N, rx.S
     rx.NS = N * S
     j = np.arange(rx.NS)
@@ -107,12 +113,15 @@ def phase_nodes(rx):
 
 
 def curve_index(rx, sub, k):
+    """The index of the curve of phase k (0 to 3) in sub-coil `sub`."""
     return sub * 4 + k
 
 # --------------------------------------------------------- layer scheme
 
 
 def assign_layers(rx):
+    """The edge class (rising or falling: its layer) of every segment from where it lies between the tip vias, then
+    the series junctions that join the curves into coils (ParameterConflict when one does not fit)."""
     P, N, S, NS = rx.P, rx.N, rx.S, rx.NS
     # segment j runs from node j to node j+1; its edge class follows from
     # where it sits between the two tip vias.
@@ -143,7 +152,7 @@ def assign_layers(rx):
             for loop in loops:
                 jp = loop * S
                 jm = ((loop - 1) * S + S // 2) % NS
-                d = try_junction(rx, plus, jp, minus, jm, legacy=True)
+                d = try_junction(rx, plus, jp, minus, jm, between_subcoils=False)
                 if d is not None:
                     commit_junction(rx, plus, jp, minus, jm, d)
                     done = True
@@ -164,7 +173,7 @@ def assign_layers(rx):
             cands = crossings(rx, plus, minus)
             placed = False
             for ja, jb in cands:
-                d = try_junction(rx, plus, ja, minus, jb, legacy=False)
+                d = try_junction(rx, plus, ja, minus, jb, between_subcoils=True)
                 if d is not None:
                     commit_junction(rx, plus, ja, minus, jb, d)
                     placed = True
@@ -185,12 +194,14 @@ def assign_layers(rx):
 
 
 def min_dist(rx, p, curve, node_idx):
+    """The distance from point p to the polyline of `curve` through the nodes node_idx."""
     a = rx.nodes[curve][node_idx[:-1]]
     b = rx.nodes[curve][node_idx[1:]]
     return float(point_segments_distance(np.asarray(p), a, b).min())
 
 
 def angular_position(rx, ja, curve):
+    """The angle (radians) about the board centre of node ja of `curve`."""
     x, y = rx.nodes[curve][ja % rx.NS]
     return math.atan2(y - rx.cy, x - rx.cx)
 
@@ -230,18 +241,19 @@ def overlaps(rx, curve, lo, hi):
     return False
 
 
-def try_junction(rx, plus, jp, minus, jm, legacy):
-    """Smallest stub length d (in nodes) for which the junction fits with the required
-    clearances, or None."""
+def try_junction(rx, plus, jp, minus, jm, between_subcoils):
+    """Smallest stub length d (in nodes) for which the junction fits with the required clearances, or None.
+    between_subcoils: the junction joins neighbouring sub-coils (its stub must also end before the tip via of its
+    lobe, and it must keep clear of every other curve) rather than the two strands of one sub-coil."""
     P, S, NS = rx.P, rx.S, rx.NS
     req = P.VIA_DIAMETER_MM / 2.0 + P.RX_TRACE_WIDTH_MM / 2.0 + P.MIN_CLEARANCE_MM
     dmax = S // 8 - 2
-    if not legacy:
+    if between_subcoils:
         u = (jp % S - rx._low_tip) % S
         w = (jm % S - rx._tip) % S
         dmax = min(dmax, S // 2 - S // 8 - u - 2, w - S // 8 - 2)
     for cand in range(1, dmax + 1):
-        if rx.n_sub > 1 or not legacy:
+        if rx.n_sub > 1 or between_subcoils:
             if overlaps(rx, plus, jp - 2, jp + cand + 2) or overlaps(rx, minus, jm - cand - 2, jm + 2):
                 continue
         via_minus = rx.nodes[minus][(jm - cand) % NS]
@@ -253,7 +265,7 @@ def try_junction(rx, plus, jp, minus, jm, legacy):
         pair_gap = float(np.hypot(*(via_minus - via_plus))) - P.VIA_DIAMETER_MM
         if not (min(d1, d2) >= req and pair_gap >= P.MIN_CLEARANCE_MM):
             continue
-        if rx.n_sub > 1 or not legacy:
+        if rx.n_sub > 1 or between_subcoils:
             # clear of every other curve (through-hole vias touch all layers) and of other junction vias
             ok = True
             for c in range(rx.ncurves):
@@ -278,6 +290,8 @@ def try_junction(rx, plus, jp, minus, jm, legacy):
 
 
 def commit_junction(rx, plus, jp, minus, jm, d):
+    """Make the junction try_junction found: the d segments on each side change their edge class, the two junction
+    vias are recorded and the node windows around them reserved."""
     NS = rx.NS
     for t in range(d):
         rx.edge_class[minus][(jm - d + t) % NS] = RISING
@@ -290,6 +304,7 @@ def commit_junction(rx, plus, jp, minus, jm, d):
 
 
 def layer_name(rx, edge_class):
+    """The copper layer of an edge class."""
     return rx.rising_layer if edge_class == RISING else rx.falling_layer
 
 # ------------------------------------------------------ items to write

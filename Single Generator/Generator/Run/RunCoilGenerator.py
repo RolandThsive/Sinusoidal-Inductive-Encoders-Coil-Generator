@@ -30,13 +30,17 @@ Steps (the chain: every step reads only what the steps before it made)
          Coil_<board inside radius>_<board outside radius>_<RX loops>_<RX sub-coils>_<TX turns>_<TX wiring>_<TX shape>
      e.g. Coil_15_27_1_1_3_Single_SteppedDiagonal (TX wiring: Single, Series or Parallel; TX shape:
      SteppedDiagonal, SteppedArc or Spiral), with __1, __2, ... added when that name exists already, and writes Stator.kicad_pcb,
-     Rotor.kicad_pcb and Parameters.txt (every value used, the summaries, the electrical estimate
+     Rotor.kicad_pcb (each with its KiCad project file, Stator.kicad_pro / Rotor.kicad_pro: the board's design
+     rules) and Parameters.txt (every value used, the summaries, the electrical estimate
      and copies of the parameter files) into it.  Nothing is ever overwritten.
      Last, LeadCutting_SilkscreenSuggestion.py draws the suggestion for cutting the leads (where to break each RX
      coil, where the TX ends get their vias) on the silkscreen of the written stator file and adds it to the record.
      When both boards were written, resources/RepresentativeSVGMaker.py and resources/ActualSVGMaker.py draw them
      as <folder name>_Representative.svg and <folder name>_Actual.svg in the same folder; a missing file or a failed
      picture is only a warning.
+
+The command line, the step headings, the estimate, the deciding and the writing are in RunSteps.py, which the
+Dual Generator's run script uses as well; this file holds the order of the steps and what is built in each.
 
 All settings are in Board_Parameters.py, RX_Parameters.py, TX_Parameters.py, Rotor_Parameters.py and
 IC_Parameters.py (the Parameters folder).  Run it from any folder, e.g. from the "Single Generator" folder:
@@ -45,9 +49,6 @@ IC_Parameters.py (the Parameters folder).  Run it from any folder, e.g. from the
 overview in README.md in the top folder).
 """
 
-import argparse
-import contextlib
-import io
 import os
 import sys
 
@@ -57,96 +58,36 @@ if __package__ in (None, ""):                      # started as a script: make t
         sys.path.insert(0, _SINGLE)
 
 from Generator.Checks import DesignChecks                               # noqa: E402
-from Generator.Core.Conflict import Colour, Report                      # noqa: E402
+from Generator.Core.Conflict import Colour                              # noqa: E402
 from Generator.Run import OutputFolders as OF                           # noqa: E402
+from Generator.Run import RunSteps as RS                                # noqa: E402
 from Generator.Run.CheckParameters import check_parameters              # noqa: E402
-
-RESOURCES = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))),
-                         "resources")
-SVG_MAKERS = ("RepresentativeSVGMaker.py", "ActualSVGMaker.py")       # each has make_svg(folder)
+from Generator.Run.RunSteps import step, stop                           # noqa: E402
 
 
-def draw_pictures(folder):
-    """The SVG pictures of the written board (resources/RepresentativeSVGMaker.py and ActualSVGMaker.py).  Extras: when
-    a file is missing or anything goes wrong, a yellow warning is printed and the run goes on.  Returns the number of
-    warnings printed."""
-    import importlib.util
-    warned = 0
-    for name in SVG_MAKERS:
-        try:
-            path = os.path.join(RESOURCES, name)
-            if not os.path.isfile(path):
-                raise FileNotFoundError(f"{name} not found in resources")
-            spec = importlib.util.spec_from_file_location(os.path.splitext(name)[0], path)
-            mod = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(mod)
-            print("  " + Colour.green(f"picture -> {mod.make_svg(folder)}"))
-        except Exception as e:
-            print("  " + Colour.yellow(f"WARNING picture not made by {name}: {e}; the boards are not affected"))
-            warned += 1
-    return warned
-
-
-def step(n, total, text):
-    print(Colour.bold(f"[{n}/{total}] {text}"))
-
-
-def stop(why):
-    print()
-    print(Colour.red(f"FAILED: {why}. Nothing was written."))
-    return 1
-
-
-def captured_warnings(text):
-    """The generator's own 'WARNING: ...' lines (stderr) as report items (DesignChecks.classify_generator_output)."""
-    return DesignChecks.classify_generator_output(text)
-
-
-def electrical(P, stator, rotor, RB, n, total):
+def electrical(P, stator, rotor, n, total):
     """Step n: print the electrical estimate (TX_Electrics.py).  Returns (warning texts, one-line summary or
     None, report lines for Parameters.txt).  It never stops a generation: if it cannot be made, a note says why
     and the boards are written."""
-    if rotor is None:                                  # --stator: the rotor is built only for the estimate
-        try:
-            rotor = RB.RotorDesign(P, stator=stator)
-        except Exception:
-            rotor = None
-    try:
-        from Generator.Stator.TX import TX_Electrics as TXE
-        el = TXE.estimate(stator, rotor, P)
-    except Exception as e:
+    el, e = RS.estimate(P, stator, rotor)            # (--stator: the rotor is built only for the estimate)
+    if el is None:
         step(n, total, "Electrical estimate")
-        why = f"the electrical estimate could not be made ({type(e).__name__}: {e}); the boards are not affected"
-        print("  " + Colour.yellow(why))
-        return [], None, ["ELECTRICAL ESTIMATE", "  " + why]
+        return RS.not_estimated(e)
     step(n, total, f"Electrical estimate  ({el.heading()})")
-    for line in el.lines(title=False):
-        print(line)
-    rep = Report()
-    rep.items = [(level, msg, ()) for level, _code, msg in el.findings]
-    rep.print()
-    record = el.lines(title=True) + [f"  {level.upper():8s}{msg}" for level, _code, msg in el.findings]
-    return rep.warnings, el.summary(), record
+    return RS.show_estimate(el)
 
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(description="Check the parameters, then generate the stator and rotor.")
-    ap.add_argument("--check", action="store_true", help="check the parameters and the geometry, write nothing")
-    ap.add_argument("--stator", action="store_true", help="write only the stator")
-    ap.add_argument("--rotor", action="store_true", help="write only the rotor")
-    ap.add_argument("--no-color", action="store_true", help="no colours")
-    args = ap.parse_args(argv)
-    Colour.setup(False if args.no_color else None)
-    want_stator = args.stator or not args.rotor
-    want_rotor = args.rotor or not args.stator
+    """Check the parameters, build the stator and the rotor, write the files.  argv: the command line (None =
+    sys.argv).  Returns the exit code."""
+    args = RS.parse_args("Check the parameters, then generate the stator and rotor.", argv)
+    want_stator, want_rotor = args.want_stator, args.want_rotor
     total = 6
 
     # ---------------------------------------------------------------- 1. parameters
     step(1, total, "Checking the parameters")
-    try:
-        import Parameters as P
-    except Exception as e:                                             # syntax error, missing file ...
-        print("  " + Colour.red(f"ERROR   the parameter files cannot be loaded: {type(e).__name__}: {e}"))
+    P = RS.load_parameters("Parameters")
+    if P is None:                                                      # syntax error, missing file ...
         return stop("parameter files cannot be loaded")
     rep = check_parameters(P)
     rep.print()
@@ -154,34 +95,23 @@ def main(argv=None):
     if rep.errors:
         return stop(f"{len(rep.errors)} parameter error(s)")
     print("  " + Colour.green("parameters OK"))
-    strict = str(getattr(P, "GENERATOR_MODE", "normal")).strip().lower() == "strict"
+    strict = RS.is_strict(P)
 
     # ---------------------------------------------------------------- 2. stator
     from Generator.Stator import StatorAssembly
-    from Generator.Stator.RX import RX_Builder
-    from Generator.Stator.TX import TX_Builder
     from Generator.Rotor import RotorBuilder as RB
     from Generator.Stator import LeadCutting_SilkscreenSuggestion as LCS
     step(2, total, "Building the stator")
-    buf = io.StringIO()
     try:
-        with contextlib.redirect_stderr(buf):
-            # THE CHAIN.  THE RX READS ONLY THE PARAMETERS; THE TX READS THE RX (ITS FINGERS AND ITS COPPER, TO FIND
-            # THE PLACE FOR ITS TERMINAL); THE ASSEMBLY TURNS THE BOARD SO THAT THE TERMINAL SITS AT 0 DEG (THE RIGHT);
-            # THE CHECKS MEASURE THE RESULT.  NOTHING GOES BACKWARDS AND NOTHING IS ESTIMATED.
-            rx = RX_Builder.build_rx(P)
-            tx = TX_Builder.build_tx(rx)
-            DesignChecks.check_tx_terminal(tx)
-            stator = StatorAssembly.assemble(P, rx, tx)
-            DesignChecks.check_stator_clearances(stator)
+        # THE CHAIN (StatorAssembly.build_stator).  THE RX READS ONLY THE PARAMETERS; THE TX READS THE RX (ITS
+        # FINGERS AND ITS COPPER, TO FIND THE PLACE FOR ITS TERMINAL); THE ASSEMBLY TURNS THE BOARD SO THAT THE
+        # TERMINAL SITS AT 0 DEG (THE RIGHT); THE CHECKS MEASURE THE RESULT.  NOTHING GOES BACKWARDS AND NOTHING
+        # IS ESTIMATED.  (Their warnings are caught from stderr.)
+        stator, gen_rep = RS.captured(StatorAssembly.build_stator, P)
     except (ValueError, RuntimeError) as e:
-        failed = Report()
-        failed.add_exception(e)
-        failed.print()
+        RS.failed(e).print()
         return stop("the stator cannot be built")
-    gen_rep = captured_warnings(buf.getvalue())
-    design_rep = DesignChecks.check_design(P, stator)
-    gen_rep.extend(design_rep)
+    gen_rep.extend(DesignChecks.check_design(P, stator))
     gen_rep.print()
     all_warn = len(rep.warnings) + len(gen_rep.warnings)
     board_warn = len(gen_rep.warnings)                                  # warnings about the finished boards
@@ -197,9 +127,7 @@ def main(argv=None):
         # still builds one for itself)
         rotor = RB.RotorDesign(P, stator=stator) if want_rotor else None
     except (ValueError, RuntimeError) as e:
-        failed = Report()
-        failed.add_exception(e)
-        failed.print()
+        RS.failed(e).print()
         return stop("the rotor cannot be built")
     if rotor is not None:
         rot_rep = DesignChecks.check_design(P, stator, rotor)
@@ -216,55 +144,25 @@ def main(argv=None):
         print("  " + Colour.dim("--stator: the rotor is not written"))
 
     # ---------------------------------------------------------------- 4. electrical estimate
-    el_warn, el_summary, el_record = electrical(P, stator, rotor, RB, 4, total)
+    el_warn, el_summary, el_record = electrical(P, stator, rotor, 4, total)
     all_warn += len(el_warn)
 
     # ---------------------------------------------------------------- 5. strict / check-only
-    step(5, total, "Deciding")
-    if strict and board_warn:
-        print("  " + Colour.red(f'GENERATOR_MODE = "strict": {board_warn} warning(s) about the boards count as errors'))
-        return stop(f"{board_warn} board warning(s) in strict mode")
-    if all_warn:
-        print("  " + Colour.yellow(f"{all_warn} warning(s) - the files can still be written; read them first"))
-    else:
-        print("  " + Colour.green("no warnings"))
-    if args.check:
-        print()
-        print(Colour.green("CHECK PASSED") + " (--check: no files written)")
-        return 0
+    rc = RS.decide(strict, board_warn, all_warn, args.check, 5, total)
+    if rc is not None:
+        return rc
 
     # ---------------------------------------------------------------- 6. write
-    step(6, total, "Writing the files")
-    written, folder, silk = [], None, None
-    try:
-        folder = OF.create_output_folder(stator, P)
-        print(f"  folder  {folder}")
-        if want_stator:
-            path = stator.write(os.path.join(folder, P.STATOR_FILE))
-            written.append(path)
-            print("  " + Colour.green(f"stator  -> {path}"))
-            silk = LCS.add_to_file(path, P)              # the lead-cutting silkscreen suggestion, drawn into the file
-        if want_rotor:
-            path = rotor.write(os.path.join(folder, P.ROTOR_FILE))
-            written.append(path)
-            print("  " + Colour.green(f"rotor   -> {path}"))
-        path = OF.write_record(folder, P, written, stator=stator, rotor=rotor if want_rotor else None,
-                                electrical_lines=el_record, warnings=warn_texts + list(el_warn),
-                                command="python Generator/Run/RunCoilGenerator.py "
-                                        + " ".join(sys.argv[1:] if argv is None else argv))
-        if silk is not None:
-            LCS.append_record(path, silk)
-        print("  " + Colour.green(f"record  -> {path}"))
-        if want_stator and want_rotor:
-            all_warn += draw_pictures(folder)
-    except OSError as e:
-        print("  " + Colour.red(f"ERROR   cannot write: {e}"))
-        if not written:
-            OF.remove_if_empty(folder)
-            return stop("cannot write the files")
-        print()
-        print(Colour.red(f"FAILED: only {', '.join(os.path.basename(p) for p in written)} was written to {folder}."))
-        return 1
+    rc, folder, written, warned = RS.write_files(
+        lambda: OF.create_output_folder(stator, P), stator if want_stator else None, rotor if want_rotor else None,
+        P.STATOR_FILE, P.ROTOR_FILE, lambda path: LCS.add_to_file(path, P), LCS.append_record,
+        lambda folder, written: OF.write_record(
+            folder, P, written, stator=stator, rotor=rotor if want_rotor else None, electrical_lines=el_record,
+            warnings=warn_texts + list(el_warn), command=RS.command("python Generator/Run/RunCoilGenerator.py", argv)),
+        OF.remove_if_empty, 6, total)
+    if rc is not None:
+        return rc
+    all_warn += warned
 
     print()
     if want_stator:
@@ -273,10 +171,7 @@ def main(argv=None):
         print(rotor.summary())
     if el_summary:
         print(f"Electrical (estimate, step 4): {el_summary}")
-    print()
-    print(Colour.green(f"SUCCESS: {len(written)} board file(s) + {OF.RECORD_FILE} written to {folder}")
-          + (Colour.yellow(f"  ({all_warn} warning(s) above)") if all_warn else ""))
-    return 0
+    return RS.success(written, folder, all_warn)
 
 
 if __name__ == "__main__":

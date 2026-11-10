@@ -1,4 +1,4 @@
-# 23. Checks, Errors And Warnings
+# 24. Checks, Errors And Warnings
 
 Before and after a board is built, the generator checks it. The rules live in `Generator/Checks/`
 (`ParameterRules.py`, `ConflictRules.py` and `DesignChecks.py`). The parameter rules can also be run alone, from the
@@ -13,9 +13,9 @@ Whether warnings about the finished boards stop the run is set by `GENERATOR_MOD
 `"normal"` writes the boards anyway, `"strict"` treats every such warning as an error.
 
 The Dual Generator runs all of these checks on each of its two sets, and adds its own; see
-[23.6 Dual Generator](#236-dual-generator).
+[24.6 Dual Generator](#246-dual-generator).
 
-## 23.1 Levels
+## 24.1 Levels
 
 | Level | Meaning | What happens |
 |---|---|---|
@@ -30,7 +30,7 @@ manufacturer. Check yours.
 Copper that overlaps copper of another net (a short) is always an error, in both generator modes. Warnings about the
 parameter values themselves (ranges, estimates) stay warnings in both modes.
 
-### 23.1.1 Named Conflicts
+### 24.1.1 Named Conflicts
 
 When settings cannot hold together, the message names them and explains why on the next line:
 
@@ -41,7 +41,7 @@ ERROR   RX_TAB_LENGTH_MM conflicts with TX_OFFSET_MM, TX_TURNS and TX_PITCH_MM
 
 The explanation says which value to change and, where it can be worked out, the value that is needed.
 
-## 23.2 Two Stages
+## 24.2 Two Stages
 
 1. **Parameter rules** (`check_parameters`). They need only the values: types, ranges, and combinations that cannot
    work. Each parameter has a range (see the [Parameter Reference Single Generator](Parameter-Reference-Single-Generator.md)), and a misspelled or
@@ -56,7 +56,7 @@ After the files are written, the two [output pictures](Output-Pictures.md) are d
 is a warning (`WARNING picture not made by <file>: <reason>; the boards are not affected`): it is counted in the
 run's warnings, but it never stops the run or removes a file, in either `GENERATOR_MODE`.
 
-## 23.3 What Is Checked
+## 24.3 What Is Checked
 
 | Area | Examples of what the rules look for |
 |---|---|
@@ -69,17 +69,17 @@ run's warnings, but it never stops the run or removes a file, in either `GENERAT
 | TX turns | Turns closer than the clearance (error) or practically equal to it (warning), also with one turn, because the outer tail runs one pitch outside the last turn; the first TX turn too close to the RX copper on the same layer (error); the terminal via too near the RX band or the next turns (warnings). The TX terminal itself has no setting: the generator searches the ring for the place with the largest gap to the RX copper (with `RX_TABS = "single"`, the place nearest the middle of the two fingers that keeps the clearance) and turns the board so that it ends up at 0°. With `RX_TABS = "single"`, if no place keeps the clearance, a note says so and the terminal goes where the gap is largest. |
 | Resolution | A fixed `STEPS_PER_LOOP` or `TX_STEPS` giving a chord error above 0.01 mm, or a fixed `ROTOR_ARC_STEPS_PER_SECTOR` giving one above 0.05 mm (warning; the chord tolerances are not used for these). With "auto" the count is chosen from the chord tolerance instead; for the RX coils a warning appears if more than 1024 chords per loop would be needed (the count then stops at 1024). With S chords per loop the tip vias can only sit at about 45 + 720 / S to 135 − 720 / S electrical degrees. If `RX_VIA_ELECTRICAL_DEG` is outside that, the vias move to the nearest end, with a warning (with `GENERATOR_MODE = "strict"` the board is refused). |
 | Board edge | `OUTER_EDGE_RADIUS_MM` cutting through the outermost TX turn, the fingers or the TX tail (errors); inner-tip vias running over the centre hole; a via touching copper of another net (error). |
-| Rotor | Rotor metal fraction giving a weak fundamental (warning) or removing a harmonic (info); rotor copper with no width; custom rotor sector count different from `LOOPS`; custom radii out of order, copper too near the bore or the outline; solder-mask opening reaching the bore or outline; `ROTOR_ARC_STEPS_PER_SECTOR` giving a coarse arc (warning), or so few chords that the corners of the rotor copper cross the outline (error). |
+| Rotor | Rotor metal fraction giving a weak fundamental (warning) or removing a harmonic (info); rotor copper with no width; custom rotor sector count different from `LOOPS`; a custom rotor with neither an outline nor a bore (error: the rotor file would have no board edge, which KiCad reports as an invalid outline); custom radii out of order, copper too near the bore or the outline; solder-mask opening reaching the bore or outline; `ROTOR_ARC_STEPS_PER_SECTOR` giving a coarse arc (warning), or so few chords that the corners of the rotor copper cross the outline (error). |
 | Files | Stator and rotor file names equal (error); names not ending in `.kicad_pcb` (warning); `OUTPUT_DIR` not a writable folder, or a missing folder that cannot be created (errors). |
 | Chord tolerances | Each of `RX_CHORD_TOLERANCE_MM`, `TX_CHORD_TOLERANCE_MM` and `ROTOR_CHORD_TOLERANCE_MM` must be at least 0.001 mm (error below that). |
 | IC limits | `IC_OSC_MIN_MHZ` not below `IC_OSC_MAX_MHZ` (error); a `RECEIVER_IC` line from an older version (warning: it is ignored, the receiver IC is now set in `IC_Parameters.py`). |
-| Silkscreen | The lead-cutting suggestion, the last step of a run, never stops a generation. A wrong value in `SilkScreenSuggestion_Parameters.py` falls back to its default (warning); no spot with room for a break within `SILKSCREEN_SEARCH_SPAN_DEG`, no two via sites near the TX ends, or a missing font (warnings: that part is not drawn, the boards are written); no free place for a name (warning: the name is drawn at its default spot, where it may cover other marks or vias). See [Silkscreen](Silkscreen.md). |
+| Silkscreen | The lead-cutting suggestion, the last step of a run, never stops a generation. A wrong value in `SilkScreenSuggestion_Parameters.py` falls back to its default (warning); no spot with room for a break within `SILKSCREEN_SEARCH_SPAN_DEG`, no two via sites near the TX ends, or a missing font (warnings: that part is not drawn, the boards are written); no free place for a name (warning: the name is drawn at the nearest spot on the board, where it may cover other marks or vias). See [Silkscreen](Silkscreen.md). |
 | Page | The stator board, or a rotor board that reaches farther out than the stator, comes close to the top or left of its KiCad page (warning; the page grows right and down automatically). |
 
 Each message names the setting, its value and the limit it broke, and many also say what to change. The Web Tool shows the same messages; see
 [Web Tool](Web-Tool.md#46-errors-and-warnings).
 
-### 23.3.1 TX Shape Checks
+### 24.3.1 TX Shape Checks
 
 | Message | Level |
 |---|---|
@@ -88,13 +88,13 @@ Each message names the setting, its value and the limit it broke, and many also 
 | `TX_STEPPED_ARC_RADIUS_MM` below via radius + half a TX trace + clearance | Warning: the innermost arc comes within the clearance of the via (KiCad's DRC does not see it, all TX is one net) |
 | Smallest gap between TX copper pieces around the via below `MIN_CLEARANCE_MM` | Warning |
 
-## 23.4 Electrical Checks
+## 24.4 Electrical Checks
 
 The [electrical estimate](Electrical-Estimate.md) adds its own findings, checked against the receiver IC limits in
 `IC_Parameters.py`: oscillator frequency out of range and tank resistance too low. When only the lower end of the tank resistance
 range is below the limit, you get an info line that gives the range, not a warning.
 
-## 23.5 Examples Of Boards The Generator Refuses
+## 24.5 Examples Of Boards The Generator Refuses
 
 | Situation | Why |
 |---|---|
@@ -102,7 +102,7 @@ range is below the limit, you get an info line that gives the range, not a warni
 | 2 sub-coils at the default band, with 4 loops and fingers (`RX_TABS = "all"` or `"single"`), or with 5 or more loops | A via touches copper of another net, or the vias that join the sub-coils do not fit between the curves. Without fingers (`RX_TABS = "none"`) 4 loops build, with a via clearance warning. Use 1 sub-coil, fewer loops or a wider band. |
 | `RX_TABS = "all"` on a small board when the TX turns go around the fingers (the fingers on a layer with TX turns) and there are several loops (on a board of 15 to 27 mm with a series TX on Top + Inner-1, 4 loops fail at the default 0.6 mm pitch, and a smaller pitch makes it worse) | A TX window under an RX finger would reach the TX terminal; the smaller the pitch, the farther the window reaches. Use `RX_TABS = "single"`, the fingers on a layer without TX turns (`RX_TAB_LAYER`), a parallel TX, fewer `TX_TURNS` or a bigger board. |
 
-## 23.6 Dual Generator
+## 24.6 Dual Generator
 
 The Dual Generator's rules live in `Dual Generator/Dual_Generator/Checks/`: `Dual_ParameterRules.py`, run by
 `Dual_CheckParameters.py` before anything is built, and `Dual_DesignChecks.py`, run on the built copper. The checker on
@@ -114,21 +114,20 @@ python Dual_Generator/Checks/Dual_CheckParameters.py
 python Dual_Generator/Run/Dual_RunCoilGenerator.py --check    # check only, write nothing
 ```
 
-The run checks in this order: the dual files and the dual rules, the layout mode, then the Single Generator's own
+The run checks in this order: the dual files and the dual rules, the layout, then the Single Generator's own
 parameter checks on each set. After the build: the Single Generator's checks on each set's finished copper, then the
 dual checks on the two sets together and on the two rotor rings. A message about one set names it: its explanation
 line starts with `set 1:` or `set 2:`. `GENERATOR_MODE` in `Dual_Board_Parameters.py` works as on a single board.
 
 | Area | What the rules look for |
 |---|---|
-| Files | A name in the wrong dual file (warning: ignored, the message names the file it belongs in); a name that is not a parameter, or one no longer used (warnings); a missing name (error); `OUTPUT_DIR` not a folder or not writable (errors), or not there yet (info: it will be created). |
-| Fixed values | Any value in `Dual_Fixed_Parameters.py` other than its fixed one (error, saying why it is fixed). `TX_WIRING = "single"` (error: a dual board uses series or parallel). |
-| Layout mode | A value `DUAL_MODE` needs that is `None`, or a value that must be `None` and is set (error naming every such value, and the mode that matches what is set when one does). A band given by half a pair, or by both pairs (error). A board too small for two bands in mode 1 (error, giving the outer radius it needs). Two sets that run into each other (error, giving the RX2 band start needed), or a bore with no room inside the RX1 band (error). In mode 4 each edge is held against its set's band and TX ring by the Single Generator's own edge rules. |
-| Nets | A net name used twice across the two sets (error: KiCad would join the two coils). |
+| Files | A name in the wrong dual file (warning: ignored, the message names the file it belongs in); a name that is not a parameter, or one no longer used (warnings); a missing name (error); a set's own via, clearance, AC factor or capacitor series line missing from its file (info: the board's value is used); `OUTPUT_DIR` not a folder or not writable (errors), or not there yet (info: it will be created). |
+| Layout | No RX band and not both board edges, so nothing to size a band from (error naming what to give; see [Dual Layout](Dual-Layout.md)). A band given by half a pair, or by both pairs (error). A board too small for two bands fitted between the edges (error, giving the outer radius it needs). A given edge that leaves a placed band no room (error). A placed RX1 band that would push the bore to zero (error). `DUAL_MODE` in an old file (warning: no longer used). Two sets that run into each other (error, giving the RX2 band start needed), an RX1 band that is not inside the RX2 band (error: set 1 is the inner set; the message says to swap the two sets' files), or a bore with no room inside the RX1 band (error). A given edge is held against its set's band and TX ring by the Single Generator's own edge rules. When a placed band is too narrow for its vias, a hint names the edge to move. |
+| Nets | A net name used twice across the two sets (warning: KiCad joins the two coils into one net in its ratsnest and DRC; the copper is not shorted). |
 | Frequencies | `EXCITATION_FREQ_HZ` of the two sets closer than `TX_FREQ_SEPARATION_MIN` (warning), or within `TX_FREQ_RATIO_TOLERANCE` of a small integer ratio (warning). Whenever the separation is met, also an info that two free-running tanks have not been shown to work and must be proven on the first board. |
-| Layers | Set 2 using all four layers, so no layer is free for set 1's leads (warning). |
+| Layers | Set 2 using all four layers, or a 2-layer board, so no layer is free for set 1's leads (warning). |
 | Rotor settings | `ROTOR_AUTO_COVER_TX = True` for ring 1, which puts the coarse half moon next to the fine band (warning). |
-| Gap between the sets | Measured on the built copper: less than `TRACK_GAP_MM` (modes 1 and 3) or `MIN_CLEARANCE_MM` (modes 2 and 4) is an error that says how far to move the RX2 band out; a difference from the layout formulas larger than `LAYOUT_TOLERANCE_MM` is a warning. Copper of one set inside the other set's ring is always an error. |
+| Gap between the sets | Measured on the built copper: less than `TRACK_GAP_MM`, or `MIN_CLEARANCE_MM` (the larger of the two sets') when that is `None`, is an error that says how far to move the RX2 band out; a difference from the layout formulas larger than `LAYOUT_TOLERANCE_MM` is a warning. Copper of one set inside the other set's ring is always an error. |
 | Rotor rings | The bare ring between the two rings below `ROTOR_TRACK_GAP_MM` (error naming the extension to change); ring 1 closer than `ROTOR_1_TO_RX2_MM` to the RX2 copper, or ring 2 closer than `ROTOR_2_TO_RX1_MM` to the RX1 copper (warnings); ring 1 reaching past the TX1 ring or over set 2, or ring 2 reaching in over set 1 (warnings). |
 | Electrical | The estimate for each set, against that set's own IC in `Dual_IC1_Parameters.py` or `Dual_IC2_Parameters.py`. |
 | Silkscreen | As on a single board, for each set; a set's message names its number. |
@@ -141,7 +140,7 @@ set 1: a pitch of 0.35 mm is too small for the stitching vias of the parallel TX
 ```
 
 See [Board Features - Dual Generator](Board-Features-Dual-Generator.md#185-checks-on-the-finished-boards) and
-[Quick Guide To Parameters Selections - Dual Generator](Quick-Guide-To-Parameters-Selections-Dual-Generator.md#2011-what-the-checker-says).
+[Quick Guide To Parameters Selections - Dual Generator](Quick-Guide-To-Parameters-Selections-Dual-Generator.md#2111-what-the-checker-says).
 
 [<img align="right" src="https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/logo/Logo_1_V2.png" alt="Sinusoidal Coil Generator logo, click to see it spin" width="72">](https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/logo/Logo_1_V2_rotor_spin_400px.webp)
 

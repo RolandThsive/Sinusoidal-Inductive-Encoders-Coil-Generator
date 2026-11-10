@@ -285,16 +285,19 @@ class Electrics:
 
     @property
     def warnings(self):
+        """The texts of the estimate's warnings."""
         return [m for l, _c, m in self.findings if l == "warning"]
 
     # ------------------------------------------------------------ text
     def heading(self):
+        """Which IC limits the estimate is checked against, or that none are set."""
         return ((f"receiver IC {self.ic}" if self.lim and self.ic != "receiver IC" else
                  "receiver IC limits from IC_Parameters.py" if self.lim else
                  "no IC limits set (IC_Parameters.py): no IC checks")
                 + "; model only, not checked on hardware")
 
     def title(self):
+        """The heading of the estimate's section in the output and in Parameters.txt."""
         return "ELECTRICAL ESTIMATE  (" + self.heading() + ")"
 
     def lines(self, title=True):

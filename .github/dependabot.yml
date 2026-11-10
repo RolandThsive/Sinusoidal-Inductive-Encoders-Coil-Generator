@@ -1,0 +1,24 @@
+# Dependabot proposes, once a week, a pull request when a newer numpy, a newer CI tool (requirements-dev.txt) or a newer
+# version of an action used by the workflows comes out.  Each proposal runs the whole CI before it can be merged.
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "Dependencies"
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "CI"
+    groups:
+      actions:
+        patterns: ["*"]

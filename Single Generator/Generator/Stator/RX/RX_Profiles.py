@@ -11,6 +11,8 @@ import numpy as np
 
 
 def radius_law(rx):
+    """Set rx.radius, the radius of a curve as a function of sin(phase), for RX_PROFILE: "equal_area" (r squared
+    linear in it) or "cosine_r" (r linear in it)."""
     P = rx.P
     ri2, ro2 = rx.ri ** 2, rx.ro ** 2
     rx._a, rx._b = 0.5 * (ro2 - ri2), 0.5 * (ro2 + ri2)

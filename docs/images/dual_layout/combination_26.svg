@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="614" viewBox="0 0 1400 614" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
+<title>Combination 26: TRACK_GAP_MM given</title>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<rect x="24" y="116" width="1352" height="398" fill="#d5dce5" stroke="#c4c4c4" stroke-width="1"/>
+<text x="24" y="48" font-size="24" font-weight="bold" fill="#1a1a1a">Combination 26: TRACK_GAP_MM given</text>
+<text x="24" y="77" font-size="15" fill="#555555">Refused: nothing is built, so this picture shows only what is given, at the radii of the repository's default board, and the message the generator stops with at</text>
+<text x="24" y="98" font-size="15" fill="#555555">the parameter check.</text>
+<rect x="766" y="130" width="596" height="30" rx="3" fill="#ffffff" stroke="#bdbdbd" stroke-width="1"/>
+<line x1="778" y1="145" x2="808" y2="145" stroke="#1a1a1a" stroke-width="2"/>
+<text x="816" y="150" font-size="13" fill="#1a1a1a">given in the parameter files</text>
+<line x1="1056" y1="145" x2="1086" y2="145" stroke="#1d5fa6" stroke-width="2"/>
+<text x="1094" y="150" font-size="13" fill="#1d5fa6">placed or worked out by the generator</text>
+<rect x="128" y="312" width="1218" height="120" fill="#ffffff" stroke="#8a96a3" stroke-width="1.2" stroke-dasharray="6 4"/>
+<line x1="734.28" y1="208" x2="761.44" y2="208" stroke="#1a1a1a" stroke-width="1.2"/>
+<line x1="734.28" y1="202" x2="734.28" y2="214" stroke="#1a1a1a" stroke-width="1.2"/>
+<line x1="761.44" y1="202" x2="761.44" y2="214" stroke="#1a1a1a" stroke-width="1.2"/>
+<rect x="596.56" y="178" width="302.6" height="21" rx="3" fill="#ffffff" stroke="#bdbdbd" stroke-width="1"/>
+<text x="747.86" y="193" font-size="13" text-anchor="middle" fill="#1a1a1a">TRACK_GAP_MM given, but between what?</text>
+<rect x="334.2" y="328" width="805.6" height="85" rx="3" fill="#ffffff" stroke="#c62828" stroke-width="1"/>
+<text x="342.2" y="349" font-size="14" fill="#1a1a1a">ERROR no RX band and no board edge is given: there is nothing to size the bands from. Give one</text>
+<text x="342.2" y="368" font-size="14" fill="#1a1a1a">RX band (INSIDE_RADIUS_MM / OUTSIDE_RADIUS_MM or RX_R_BASE_MM / RX_A_MM in Dual_RX1 or</text>
+<text x="342.2" y="387" font-size="14" fill="#1a1a1a">Dual_RX2_Parameters.py), or both board edges (INNER_EDGE_RADIUS_MM and OUTER_EDGE_RADIUS_MM,</text>
+<text x="342.2" y="406" font-size="14" fill="#1a1a1a">Dual_Board_Parameters.py) to fit both bands between them</text>
+<line x1="58" y1="480" x2="110" y2="480" stroke="#1a1a1a" stroke-width="1" stroke-dasharray="4 3"/>
+<line x1="110" y1="473" x2="104" y2="487" stroke="#1a1a1a" stroke-width="1.2"/>
+<line x1="116" y1="473" x2="110" y2="487" stroke="#1a1a1a" stroke-width="1.2"/>
+<line x1="116" y1="480" x2="1346" y2="480" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="58" y1="473" x2="58" y2="487" stroke="#1a1a1a" stroke-width="1.4"/>
+<text x="58" y="502" font-size="13" text-anchor="middle" fill="#1a1a1a">centre</text>
+<line x1="147.01" y1="480" x2="147.01" y2="484" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="201.32" y1="480" x2="201.32" y2="484" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="255.64" y1="480" x2="255.64" y2="484" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="309.95" y1="480" x2="309.95" y2="484" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="364.27" y1="480" x2="364.27" y2="488" stroke="#1a1a1a" stroke-width="1"/>
+<text x="364.27" y="502" font-size="13" text-anchor="middle" fill="#1a1a1a">10 mm</text>
+<line x1="418.58" y1="480" x2="418.58" y2="484" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="472.9" y1="480" x2="472.9" y2="484" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="527.21" y1="480" x2="527.21" y2="484" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="581.53" y1="480" x2="581.53" y2="484" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="635.84" y1="480" x2="635.84" y2="488" stroke="#1a1a1a" stroke-width="1"/>
+<text x="635.84" y="502" font-size="13" text-anchor="middle" fill="#1a1a1a">15 mm</text>
+<line x1="690.15" y1="480" x2="690.15" y2="484" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="744.47" y1="480" x2="744.47" y2="484" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="798.78" y1="480" x2="798.78" y2="484" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="853.1" y1="480" x2="853.1" y2="484" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="907.41" y1="480" x2="907.41" y2="488" stroke="#1a1a1a" stroke-width="1"/>
+<text x="907.41" y="502" font-size="13" text-anchor="middle" fill="#1a1a1a">20 mm</text>
+<line x1="961.73" y1="480" x2="961.73" y2="484" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="1016.04" y1="480" x2="1016.04" y2="484" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="1070.35" y1="480" x2="1070.35" y2="484" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="1124.67" y1="480" x2="1124.67" y2="484" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="1178.98" y1="480" x2="1178.98" y2="488" stroke="#1a1a1a" stroke-width="1"/>
+<text x="1178.98" y="502" font-size="13" text-anchor="middle" fill="#1a1a1a">25 mm</text>
+<line x1="1233.3" y1="480" x2="1233.3" y2="484" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="1287.61" y1="480" x2="1287.61" y2="484" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="1341.93" y1="480" x2="1341.93" y2="484" stroke="#1a1a1a" stroke-width="1"/>
+<text x="1346" y="472" font-size="13" text-anchor="end" fill="#555555">radius from the board centre (true scale)</text>
+<circle cx="46" cy="138" r="12" fill="#1a1a1a"/>
+<text x="46" y="143" font-size="15" font-weight="bold" text-anchor="middle" fill="#ffffff">1</text>
+<text x="24" y="542" font-size="17" font-weight="bold" fill="#1a1a1a">1  TRACK_GAP_MM given: refused</text>
+<text x="24" y="567" font-size="15" fill="#555555">Refused: no RX band and no board edge, so there is nothing to size the bands from. Give one RX band, or both board edges to fit both bands between them.</text>
+<text x="24" y="588" font-size="15" fill="#555555">TRACK_GAP_MM alone does not help: it is a distance, not a place.</text>
+</svg>

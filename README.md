@@ -15,7 +15,7 @@ Set the parameters, get a stator and a rotor as KiCad boards, checked and with a
 [![Contributing](https://img.shields.io/badge/Contributing-Get_involved-2EA44F?style=for-the-badge&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxjaXJjbGUgY3g9IjEwIiBjeT0iOCIgcj0iNCIvPjxwYXRoIGQ9Ik0zIDIxYzAtNCAzLTcgNy03czcgMyA3IDciLz48cGF0aCBkPSJNMTkgNHY2Ii8%2BPHBhdGggZD0iTTE2IDdoNiIvPjwvc3ZnPgo%3D)](CONTRIBUTING.md)
 [![License](https://img.shields.io/badge/License-Open_for_research-F28C28?style=for-the-badge&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik02IDNoOWw0IDR2MTRINnoiLz48cGF0aCBkPSJNMTUgM3Y0aDQiLz48cGF0aCBkPSJNOSAxMmg3Ii8%2BPHBhdGggZD0iTTkgMTZoNyIvPjwvc3ZnPgo%3D)](LICENSE.md)
 
-![Python](https://img.shields.io/badge/Python-3.9%2B-555555)
+![Python](https://img.shields.io/badge/Python-3.11%20to%203.15-555555)
 ![KiCad](https://img.shields.io/badge/KiCad-7%20to%2010-555555)
 ![Loops](https://img.shields.io/badge/RX_loops-1_to_16-blueviolet)
 ![Stars](https://img.shields.io/github/stars/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator?style=flat)
@@ -59,7 +59,8 @@ python Generator/Run/RunCoilGenerator.py --rotor      # Only the rotor
 ```
 
 Edit only the files in `Single Generator/Parameters/`. Each run writes a new folder in `Single Generator/Output/`
-with `Stator.kicad_pcb`, `Rotor.kicad_pcb`, `Parameters.txt` and two SVG pictures of the boards
+with `Stator.kicad_pcb`, `Rotor.kicad_pcb` (each with a KiCad project file that holds its design rules),
+`Parameters.txt` and two SVG pictures of the boards
 ([Representative and Actual](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Output-Pictures)),
 and never overwrites an earlier one. Prefer a
 browser? Use the [Web Tool](https://ro-h-bots.blogspot.com/p/inductive-encoder-sinusoidal-coil.html). Full

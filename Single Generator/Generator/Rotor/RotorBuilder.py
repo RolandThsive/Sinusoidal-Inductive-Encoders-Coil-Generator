@@ -139,8 +139,13 @@ def offset_polygon(points, distance, corner_step_deg=MASK_CORNER_STEP_DEG):
 
 
 class RotorDesign:
-    def __init__(self, P=P_DEFAULT, stator=None):
+    """The rotor.  start_offset_deg is added to the start angle (ROTOR_AUTO_START_ANGLE_DEG or
+    ROTOR_CUSTOM_START_ANGLE_DEG): the Dual Generator measures each ring's start from its own set's RX pattern
+    zero with it.  The Single Generator leaves it at 0."""
+
+    def __init__(self, P=P_DEFAULT, stator=None, start_offset_deg=0.0):
         self.P = P
+        self.start_offset_deg = float(start_offset_deg)
         mode = str(P.ROTOR_MODE).lower()
         if mode == "according_to_stator":
             self.mode = mode
@@ -164,7 +169,7 @@ class RotorDesign:
         P, st = self.P, self.stator
         self.sectors = st.N
         self.duty = float(P.ROTOR_AUTO_DUTY)
-        self.start_angle = math.radians(P.ROTOR_AUTO_START_ANGLE_DEG)
+        self.start_angle = math.radians(float(P.ROTOR_AUTO_START_ANGLE_DEG) + self.start_offset_deg)
         # how far the copper reaches past the RX band: both edges together, or each edge on its own
         ext = P.AIR_GAP_MM if P.ROTOR_AUTO_EXTENSION_MM is None else float(P.ROTOR_AUTO_EXTENSION_MM)
         given_in = getattr(P, "ROTOR_AUTO_EXTENSION_INNER_MM", None)
@@ -222,7 +227,7 @@ class RotorDesign:
         P = self.P
         self.sectors = int(P.ROTOR_CUSTOM_SECTORS)
         self.duty = float(P.ROTOR_CUSTOM_DUTY)
-        self.start_angle = math.radians(P.ROTOR_CUSTOM_START_ANGLE_DEG)
+        self.start_angle = math.radians(float(P.ROTOR_CUSTOM_START_ANGLE_DEG) + self.start_offset_deg)
         self.r_in = float(P.ROTOR_CUSTOM_INNER_RADIUS_MM)
         self.r_out = float(P.ROTOR_CUSTOM_OUTER_RADIUS_MM)
         self.layers = list(P.ROTOR_CUSTOM_COPPER_LAYERS)
@@ -346,6 +351,7 @@ class RotorDesign:
         return float(getattr(self.P, "COPPER_CONDUCTIVITY_S_M", DEFAULT_COPPER_CONDUCTIVITY))
 
     def skin_depth_um(self):
+        """The skin depth of the rotor metal at EXCITATION_FREQ_HZ, in micrometres."""
         f = float(self.P.EXCITATION_FREQ_HZ)
         return 1e6 * math.sqrt(1.0 / (math.pi * f * MU0 * self.conductivity()))
 
@@ -390,6 +396,7 @@ class RotorDesign:
         return f"  solder mask: removed over the copper, openings {e:g} mm wider than the copper on {where}"
 
     def summary(self):
+        """The rotor's lines for the run's output and for Parameters.txt."""
         lines = [f"Rotor ({self.mode}): {self.sectors} sector(s), metal fraction {self.duty:g} "
                  f"({self.duty * 360.0 / self.sectors:.2f} deg mechanical each)",
                  f"  copper r = {self.r_in:.2f} ... {self.r_out:.2f} mm on {', '.join(self.layers)}, "
@@ -444,6 +451,17 @@ class RotorDesign:
             thickness = P.PCB_THICKNESS_MM                # None = the same board thickness as the stator
         board = KiCadBoard(title="Rotor %d sector%s" % (self.sectors, "" if self.sectors == 1 else "s"),
                            comments=comments, page=self.page_size(), thickness=thickness)
+        self.add_copper(board)
+        if self.bore_radius is not None:
+            board.circle((self.cx, self.cy), self.bore_radius, "Edge.Cuts", P.EDGE_LINE_WIDTH_MM)
+        if self.outline_radius is not None:
+            board.circle((self.cx, self.cy), self.outline_radius, "Edge.Cuts", P.EDGE_LINE_WIDTH_MM)
+        board.save(path, P.MIN_CLEARANCE_MM)
+        return path
+
+    def add_copper(self, board):
+        """Put the rotor's copper sectors on `board` (a PCBWriter.KiCadBoard), then their solder-mask openings.
+        The Dual Generator puts both of its rings on one disc with it."""
         for layer in self.layers:
             for k in range(self.sectors):
                 board.polygon(self.sector_polygon(k), layer)
@@ -451,9 +469,3 @@ class RotorDesign:
             for layer in self.layers:
                 for k in range(self.sectors):
                     board.polygon(self.mask_polygon(k), MASK_LAYER[layer])
-        if self.bore_radius is not None:
-            board.circle((self.cx, self.cy), self.bore_radius, "Edge.Cuts", P.EDGE_LINE_WIDTH_MM)
-        if self.outline_radius is not None:
-            board.circle((self.cx, self.cy), self.outline_radius, "Edge.Cuts", P.EDGE_LINE_WIDTH_MM)
-        board.save(path)
-        return path

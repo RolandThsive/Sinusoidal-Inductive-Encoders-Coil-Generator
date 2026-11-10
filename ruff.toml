@@ -1,0 +1,8 @@
+# Lint settings of the CI (and of .pre-commit-config.yaml).  Run locally with:  ruff check .
+# Only rules that find real mistakes: pyflakes (F: undefined and unused names), bugbear (B: likely bugs) and the
+# pylint errors (PLE).  No formatter and no style rules: the code's hand alignment stays as it is.
+target-version = "py311"
+line-length = 120
+
+[lint]
+select = ["F", "B", "PLE"]

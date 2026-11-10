@@ -40,6 +40,8 @@ class Colour:
 
     @classmethod
     def setup(cls, force=None):
+        """Colours on or off: `force` decides when given; else NO_COLOR turns them off, FORCE_COLOR on, and without
+        either they follow whether the output is a terminal."""
         if force is None:
             force = None if "FORCE_COLOR" not in os.environ else True
         if "NO_COLOR" in os.environ and force is None:
@@ -107,6 +109,8 @@ class Report:
         return f"{conflict_title(names)}: {msg}" if len(names) >= 2 else msg
 
     def print(self, indent="  "):
+        """Print every finding: a conflict with its names as the heading and the explanation below them, the others
+        with their level, coloured by level."""
         for level, msg, names in self.items:
             paint = {"error": Colour.red, "warning": Colour.yellow}.get(level, Colour.dim if level == "info" else None)
             tag = {"error": "ERROR  ", "warning": "WARNING", "info": "info   "}[level]

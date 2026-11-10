@@ -1,15 +1,14 @@
 """
 Dual_ParameterRules.py  -  the rules the Single Generator cannot know: which name belongs in which dual file, the
-values that only a dual board has (the layout mode, the gap between the sets, the band split, the terminal angles,
-the gap between the rotor rings, the frequency warning), and the rules between the two sets (distinct nets, frequencies apart,
-a TX shape that needs a tail, a layer left free for set 1's leads).  Every rule about one set on its own is the
-Single Generator's (ParameterRules.py, ConflictRules.py), run by Dual_CheckParameters.py on each set.
-Nothing to edit here.
+values that only a dual board has (the gap between the sets, the band split, the terminal angles, the gap between
+the rotor rings, the frequency warning), and the rules between the two sets (distinct nets, frequencies apart, a
+layer left free for set 1's leads).  Every rule about one set on its own is the Single
+Generator's (ParameterRules.py, ConflictRules.py), run by Dual_CheckParameters.py on each set, with the set's own
+values (Dual_SetParameters.build).  Nothing to edit here.
 """
 
 import difflib
 import math
-import os
 
 from Generator.Checks import ParameterRules as SingleRules
 from Generator.Rotor import RotorBuilder as RB
@@ -20,7 +19,6 @@ BOARD_FILE = "Dual_Board_Parameters.py"
 
 # the dual-only values: (name, kind, options) for ParameterRules._check_value
 DUAL_SPEC = (
-    ("DUAL_MODE", "int", dict(lo=1, hi=4)),
     ("TRACK_GAP_MM", "num_or_none", dict(lo=0, lo_ex=True)),
     ("BAND_SPLIT", "num", dict(lo=0, hi=1, lo_ex=True, hi_ex=True)),
     ("LAYOUT_TOLERANCE_MM", "num", dict(lo=0, hi=1)),
@@ -38,9 +36,12 @@ _SINGLE_OPTIONAL = {name: opt for _file, name, _kind, opt, _active in SingleRule
 _FILE_ATTR = {"Dual_Board_Parameters.py": "BOARD", "Dual_RX1_Parameters.py": "RX1", "Dual_RX2_Parameters.py": "RX2",
               "Dual_TX1_Parameters.py": "TX1", "Dual_TX2_Parameters.py": "TX2",
               "Dual_Rotor1_Parameters.py": "ROTOR1", "Dual_Rotor2_Parameters.py": "ROTOR2",
-              "Dual_IC1_Parameters.py": "IC1", "Dual_IC2_Parameters.py": "IC2",
-              SP.FIXED_FILE: "FIXED"}
-_RETIRED = getattr(SingleRules, "RETIRED", {})          # names of earlier versions that are no longer read
+              "Dual_IC1_Parameters.py": "IC1", "Dual_IC2_Parameters.py": "IC2"}
+# names of earlier versions that are no longer read: the Single Generator's, and the dual board's own
+_RETIRED = dict(getattr(SingleRules, "RETIRED", {}),
+                DUAL_MODE="there are no layout modes any more: the generator takes the RX bands, board edges and "
+                          "TRACK_GAP_MM you give and places the rest (the wiki page Dual Layout lists the 32 "
+                          "combinations)")
 
 
 def _where(name):
@@ -48,35 +49,10 @@ def _where(name):
     return [f for f, names in SP.NAMES_BY_FILE.items() if name in names]
 
 
-def _same(a, b):
-    """Two parameter values alike (strings without case or spaces, numbers as numbers, bools exactly)."""
-    if isinstance(a, bool) or isinstance(b, bool):
-        return a is b
-    if isinstance(a, str) and isinstance(b, str):
-        return a.strip().lower() == b.strip().lower()
-    if isinstance(a, (int, float)) and isinstance(b, (int, float)):
-        return abs(float(a) - float(b)) < 1e-12
-    return a == b
-
-
-def check_fixed(P, rep):
-    """Every value in Dual_Fixed_Parameters.py is what a dual board fixes it at; anything else is an error that says
-    why the value is fixed."""
-    mod = getattr(P, "FIXED", None)
-    if mod is None:
-        return
-    for name, (req, why) in SP.FIXED_REQUIRED.items():
-        if not hasattr(mod, name):
-            continue                                   # check_files reports it as missing
-        val = getattr(mod, name)
-        if not _same(val, req):
-            rep.error(f"{name} = {val!r} in {SP.FIXED_FILE} is FIXED at {req!r} for every dual board ({why}). "
-                      f"Put it back; a board with another value is a Single Generator board")
-
-
 def check_files(P, rep):
-    """Every dual file: the names it must have are there; a name it should not have is reported (a typo, a line
-    that belongs in another file, or a setting a dual board fixes)."""
+    """Every dual file: the names it must have are there; a name it should not have is reported (a typo, or a line
+    that belongs in another file).  A board value a set may set for itself (Dual_SetParameters.OVERRIDES) missing
+    from the set's file is only noted: the board's value is used."""
     all_known = set(SingleRules.KNOWN_NAMES) | {n for n, _k, _o in DUAL_SPEC}
     for file, attr in _FILE_ATTR.items():
         mod = getattr(P, attr, None)
@@ -87,6 +63,9 @@ def check_files(P, rep):
         present = {n for n in dir(mod) if n.isupper() and not n.startswith("_")}
         for name in expected:
             if name in present:
+                continue
+            if name in SP.OVERRIDES and file != SP.BOARD_FILE:
+                rep.info(f"{name} is not in {file}: the board's value is used ({SP.BOARD_FILE})")
                 continue
             opt = _SINGLE_OPTIONAL.get(name)
             if opt is not None:
@@ -99,9 +78,6 @@ def check_files(P, rep):
         for name in sorted(present - set(expected)):
             if name in _RETIRED:
                 rep.warn(f"{name} in {file} is no longer used and is ignored: {SP.rename_single_files(_RETIRED[name], 1)}")
-            elif name in SP.FIXED_REQUIRED:
-                rep.warn(f"{name} in {file} is ignored: a dual board fixes it at {SP.FIXED_REQUIRED[name][0]!r} "
-                         f"({SP.FIXED_FILE})")
             elif _where(name):
                 rep.warn(f"{name} in {file} is ignored: it belongs in {' / '.join(_where(name))}")
             else:
@@ -127,14 +103,8 @@ def check_dual_values(P, rep):
 def dual_rules(P, v, rep):
     """The rules between the two sets and the dual-only rules."""
     B = P.BOARD
-    # the wiring of each set: series or parallel (a single-layer TX is not a dual option)
-    for k in (1, 2):
-        tx = SP.modules(P, k)[1]
-        w = getattr(tx, "TX_WIRING", None)
-        if isinstance(w, str) and w.strip().lower() == "single":
-            rep.conflict(("TX_WIRING",), f'TX_WIRING = "single" in Dual_TX{k}_Parameters.py: a dual board uses "series" '
-                         f'or "parallel" (turns on both TX layers); a single-layer TX has no place on it')
-    # the six nets must differ (KiCad merges equal names)
+    # the six nets should differ: KiCad joins equal names into one net (the ratsnest, the DRC); the copper itself is
+    # not shorted
     nets = []
     for k in (1, 2):
         rx, tx, _ = SP.modules(P, k)
@@ -147,8 +117,9 @@ def dual_rules(P, v, rep):
     seen = {}
     for val, where in nets:
         if val in seen:
-            rep.error(f"the net name {val!r} is used twice: {seen[val]} and {where}. KiCad would join the two coils "
-                      f"into one net; give every net of the two sets its own name")
+            rep.warn(f"the net name {val!r} is used twice: {seen[val]} and {where}. KiCad joins the two coils into "
+                     f"one net (its ratsnest and DRC treat them as connected; the copper is not shorted); give every "
+                     f"net of the two sets its own name")
         seen.setdefault(val, where)
     # the two excitation frequencies (see TX_FREQ_SEPARATION_MIN in Dual_Board_Parameters.py)
     f1, f2 = (getattr(SP.modules(P, k)[1], "EXCITATION_FREQ_HZ", None) for k in (1, 2))
@@ -181,14 +152,23 @@ def dual_rules(P, v, rep):
                      f"proven on the first board: read each IC's AGC gain with the other TX on and off")
     # one layer free of set 2's copper, for set 1's leads to cross it by hand (radially, as tight pairs, at one
     # azimuth, on the layer farthest from the rotor: a lead running along an RX trace couples the TX in as offset)
+    layers = getattr(B, "PCB_LAYERS", None)
     rx2, tx2, _ = SP.modules(P, 2)
-    used = {getattr(rx2, "RX_LAYER_A", None), getattr(rx2, "RX_LAYER_B", None),
-            getattr(tx2, "TX_LAYER_A", None), getattr(tx2, "TX_LAYER_B", None)}
-    if used >= {1, 2, 3, 4}:
-        rep.warn("set 2 uses all four layers (RX_LAYER_A / B in Dual_RX2_Parameters.py, TX_LAYER_A / B in "
-                 "Dual_TX2_Parameters.py), so no layer is free for set 1's six leads to cross set 2 on their way "
-                 "to its IC. The recommended layers leave Bottom (the layer farthest from the rotor) free: RX on "
-                 "1 + 2, TX on 1 + 3")
+    if layers == 2:
+        rep.warn("a 2-layer dual board (PCB_LAYERS = 2, Dual_Board_Parameters.py): set 2's RX coils run on both "
+                 "layers, so no layer is free for set 1's six leads to cross set 2 on their way to its IC; they need "
+                 "vias or wires across it. A 4-layer board with RX on 1 + 2 and TX on 1 + 3 leaves Bottom (the layer "
+                 "farthest from the rotor) free")
+    elif layers == 4:
+        used = {getattr(rx2, "RX_LAYER_A", None), getattr(rx2, "RX_LAYER_B", None),
+                getattr(tx2, "TX_LAYER_A", None)}
+        if str(getattr(tx2, "TX_WIRING", "")).strip().lower() != "single":
+            used.add(getattr(tx2, "TX_LAYER_B", None))
+        if used >= {1, 2, 3, 4}:
+            rep.warn("set 2 uses all four layers (RX_LAYER_A / B in Dual_RX2_Parameters.py, TX_LAYER_A / B in "
+                     "Dual_TX2_Parameters.py), so no layer is free for set 1's six leads to cross set 2 on their way "
+                     "to its IC. The recommended layers leave Bottom (the layer farthest from the rotor) free: RX on "
+                     "1 + 2, TX on 1 + 3")
     # ring 1 over its TX turns: allowed, but it puts the coarse target next to set 2's RX band
     _rx1, _tx1, ro1 = SP.modules(P, 1)
     cover1 = getattr(ro1, "ROTOR_AUTO_COVER_TX", None)
@@ -207,10 +187,4 @@ def dual_rules(P, v, rep):
     # the output folder
     if hasattr(B, "OUTPUT_DIR") and isinstance(B.OUTPUT_DIR, str) and B.OUTPUT_DIR.strip():
         from Dual_Generator.Run import Dual_OutputFolders
-        d = Dual_OutputFolders.output_dir(B)
-        if os.path.exists(d) and not os.path.isdir(d):
-            rep.error(f"OUTPUT_DIR {d!r} exists but is not a folder")
-        elif os.path.isdir(d) and not os.access(d, os.W_OK):
-            rep.error(f"OUTPUT_DIR {d!r} is not writable")
-        elif not os.path.exists(d):
-            rep.info(f"OUTPUT_DIR {d!r} does not exist yet and will be created (the DualCoil_... folder goes inside it)")
+        SingleRules.check_output_dir(Dual_OutputFolders.output_dir(B), rep, "DualCoil_...")
