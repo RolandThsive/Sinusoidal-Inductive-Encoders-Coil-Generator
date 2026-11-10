@@ -152,24 +152,11 @@ class Stator:
         loops = f"{self.N} loop" + ("s" if self.N != 1 else "")
         subs = "no sub-coils" if self.n_sub == 1 else f"{self.n_sub} sub-coils"
         title = f"Stator {loops}, {subs}"
-        lay = self.tx_lay
-        T = int(P.TX_TURNS)
-        if self.tx_mode == "series":
-            tx = f"TX: Series, Turns: {T} {w(self.tx_layer_p)} {T} {w(self.tx_layer_q)}"
-        elif self.tx_mode == "parallel":
-            tx = f"TX: Parallel, Turns: {T} {w(lay['layers'][0])} {T} {w(lay['layers'][1])}"
-        else:
-            tx = f"TX: Single Layer, Turns: {T} {w(lay['base_layer'])}, Tail: {w(lay['tail_layer'])}"
-        if self.tx_windows_on:
-            tx += ", Style: " + ("Around the Finger" if self.tx_goaround else "Stitched")
-        n_f = len(self.tab_segments) // 3
-        kind = {"all": "Every Outer Tip", "single": "One per Coil"}.get(str(P.RX_TABS).lower(), "")
-        fingers = f"Fingers: {n_f} {w(self.tab_layer)}, Style: {kind}" if n_f else "Fingers: None"
         comments = [
-            tx,                                                                              # Comment1 (bottom)
+            "TX: " + self.tx_words(),                                                        # Comment1 (bottom)
             f"Loops: {self.N}, SIN: Net {P.RX_NET_PHASE_0_2}, Phase 0 (+) / 2 (-), "
             f"COS: Net {P.RX_NET_PHASE_1_3}, Phase 1 (+) / 3 (-)",
-            f"RX: Rising: {w(self.rising_layer)}, Falling: {w(self.falling_layer)}, {fingers}",
+            f"RX: Rising: {w(self.rising_layer)}, Falling: {w(self.falling_layer)}, {self.finger_words()}",
             f"Radius-Outer: {f(self.outer_edge_radius)} mm, Radius-Inner: {f(self.inner_edge_radius)} mm, "
             f"Width-TX: {f(float(P.TX_TRACE_WIDTH_MM))} mm, Width-RX: {f(float(P.RX_TRACE_WIDTH_MM))} mm",  # Comment4
             f"RX Band: Radius-Inner: {f(self.ri)} mm, Radius-Outer: {f(self.ro)} mm, Sub-Coils: {self.n_sub}"
@@ -177,6 +164,31 @@ class Stator:
             "Generator: StatorAssembly.py",
         ]
         return title, comments
+
+    def tx_words(self):
+        """The TX in the title block's words: "Series, Turns: 3 Top 3 Bottom", "Parallel, ...", "Single Layer,
+        Turns: 3 Bottom, Tail: Top", with ", Style: ..." where the TX makes way for the fingers.  The Dual
+        Generator's title block uses it for each set."""
+        w = lambda l: self.LAYER_WORDS.get(l, l)
+        lay = self.tx_lay
+        T = int(self.P.TX_TURNS)
+        if self.tx_mode == "series":
+            tx = f"Series, Turns: {T} {w(self.tx_layer_p)} {T} {w(self.tx_layer_q)}"
+        elif self.tx_mode == "parallel":
+            tx = f"Parallel, Turns: {T} {w(lay['layers'][0])} {T} {w(lay['layers'][1])}"
+        else:
+            tx = f"Single Layer, Turns: {T} {w(lay['base_layer'])}, Tail: {w(lay['tail_layer'])}"
+        if self.tx_windows_on:
+            tx += ", Style: " + ("Around the Finger" if self.tx_goaround else "Stitched")
+        return tx
+
+    def finger_words(self):
+        """The RX bridging fingers in the title block's words: "Fingers: 4 Inner 1, Style: Every Outer Tip" or
+        "Fingers: None" (the Dual Generator's title block uses it too)."""
+        w = lambda l: self.LAYER_WORDS.get(l, l)
+        n_f = len(self.tab_segments) // 3
+        kind = {"all": "Every Outer Tip", "single": "One per Coil"}.get(str(self.P.RX_TABS).lower(), "")
+        return f"Fingers: {n_f} {w(self.tab_layer)}, Style: {kind}" if n_f else "Fingers: None"
 
     def summary(self):
         P = self.P
@@ -210,7 +222,8 @@ class Stator:
             f"  board edge: bore r = {self.inner_edge_radius:g} mm, outer r = {self.outer_edge_radius:g} mm",
             f"  TX terminal: found at {self.tx.angle_deg:.2f} deg of the RX pattern ({self.tx.terminal_search_gap:.3f} mm "
             f"from the nearest RX copper); the board is turned by {self.rotation_deg:.2f} deg so that it sits at "
-            f"{self.terminal_deg:g} deg (the right, horizontal axis); the RX pattern's zero is at {self.rotation_deg:.2f} deg",
+            f"{self.terminal_deg:g} deg{' (the right, horizontal axis)' if self.terminal_deg % 360.0 == 0.0 else ''}; "
+            f"the RX pattern's zero is at {self.rotation_deg:.2f} deg",
         ]
         b = self.band
         if b["mode"] != "radii" or b["inner_from"] != "band" or b["outer_from"] != "band":

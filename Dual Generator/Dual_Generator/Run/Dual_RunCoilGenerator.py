@@ -119,11 +119,11 @@ def main(argv=None):
         try:
             stators[k], r = RS.captured(StatorAssembly.build_stator, sets[k], terminal[k])
         except (ValueError, RuntimeError) as e:
-            SP.for_set(RS.failed(e), k).print()
+            SP.for_set(RS.failed(e), k, P).print()
             narrow_band_hint(layout)
             return stop(f"{SET_WORD[k]} cannot be built")
         r.extend(DesignChecks.check_design(sets[k], stators[k]))
-        gen_rep.extend(SP.for_set(r, k))
+        gen_rep.extend(SP.for_set(r, k, P))
     dual = DSA.assemble(P, layout, stators[1], stators[2])
     sets_rep, _gap = DDC.check_sets(P, layout, stators[1], stators[2])
     gen_rep.extend(sets_rep)
@@ -145,9 +145,9 @@ def main(argv=None):
             try:
                 rings[k] = DRB.build_ring(sets[k], stators[k], getattr(P.BOARD, "ROTOR_START_ANGLE_ZERO", "rx_zero"))
             except (ValueError, RuntimeError) as e:
-                SP.for_set(RS.failed(e), k).print()
+                SP.for_set(RS.failed(e), k, P).print()
                 return stop(f"ring {k} of the rotor cannot be built")
-            r = SP.for_set(DesignChecks.check_design(sets[k], stators[k], rings[k]), k)
+            r = SP.for_set(DesignChecks.check_design(sets[k], stators[k], rings[k]), k, P)
             r.items = [it for it in r.items if it not in gen_rep.items]      # only the rotor's own notes are new
             rot_rep.extend(r)
         disc = DRB.assemble(P, dual, rings[1], rings[2])

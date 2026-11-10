@@ -79,8 +79,7 @@ The Dual Generator builds two coil sets on one stator (a coarse inner set and a 
 and one rotor disc with two rings. It uses the Single Generator's own code, so both folders must stay next to each
 other. Its settings are the files in `Dual Generator/Parameters/` (`Dual_Board_Parameters.py`, `Dual_RX1` / `Dual_RX2`,
 `Dual_TX1` / `Dual_TX2`, `Dual_Rotor1` / `Dual_Rotor2`, `Dual_IC1` / `Dual_IC2` and
-`Dual_SilkScreenSuggestion_Parameters.py`; `Dual_Fixed_Parameters.py` is not to be changed). The defaults build a
-1x / 16x board.
+`Dual_SilkScreenSuggestion_Parameters.py`). The defaults build a 1x / 16x board.
 
 ```bash
 cd "Dual Generator"

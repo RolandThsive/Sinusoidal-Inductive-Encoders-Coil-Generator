@@ -3,9 +3,8 @@ boards.py  -  looks after the test board folders (BoardNNN-<what it tests>) of t
 
     python regression/boards.py new single "spiral-tx-8-turns" TX_SHAPE=spiral TX_TURNS=8
     python regression/boards.py new dual "rx2-cosine-r" RX2.RX_PROFILE=cosine_r --from Board005
-    python regression/boards.py sync                  every board folder given the names the generators' own
-                                                      parameter files set (added) and not those they no longer
-                                                      set (removed)
+    python regression/boards.py sync                  every board folder's parameter files written anew from the
+                                                      generators' own files, with the board's values
     python regression/boards.py table                 the board table in each suite's README.md written anew
     python regression/boards.py unpack single Board007 [FOLDER]
                                                       the board's Stator and Rotor as plain .kicad_pcb files, to
@@ -19,9 +18,10 @@ from another board with --from; each changed value is replaced in place, so the 
 board is written and its files saved next to its parameter files, its tests run, and the README table written anew.
 A board that does not build or fails its tests is removed again: read what the run printed.
 
-sync is for after a change to the generators: a parameter added to a generator's own parameter file is added to every
-board folder with the value it has there (with the comment lines right above it), one removed is removed.  Then run
-run_regression.py, and --update-references where the boards changed on purpose.
+sync is for after a change to a generator's own parameter files: each board file becomes the generator's file again,
+with the board's values put in where they differ.  A parameter added there comes into every board folder with the
+generator's value, one removed goes, and changed comments follow.  Then run run_regression.py, and
+--update-references where the boards changed on purpose.
 """
 
 import argparse
@@ -43,16 +43,6 @@ SUITES = RH.SUITES
 
 
 # ---------------------------------------------------------------------------------------------- parameter file text
-def statements(text):
-    """{NAME: (first line, last line)} (0-based, inclusive) of each top-level NAME = value of a parameter file."""
-    out = {}
-    for node in ast.parse(text).body:
-        if isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name) \
-                and RH.is_parameter_name(node.targets[0].id):
-            out[node.targets[0].id] = (node.lineno - 1, node.end_lineno - 1)
-    return out
-
-
 def set_value(text, name, value):
     """`text` (a parameter file) with the value of `name` replaced in place; None when the file does not set it."""
     lines = text.split("\n")
@@ -83,35 +73,31 @@ def change(folder, files, name, value):
                      (f" (dual names start with the module: {', '.join(keys)})" if len(keys) > 1 else ""))
 
 
-def _block_start(lines, first):
-    """The first line of a statement's block: the statement and the comment lines right above it."""
-    while first > 0 and lines[first - 1].lstrip().startswith("#"):
-        first -= 1
-    return first
+def _values(text):
+    """{NAME: (value node, the value's source text)} of each top-level NAME = value of a parameter file."""
+    out = {}
+    for node in ast.parse(text).body:
+        if isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name) \
+                and RH.is_parameter_name(node.targets[0].id):
+            out[node.targets[0].id] = (node.value, ast.get_source_segment(text, node.value))
+    return out
 
 
 def synced(board_text, own_text):
-    """The board's parameter file with the names of the generator's own file: a name it lacks is copied in, with the
-    comment lines right above it, before the name that follows it in the generator's file; a name the generator's
-    file does not set is removed, with the comment lines right above it.  Returns (text, added, removed)."""
-    own, mine = statements(own_text), statements(board_text)
-    own_lines, lines = own_text.split("\n"), board_text.split("\n")
-    removed = [n for n in mine if n not in own]
-    for n in sorted(removed, key=lambda n: -mine[n][0]):
-        first, last = mine[n]
-        del lines[_block_start(lines, first):last + 1]
-    order = list(own)
-    added = []
-    for i, n in enumerate(order):
-        mine = statements("\n".join(lines))
-        if n in mine:
+    """The generator's own parameter file with the board's values: each name the board's file sets to another value
+    gets the board's value, written as the board's file writes it; a name the board's file lacks keeps the
+    generator's value (added); a name only the board's file sets is left out (removed).  So a board file always has
+    the generator's names, order and comments.  Returns (text, added, removed)."""
+    own, mine = _values(own_text), _values(board_text)
+    lines = own_text.split("\n")
+    for name, (node, src) in sorted(own.items(), key=lambda it: (-it[1][0].lineno, -it[1][0].col_offset)):
+        if name not in mine or mine[name][1] == src:
             continue
-        block = own_lines[_block_start(own_lines, own[n][0]):own[n][1] + 1]
-        after = next((m for m in order[i + 1:] if m in mine), None)
-        before = next((m for m in reversed(order[:i]) if m in mine), None)
-        at = _block_start(lines, mine[after][0]) if after else (mine[before][1] + 1 if before else len(lines))
-        lines[at:at] = block
-        added.append(n)
+        first, last = node.lineno - 1, node.end_lineno - 1
+        head, tail = lines[first][:node.col_offset], lines[last][node.end_col_offset:]
+        lines[first:last + 1] = (head + mine[name][1] + tail).split("\n")
+    added = [n for n in own if n not in mine]
+    removed = [n for n in mine if n not in own]
     return "\n".join(lines), added, removed
 
 
@@ -176,14 +162,17 @@ def cmd_sync(args):
         for name, folder in RH.find_boards(s["root"]).items():
             for f in s["files"]:
                 path = os.path.join(folder, f)
-                text, added, removed = synced(read(path), read(os.path.join(s["parameters"], f)))
-                if added or removed:
+                before = read(path)
+                text, added, removed = synced(before, read(os.path.join(s["parameters"], f)))
+                if text != before:
                     write(path, text)
                     count += 1
                     for n in added:
                         print(f"  {name}/{f}: added {n}")
                     for n in removed:
                         print(f"  {name}/{f}: removed {n}")
+                    if not added and not removed:
+                        print(f"  {name}/{f}: comments brought up to date")
         write_table(g)
     print(f"{count} parameter file(s) changed" + ("; now run regression/run_regression.py" if count else ""))
     return 0

@@ -1,9 +1,11 @@
 """
 test_units.py  -  the dual generator's own building blocks on their own: the set parameters handed to the Single
-Generator, the layout modes, the output folder names, the design checks between the sets, and the guard that the
-dual files supply every name the Single Generator's rule table knows.  Fast, no board written.
+Generator (every name the Single Generator's rule table knows, each in its dual file, and a set's own values for a
+few board values), the layout modes, the output folder names and the design checks between the sets.  Fast, no
+board written.
 """
 
+import math
 import os
 import re
 import tempfile
@@ -26,9 +28,39 @@ class SetParameters(unittest.TestCase):
     def tearDown(self):
         H.restore()
 
-    def test_every_single_name_is_supplied(self):
-        """When the Single Generator gains a parameter, the dual files must supply it too: this list is empty."""
-        self.assertEqual(SP.names_the_single_wants_but_the_dual_lacks(), [])
+    def test_every_single_name_has_a_dual_file(self):
+        """The name table is made from the Single Generator's: each of its names lives in exactly one kind of dual
+        file (the board file, or the set files of one kind), a board value a set may set for itself also in the
+        set file, and the exceptions (MOVED) where they say."""
+        from Generator.Checks import ParameterRules as SingleRules
+        for name in SingleRules.KNOWN_NAMES:
+            kinds = {f for f, names in SP.NAMES_BY_FILE.items() if name in names}
+            if name in SP.OVERRIDES:
+                self.assertEqual(kinds, {SP.BOARD_FILE, SP.set_file(SP.OVERRIDES[name], 1),
+                                         SP.set_file(SP.OVERRIDES[name], 2)}, name)
+            elif SP.dual_file_of(name, 1) == SP.BOARD_FILE:
+                self.assertEqual(kinds, {SP.BOARD_FILE}, name)
+            else:
+                self.assertEqual(kinds, {SP.dual_file_of(name, 1), SP.dual_file_of(name, 2)}, name)
+        self.assertEqual(SP.dual_file_of("EXCITATION_FREQ_HZ", 2), "Dual_TX2_Parameters.py")
+        self.assertEqual(SP.dual_file_of("ROTOR_PCB_THICKNESS_MM", 2), SP.BOARD_FILE)
+        self.assertEqual(SP.dual_file_of("PCB_LAYERS", 1), SP.BOARD_FILE)
+        self.assertEqual(SP.dual_file_of("RX_TABS", 2), "Dual_RX2_Parameters.py")
+        self.assertEqual(SP.dual_file_of("TX_SHAPE", 1), "Dual_TX1_Parameters.py")
+        self.assertEqual(len(SP.MOVED), 9)
+        self.assertEqual(SP.PARAMETER_FILES[0], SP.BOARD_FILE)
+        self.assertEqual(len(SP.PARAMETER_FILES), 9)
+
+    def test_the_repository_files_hold_exactly_the_table(self):
+        """The generator's own parameter files set exactly the names of the table (and the board file the dual-only
+        names too)."""
+        mods = {SP.BOARD_FILE: H.P.BOARD, "Dual_RX1_Parameters.py": H.P.RX1, "Dual_RX2_Parameters.py": H.P.RX2,
+                "Dual_TX1_Parameters.py": H.P.TX1, "Dual_TX2_Parameters.py": H.P.TX2,
+                "Dual_Rotor1_Parameters.py": H.P.ROTOR1, "Dual_Rotor2_Parameters.py": H.P.ROTOR2,
+                "Dual_IC1_Parameters.py": H.P.IC1, "Dual_IC2_Parameters.py": H.P.IC2}
+        for file, mod in mods.items():
+            present = {n for n in dir(mod) if n.isupper() and not n.startswith("_")}
+            self.assertEqual(present, set(SP.NAMES_BY_FILE[file]), file)
 
     def test_build_takes_each_sets_own_values(self):
         s1, s2 = SP.build(H.P, 1), SP.build(H.P, 2)
@@ -38,11 +70,10 @@ class SetParameters(unittest.TestCase):
         self.assertEqual(s1.ROTOR_AUTO_COVER_TX, H.P.ROTOR1.ROTOR_AUTO_COVER_TX)
         self.assertEqual(s2.ROTOR_AUTO_COVER_TX, H.P.ROTOR2.ROTOR_AUTO_COVER_TX)
         self.assertEqual(s1.IC_NAME, H.P.IC1.IC_NAME)
-        for name, (value, _why) in SP.FIXED_REQUIRED.items():
-            self.assertEqual(getattr(s1, name), value, name)
-            self.assertEqual(getattr(s2, name), value, name)
-        self.assertEqual(s1.VIA_DIAMETER_MM, H.P.BOARD.VIA_DIAMETER_MM, "board names are shared")
-        self.assertEqual((s1.VIA_TYPE, s2.VIA_TYPE), (H.P.BOARD.VIA_TYPE, H.P.BOARD.VIA_TYPE), "VIA_TYPE is shared")
+        self.assertEqual((s1.PCB_LAYERS, s2.PCB_LAYERS), (4, 4), "the board's layer count")
+        self.assertEqual((s1.RX_TABS, s2.TX_SHAPE), (H.P.RX1.RX_TABS, H.P.TX2.TX_SHAPE))
+        self.assertEqual(s1.VIA_DIAMETER_MM, H.P.BOARD.VIA_DIAMETER_MM, "None in the set file: the board's value")
+        self.assertEqual((s1.VIA_TYPE, s2.VIA_TYPE), (H.P.BOARD.VIA_TYPE, H.P.BOARD.VIA_TYPE))
         self.assertFalse(hasattr(s1, "DUAL_MODE"), "dual-only names are not handed to the Single Generator")
         self.assertFalse(hasattr(s1, "TRACK_GAP_MM"))
 
@@ -59,11 +90,26 @@ class SetParameters(unittest.TestCase):
         self.assertFalse(hasattr(s, "TX_TURNS"), "the Single Generator's checker reports it")
         self.assertTrue(hasattr(SP.build(H.P, 1), "TX_TURNS"))
 
-    def test_fixed_values_fill_a_missing_name(self):
-        H.apply({"FIXED.RX_TABS": H.DELETE, "FIXED.PCB_LAYERS": 2})
-        v = SP.fixed_values(H.P)
-        self.assertEqual(v["RX_TABS"], "none")
-        self.assertEqual(v["PCB_LAYERS"], 2, "a changed value is handed on; the checker refuses it")
+    def test_a_set_may_set_board_values_for_itself(self):
+        H.apply({"RX2.VIA_DIAMETER_MM": 0.8, "RX2.VIA_DRILL_MM": 0.4, "RX2.VIA_TYPE": "blind",
+                 "RX1.MIN_CLEARANCE_MM": 0.2, "TX1.TX_AC_RESISTANCE_FACTOR": 3.0, "IC2.TANK_CAP_SERIES": "E24"})
+        s1, s2 = SP.build(H.P, 1), SP.build(H.P, 2)
+        self.assertEqual((s1.VIA_DIAMETER_MM, s2.VIA_DIAMETER_MM), (H.P.BOARD.VIA_DIAMETER_MM, 0.8))
+        self.assertEqual((s1.VIA_DRILL_MM, s2.VIA_DRILL_MM), (H.P.BOARD.VIA_DRILL_MM, 0.4))
+        self.assertEqual((s1.VIA_TYPE, s2.VIA_TYPE), ("through", "blind"))
+        self.assertEqual((s1.MIN_CLEARANCE_MM, s2.MIN_CLEARANCE_MM), (0.2, H.P.BOARD.MIN_CLEARANCE_MM))
+        self.assertEqual((s1.TX_AC_RESISTANCE_FACTOR, s2.TX_AC_RESISTANCE_FACTOR),
+                         (3.0, H.P.BOARD.TX_AC_RESISTANCE_FACTOR))
+        self.assertEqual((s1.TANK_CAP_SERIES, s2.TANK_CAP_SERIES), (H.P.BOARD.TANK_CAP_SERIES, "E24"))
+        self.assertEqual(SP.overridden(H.P, 2), {"VIA_DIAMETER_MM": 0.8, "VIA_DRILL_MM": 0.4, "VIA_TYPE": "blind",
+                                                 "TANK_CAP_SERIES": "E24"})
+        # a message about such a value names the set's file; for the other set, the board file
+        msg = "VIA_DRILL_MM = 0.9: too big   (Board_Parameters.py)"
+        self.assertTrue(SP.rename_single_files(msg, 2, tuple(SP.overridden(H.P, 2))).endswith("(Dual_RX2_Parameters.py)"))
+        self.assertTrue(SP.rename_single_files(msg, 1, tuple(SP.overridden(H.P, 1))).endswith("(Dual_Board_Parameters.py)"))
+        rep = Report()
+        rep.add("error", msg, ("VIA_DRILL_MM",))
+        self.assertTrue(SP.for_set(rep, 2, H.P).items[0][1].endswith("(Dual_RX2_Parameters.py)"))
 
     def test_for_set(self):
         """A Single Generator report as findings of one set: 'set k: ' in front, the set's own dual file names."""
@@ -97,7 +143,7 @@ class SetParameters(unittest.TestCase):
                          "ROTOR_MODE = 3: must be one of ...   (Dual_Board_Parameters.py)")
         self.assertEqual(SP.dual_file_of("LOOPS", 2), "Dual_RX2_Parameters.py")
         self.assertEqual(SP.dual_file_of("ROTOR_AUTO_DUTY", 1), "Dual_Rotor1_Parameters.py")
-        self.assertEqual(SP.dual_file_of("TX_SHAPE", 1), SP.FIXED_FILE)
+        self.assertEqual(SP.dual_file_of("TX_SHAPE", 1), "Dual_TX1_Parameters.py")
         self.assertIsNone(SP.dual_file_of("NOT_A_NAME", 1))
 
 
@@ -177,26 +223,51 @@ class TrackLayout(unittest.TestCase):
         """With ring 2 over the TX2 turns the outline keeps: the overhang, ROTOR_AUTO_EDGE_CLEARANCE_MM, half the
         edge line, the polygon vertices and LAYOUT_TOLERANCE_MM; the rotor settings default as in the Single."""
         H.restore()
-        B, TX2, RX2, RO2 = H.P.BOARD, H.P.TX2, H.P.RX2, H.P.ROTOR2
-        ring = TL.BoardLayout.tx_ring(TL._tx_namespace(TX2, B), 0.0)
-        edge = ring["outer_copper_edge"] + RO2.ROTOR_AUTO_TX_OVERHANG_MM + B.ROTOR_AUTO_EDGE_CLEARANCE_MM
-        fine = B.EDGE_LINE_WIDTH_MM / 2.0 + B.ROTOR_CHORD_TOLERANCE_MM
+        B = H.P.BOARD
+        P2 = SP.build(H.P, 2)
+
+        def with_(**kw):
+            return types.SimpleNamespace(**dict(vars(P2), **kw))
+
+        def without(*names):
+            return types.SimpleNamespace(**{n: v for n, v in vars(P2).items() if n not in names})
+
+        ring = TL.BoardLayout.tx_ring(P2, 0.0)
+        edge = ring["outer_copper_edge"] + P2.ROTOR_AUTO_TX_OVERHANG_MM + P2.ROTOR_AUTO_EDGE_CLEARANCE_MM
+        fine = P2.EDGE_LINE_WIDTH_MM / 2.0 + P2.ROTOR_CHORD_TOLERANCE_MM
         self.assertLess(fine, B.LAYOUT_TOLERANCE_MM, "the repository's slack covers the edge line and the vertices")
         want = edge + B.LAYOUT_TOLERANCE_MM
-        self.assertAlmostEqual(TL.outer_room(TX2, B, RO2, RX2), want, 9)
-        no_slack = types.SimpleNamespace(**dict({n: getattr(B, n) for n in dir(B) if n.isupper()}, LAYOUT_TOLERANCE_MM=0.0))
-        self.assertAlmostEqual(TL.outer_room(TX2, no_slack, RO2, RX2), edge + fine, 9, "no slack: what the ring needs")
-        wide_line = types.SimpleNamespace(**dict({n: getattr(B, n) for n in dir(B) if n.isupper()}, EDGE_LINE_WIDTH_MM=0.3))
-        self.assertAlmostEqual(TL.outer_room(TX2, wide_line, RO2, RX2), edge + 0.15 + B.ROTOR_CHORD_TOLERANCE_MM, 9)
-        no_rotor = types.SimpleNamespace(ROTOR_AUTO_COVER_TX=None, ROTOR_AUTO_TX_OVERHANG_MM=None)
-        self.assertAlmostEqual(TL.outer_room(TX2, B, no_rotor, RX2), want, 9, "None: the Single Generator's defaults")
-        self.assertAlmostEqual(TL.outer_room(TX2, B, types.SimpleNamespace(), RX2), want, 9, "missing: the same")
-        self.assertEqual(TL.ring_vertex_sag(B, RO2, RX2, 20.0), B.ROTOR_CHORD_TOLERANCE_MM, "auto steps")
-        steps = types.SimpleNamespace(ROTOR_ARC_STEPS_PER_SECTOR=8, ROTOR_CHORD_TOLERANCE_MM=0.001)
-        sag = TL.ring_vertex_sag(steps, types.SimpleNamespace(ROTOR_AUTO_DUTY=0.5), types.SimpleNamespace(LOOPS=16), 20.0)
-        self.assertAlmostEqual(sag, 20.0 * (1.0 / __import__("math").cos(0.5 * 2 * 3.141592653589793 / 16 / 8 / 2) - 1.0), 12)
-        self.assertLess(TL.outer_room(TX2, B, types.SimpleNamespace(ROTOR_AUTO_COVER_TX=False), RX2), want,
+        self.assertAlmostEqual(TL.outer_room(P2, B), want, 9)
+        no_slack = types.SimpleNamespace(LAYOUT_TOLERANCE_MM=0.0)
+        self.assertAlmostEqual(TL.outer_room(P2, no_slack), edge + fine, 9, "no slack: what the ring needs")
+        self.assertAlmostEqual(TL.outer_room(with_(EDGE_LINE_WIDTH_MM=0.3), B),
+                               edge + 0.15 + P2.ROTOR_CHORD_TOLERANCE_MM, 9)
+        none = with_(ROTOR_AUTO_COVER_TX=None, ROTOR_AUTO_TX_OVERHANG_MM=None)
+        self.assertAlmostEqual(TL.outer_room(none, B), want, 9, "None: the Single Generator's defaults")
+        missing = without("ROTOR_AUTO_COVER_TX", "ROTOR_AUTO_TX_OVERHANG_MM")
+        self.assertAlmostEqual(TL.outer_room(missing, B), want, 9, "missing: the same")
+        self.assertEqual(TL.ring_vertex_sag(P2, 20.0), P2.ROTOR_CHORD_TOLERANCE_MM, "auto steps")
+        steps = types.SimpleNamespace(ROTOR_ARC_STEPS_PER_SECTOR=8, ROTOR_CHORD_TOLERANCE_MM=0.001, ROTOR_AUTO_DUTY=0.5,
+                                      LOOPS=16)
+        self.assertAlmostEqual(TL.ring_vertex_sag(steps, 20.0),
+                               20.0 * (1.0 / math.cos(0.5 * 2 * math.pi / 16 / 8 / 2) - 1.0), 12)
+        self.assertLess(TL.outer_room(with_(ROTOR_AUTO_COVER_TX=False), B), want,
                         "no overhang room when ring 2 stays inside the TX ring")
+
+    def test_the_reach_of_set_1_follows_its_copper(self):
+        """Set 1's reach past its RX band (BoardLayout.outer_copper_reach): the TX turns and tail, a spiral's extra
+        pitch, the fingers.  The defaults: a series TX with no tail, its two ends one pitch outside the last turn."""
+        H.restore()
+        P1 = SP.build(H.P, 1)
+        base = P1.TX_OFFSET_MM + P1.TX_TURNS * P1.TX_PITCH_MM + P1.TX_TRACE_WIDTH_MM / 2.0
+        self.assertAlmostEqual(TL.tx_room(P1), base, 9)
+        tail = types.SimpleNamespace(**dict(vars(P1), TX_TAIL_EXTRA_MM=1.5))
+        self.assertAlmostEqual(TL.tx_room(tail), base + 1.5, 9)
+        fingers = types.SimpleNamespace(**dict(vars(P1), RX_TABS="all", RX_TAB_LENGTH_MM=4.0))
+        self.assertGreaterEqual(TL.tx_room(fingers), 4.0 + P1.RX_TRACE_WIDTH_MM / 2.0)
+        self.assertAlmostEqual(TL.inner_margin(SP.build(H.P, 2)), H.P.BOARD.VIA_DIAMETER_MM / 2.0, 9)
+        H.apply({"RX2.VIA_DIAMETER_MM": 0.9, "RX2.VIA_DRILL_MM": 0.45})
+        self.assertAlmostEqual(TL.inner_margin(SP.build(H.P, 2)), 0.45, 9, "set 2's own via")
 
 
 class Assembler(unittest.TestCase):
@@ -263,7 +334,7 @@ class Assembler(unittest.TestCase):
         lay = TL.resolve(H.P)
         s1 = StatorAssembly.build_stator(SP.build(H.P, 1, lay.set_band(1), lay.edges()), 180.0)
         lo, hi = DDC.copper_extent(s1)
-        self.assertAlmostEqual(hi, lay.reach1, 3, "the TX1 ring reaches where the layout said")
+        self.assertAlmostEqual(hi, lay.reach1, 3, "set 1 reaches where the layout said")
         self.assertGreater(lo, lay.bore)
         rlo, rhi = DDC.rx_extent(s1)
         self.assertLessEqual(rhi, hi)

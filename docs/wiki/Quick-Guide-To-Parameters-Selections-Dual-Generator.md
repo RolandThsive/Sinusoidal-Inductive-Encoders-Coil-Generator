@@ -121,7 +121,7 @@ python Dual_Generator/Run/Dual_RunCoilGenerator.py
 ## 20.6 Related Pages
 
 - [Quick Guide To Parameters Selections](Quick-Guide-To-Parameters-Selections.md): the band, TX and rotor choices of each
-  set, which hold for the Dual Generator too (except the fingers and tails a dual board does not have).
+  set, which hold for each set of a dual board too, the RX fingers and the TX tail included.
 - [Board Features - Dual Generator](Board-Features-Dual-Generator.md): the layout and the checks.
 - [Choosing A Rotor And Stator](Choosing-A-Rotor-And-Stator.md): coarse and fine tracks.
 

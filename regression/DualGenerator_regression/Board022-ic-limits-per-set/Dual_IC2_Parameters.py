@@ -23,3 +23,7 @@ IC_SPLIT_TANK_CAPS = False       # True: the tank capacitance C goes in two halv
                                 # TX2 to ground (IPS2550: recommended for EMC); False: one C across the coil
 # Set IC_OSC_MIN_MHZ and IC_OSC_MAX_MHZ to None to skip the frequency check, IC_MIN_RP_OHM to None to skip the
 # resistance check; with all three None there are no IC checks.
+
+# The capacitor series the estimate suggests this set's tank capacitor from: "E6", "E12" or "E24" (any letter
+# case), or None = the board's TANK_CAP_SERIES (Dual_Board_Parameters.py)
+TANK_CAP_SERIES    = None

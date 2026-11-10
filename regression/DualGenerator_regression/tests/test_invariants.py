@@ -2,12 +2,13 @@
 test_invariants.py  -  what must hold for EVERY dual board the generator writes, measured on the written files
 with RegressionTools (not with the generator's own geometry code), for every test board (the BoardNNN-... folders):
 
-    the file     KiCad 7 header, balanced brackets, nothing the parser does not know, four copper layers, six
-                 nets, the page, the thickness
-    the copper   every segment on the layer its set asked for, inside the outline and outside the bore, with the
-                 trace width of its set; every via with the via size and drill; copper of different nets at least
-                 MIN_CLEARANCE_MM apart unless the run warned about it; the two sets apart by the gap the record
-                 names, set 1 inside set 2
+    the file     KiCad 7 header, balanced brackets, nothing the parser does not know, the copper layers of
+                 PCB_LAYERS, six nets, the page, the thickness
+    the copper   every segment on the layers its set asked for (RX, fingers, TX turns, tail and brackets), inside
+                 the outline and outside the bore, with the trace width of its set; every via with its set's via
+                 size, drill and type (a set may have its own, Dual_SetParameters.OVERRIDES); copper of different
+                 nets of a set at least that set's MIN_CLEARANCE_MM apart unless the run warned about it; the two
+                 sets apart by the gap the record names and by the larger clearance, set 1 inside set 2
     the nets     each RX coil one connected piece whose only free ends sit on its layer-swap vias; each TX one piece
                  whose only free ends are its terminal, set 1 at TERMINAL_1_DEG and set 2 at TERMINAL_2_DEG
     the rotor    ring 1 with set 1's sectors, ring 2 with set 2's, ring 1 inside ring 2 by ROTOR_TRACK_GAP_MM,
@@ -16,14 +17,17 @@ with RegressionTools (not with the generator's own geometry code), for every tes
     the record   the layout, every parameter with its value, the two sets as handed to the Single Generator
 """
 
+import functools
 import math
 import re
+import types
 import unittest
 
 import numpy as np
 
 import harness as H
 import RegressionTools as RT
+from Dual_Generator.Core import Dual_SetParameters as SP
 
 TOL = 1e-6
 LAYER = {1: "F.Cu", 2: "In1.Cu", 3: "In2.Cu", 4: "B.Cu"}
@@ -46,6 +50,37 @@ def set_nets(res, k):
     b = res.stator
     return {"TX": b.net_id[res.p(f"TX{k}", "TX_NET")], "SIN": b.net_id[res.p(f"RX{k}", "RX_NET_PHASE_0_2")],
             "COS": b.net_id[res.p(f"RX{k}", "RX_NET_PHASE_1_3")]}
+
+
+def own(res, k, name):
+    """The value set k uses for a board value it may set for itself (Dual_SetParameters.OVERRIDES: in its RX, TX or
+    IC file, None = the board's value)."""
+    v = res.params[f"{SP.OVERRIDES[name]}{k}"].get(name)
+    return res.p("BOARD", name) if v is None else v
+
+
+def blind(res, k):
+    """Set k's vias are blind vias (VIA_TYPE "blind" on a 4-layer board)."""
+    return str(own(res, k, "VIA_TYPE")).strip().lower() == "blind" and res.p("BOARD", "PCB_LAYERS") == 4
+
+
+def fingers(res, k):
+    return str(res.p(f"RX{k}", "RX_TABS")).strip().lower() in ("all", "single")
+
+
+def set_of_via(res, i):
+    """The set (1 or 2) whose net via i of the stator carries."""
+    n = res.stator.via_net[i]
+    return next(k for k in (1, 2) if n in set_nets(res, k).values())
+
+
+def set_copper(res, k):
+    """Set k's copper alone (its three nets' segments and vias), in the shape RegressionTools.min_clearance reads."""
+    b = res.stator
+    ids = list(set_nets(res, k).values())
+    ms, mv = np.isin(b.seg_net, ids), np.isin(b.via_net, ids)
+    return types.SimpleNamespace(seg=b.seg[ms], seg_net=b.seg_net[ms], seg_layer=b.seg_layer[ms], nets=b.nets,
+                                 via=b.via[mv], via_net=b.via_net[mv])
 
 
 def set_extent(res, k):
@@ -81,7 +116,10 @@ class FileFormat(unittest.TestCase):
                     want = 2 if which == "stator" else sum(r is not None for r in rotor_disc(res))
                     self.assertEqual(len(b.edges), want, f"{which}: bore and outline on Edge.Cuts")
                     self.assertTrue(b.title, f"{which}: a title")
-                self.assertEqual(res.stator.copper_layers, ["F.Cu", "In1.Cu", "In2.Cu", "B.Cu"], "a dual board has 4 layers")
+                n = res.p("BOARD", "PCB_LAYERS")
+                self.assertEqual(res.stator.copper_layers, ["F.Cu", "In1.Cu", "In2.Cu", "B.Cu"] if n == 4 else
+                                 ["F.Cu", "B.Cu"], f"the copper layers of PCB_LAYERS = {n}")
+                self.assertEqual(set(res.stator.seg_layer), set(res.stator.seg_layer) & set(res.stator.copper_layers))
                 self.assertEqual(res.stator.thickness, res.p("BOARD", "PCB_THICKNESS_MM"))
                 want = res.p("BOARD", "ROTOR_PCB_THICKNESS_MM") or res.p("BOARD", "PCB_THICKNESS_MM")
                 self.assertEqual(res.rotor.thickness, want)
@@ -95,7 +133,7 @@ class FileFormat(unittest.TestCase):
                 self.assertEqual(len(names), 6)
                 self.assertEqual(set(b.nets.values()) - {""}, names)
                 self.assertEqual(b.nets_used(), set(b.nets) - {0})
-                if str(res.p("BOARD", "VIA_TYPE")).lower() != "blind":
+                if not (blind(res, 1) or blind(res, 2)):
                     self.assertEqual(set(b.via_layers), {("F.Cu", "B.Cu")}, "every via goes through the board")
 
     def test_outline_and_centre(self):
@@ -126,16 +164,38 @@ class Copper(unittest.TestCase):
                     self.assertLess(hi, b.outer_radius, f"{layer}: copper reaches past the outline")
 
     def test_each_net_on_the_layers_its_set_asked_for(self):
+        """RX: RX_LAYER_A / B (Top and Bottom on a 2-layer board), plus RX_TAB_LAYER when the fingers are on a layer
+        of their own.  TX: its turn layers (TX_LAYER_A, and TX_LAYER_B unless TX_WIRING = "single"); a single-layer
+        TX adds its tail layer (TX_SERIES_UNDERPASS_LAYER when given); the go-around brackets may add the underpass
+        layer when given."""
         for case in cases():
             with self.subTest(case=case):
                 res, b = H.board(case), H.board(case).stator
                 for k in (1, 2):
                     nets = set_nets(res, k)
-                    rx_layers = {LAYER[res.p(f"RX{k}", "RX_LAYER_A")], LAYER[res.p(f"RX{k}", "RX_LAYER_B")]}
-                    tx_layers = {LAYER[res.p(f"TX{k}", "TX_LAYER_A")], LAYER[res.p(f"TX{k}", "TX_LAYER_B")]}
+                    rx, tx = functools.partial(res.p, f"RX{k}"), functools.partial(res.p, f"TX{k}")
+                    if res.p("BOARD", "PCB_LAYERS") == 2:
+                        rx_layers = {"F.Cu", "B.Cu"}
+                    else:
+                        rx_layers = {LAYER[rx("RX_LAYER_A")], LAYER[rx("RX_LAYER_B")]}
+                    tab = rx("RX_TAB_LAYER")
+                    if fingers(res, k) and not isinstance(tab, str):
+                        rx_layers.add(LAYER[tab])
                     for coil in ("SIN", "COS"):
                         self.assertEqual(set(b.seg_layer[b.seg_net == nets[coil]]), rx_layers, f"set {k} {coil}")
-                    self.assertEqual(set(b.seg_layer[b.seg_net == nets["TX"]]), tx_layers, f"set {k} TX")
+                    on = set(b.seg_layer[b.seg_net == nets["TX"]])
+                    under = tx("TX_SERIES_UNDERPASS_LAYER")
+                    under = None if isinstance(under, str) else LAYER[under]
+                    if str(tx("TX_WIRING")).strip().lower() == "single":
+                        self.assertEqual(len(on), 2, f"set {k} TX: its turn layer and its tail layer, not {sorted(on)}")
+                        self.assertIn(LAYER[tx("TX_LAYER_A")], on, f"set {k} TX")
+                        if under is not None:
+                            self.assertIn(under, on, f"set {k} TX: the tail on TX_SERIES_UNDERPASS_LAYER")
+                    else:
+                        turns = {LAYER[tx("TX_LAYER_A")], LAYER[tx("TX_LAYER_B")]}
+                        self.assertLessEqual(turns, on, f"set {k} TX")
+                        extra = {under} if under is not None and fingers(res, k) else set()
+                        self.assertLessEqual(on - turns, extra, f"set {k} TX on {sorted(on)}")
 
     def test_trace_widths_and_via_sizes(self):
         for case in cases():
@@ -148,18 +208,29 @@ class Copper(unittest.TestCase):
                                          {res.p(f"RX{k}", "RX_TRACE_WIDTH_MM")}, f"set {k} {coil} width")
                     self.assertEqual(set(np.round(b.seg[b.seg_net == nets["TX"], 4], 6).tolist()),
                                      {res.p(f"TX{k}", "TX_TRACE_WIDTH_MM")}, f"set {k} TX width")
-                self.assertEqual(set(np.round(b.via[:, 2], 6).tolist()), {res.p("BOARD", "VIA_DIAMETER_MM")})
-                self.assertEqual(set(np.round(b.via[:, 3], 6).tolist()), {res.p("BOARD", "VIA_DRILL_MM")})
+                n_vias = 0
+                for k in (1, 2):
+                    m = np.isin(b.via_net, list(set_nets(res, k).values()))
+                    n_vias += int(m.sum())
+                    self.assertGreater(int(m.sum()), 0, f"set {k} has no via")
+                    self.assertEqual(set(np.round(b.via[m, 2], 6).tolist()), {own(res, k, "VIA_DIAMETER_MM")}, f"set {k}")
+                    self.assertEqual(set(np.round(b.via[m, 3], 6).tolist()), {own(res, k, "VIA_DRILL_MM")}, f"set {k}")
+                self.assertEqual(n_vias, len(b.via), "every via belongs to a set")
 
     def test_clearance_between_nets(self):
+        """Within each set, its own MIN_CLEARANCE_MM; on the whole board, the smaller of the two (between the sets
+        the larger one holds: test_set_1_inside_set_2_with_the_recorded_gap)."""
         for case in cases():
             with self.subTest(case=case):
                 res, b = H.board(case), H.board(case).stator
-                need = res.p("BOARD", "MIN_CLEARANCE_MM")
-                d, where = RT.min_clearance(b, max_interest=need + 0.5)
-                if d < need - TOL:
-                    self.assertTrue(res.has(r"WARNING.*(clearance|from other copper)"),
-                                    f"{d:.4f} mm between {where}, below {need} mm, and the run did not warn")
+                needs = {k: own(res, k, "MIN_CLEARANCE_MM") for k in (1, 2)}
+                for what, copper, need in ((1, set_copper(res, 1), needs[1]), (2, set_copper(res, 2), needs[2]),
+                                           ("both", b, min(needs.values()))):
+                    d, where = RT.min_clearance(copper, max_interest=need + 0.5)
+                    if d < need - TOL:
+                        self.assertTrue(res.has(r"WARNING.*(clearance|from other copper)"),
+                                        f"set {what}: {d:.4f} mm between {where}, below {need} mm, and the run did "
+                                        f"not warn")
 
     def test_set_1_inside_set_2_with_the_recorded_gap(self):
         for case in cases():
@@ -175,7 +246,7 @@ class Copper(unittest.TestCase):
                 self.assertAlmostEqual(hi1, float(m.group(1)), 3)
                 self.assertAlmostEqual(lo2, float(m.group(2)), 3)
                 self.assertAlmostEqual(gap, float(m.group(3)), 3)
-                self.assertGreaterEqual(gap, res.p("BOARD", "MIN_CLEARANCE_MM") - 1e-3)
+                self.assertGreaterEqual(gap, max(own(res, 1, "MIN_CLEARANCE_MM"), own(res, 2, "MIN_CLEARANCE_MM")) - 1e-3)
                 if res.p("BOARD", "TRACK_GAP_MM") is not None:
                     self.assertGreaterEqual(gap, res.p("BOARD", "TRACK_GAP_MM") - res.p("BOARD", "LAYOUT_TOLERANCE_MM") - 1e-3)
 
@@ -231,32 +302,33 @@ class Nets(unittest.TestCase):
                         L = np.hypot(s[:, 2] - s[:, 0], s[:, 3] - s[:, 1])
                         mx = float(np.sum((s[:, 0] + s[:, 2]) / 2 * L) / L.sum())
                         my = float(np.sum((s[:, 1] + s[:, 3]) / 2 * L) / L.sum())
-                        self.assertLess(math.hypot(mx - cx, my - cy), 0.25, f"set {k} {coil} centroid off")
+                        limit = 2.0 if fingers(res, k) else 0.25      # the fingers sit on one side
+                        self.assertLess(math.hypot(mx - cx, my - cy), limit, f"set {k} {coil} centroid off")
 
 
 class Vias(unittest.TestCase):
-    """VIA_TYPE (Dual_Board_Parameters.py, both sets).  A through via is written with F.Cu and B.Cu; with "blind" every
-    via carries KiCad's blind token and the two layers that carry its net's copper there (top-most first), except a via
-    between Top and Bottom, which stays a through via."""
+    """VIA_TYPE (Dual_Board_Parameters.py, or a set's own in its RX file).  A through via is written with F.Cu and
+    B.Cu; a via of a set with "blind" vias (on a 4-layer board) carries KiCad's blind token and the two layers that
+    carry its net's copper there (top-most first), except a via between Top and Bottom, which stays a through via."""
 
     def test_via_layers_follow_the_via_type(self):
         for case in cases():
             with self.subTest(case=case):
                 res, b = H.board(case), H.board(case).stator
-                blind = str(res.p("BOARD", "VIA_TYPE")).lower() == "blind"
                 self.assertGreater(len(b.via), 0)
-                if not blind:
-                    self.assertFalse(b.via_blind.any(), "a blind via on a board of through vias")
-                    self.assertEqual(set(b.via_layers), {("F.Cu", "B.Cu")})
-                    continue
-                radius = res.p("BOARD", "VIA_DIAMETER_MM") / 2.0
                 n_blind = 0
                 for i in range(len(b.via)):
+                    k = set_of_via(res, i)
+                    if not blind(res, k):
+                        self.assertFalse(b.via_blind[i], f"via {i}: a blind via of set {k}, whose vias are through vias")
+                        self.assertEqual(b.via_layers[i], ("F.Cu", "B.Cu"), f"via {i} of set {k}")
+                        continue
+                    radius = own(res, k, "VIA_DIAMETER_MM") / 2.0
                     pair, centre = b.via_layers[i], b.via[i, :2]
                     self.assertLess(RT.LAYER_INDEX[pair[0]], RT.LAYER_INDEX[pair[1]], f"via {i}: {pair} not top-most first")
                     m = b.seg_net == b.via_net[i]
                     d = RT.point_segment_distance(np.repeat(centre[None, :], int(m.sum()), axis=0), b.seg[m, 0:2], b.seg[m, 2:4])
-                    touching = {b.seg_layer[j] for j, k in zip(np.flatnonzero(m), d <= radius + 1e-3, strict=True) if k}
+                    touching = {b.seg_layer[j] for j, near in zip(np.flatnonzero(m), d <= radius + 1e-3, strict=True) if near}
                     self.assertEqual(set(pair), touching, f"via {i} at {centre.tolist()}: written as {pair}, the copper of "
                                                           f"its net there is on {sorted(touching)}")
                     if set(pair) == {"F.Cu", "B.Cu"}:
@@ -265,7 +337,8 @@ class Vias(unittest.TestCase):
                         self.assertTrue(b.via_blind[i], f"via {i}: {pair} must carry the blind token")
                         n_blind += 1
                 self.assertEqual(n_blind, int(b.via_blind.sum()))
-                self.assertGreater(n_blind, 0, "a blind board with no blind via")
+                if blind(res, 1) or blind(res, 2):
+                    self.assertGreater(n_blind, 0, "a set of blind vias with no blind via")
 
 
 class Rotor(unittest.TestCase):
@@ -345,9 +418,7 @@ class Record(unittest.TestCase):
                 "SET 1: ELECTRICAL ESTIMATE", "SET 2: ELECTRICAL ESTIMATE", "PARAMETER VALUES USED",
                 "THE TWO SETS AS HANDED TO THE SINGLE GENERATOR (its names)", "PARAMETER FILES (verbatim copies)",
                 "LEAD CUTTING SILKSCREEN SUGGESTION")
-    FILES = ("Dual_Board_Parameters.py", "Dual_RX1_Parameters.py", "Dual_RX2_Parameters.py", "Dual_TX1_Parameters.py",
-             "Dual_TX2_Parameters.py", "Dual_Rotor1_Parameters.py", "Dual_Rotor2_Parameters.py", "Dual_IC1_Parameters.py",
-             "Dual_IC2_Parameters.py", "Dual_Fixed_Parameters.py")
+    FILES = SP.PARAMETER_FILES
 
     def test_sections_values_and_copies(self):
         for case in cases():

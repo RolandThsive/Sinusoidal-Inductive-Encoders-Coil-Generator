@@ -78,24 +78,32 @@ class DrawnIntoTheFile(unittest.TestCase):
                     self.assertGreater(r - c["radius"], b.inner_radius)
 
     def test_suggested_via_sites_have_room_on_every_layer(self):
-        res = H.board("Board001-default")
-        b = res.stator
-        need = res.p("BOARD", "MIN_CLEARANCE_MM")
-        via_r = res.p("BOARD", "VIA_DIAMETER_MM") / 2.0
-        _l, dots = silk_items(b, "F.SilkS")
-        for c in dots:
-            p = np.array(c["centre"])
-            P = np.repeat(p[None, :], len(b.seg), axis=0)
-            d = RT.point_segment_distance(P, b.seg[:, 0:2], b.seg[:, 2:4]) - b.seg[:, 4] / 2.0 - via_r
-            near = d < need
-            own = np.zeros(len(b.seg), dtype=bool)
-            if near.any():
-                nets = set(b.seg_net[near].tolist())
-                self.assertEqual(len(nets), 1, f"a dot at {c['centre']} is within {need} mm of nets {nets}")
-                own = b.seg_net == nets.pop()
-            self.assertGreaterEqual(float(d[~own].min()), need - 1e-6, f"dot at {c['centre']}")
-            dv = np.hypot(b.via[:, 0] - p[0], b.via[:, 1] - p[1]) - b.via[:, 2] / 2.0 - via_r
-            self.assertGreaterEqual(float(dv.min()), need - 1e-6, f"dot at {c['centre']} too close to a via")
+        """A suggested via keeps the clearance from every other net and every via, with the larger via and clearance
+        of the two sets (the default board, and the board whose sets have vias and a clearance of their own)."""
+        boards = ["Board001-default"] + [n for n in H.BOARDS if n.endswith("-vias-per-set-blind-set1")]
+        self.assertEqual(len(boards), 2)
+        for name in boards:
+            res = H.board(name)
+            b = res.stator
+            sets = [{n: res.params[f"RX{k}"][n] if res.params[f"RX{k}"][n] is not None else res.p("BOARD", n)
+                     for n in ("MIN_CLEARANCE_MM", "VIA_DIAMETER_MM")} for k in (1, 2)]
+            need = max(s["MIN_CLEARANCE_MM"] for s in sets)
+            via_r = max(s["VIA_DIAMETER_MM"] for s in sets) / 2.0
+            _l, dots = silk_items(b, "F.SilkS")
+            self.assertGreater(len(dots), 0, name)
+            for c in dots:
+                p = np.array(c["centre"])
+                P = np.repeat(p[None, :], len(b.seg), axis=0)
+                d = RT.point_segment_distance(P, b.seg[:, 0:2], b.seg[:, 2:4]) - b.seg[:, 4] / 2.0 - via_r
+                near = d < need
+                own = np.zeros(len(b.seg), dtype=bool)
+                if near.any():
+                    nets = set(b.seg_net[near].tolist())
+                    self.assertEqual(len(nets), 1, f"{name}: a dot at {c['centre']} is within {need} mm of nets {nets}")
+                    own = b.seg_net == nets.pop()
+                self.assertGreaterEqual(float(d[~own].min()), need - 1e-6, f"{name}: dot at {c['centre']}")
+                dv = np.hypot(b.via[:, 0] - p[0], b.via[:, 1] - p[1]) - b.via[:, 2] / 2.0 - via_r
+                self.assertGreaterEqual(float(dv.min()), need - 1e-6, f"{name}: dot at {c['centre']} too close to a via")
 
     def test_lettering_keeps_off_the_vias(self):
         res = H.board("Board001-default")
@@ -155,6 +163,31 @@ class SettingsAndFont(unittest.TestCase):
         self.assertEqual(len(s.warnings), 1)
         self.assertIn("SILKSCREEN_FOO", s.warnings[0])
         self.assertEqual(s.SILKSCREEN_DOT_RADIUS_MM, LCS.DEFAULTS["SILKSCREEN_DOT_RADIUS_MM"])
+
+    def test_break_layers_default_follows_the_layer_count(self):
+        """A missing or wrong SILKSCREEN_BREAK_LAYERS falls back to the RX layers of the board: Top and Inner 1 on 4
+        layers, Top and Bottom on 2."""
+        H.apply({"SILK.SILKSCREEN_BREAK_LAYERS": H.DELETE})
+        self.assertEqual(LCS.Settings(H.P).SILKSCREEN_BREAK_LAYERS, ["F.Cu", "In1.Cu"])
+        H.apply({"BOARD.PCB_LAYERS": 2, "SILK.SILKSCREEN_BREAK_LAYERS": H.DELETE})
+        self.assertEqual(LCS.Settings(H.P).SILKSCREEN_BREAK_LAYERS, ["F.Cu", "B.Cu"])
+        H.apply({"BOARD.PCB_LAYERS": 2, "SILK.SILKSCREEN_BREAK_LAYERS": "Top"})
+        s = LCS.Settings(H.P)
+        self.assertEqual(s.SILKSCREEN_BREAK_LAYERS, ["F.Cu", "B.Cu"])
+        self.assertIn('["F.Cu", "B.Cu"]', s.warnings[0])
+        H.restore()
+        H.apply({"BOARD.PCB_LAYERS": 2})
+        self.assertEqual(LCS.Settings(H.P).SILKSCREEN_BREAK_LAYERS, ["F.Cu", "In1.Cu"], "the file's value is kept")
+
+    def test_vias_keep_the_room_of_the_larger_set(self):
+        """A set with its own vias or clearance (Dual_RX<k>_Parameters.py): the suggested vias keep the larger room."""
+        B = H.P.BOARD
+        self.assertEqual((LCS.board_values(H.P).VIA_DIAMETER_MM, LCS.board_values(H.P).MIN_CLEARANCE_MM),
+                         (B.VIA_DIAMETER_MM, B.MIN_CLEARANCE_MM))
+        H.apply({"RX2.VIA_DIAMETER_MM": 0.8, "RX1.MIN_CLEARANCE_MM": 0.3, "RX1.VIA_DIAMETER_MM": 0.4})
+        v = LCS.board_values(H.P)
+        self.assertEqual((v.VIA_DIAMETER_MM, v.MIN_CLEARANCE_MM, v.CENTER_X_MM), (0.8, 0.3, B.CENTER_X_MM))
+        self.assertEqual(H.P.BOARD.VIA_DIAMETER_MM, B.VIA_DIAMETER_MM, "the board values are not changed")
 
     def test_font_is_the_shared_one(self):
         font, why = LCS.load_font()

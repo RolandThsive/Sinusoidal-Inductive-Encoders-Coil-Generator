@@ -14,15 +14,18 @@ there is one.
 
 From the centre out:   bore | RX1 band | TX1 ring | gap | RX2 band | TX2 ring | outline
 
-The radii between the bands come from the Single Generator's own rules, so that the sets it then builds land
-exactly where this module put them:
+The radii between the bands come from the Single Generator's own rules, applied to each set's own values
+(Dual_SetParameters.build: its own vias and clearance where the set file gives them), so that the sets it then
+builds land exactly where this module put them:
     bore            = RX1 band start - INNER_EDGE_INSET_MM                     (BoardLayout.resolve)
-    TX ring reach   = RX band end + TX_OFFSET_MM + TX_TURNS x TX_PITCH_MM + half a trace   (BoardLayout.tx_ring:
-                      the series TX has no tail; its two ends sit one pitch outside the last turn)
+    set 1 reach     = RX1 band end + how far set 1's copper reaches past it: the TX turns (a spiral one pitch
+                      farther), the TX tail, the RX bridging fingers and the go-around brackets, widths included
+                      (BoardLayout.outer_copper_reach)
     set 2 innermost copper = RX2 band start - max(half an RX trace, a via radius)  (the inner-tip vias)
-    gap             = set 2 innermost copper - TX1 reach
-    outline         = RX2 band end + outer_edge_room  (BoardLayout.outer_edge_room: OUTER_EDGE_OFFSET_MM, or the
-                      TX2 reach + OUTER_EDGE_TAIL_MARGIN_MM, whichever is larger)
+    gap             = set 2 innermost copper - set 1 reach; at least TRACK_GAP_MM, or the larger of the two sets'
+                      MIN_CLEARANCE_MM
+    outline         = RX2 band end + outer_edge_room  (BoardLayout.outer_edge_room: OUTER_EDGE_OFFSET_MM, the
+                      TX2 tail + OUTER_EDGE_TAIL_MARGIN_MM or set 2's fingers + the margin, whichever is larger)
 Dual_DesignChecks measures the same radii on the built copper afterwards.
 
 resolve(P) returns a Layout (below) or raises ParameterConflict in the Single Generator's style (the names of the
@@ -61,7 +64,8 @@ BOARD_FILE = "Dual_Board_Parameters.py"
 class Layout(types.SimpleNamespace):
     """mode; band1, band2 (dict ri, ro, how = "radii" | "centre" | "placed", names = the single names to set);
     bore, outline (mm) and where each came from; gap_setting (TRACK_GAP_MM or None), gap_required, gap_expected
-    (mm, from the formulas); reach1 (TX1 reach), inner2 (set 2 innermost copper); room1, margin2, outer_room2."""
+    (mm, from the formulas); reach1 (set 1 outermost copper), inner2 (set 2 innermost copper); room1, margin2,
+    outer_room2."""
 
     def set_band(self, k):
         """{single name: value} for set k's RX band (Dual_SetParameters.build)."""
@@ -81,7 +85,7 @@ class Layout(types.SimpleNamespace):
             out.append(f"  RX{k} band r = {f(b['ri'])} ... {f(b['ro'])} mm (RX_R_BASE_MM {f((b['ri'] + b['ro']) / 2)}, "
                        f"RX_A_MM {f(a)}): {how[b['how']]}")
         out.append(f"  bore r = {f(self.bore)} mm ({self.bore_from}), outline r = {f(self.outline)} mm ({self.outline_from})")
-        out.append(f"  TX1 ring reaches r = {f(self.reach1)} mm; set 2 copper starts at r = {f(self.inner2)} mm: "
+        out.append(f"  set 1 copper reaches r = {f(self.reach1)} mm; set 2 copper starts at r = {f(self.inner2)} mm: "
                    f"gap {f(self.gap_expected)} mm"
                    + (f" (TRACK_GAP_MM = {f(self.gap_setting)})" if self.gap_setting is not None
                       else f" (measured; at least MIN_CLEARANCE_MM = {f(self.gap_required)} needed)"))
@@ -107,19 +111,11 @@ def _placed(ri, ro):
                                                     "RX_A_MM": round((ro - ri) / 2.0, 9)})
 
 
-def _tx_namespace(tx, board):
-    """What the Single Generator's ring formulas read, for one set's TX with no tail and no fingers."""
-    return types.SimpleNamespace(
-        TX_TURNS=tx.TX_TURNS, TX_PITCH_MM=tx.TX_PITCH_MM, TX_TRACE_WIDTH_MM=tx.TX_TRACE_WIDTH_MM,
-        TX_OFFSET_MM=tx.TX_OFFSET_MM, TX_SHAPE=SP.FIXED_REQUIRED["TX_SHAPE"][0], TX_TAIL_EXTRA_MM=0.0, RX_TABS="none",
-        OUTER_EDGE_OFFSET_MM=board.OUTER_EDGE_OFFSET_MM, OUTER_EDGE_TAIL_MARGIN_MM=board.OUTER_EDGE_TAIL_MARGIN_MM)
-
-
-def tx_room(tx, board):
-    """How far a set's TX ring reaches past its RX band end (mm): the ends of the series TX one pitch outside the
-    last turn, plus half a trace (BoardLayout.tx_ring with no tail)."""
-    ring = BoardLayout.tx_ring(_tx_namespace(tx, board), 0.0)
-    return max(ring["tail_end"] + float(tx.TX_TRACE_WIDTH_MM) / 2.0, ring["outer_copper_edge"])
+def tx_room(P1):
+    """How far set 1's copper reaches past its RX band end (mm): the TX turns, the TX tail, the RX bridging fingers
+    and the go-around brackets, widths included (BoardLayout.outer_copper_reach).  P1: set 1's namespace
+    (Dual_SetParameters.build)."""
+    return BoardLayout.outer_copper_reach(P1)
 
 
 def _setting(module, name, default):
@@ -128,45 +124,47 @@ def _setting(module, name, default):
     return default if v is None else v
 
 
-def ring_vertex_sag(board, rotor, rx, r):
+def ring_vertex_sag(Pk, r):
     """How far the outermost polygon vertices of a rotor ring of radius r reach past r (mm): the ring's arcs are
     chords whose vertices sit on a slightly larger circle (RotorBuilder.sector_polygon).  With
     ROTOR_ARC_STEPS_PER_SECTOR = "auto" that is ROTOR_CHORD_TOLERANCE_MM; with a number of steps it follows from
-    the chord angle."""
-    steps = getattr(board, "ROTOR_ARC_STEPS_PER_SECTOR", "auto")
+    the chord angle.  Pk: the set's namespace (Dual_SetParameters.build)."""
+    steps = getattr(Pk, "ROTOR_ARC_STEPS_PER_SECTOR", "auto")
     if isinstance(steps, str) and steps.strip().lower() == "auto":
-        return float(_setting(board, "ROTOR_CHORD_TOLERANCE_MM", 0.001))
-    half = float(rotor.ROTOR_AUTO_DUTY) * 2.0 * math.pi / int(rx.LOOPS) / max(8, int(steps)) / 2.0
+        return float(_setting(Pk, "ROTOR_CHORD_TOLERANCE_MM", 0.001))
+    half = float(Pk.ROTOR_AUTO_DUTY) * 2.0 * math.pi / int(Pk.LOOPS) / max(8, int(steps)) / 2.0
     return float(r) * (1.0 / math.cos(half) - 1.0)
 
 
-def outer_room(tx, board, rotor=None, rx=None):
-    """From the RX2 band end to the outline (mm): the Single Generator's own rule (BoardLayout.outer_edge_room),
-    and, when ring 2 of the rotor covers the TX2 turns (ROTOR_AUTO_COVER_TX, according_to_stator), also room for
-    its overhang past the outermost turn as RotorBuilder limits the ring: ROTOR_AUTO_EDGE_CLEARANCE_MM inside
-    the outline, then LAYOUT_TOLERANCE_MM of slack or, when they need more, half the edge line plus the polygon
-    vertices (ring_vertex_sag), which the ring also keeps inside the outline (the disc has the stator's
-    outline).  The rotor settings default as in the Single Generator."""
-    room = BoardLayout.outer_edge_room(_tx_namespace(tx, board))
-    if rotor is not None and str(getattr(board, "ROTOR_MODE", "")).lower() == "according_to_stator" \
-            and bool(_setting(rotor, "ROTOR_AUTO_COVER_TX", RB.DEFAULT_COVER_TX)):
-        ring = BoardLayout.tx_ring(_tx_namespace(tx, board), 0.0)
-        overhang = _setting(rotor, "ROTOR_AUTO_TX_OVERHANG_MM", RB.DEFAULT_TX_OVERHANG_MM)
-        clearance = _setting(board, "ROTOR_AUTO_EDGE_CLEARANCE_MM", 0.0)
-        edge_line = _setting(board, "EDGE_LINE_WIDTH_MM", 0.0)
+def outer_room(P2, board):
+    """From the RX2 band end to the outline (mm): the Single Generator's own rule (BoardLayout.outer_edge_room: the
+    TX turns and tail, the fingers, the margins), and, when ring 2 of the rotor covers the TX2 turns
+    (ROTOR_AUTO_COVER_TX, according_to_stator), also room for its overhang past the outermost turn as RotorBuilder
+    limits the ring: ROTOR_AUTO_EDGE_CLEARANCE_MM inside the outline, then LAYOUT_TOLERANCE_MM (board) of slack
+    or, when they need more, half the edge line plus the polygon vertices (ring_vertex_sag), which the ring also
+    keeps inside the outline (the disc has the stator's outline).  P2: set 2's namespace
+    (Dual_SetParameters.build); the rotor settings default as in the Single Generator."""
+    room = BoardLayout.outer_edge_room(P2)
+    if str(getattr(P2, "ROTOR_MODE", "")).lower() == "according_to_stator" \
+            and bool(_setting(P2, "ROTOR_AUTO_COVER_TX", RB.DEFAULT_COVER_TX)):
+        ring = BoardLayout.tx_ring(P2, 0.0)
+        overhang = _setting(P2, "ROTOR_AUTO_TX_OVERHANG_MM", RB.DEFAULT_TX_OVERHANG_MM)
+        clearance = _setting(P2, "ROTOR_AUTO_EDGE_CLEARANCE_MM", 0.0)
+        edge_line = _setting(P2, "EDGE_LINE_WIDTH_MM", 0.0)
         tol = _setting(board, "LAYOUT_TOLERANCE_MM", 0.0)
         try:
             edge = ring["outer_copper_edge"] + float(overhang)
-            sag = ring_vertex_sag(board, rotor, rx, edge) if rx is not None else 0.0
+            sag = ring_vertex_sag(P2, edge) if hasattr(P2, "LOOPS") else 0.0
             room = max(room, edge + float(clearance) + max(float(tol), float(edge_line) / 2.0 + sag))
         except (TypeError, ValueError):
             pass                                   # a bad value: the Single Generator's checks report it
     return room
 
 
-def inner_margin(rx, board):
-    """From the RX2 band start inwards to the set's innermost copper (mm): the inner-tip vias, or half a trace."""
-    return max(float(rx.RX_TRACE_WIDTH_MM) / 2.0, float(board.VIA_DIAMETER_MM) / 2.0)
+def inner_margin(P2):
+    """From the RX2 band start inwards to the set's innermost copper (mm): the inner-tip vias (set 2's own
+    VIA_DIAMETER_MM), or half a trace."""
+    return max(float(P2.RX_TRACE_WIDTH_MM) / 2.0, float(P2.VIA_DIAMETER_MM) / 2.0)
 
 
 def mode_of(P):
@@ -249,10 +247,11 @@ def resolve(P):
     if gap is not None:
         gap = _num("TRACK_GAP_MM", gap, BOARD_FILE)
     inset = float(B.INNER_EDGE_INSET_MM)
-    clearance = float(B.MIN_CLEARANCE_MM)
-    room1 = tx_room(P.TX1, B)                    # TX1 reach past the RX1 band end
-    margin2 = inner_margin(P.RX2, B)             # set 2's copper inside its RX band start
-    room2 = outer_room(P.TX2, B, P.ROTOR2, P.RX2)   # from the RX2 band end to the outline (ring 2's overhang included)
+    P1, P2 = SP.build(P, 1), SP.build(P, 2)      # each set in the Single Generator's names (its own vias, clearance)
+    clearance = max(float(P1.MIN_CLEARANCE_MM), float(P2.MIN_CLEARANCE_MM))   # between the sets: the larger one
+    room1 = tx_room(P1)                          # set 1's copper past the RX1 band end
+    margin2 = inner_margin(P2)                   # set 2's copper inside its RX2 band start
+    room2 = outer_room(P2, B)                    # from the RX2 band end to the outline (ring 2's overhang included)
 
     # ---- the bands (the mode is DUAL_MODE, checked above against what is set)
     if mode == 1:
@@ -308,6 +307,12 @@ def resolve(P):
         # (the Single Generator checks each edge against its own set's band and reports what it needs)
 
     # ---- the gap between the sets
+    if b1["ri"] >= b2["ri"]:
+        raise ParameterConflict(SP.BAND_NAMES, f"the RX1 band ({b1['ri']:g} ... {b1['ro']:g} mm) must lie inside the RX2 "
+                                f"band ({b2['ri']:g} ... {b2['ro']:g} mm): set 1 is the inner set. To have the coils "
+                                f"of Dual_RX2 inside, swap the two sets' files: Dual_RX1 / TX1 / Rotor1 / "
+                                f"IC1_Parameters.py with Dual_RX2 / TX2 / Rotor2 / IC2_Parameters.py, and "
+                                f"TERMINAL_1_DEG with TERMINAL_2_DEG ({BOARD_FILE})")
     reach1 = b1["ro"] + room1
     inner2 = b2["ri"] - margin2
     expected = inner2 - reach1
@@ -316,14 +321,12 @@ def resolve(P):
         if mode == 1:
             raise AssertionError("DUAL_MODE 1 placed the bands without the gap")  # (cannot happen: the bands are placed)
         need = b1["ro"] + room1 + required + margin2
-        raise ParameterConflict(SP.BAND_NAMES, f"the two sets run into each other: the TX1 ring reaches r = {reach1:.2f} "
-                                f"mm (RX1 band end {b1['ro']:g} + TX1 offset, turns and pitch) and set 2's copper starts "
-                                f"at r = {inner2:.2f} mm (RX2 band start {b2['ri']:g} - its vias), {expected:.2f} mm "
-                                f"apart; at least {required:g} mm must stay free. Move the RX2 band start to "
-                                f"{need:.2f} mm or more, or the RX1 band in, or lower TX1's turns, pitch or offset")
-    if b1["ro"] >= b2["ri"]:
-        raise ParameterConflict(SP.BAND_NAMES, f"the RX1 band ({b1['ri']:g} ... {b1['ro']:g} mm) must lie inside the RX2 "
-                                f"band ({b2['ri']:g} ... {b2['ro']:g} mm)")
+        raise ParameterConflict(SP.BAND_NAMES, f"the two sets run into each other: set 1's copper reaches r = "
+                                f"{reach1:.2f} mm (RX1 band end {b1['ro']:g} + its TX turns, tail and fingers) and set "
+                                f"2's copper starts at r = {inner2:.2f} mm (RX2 band start {b2['ri']:g} - its vias), "
+                                f"{expected:.2f} mm apart; at least {required:g} mm must stay free. Move the RX2 band "
+                                f"start to {need:.2f} mm or more, or the RX1 band in, or lower TX1's turns, pitch or "
+                                f"offset")
     return Layout(mode=mode, band1=b1, band2=b2, bore=bore, outline=outline, bore_from=bore_from,
                   outline_from=outline_from, gap_setting=gap, gap_required=required, gap_expected=expected,
                   reach1=reach1, inner2=inner2, room1=room1, margin2=margin2, outer_room2=room2)

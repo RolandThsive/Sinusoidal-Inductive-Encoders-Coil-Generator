@@ -16,22 +16,18 @@ Bottom dark blue. Traces are drawn at their true width. Unless a caption says ot
 bore radius 7.25 mm, outer radius 26.875 mm, RX1 band 8.45 to 11.7 mm, RX2 band 18.0 to 23.9 mm, 4 TX turns per layer
 in both sets, TX pitch 0.35 mm, traces 0.15 mm, vias 0.6 / 0.3 mm.
 
-## 16.1 What A Dual Board Fixes
+## 16.1 Each Set Is A Single Generator Board
 
-A dual board is always built one way. These Single Generator settings are fixed in `Dual_Fixed_Parameters.py`, and the
-checker refuses any other value and says why:
+Each set takes every Single Generator setting: the layer count (`PCB_LAYERS`, once for the board), its RX with or
+without bridging fingers (`RX_TABS`), its TX with any wiring (`"series"`, `"parallel"` or `"single"`), any shape
+(`TX_SHAPE`) and a tail (`TX_TAIL_EXTRA_MM`), and, if it needs them, its own vias and clearance. The defaults build the
+usual dual board: 4 layers, plain RX bands broken out by hand, stepped series TX rings that end one pitch outside their
+last turn.
 
-| Setting | Fixed Value | Why |
-|---|---|---|
-| `PCB_LAYERS` | `4` | Each set needs two RX layers and two TX layers; two layers cannot hold two sets without fingers |
-| `RX_TABS` | `"none"` | Set 1's bridging fingers would cross set 2's band; both RX rings are plain bands, broken out by hand |
-| `TX_SHAPE` | `"stepped_diagonal"` | Stepped turns only: `"spiral"` is not used, and `"stepped_arc"`'s last arc would need a tail |
-| `TX_TAIL_EXTRA_MM` | `0` | No tail: the TX ring ends one pitch outside its last turn, so nothing runs out through the other set |
-| `RX_RISING_EDGE_LAYER` | `"F.Cu"` | A 2-layer setting, unused on 4 layers |
-
-The finger settings (`RX_TAB_LAYER`, `RX_TAB_LENGTH_MM`, `RX_TAB_WIDTH_MM`, `TX_SERIES_UNDERPASS_LAYER`,
-`TX_PARALLEL_BREAK_STYLE`) and `TX_STEPPED_ARC_RADIUS_MM` are listed there too, as unused. `TX_WIRING` is not fixed:
-each set chooses `"series"` or `"parallel"`, and `"single"` is a conflict.
+Where the sets sit follows from what each set's copper needs (Dual_TrackLayout.py): set 1 reaches past its RX band by
+its TX turns, its tail, its fingers and the go-around brackets around them, whichever is farthest, and set 2 starts
+`TRACK_GAP_MM` (or the larger `MIN_CLEARANCE_MM`) beyond that. The gap is then measured on the built copper. Set 1 is
+always the inner set: an RX1 band outside the RX2 band is an error that says to swap the two sets' files.
 
 ## 16.2 RX Coils
 

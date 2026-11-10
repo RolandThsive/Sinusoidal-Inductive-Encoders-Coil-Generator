@@ -17,7 +17,7 @@
 | TX Break Style | Go-around (staggered) or stitched windows where a finger crosses the TX ring |
 | TX Terminal | Placed automatically where it keeps the largest gap from the RX copper (with `RX_TABS = "single"`, as close to the two fingers as the clearance allows); the board is turned so it sits at 0° |
 | Rotor | Generated from the stator, or fully custom |
-| Board | 2 or 4 copper layers (always 4 on a dual board), through or blind vias (`VIA_TYPE`), fixed or automatic board edges |
+| Board | 2 or 4 copper layers (a dual board too), through or blind vias (`VIA_TYPE`), fixed or automatic board edges |
 | Dual Layout | Four `DUAL_MODE`s: the bands fitted between fixed edges, the edges from the bands, one band placed across a gap, or everything given; the gap between the sets and the rotor rings measured and checked |
 | Silkscreen | A lead-cutting suggestion on the stator's silkscreen: where to break each RX coil and where the TX ends get their vias, with the lead names; no copper changed |
 | Checks | Parameter rules, finished-geometry rules and the generator's own TX self-clearance check, with named conflicts; `GENERATOR_MODE` `normal` or `strict` |

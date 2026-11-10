@@ -43,7 +43,7 @@ regression/
 └── DualGenerator_regression/
     ├── README.md
     ├── tests/
-    ├── Board001-default/          The eleven Dual_..._Parameters.py files and the same three written files
+    ├── Board001-default/          The ten Dual_..._Parameters.py files and the same three written files
     └── ...
 ```
 
@@ -66,7 +66,7 @@ python regression/boards.py new dual "rx2-cosine-r" RX2.RX_PROFILE=cosine_r
 ```
 
 The folder gets the next free number. Each `NAME=VALUE` is written as in a parameter file; a Dual Generator name starts
-with its file (`BOARD.`, `RX1.`, `TX2.`, `ROTOR1.`, `FIXED.`, `SILK.` and so on). The parameter files are copied from
+with its file (`BOARD.`, `RX1.`, `TX2.`, `ROTOR1.`, `SILK.` and so on). The parameter files are copied from
 `Board001-default` (or from another board with `--from`), each value is replaced where it stands, then the board is
 written, its files saved, its tests run and the README table written anew. A board that does not build, or fails its
 tests, is removed again.
@@ -84,9 +84,9 @@ Each suite has the same files in its `tests` folder:
 
 | File | Single Generator | Dual Generator |
 |---|---|---|
-| `test_checker.py` | One value of every kind set wrongly, missing and unknown names, inactive values left alone, the conflicts between values (vias, layers, nets, edges, fingers, rotor), the geometry that stops a run, strict mode. Each case states the return code and the lines the run must print | The four `DUAL_MODE` layouts and every way they can be set wrongly, the fixed file, the dual rules (nets, frequencies, layers, rings), the Single Generator's own checks on each set, strict mode |
+| `test_checker.py` | One value of every kind set wrongly, missing and unknown names, inactive values left alone, the conflicts between values (vias, layers, nets, edges, fingers, rotor), the geometry that stops a run, strict mode. Each case states the return code and the lines the run must print | The four `DUAL_MODE` layouts and every way they can be set wrongly, the names of each dual file, the values a set sets for itself, the dual rules (nets, frequencies, layers, rings), the Single Generator's own checks on each set, strict mode |
 | `test_boards.py` | Every board folder written again and compared with the files saved in it (stator, rotor, record), character for character; the run's output folder must hold exactly these three files and the two [output pictures](Output-Pictures.md); every board folder must set exactly the generator's parameter names, hold nothing else and be in the README table | The same, for the dual boards |
-| `test_invariants.py` | What every written board must obey: the file format, the layer table, the nets, copper inside the edges with the right widths, the clearance between nets, closed RX coils, the TX in one piece with its terminal at 0°, the rotor sectors, the record; the same values written twice are identical | The same for a dual board: four layers, six nets, set 1 inside set 2 by the recorded gap, the TX ends at `TERMINAL_1_DEG` / `TERMINAL_2_DEG`, the two rotor rings |
+| `test_invariants.py` | What every written board must obey: the file format, the layer table, the nets, copper inside the edges with the right widths, the clearance between nets, closed RX coils, the TX in one piece with its terminal at 0°, the rotor sectors, the record; the same values written twice are identical | The same for a dual board, each set with its own values (layers, fingers, vias, clearance): six nets, set 1 inside set 2 by the recorded gap, the TX ends at `TERMINAL_1_DEG` / `TERMINAL_2_DEG`, the two rotor rings |
 | `test_silkscreen.py` | The lead-cutting silkscreen: three suggestions on both sides, via sites with room, lettering off the vias and mirrored on the bottom, the settings with their fallbacks, the font, the name placer | Six suggestions, names with the set number, breaks near each set's terminal, sides and labels options |
 | `test_cli.py` | The generator started as a script in a fresh Python process, from its folder and from elsewhere, with `--check`, `--help` and a bad option | The same, plus the checker on its own and the promise that a dual run leaves no `__pycache__` in the Single Generator |
 | `test_units.py` | The folder names, the OUTPUT_DIR rule, the KiCad writer, the report and colour classes, the parameter and geometry helpers, and the hooks the Dual Generator builds on | The set parameters handed to the Single Generator and the "set k:" findings, the layout modes, the folder names, the Single's OUTPUT_DIR rule, and a guard that the dual files supply every name the Single Generator knows |

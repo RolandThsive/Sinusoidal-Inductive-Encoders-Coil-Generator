@@ -47,7 +47,7 @@ class DualStator:
             raise ValueError("DualStator.write needs the file path; boards are written by Dual_RunCoilGenerator.py")
         title, comments = self.title_block()
         board = KiCadBoard(title=title, comments=comments, page=self.page_mm, thickness=B.PCB_THICKNESS_MM,
-                           copper_layers=4)
+                           copper_layers=int(B.PCB_LAYERS))
         for net in self.nets():                    # all six nets first, then each set's copper
             board.net(net)
         for st in self.sets:
@@ -66,11 +66,11 @@ class DualStator:
         lines = []
         for k, st in ((1, s1), (2, s2)):
             Pk = st.P
-            lay = st.tx_lay["layers"] if st.tx_mode == "parallel" else (st.tx_layer_p, st.tx_layer_q)
+            fingers = st.finger_words()                # the Single Generator's own words for the TX and the fingers
             lines.append(f"Set {k}: Loops: {st.N}, RX Band: {f(st.ri)} ... {f(st.ro)} mm, SIN: Net {Pk.RX_NET_PHASE_0_2}, "
                          f"COS: Net {Pk.RX_NET_PHASE_1_3}, Rising: {w(st.rising_layer)}, Falling: {w(st.falling_layer)}, "
-                         f"TX: Net {Pk.TX_NET}, {str(Pk.TX_WIRING).strip().capitalize()}, Turns: {int(Pk.TX_TURNS)} "
-                         f"{w(lay[0])} {int(Pk.TX_TURNS)} {w(lay[1])}, Ends at {f(st.terminal_deg)} deg")
+                         + (f"{fingers}, " if not fingers.endswith("None") else "")
+                         + f"TX: Net {Pk.TX_NET}, {st.tx_words()}, Ends at {f(st.terminal_deg)} deg")
         comments = [
             lines[0],                                                                          # Comment1 (bottom)
             lines[1],

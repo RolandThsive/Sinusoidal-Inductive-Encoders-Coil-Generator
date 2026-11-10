@@ -19,9 +19,9 @@ passed.  [../README.md](../README.md) explains the board folders and how to add 
 
 | file | what it tests |
 |---|---|
-| `tests/test_checker.py` | the four DUAL_MODE layouts and every way they can be set wrongly, the fixed file, the dual rules (nets, frequencies, layers, rings), the Single Generator's own checks on each set, strict mode; each case says the return code and the lines the run must print |
+| `tests/test_checker.py` | the four DUAL_MODE layouts and every way they can be set wrongly, the names of each dual file, the values a set sets for itself, the dual rules (nets, frequencies, layers, rings), the Single Generator's own checks on each set, strict mode; each case says the return code and the lines the run must print |
 | `tests/test_boards.py` | every board folder written again from its own parameter files and compared with the files kept in it (stator, rotor, record), character for character; every board folder complete (the generator's parameter names, the three files, nothing else) and listed below |
-| `tests/test_invariants.py` | what must hold for every dual board: the file format, four layers, six nets, copper inside the edges on the layers each set asked for, the clearance between nets, set 1 inside set 2 by the recorded gap, closed RX coils, TX terminals at TERMINAL_1_DEG / TERMINAL_2_DEG, the two rotor rings, the record with every value as used; the same values written twice are identical |
+| `tests/test_invariants.py` | what must hold for every dual board: the file format, the layers of PCB_LAYERS, six nets, copper inside the edges on the layers each set asked for (RX, fingers, TX turns and tail), each set's via size, drill and type, the clearance between nets (each set's own), set 1 inside set 2 by the recorded gap, closed RX coils, TX terminals at TERMINAL_1_DEG / TERMINAL_2_DEG, the two rotor rings, the record with every value as used; the same values written twice are identical |
 | `tests/test_silkscreen.py` | the lead-cutting silkscreen of both sets: six suggestions, names with the set number, breaks near each set's terminal, via sites with room, lettering off the vias, sides and labels options |
 | `tests/test_units.py` | the set parameters handed to the Single Generator and the "set k:" findings, the layout modes, folder names, the Single's OUTPUT_DIR rule, the guard that the dual files supply every name the Single Generator knows |
 | `tests/test_cli.py` | the run script started the way a user starts it, in a fresh Python process, from its own folder and from elsewhere, with --check, --help and a bad option; the checker on its own; no `__pycache__` left in the Single Generator |
@@ -47,9 +47,9 @@ The suite cannot notice a feature that arrived without a test: that part is the 
 
 ## The boards
 
-Each board folder holds the eleven parameter files and the three files the generator wrote from them.  The
+Each board folder holds the ten parameter files and the three files the generator wrote from them.  The
 table lists what each board sets differently from Board001-default (a name starts with its file: BOARD., RX1., TX2.,
-ROTOR1., FIXED., SILK. and so on).
+ROTOR1., SILK. and so on).
 
 <!-- board table: written by `python regression/boards.py table`, do not edit by hand -->
 | Board | Values that differ from Board001-default |
@@ -123,4 +123,17 @@ ROTOR1., FIXED., SILK. and so on).
 | [Board067-rotor1-covers-tx-overhang-0-2](Board067-rotor1-covers-tx-overhang-0-2/) | `ROTOR1.ROTOR_AUTO_COVER_TX = True`<br>`ROTOR1.ROTOR_AUTO_TX_OVERHANG_MM = 0.2` |
 | [Board068-rotor-extensions-tx-clearance](Board068-rotor-extensions-tx-clearance/) | `ROTOR1.ROTOR_AUTO_EXTENSION_INNER_MM = 0.3`<br>`ROTOR1.ROTOR_AUTO_EXTENSION_OUTER_MM = 0.2`<br>`ROTOR2.ROTOR_AUTO_COVER_TX = False`<br>`ROTOR2.ROTOR_AUTO_EXTENSION_MM = 0.3`<br>`ROTOR2.ROTOR_AUTO_TX_CLEARANCE_MM = 0.2` |
 | [Board069-custom-rotor-radii-start-duty-layers](Board069-custom-rotor-radii-start-duty-layers/) | `BOARD.ROTOR_MODE = "custom"`<br>`ROTOR1.ROTOR_CUSTOM_START_ANGLE_DEG = 15.0`<br>`ROTOR1.ROTOR_CUSTOM_INNER_RADIUS_MM = 7.9`<br>`ROTOR1.ROTOR_CUSTOM_OUTER_RADIUS_MM = 12.0`<br>`ROTOR2.ROTOR_CUSTOM_DUTY = 0.4`<br>`ROTOR2.ROTOR_CUSTOM_INNER_RADIUS_MM = 17.6`<br>`ROTOR2.ROTOR_CUSTOM_OUTER_RADIUS_MM = 26.0`<br>`ROTOR2.ROTOR_CUSTOM_COPPER_LAYERS = ["B.Cu"]` |
+| [Board070-two-layer-board](Board070-two-layer-board/) | `BOARD.PCB_LAYERS = 2`<br>`RX2.RX_RISING_EDGE_LAYER = "B.Cu"`<br>`TX1.TX_LAYER_B = 4`<br>`TX2.TX_LAYER_B = 4`<br>`SILK.SILKSCREEN_BREAK_LAYERS = ["F.Cu", "B.Cu"]` |
+| [Board071-fingers-set1-all](Board071-fingers-set1-all/) | `RX1.RX_TABS = "all"` |
+| [Board072-fingers-set2-single-length-width](Board072-fingers-set2-single-length-width/) | `RX2.RX_TABS = "single"`<br>`RX2.RX_TAB_LENGTH_MM = 2.5`<br>`RX2.RX_TAB_WIDTH_MM = 0.8` |
+| [Board073-fingers-set1-tx-goes-around](Board073-fingers-set1-tx-goes-around/) | `RX1.RX_TABS = "all"`<br>`RX1.RX_TAB_LAYER = 1`<br>`RX1.RX_TAB_LENGTH_MM = 4.2` |
+| [Board074-fingers-set2-parallel-stitched](Board074-fingers-set2-parallel-stitched/) | `RX2.RX_TABS = "single"`<br>`RX2.RX_TAB_LAYER = 1`<br>`RX2.RX_TAB_LENGTH_MM = 3.2`<br>`TX2.TX_WIRING = "parallel"`<br>`TX2.TX_PITCH_MM = 0.6` |
+| [Board075-fingers-set1-parallel-staggered](Board075-fingers-set1-parallel-staggered/) | `RX1.RX_TABS = "all"`<br>`RX1.RX_TAB_LAYER = 1`<br>`RX1.RX_TAB_LENGTH_MM = 5.4`<br>`TX1.TX_WIRING = "parallel"`<br>`TX1.TX_PITCH_MM = 0.6`<br>`TX1.TX_PARALLEL_BREAK_STYLE = "staggered"` |
+| [Board076-spiral-tx-both-tx2-tail](Board076-spiral-tx-both-tx2-tail/) | `TX1.TX_SHAPE = "spiral"`<br>`TX2.TX_SHAPE = "spiral"`<br>`TX2.TX_TAIL_EXTRA_MM = 1.0` |
+| [Board077-stepped-arc-tx1-tail](Board077-stepped-arc-tx1-tail/) | `TX1.TX_SHAPE = "stepped_arc"`<br>`TX1.TX_TAIL_EXTRA_MM = 1.5` |
+| [Board078-single-layer-tx-both-underpass-4](Board078-single-layer-tx-both-underpass-4/) | `TX1.TX_WIRING = "single"`<br>`TX2.TX_WIRING = "single"`<br>`TX2.TX_LAYER_A = 3`<br>`TX2.TX_SERIES_UNDERPASS_LAYER = 4` |
+| [Board079-vias-per-set-blind-set1](Board079-vias-per-set-blind-set1/) | `RX1.VIA_DIAMETER_MM = 0.4`<br>`RX1.VIA_DRILL_MM = 0.15`<br>`RX1.VIA_TYPE = "blind"`<br>`RX2.VIA_DIAMETER_MM = 0.7`<br>`RX2.VIA_DRILL_MM = 0.35`<br>`TX1.TX_LAYER_B = 2`<br>`TX2.TX_PITCH_MM = 0.4` |
+| [Board080-clearance-set2-0-25](Board080-clearance-set2-0-25/) | `RX2.MIN_CLEARANCE_MM = 0.25`<br>`TX2.TX_OFFSET_MM = 0.9`<br>`TX2.TX_PITCH_MM = 0.45` |
+| [Board081-tank-caps-ac-factor-per-set](Board081-tank-caps-ac-factor-per-set/) | `TX1.TX_AC_RESISTANCE_FACTOR = 3.0`<br>`IC2.TANK_CAP_SERIES = "E24"` |
+| [Board082-mode1-fingers-both-sets](Board082-mode1-fingers-both-sets/) | `BOARD.PAGE_SIZE_MM = (200, 200)`<br>`BOARD.MIN_CLEARANCE_MM = 0.2`<br>`BOARD.DUAL_MODE = 1`<br>`BOARD.INNER_EDGE_RADIUS_MM = 8.5`<br>`BOARD.OUTER_EDGE_RADIUS_MM = 29.5`<br>`BOARD.TRACK_GAP_MM = 0.5`<br>`BOARD.PCB_THICKNESS_MM = 1.6`<br>`RX1.INSIDE_RADIUS_MM = None`<br>`RX1.OUTSIDE_RADIUS_MM = None`<br>`RX1.RX_TRACE_WIDTH_MM = 0.2`<br>`RX1.RX_TABS = "all"`<br>`RX2.INSIDE_RADIUS_MM = None`<br>`RX2.OUTSIDE_RADIUS_MM = None`<br>`RX2.RX_TRACE_WIDTH_MM = 0.2`<br>`RX2.RX_TABS = "all"`<br>`TX1.TX_TURNS = 3`<br>`TX1.TX_PITCH_MM = 0.6`<br>`TX1.TX_TRACE_WIDTH_MM = 0.2`<br>`TX1.TX_INSIDE_VIA_DISTANCE_MM = 0.1`<br>`TX2.TX_TURNS = 3`<br>`TX2.TX_OFFSET_MM = 1.1`<br>`TX2.TX_PITCH_MM = 0.6`<br>`TX2.TX_TRACE_WIDTH_MM = 0.2`<br>`TX2.TX_INSIDE_VIA_DISTANCE_MM = 0.3` |
 <!-- end of board table -->

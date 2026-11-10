@@ -1,6 +1,6 @@
 """
-test_checker.py  -  the dual parameter checks (the four modes, the fixed file, the dual rules, the Single
-Generator's checks on each set) and the decision of Dual_RunCoilGenerator.py, run with --check (nothing is
+test_checker.py  -  the dual parameter checks (the four modes, the settings a dual board used to fix, a set's own
+vias and clearance, the dual rules, the Single Generator's checks on each set) and the decision of Dual_RunCoilGenerator.py, run with --check (nothing is
 written).  Every case sets a few values in memory and says what the generator must print and return.
 
 A case is (name, overrides, return code, must-match patterns, must-not-match patterns).  Most cases start from
@@ -70,14 +70,29 @@ CASES = [
     ("err_mode4_edges_too_tight", mode1(**BAND1, **BAND2_CENTRE, **{"BOARD.DUAL_MODE": 4, "BOARD.TRACK_GAP_MM": None, "BOARD.OUTER_EDGE_RADIUS_MM": 28.0}), 1, [r"ERROR"], []),
     ("err_board_too_small_narrow_bands", mode1(**{"BOARD.OUTER_EDGE_RADIUS_MM": 20.0}), 1, [r"ERROR", r"hint    DUAL_MODE 1 fitted"], []),
     ("err_board_far_too_small", mode1(**{"BOARD.OUTER_EDGE_RADIUS_MM": 16.0}), 1, [r"ERROR", r"too small for two RX bands"], []),
-    # ------------------------------------------------------------------ the fixed file
-    ("err_fixed_pcb_layers_changed", mode1(**{"FIXED.PCB_LAYERS": 2}), 1, [r"ERROR", r"is FIXED at 4"], []),
-    ("err_fixed_name_missing", mode1(**{"FIXED.RX_TABS": DELETE}), 1, [r"ERROR", r"RX_TABS is missing"], []),
-    ("err_fixed_tx_shape_changed", mode1(**{"FIXED.TX_SHAPE": "spiral"}), 1, [r"ERROR", r"is FIXED at 'stepped_diagonal'"], []),
-    ("warn_cover_tx_in_the_fixed_file", mode1(**{"FIXED.ROTOR_AUTO_COVER_TX": False}), 0,
-     [r"WARNING", r"ROTOR_AUTO_COVER_TX in Dual_Fixed_Parameters.py is ignored: it belongs in Dual_Rotor1_Parameters.py / Dual_Rotor2_Parameters.py"], [r"ERROR"]),
-    ("warn_tx_shape_in_a_tx_file", mode1(**{"TX2.TX_SHAPE": "spiral"}), 0, [r"WARNING", r"TX_SHAPE in Dual_TX2_Parameters.py is ignored"], [r"ERROR"]),
-    ("warn_fixed_name_in_board_file", mode1(**{"BOARD.PCB_LAYERS": 2}), 0, [r"WARNING", r"PCB_LAYERS"], [r"ERROR"]),
+    # ------------------------------------------------------------------ what a dual board used to fix (Dual_Fixed_Parameters.py)
+    ("two_layer_board", mode1(**{"BOARD.PCB_LAYERS": 2, "TX1.TX_LAYER_B": 4, "TX2.TX_LAYER_B": 4}), 0,
+     [r"WARNING a 2-layer dual board \(PCB_LAYERS = 2", r"CHECK PASSED"], [r"ERROR"]),
+    ("err_two_layers_with_an_inner_tx_layer", mode1(**{"BOARD.PCB_LAYERS": 2}), 1,
+     [r"ERROR   set 1: TX_LAYER_B must be one of 1, 4", r"ERROR   set 2: TX_LAYER_B must be one of 1, 4"], []),
+    ("fingers_on_set_1_push_set_2_out", mode1(**{"RX1.RX_TABS": "all"}), 0,
+     [r"set 1 copper reaches r = 18\.95 mm", r"0\.500 mm free", r"CHECK PASSED"], [r"ERROR", r"differs from the layout"]),
+    ("fingers_on_set_2", {"RX2.RX_TABS": "single"}, 0, [r"CHECK PASSED"], [r"ERROR"]),
+    ("tail_on_tx1_pushes_set_2_out", {"TX1.TX_TAIL_EXTRA_MM": 1.0}, 0,
+     [r"set 1 copper reaches r = 14\.975 mm", r"2\.725 mm free", r"CHECK PASSED"], [r"ERROR", r"differs from the layout"]),
+    ("spiral_tx2_with_a_tail", {"TX2.TX_SHAPE": "spiral", "TX2.TX_TAIL_EXTRA_MM": 1.0}, 0, [r"CHECK PASSED"], [r"ERROR"]),
+    ("stepped_arc_tx1", {"TX1.TX_SHAPE": "stepped_arc", "TX1.TX_TAIL_EXTRA_MM": 1.5}, 0,
+     [r"set 1 copper reaches r = 15\.475 mm", r"CHECK PASSED"], [r"ERROR", r"differs from the layout"]),
+    ("err_stepped_arc_without_a_tail", {"TX1.TX_SHAPE": "stepped_arc"}, 1, [r"ERROR.*TX_STEPPED_ARC_RADIUS_MM"], []),
+    ("err_a_moved_name_missing", mode1(**{"RX1.RX_TABS": DELETE}), 1,
+     [r"ERROR", r"RX_TABS is missing - add it to Dual_RX1_Parameters.py"], []),
+    ("warn_tx_shape_in_the_board_file", mode1(**{"BOARD.TX_SHAPE": "spiral"}), 0,
+     [r"WARNING TX_SHAPE in Dual_Board_Parameters.py is ignored: it belongs in Dual_TX1_Parameters.py / Dual_TX2_Parameters.py"],
+     [r"ERROR"]),
+    ("warn_pcb_layers_in_a_set_file", mode1(**{"RX1.PCB_LAYERS": 2}), 0,
+     [r"WARNING PCB_LAYERS in Dual_RX1_Parameters.py is ignored: it belongs in Dual_Board_Parameters.py"], [r"ERROR"]),
+    ("warn_cover_tx_in_the_board_file", mode1(**{"BOARD.ROTOR_AUTO_COVER_TX": False}), 0,
+     [r"WARNING ROTOR_AUTO_COVER_TX in Dual_Board_Parameters.py is ignored: it belongs in Dual_Rotor1_Parameters.py / Dual_Rotor2_Parameters.py"], [r"ERROR"]),
     ("warn_ic_name_in_board_file", mode1(**{"BOARD.IC_MIN_RP_OHM": 100}), 0,
      [r"WARNING", r"IC_MIN_RP_OHM in Dual_Board_Parameters.py is ignored: it belongs in Dual_IC1_Parameters.py / Dual_IC2_Parameters.py", r"CHECK PASSED"], [r"ERROR"]),
     ("warn_unknown_name_in_rx1", mode1(**{"RX1.FOO_BAR": 1}), 0, [r"WARNING", r"FOO_BAR"], [r"ERROR"]),
@@ -98,10 +113,15 @@ CASES = [
     ("err_rotor_zero_missing", mode1(**{"BOARD.ROTOR_START_ANGLE_ZERO": DELETE}), 1, [r"ERROR", r"ROTOR_START_ANGLE_ZERO is missing"], []),
     ("custom_rotor_mode", mode1(**{"BOARD.ROTOR_MODE": "custom"}), 0, [r"CHECK PASSED"], [r"ERROR"]),
     # ------------------------------------------------------------------ the dual rules
-    ("err_single_wiring", mode1(**{"TX1.TX_WIRING": "single"}), 1, [r"ERROR", r"a single-layer TX has no place"], []),
+    ("single_layer_tx1", {"TX1.TX_WIRING": "single"}, 0, [r"CHECK PASSED"], [r"ERROR", r"no place"]),
+    ("single_layer_tx2", mode1(**{"TX2.TX_WIRING": "single"}), 0, [r"CHECK PASSED"], [r"ERROR"]),
     ("parallel_wiring_set_1", mode1(**{"TX1.TX_WIRING": "parallel"}), 0, [r"CHECK PASSED", r"0\.500 mm free"], [r"ERROR"]),
     ("parallel_wiring_both_sets", mode1(**{"TX1.TX_WIRING": "parallel", "TX2.TX_WIRING": "parallel"}), 0, [r"CHECK PASSED"], [r"ERROR"]),
-    ("err_duplicate_net", mode1(**{"RX2.RX_NET_PHASE_0_2": "SIN_1"}), 1, [r"ERROR", r"used twice"], []),
+    ("warn_duplicate_net", mode1(**{"RX2.RX_NET_PHASE_0_2": "SIN_1"}), 0,
+     [r"WARNING the net name 'SIN_1' is used twice", r"the copper is not shorted", r"CHECK PASSED"], [r"ERROR"]),
+    ("err_rx1_outside_rx2_says_swap", {"RX1.INSIDE_RADIUS_MM": 18.0, "RX1.OUTSIDE_RADIUS_MM": 23.9,
+                                       "RX2.INSIDE_RADIUS_MM": 8.45, "RX2.OUTSIDE_RADIUS_MM": 11.7}, 1,
+     [r"ERROR", r"must lie inside the RX2 band", r"swap the two sets' files"], [r"run into each other"]),
     ("warn_set2_on_all_four_layers", mode1(**{"TX2.TX_LAYER_A": 3, "TX2.TX_LAYER_B": 4}), 0, [r"WARNING", r"all four layers"], [r"ERROR"]),
     ("warn_frequencies_10_percent_apart", mode1(**{"TX2.EXCITATION_FREQ_HZ": 3.3e6}), 0, [r"WARNING", r"differ by 10\.0 %"], [r"ERROR"]),
     ("warn_frequencies_3_to_2", mode1(**{"TX2.EXCITATION_FREQ_HZ": 4.5e6}), 0,
@@ -183,9 +203,29 @@ CASES = [
      [r"ERROR   set 1: VIA_TYPE = 'micro': must be one of 'through', 'blind'   \(Dual_Board_Parameters\.py\)", r"FAILED: 2 parameter error"], []),
     ("via_type_missing_uses_through", mode1(**{"BOARD.VIA_TYPE": DELETE}), 0,
      [r"VIA_TYPE is not in Dual_Board_Parameters\.py: using the default 'through'", r"CHECK PASSED"], [r"ERROR", r"blind vias"]),
-    ("via_type_in_a_set_file_is_ignored", mode1(**{"RX1.VIA_TYPE": "blind"}), 0,
-     [r"WARNING VIA_TYPE in Dual_RX1_Parameters\.py is ignored: it belongs in Dual_Board_Parameters\.py", r"CHECK PASSED"],
-     [r"ERROR", r"blind vias between"]),
+    # ------------------------------------------------------------------ a set's own vias, clearance, tank capacitors, AC factor
+    ("via_type_blind_in_set_1_only", mode1(**{"RX1.VIA_TYPE": "blind", "RX1.VIA_DIAMETER_MM": 0.4, "RX1.VIA_DRILL_MM": 0.15}), 0,
+     [r"set 1: the RX tip vias are blind vias between Top and Inner-1", r"CHECK PASSED"],
+     [r"ERROR", r"set 2: the RX tip vias are blind", r"VIA_TYPE in Dual_RX1_Parameters\.py is ignored"]),
+    ("via_type_in_a_tx_file_is_ignored", mode1(**{"TX1.VIA_TYPE": "blind"}), 0,
+     [r"WARNING VIA_TYPE in Dual_TX1_Parameters\.py is ignored: it belongs in Dual_Board_Parameters\.py / "
+      r"Dual_RX1_Parameters\.py / Dual_RX2_Parameters\.py", r"CHECK PASSED"], [r"ERROR", r"blind vias between"]),
+    ("bigger_vias_in_set_2_move_its_copper_in", {"RX2.VIA_DIAMETER_MM": 0.8, "RX2.VIA_DRILL_MM": 0.4}, 0,
+     [r"set 2 copper starts at r = 17\.6 mm", r"3\.625 mm free", r"CHECK PASSED"], [r"ERROR"]),
+    ("err_set_1_drill_names_its_rx_file", mode1(**{"RX1.VIA_DRILL_MM": 0.8}), 1,
+     [r"ERROR   VIA_DRILL_MM conflicts with VIA_DIAMETER_MM\n\s+set 1: the drill"], [r"set 2: the drill"]),
+    ("err_set_2_via_type_bad", mode1(**{"RX2.VIA_TYPE": "micro"}), 1,
+     [r"ERROR   set 2: VIA_TYPE = 'micro': must be one of 'through', 'blind'   \(Dual_RX2_Parameters\.py\)"],
+     [r"set 1: VIA_TYPE"]),
+    ("larger_clearance_of_set_2_between_the_sets", {"RX2.MIN_CLEARANCE_MM": 0.18}, 0,
+     [r"at least MIN_CLEARANCE_MM = 0\.18 needed", r"CHECK PASSED"], [r"ERROR"]),
+    ("info_a_set_value_not_in_its_file", mode1(**{"RX2.MIN_CLEARANCE_MM": DELETE}), 0,
+     [r"MIN_CLEARANCE_MM is not in Dual_RX2_Parameters\.py: the board's value is used", r"CHECK PASSED"], [r"ERROR"]),
+    ("tank_caps_e24_in_set_2_only", mode1(**{"IC2.TANK_CAP_SERIES": "E24"}), 0,
+     [r"set 1 \(inner\)[\s\S]*\(E12\)[\s\S]*set 2 \(outer\)[\s\S]*\(E24\)", r"CHECK PASSED"], [r"ERROR"]),
+    ("ac_factor_3_in_set_1_only", mode1(**{"TX1.TX_AC_RESISTANCE_FACTOR": 3.0}), 0,
+     [r"set 1 \(inner\)[\s\S]*up to about 3x that[\s\S]*set 2 \(outer\)[\s\S]*up to about 2x that", r"CHECK PASSED"],
+     [r"ERROR"]),
 ]
 
 

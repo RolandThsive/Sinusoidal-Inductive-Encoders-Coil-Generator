@@ -61,10 +61,11 @@ SILKSCREEN_SEARCH_SPAN_DEG    = 30.0
 # The two breaks of a set and its TX end stay at least this far apart (centre to centre), so that the marks and
 # the lead names do not land on each other.
 SILKSCREEN_BREAK_SEPARATION_MM = 4.0
-# The coil layers tried for the break, in this order; the first layer with a spot that has room is used.
+# The coil layers tried for the break, in this order; the first layer with a spot that has room is used.  On a
+# 2-layer board (PCB_LAYERS = 2) the RX coils run on Top and Bottom: ["F.Cu", "B.Cu"].
 SILKSCREEN_BREAK_LAYERS       = ["In1.Cu"]
-# A via of the suggestion keeps MIN_CLEARANCE_MM (Dual_Board_Parameters.py) from every copper on every layer, and
-# this much from the bore and the outline.
+# A via of the suggestion keeps MIN_CLEARANCE_MM (Dual_Board_Parameters.py, or the larger one a set sets for itself)
+# from every copper on every layer, and this much from the bore and the outline.
 SILKSCREEN_VIA_EDGE_CLEARANCE_MM = 0.35
 # The two via sites of a TX end are looked for up to this far from the stacked end (mm).
 SILKSCREEN_TX_SITE_REACH_MM   = 2.5

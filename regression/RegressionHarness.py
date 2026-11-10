@@ -65,7 +65,7 @@ SUITES = {
                         "Dual_RX2_Parameters.py": "RX2", "Dual_TX1_Parameters.py": "TX1",
                         "Dual_TX2_Parameters.py": "TX2", "Dual_Rotor1_Parameters.py": "ROTOR1",
                         "Dual_Rotor2_Parameters.py": "ROTOR2", "Dual_IC1_Parameters.py": "IC1",
-                        "Dual_IC2_Parameters.py": "IC2", "Dual_Fixed_Parameters.py": "FIXED",
+                        "Dual_IC2_Parameters.py": "IC2",
                         "Dual_SilkScreenSuggestion_Parameters.py": "SILK"}),
 }
 

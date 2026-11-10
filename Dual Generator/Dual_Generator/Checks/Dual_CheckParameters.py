@@ -5,13 +5,12 @@ Dual_CheckParameters.py  -  checks the dual parameter files without generating a
 
 In this order:
   1. Dual_ParameterRules.check_files       every name in its file, nothing missing, nothing that does not belong
-     Dual_ParameterRules.check_fixed       Dual_Fixed_Parameters.py holds exactly the fixed values
   2. Dual_ParameterRules.check_dual_values the dual-only values (gaps, split, angles)
   3. Dual_ParameterRules.dual_rules        the rules between the two sets
   4. Dual_TrackLayout.resolve             the mode, the two bands, the bore, the outline, the gap
-  5. the Single Generator's own check_parameters on each set, in the Single Generator's names (every rule about a
-     set on its own: present, in range, settings that cannot hold together), its findings prefixed "set 1:" /
-     "set 2:" with the dual file names
+  5. the Single Generator's own check_parameters on each set, in the Single Generator's names with the set's own
+     values (every rule about a set on its own: present, in range, settings that cannot hold together), its
+     findings prefixed "set 1:" / "set 2:" with the dual file names
 
 Dual_RunCoilGenerator.py runs the same check_parameters before it builds anything; the checks on the finished
 boards are in Dual_DesignChecks.py (and the Single Generator's DesignChecks.py for each set).
@@ -43,12 +42,7 @@ def check_parameters(P):
     worked out); the values themselves are never changed."""
     rep = Report()
     DR.check_files(P, rep)
-    DR.check_fixed(P, rep)
     v = DR.check_dual_values(P, rep)
-    lacking = SP.names_the_single_wants_but_the_dual_lacks()
-    if lacking:
-        rep.error("the Single Generator has parameters that the dual generator does not supply: "
-                  + ", ".join(lacking) + " (the Single Generator gained them; add them to Dual_SetParameters.py)")
     DR.dual_rules(P, v, rep)
     if rep.errors:
         return rep, None
@@ -66,7 +60,7 @@ def check_parameters(P):
             r = single_check(SP.build(P, k))
             r.items = [(level, msg, names) for level, msg, names in r.items
                        if level == "error" and not (set(names) & skip) and not msg.startswith(tuple(skip))]
-            rep.extend(SP.for_set(r, k))
+            rep.extend(SP.for_set(r, k, P))
             named = named or bool(r.items)
         if not named:
             rep.error(f"the layout of the two sets cannot be worked out (a setting is not a number: {e})")
@@ -77,7 +71,7 @@ def check_parameters(P):
         Pk = SP.build(P, k, layout.set_band(k), layout.edges())
         r = single_check(Pk)
         r.items = [it for it in r.items if "OUTPUT_DIR" not in it[1]]   # the dual checks its own output folder
-        rep.extend(SP.for_set(r, k))                                     # (dual_rules)
+        rep.extend(SP.for_set(r, k, P))                                  # (dual_rules)
     return rep, layout
 
 

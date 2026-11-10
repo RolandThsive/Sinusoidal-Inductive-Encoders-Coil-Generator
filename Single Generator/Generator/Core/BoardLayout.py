@@ -27,6 +27,7 @@ Then the board edges (INNER_EDGE_RADIUS_MM = centre hole, OUTER_EDGE_RADIUS_MM =
 
 import math
 
+from Generator.Core import Layers
 from Generator.Core.Conflict import ParameterConflict
 
 RADII = ("INSIDE_RADIUS_MM", "OUTSIDE_RADIUS_MM")
@@ -227,6 +228,31 @@ def goaround_dims(P):
     tip_off = bracket_off[-1] + tw / 2.0 + rw / 2.0 + clr + 0.2
     return dict(T=T, g=g, dg=dg, g0=g0, via_off=via_off, bracket_off=bracket_off, reach=reach, tip_off=tip_off,
                 vr=vr, tw=tw, clr=clr, s=s)
+
+
+def outer_copper_reach(P):
+    """How far the stator's copper reaches past the RX outside radius (mm), trace widths and via sizes included:
+    the larger of
+        the outermost TX turn (a spiral's last turn one pitch farther out),
+        the end of the TX tail (TX_TAIL_EXTRA_MM past one pitch outside the last turn),
+        a parallel TX's stitching via on the outermost turn (with a via, a spiral reaches a little farther),
+        the RX bridging fingers (RX_TAB_LENGTH_MM, plus half an RX trace; RX_TABS = "all" or "single"),
+        the go-around brackets and their vias, where a finger crosses the TX turns on a TX layer and the turns
+        go around it (a series or one-layer TX, or TX_PARALLEL_BREAK_STYLE = "staggered"; Layers.layer_plan).
+    Like outer_edge_room it does not depend on the radius.  The Dual Generator places its outer set with it."""
+    ring = tx_ring(P, 0.0)
+    tw = float(P.TX_TRACE_WIDTH_MM)
+    reach = max(ring["outer_copper_edge"], ring["tail_end"] + tw / 2.0)
+    plan = Layers.layer_plan(P)
+    if plan["mode"] == "parallel":
+        # the stitching via of the outermost turn, next to the terminal (a spiral's: near the end of its last turn)
+        reach = max(reach, ring["outer_copper_edge"] - tw / 2.0 + float(P.VIA_DIAMETER_MM) / 2.0)
+    if str(P.RX_TABS).lower() in ("all", "single"):
+        reach = max(reach, float(P.RX_TAB_LENGTH_MM) + float(P.RX_TRACE_WIDTH_MM) / 2.0)
+        if plan["goaround"]:
+            g = goaround_dims(P)
+            reach = max(reach, g["bracket_off"][-1] + tw / 2.0, g["via_off"] + g["vr"])
+    return float(reach)
 
 
 def _room_names(get):

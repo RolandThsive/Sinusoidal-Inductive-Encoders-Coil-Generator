@@ -1,19 +1,22 @@
 """
 Dual_SetParameters.py  -  the parameter set of ONE coil set, in the Single Generator's own names.
 
-The dual parameter files hold two sets of RX, TX and rotor values and one board.  The Single Generator's builders
-and checks take one namespace with its own names (LOOPS, TX_TURNS, INNER_EDGE_RADIUS_MM, ...), so for each set the
-dual generator puts together exactly that:
+The dual parameter files hold two sets of RX, TX, rotor and IC values and one board.  The Single Generator's
+builders and checks take one namespace with its own names (LOOPS, TX_TURNS, INNER_EDGE_RADIUS_MM, ...), so for each
+set the dual generator puts together exactly that:
 
-    board names        from Dual_Board_Parameters.py (the same for both sets)
-    RX, TX, rotor, IC  from Dual_RX<k>, Dual_TX<k>, Dual_Rotor<k>, Dual_IC<k>
-    the band, the edges   as Dual_TrackLayout decided them (the mode)
-    what a dual board fixes   from Dual_Fixed_Parameters.py: 4 layers, no fingers, stepped TX, no TX tail.
-                              FIXED_REQUIRED below says the value each name must have and why; the dual
-                              checker refuses any other value in that file.
+    board names           from Dual_Board_Parameters.py (the same for both sets)
+    RX, TX, rotor, IC     from Dual_RX<k>, Dual_TX<k>, Dual_Rotor<k>, Dual_IC<k>
+    a set's own value     for a few board values (OVERRIDES): VIA_DIAMETER_MM, VIA_DRILL_MM, VIA_TYPE and
+                          MIN_CLEARANCE_MM in Dual_RX<k>, TX_AC_RESISTANCE_FACTOR in Dual_TX<k>, TANK_CAP_SERIES in
+                          Dual_IC<k>.  None there (or no line) = the board's value
+    the band, the edges   as Dual_TrackLayout decided them
 
-NAMES_BY_FILE says which Single Generator name lives in which dual file; the dual checker uses it to spot a name
-in the wrong file.  Nothing to edit here.
+Which name lives in which dual file (NAMES_BY_FILE) is made from the Single Generator's own table
+(ParameterRules.SPEC): a name of its Board_Parameters.py lives in Dual_Board_Parameters.py, one of its
+RX_Parameters.py in Dual_RX1 and Dual_RX2, and so on, except the names in MOVED.  So a parameter the Single
+Generator gains is a dual parameter at once, in the matching dual file.  The dual checker uses the table to spot a
+missing name or a name in the wrong file.  Nothing to edit here.
 """
 
 import re
@@ -22,88 +25,60 @@ import types
 from Generator.Checks import ParameterRules as SingleRules          # read only: the Single Generator's table
 from Generator.Core.Conflict import Report
 
-# what a dual board fixes: name -> (the only allowed value, why), all in Dual_Fixed_Parameters.py
-FIXED_FILE = "Dual_Fixed_Parameters.py"
-FIXED_REQUIRED = {
-    "PCB_LAYERS": (4, "a dual board is a 4-layer board"),
-    "RX_RISING_EDGE_LAYER": ("F.Cu", "a 2-layer setting, unused with 4 layers"),
-    "RX_TABS": ("none", "no bridging fingers: set 1's fingers would cross set 2's band"),
-    "RX_TAB_LAYER": ("auto", "fingers only, unused"),
-    "RX_TAB_LENGTH_MM": (0.0, "fingers only, unused"),
-    "RX_TAB_WIDTH_MM": (1.0, "fingers only, unused"),
-    "TX_SHAPE": ("stepped_diagonal", "stepped TX turns only"),
-    "TX_TAIL_EXTRA_MM": (0.0, "no extra TX tail: the ring ends one pitch outside the last turn"),
-    "TX_SERIES_UNDERPASS_LAYER": ("auto", "series with fingers only, unused"),
-    "TX_PARALLEL_BREAK_STYLE": ("stitched", "parallel with fingers only, unused"),
-    "TX_STEPPED_ARC_RADIUS_MM": ("auto", "stepped_arc only, which a dual board cannot use"),
+BOARD_FILE = "Dual_Board_Parameters.py"
+KINDS = ("BOARD", "RX", "TX", "ROTOR", "IC")
+# the Single Generator's parameter file -> the kind of dual file that holds its names
+SINGLE_KIND = {"Board_Parameters.py": "BOARD", "RX_Parameters.py": "RX", "TX_Parameters.py": "TX",
+               "Rotor_Parameters.py": "ROTOR", "IC_Parameters.py": "IC"}
+# the names whose dual file is not the one their Single Generator file says
+MOVED = {
+    "EXCITATION_FREQ_HZ": "TX",                     # each set has its own oscillator
+    # one rotor disc carries both rings: its outline, bore, thickness, resolution and mask are the board's
+    "ROTOR_MODE": "BOARD", "ROTOR_AUTO_EDGE_CLEARANCE_MM": "BOARD", "ROTOR_CUSTOM_OUTLINE_RADIUS_MM": "BOARD",
+    "ROTOR_CUSTOM_BORE_RADIUS_MM": "BOARD", "ROTOR_PCB_THICKNESS_MM": "BOARD", "ROTOR_ARC_STEPS_PER_SECTOR": "BOARD",
+    "ROTOR_CHORD_TOLERANCE_MM": "BOARD", "ROTOR_SOLDER_MASK_EXPANSION_MM": "BOARD",
 }
-FIXED_NAMES = tuple(FIXED_REQUIRED)
-
-
-def fixed_values(P):
-    """{name: value} from Dual_Fixed_Parameters.py, for both sets; a name missing there gets the required value
-    (the checker reports the gap)."""
-    mod = getattr(P, "FIXED", None)
-    return {n: (getattr(mod, n) if mod is not None and hasattr(mod, n) else req)
-            for n, (req, _why) in FIXED_REQUIRED.items()}
-
-# the Single Generator's names, by the dual file that holds them
-BOARD_SHARED = (
-    "OUTPUT_DIR", "STATOR_FILE", "ROTOR_FILE", "GENERATOR_MODE", "CENTER_X_MM", "CENTER_Y_MM", "PAGE_SIZE_MM",
-    "VIA_DIAMETER_MM", "VIA_DRILL_MM", "VIA_TYPE", "MIN_CLEARANCE_MM",
-    "INNER_EDGE_INSET_MM", "INNER_EDGE_RADIUS_MM", "OUTER_EDGE_OFFSET_MM", "OUTER_EDGE_RADIUS_MM",
-    "OUTER_EDGE_TAIL_MARGIN_MM", "EDGE_LINE_WIDTH_MM", "AIR_GAP_MM", "PCB_THICKNESS_MM", "COPPER_THICKNESS_UM",
-    "COPPER_CONDUCTIVITY_S_M", "TX_AC_RESISTANCE_FACTOR", "STACKUP_PREPREG_MM", "TANK_CAP_SERIES",
-    "ROTOR_MODE", "ROTOR_AUTO_EDGE_CLEARANCE_MM", "ROTOR_CUSTOM_OUTLINE_RADIUS_MM", "ROTOR_CUSTOM_BORE_RADIUS_MM",
-    "ROTOR_PCB_THICKNESS_MM", "ROTOR_ARC_STEPS_PER_SECTOR", "ROTOR_CHORD_TOLERANCE_MM",
-    "ROTOR_SOLDER_MASK_EXPANSION_MM",
-)
+# board values that a set file may set for its own set (None there = the board's value): name -> kind of set file
+OVERRIDES = {"VIA_DIAMETER_MM": "RX", "VIA_DRILL_MM": "RX", "VIA_TYPE": "RX", "MIN_CLEARANCE_MM": "RX",
+             "TX_AC_RESISTANCE_FACTOR": "TX", "TANK_CAP_SERIES": "IC"}
+# the values only a dual board has (Dual_ParameterRules.DUAL_SPEC checks them), all in the board file
 BOARD_DUAL = ("DUAL_MODE", "TRACK_GAP_MM", "BAND_SPLIT", "LAYOUT_TOLERANCE_MM", "TERMINAL_1_DEG", "TERMINAL_2_DEG",
               "TX_FREQ_SEPARATION_MIN", "TX_FREQ_RATIO_MAX_ORDER", "TX_FREQ_RATIO_TOLERANCE",
               "ROTOR_START_ANGLE_ZERO", "ROTOR_TRACK_GAP_MM", "ROTOR_1_TO_RX2_MM", "ROTOR_2_TO_RX1_MM")
-RX_NAMES = (
-    "LOOPS", "INSIDE_RADIUS_MM", "OUTSIDE_RADIUS_MM", "RX_R_BASE_MM", "RX_A_MM", "RX_TRACE_WIDTH_MM",
-    "RX_NET_PHASE_0_2", "RX_NET_PHASE_1_3", "RX_PROFILE", "STEPS_PER_LOOP", "RX_CHORD_TOLERANCE_MM",
-    "RX_SUBCOILS", "RX_SUBCOIL_SPLIT_ELEC_DEG", "RX_LAYER_A", "RX_LAYER_B", "RX_VIA_ELECTRICAL_DEG",
-)
-TX_NAMES = (
-    "EXCITATION_FREQ_HZ", "TX_NET", "TX_WIRING", "TX_TURNS", "TX_OFFSET_MM", "TX_PITCH_MM",
-    "TX_TRACE_WIDTH_MM", "TX_STEPS", "TX_CHORD_TOLERANCE_MM", "TX_STEPPED_ANGLE_DEG", "TX_INSIDE_VIA_DISTANCE_MM",
-    "TX_LAYER_A", "TX_LAYER_B",
-)
-IC_NAMES = ("IC_NAME", "IC_OSC_MIN_MHZ", "IC_OSC_MAX_MHZ", "IC_MIN_RP_OHM", "IC_SPLIT_TANK_CAPS")
-ROTOR_NAMES = (
-    "ROTOR_AUTO_DUTY", "ROTOR_AUTO_START_ANGLE_DEG", "ROTOR_AUTO_COVER_TX", "ROTOR_AUTO_TX_OVERHANG_MM",
-    "ROTOR_AUTO_EXTENSION_MM", "ROTOR_AUTO_EXTENSION_INNER_MM",
-    "ROTOR_AUTO_EXTENSION_OUTER_MM", "ROTOR_AUTO_TX_CLEARANCE_MM", "ROTOR_AUTO_COPPER_LAYERS",
-    "ROTOR_CUSTOM_SECTORS", "ROTOR_CUSTOM_DUTY", "ROTOR_CUSTOM_START_ANGLE_DEG", "ROTOR_CUSTOM_INNER_RADIUS_MM",
-    "ROTOR_CUSTOM_OUTER_RADIUS_MM", "ROTOR_CUSTOM_COPPER_LAYERS",
-)
+
+
+def _single_names_by_kind():
+    """{kind: (names, in the Single Generator's order)}, the exceptions of MOVED applied."""
+    out = {kind: [] for kind in KINDS}
+    for file, name, _kind, _opt, _active in SingleRules.SPEC:
+        kind = MOVED.get(name, SINGLE_KIND.get(file))
+        if kind is not None and name not in out[kind]:
+            out[kind].append(name)
+    return {kind: tuple(names) for kind, names in out.items()}
+
+
+_BY_KIND = _single_names_by_kind()
+BOARD_SHARED = _BY_KIND["BOARD"]                    # the Single Generator's names in the board file
+RX_NAMES, TX_NAMES, ROTOR_NAMES, IC_NAMES = _BY_KIND["RX"], _BY_KIND["TX"], _BY_KIND["ROTOR"], _BY_KIND["IC"]
+SET_OVERRIDES = {kind: tuple(n for n, k in OVERRIDES.items() if k == kind) for kind in ("RX", "TX", "IC")}
 
 BAND_NAMES = ("INSIDE_RADIUS_MM", "OUTSIDE_RADIUS_MM", "RX_R_BASE_MM", "RX_A_MM")
 EDGE_NAMES = ("INNER_EDGE_RADIUS_MM", "OUTER_EDGE_RADIUS_MM")
 
-NAMES_BY_FILE = {
-    "Dual_Board_Parameters.py": BOARD_SHARED + BOARD_DUAL,
-    "Dual_RX1_Parameters.py": RX_NAMES,
-    "Dual_RX2_Parameters.py": RX_NAMES,
-    "Dual_TX1_Parameters.py": TX_NAMES,
-    "Dual_TX2_Parameters.py": TX_NAMES,
-    "Dual_Rotor1_Parameters.py": ROTOR_NAMES,
-    "Dual_Rotor2_Parameters.py": ROTOR_NAMES,
-    "Dual_IC1_Parameters.py": IC_NAMES,
-    "Dual_IC2_Parameters.py": IC_NAMES,
-    FIXED_FILE: FIXED_NAMES,
-}
+
+def set_file(kind, k):
+    """The dual file of set k for a kind of names: set_file("RX", 1) = "Dual_RX1_Parameters.py"."""
+    return BOARD_FILE if kind == "BOARD" else f"Dual_{kind.capitalize() if kind == 'ROTOR' else kind}{k}_Parameters.py"
+
+
+NAMES_BY_FILE = {BOARD_FILE: BOARD_SHARED + BOARD_DUAL}
+for _kind, _names in (("RX", RX_NAMES), ("TX", TX_NAMES), ("ROTOR", ROTOR_NAMES), ("IC", IC_NAMES)):
+    for _k in (1, 2):
+        NAMES_BY_FILE[set_file(_kind, _k)] = _names + SET_OVERRIDES.get(_kind, ())
 PARAMETER_FILES = tuple(NAMES_BY_FILE)
 
 # the Single Generator's file names in its messages -> the dual file of set k
-SINGLE_FILE_WORDS = {1: {"Board_Parameters.py": "Dual_Board_Parameters.py", "RX_Parameters.py": "Dual_RX1_Parameters.py",
-                         "TX_Parameters.py": "Dual_TX1_Parameters.py", "Rotor_Parameters.py": "Dual_Rotor1_Parameters.py",
-                         "IC_Parameters.py": "Dual_IC1_Parameters.py"},
-                     2: {"Board_Parameters.py": "Dual_Board_Parameters.py", "RX_Parameters.py": "Dual_RX2_Parameters.py",
-                         "TX_Parameters.py": "Dual_TX2_Parameters.py", "Rotor_Parameters.py": "Dual_Rotor2_Parameters.py",
-                         "IC_Parameters.py": "Dual_IC2_Parameters.py"}}
+SINGLE_FILE_WORDS = {k: {single: set_file(kind, k) for single, kind in SINGLE_KIND.items()} for k in (1, 2)}
 
 
 def modules(P, k):
@@ -122,16 +97,21 @@ def ic_module(P, k):
     return getattr(P, f"IC{k}", None)
 
 
-def supplied_names():
-    """Every Single Generator name the dual generator supplies to a set (from a file or fixed)."""
-    out = set(FIXED_NAMES) | set(BOARD_SHARED) | set(RX_NAMES) | set(TX_NAMES) | set(ROTOR_NAMES) | set(IC_NAMES)
+def set_modules(P, k):
+    """{kind: the parameter module of set k} for RX, TX, ROTOR and IC (the IC module may be None)."""
+    rx, tx, ro = modules(P, k)
+    return {"RX": rx, "TX": tx, "ROTOR": ro, "IC": ic_module(P, k)}
+
+
+def overridden(P, k):
+    """{name: value} of the board values that set k sets for itself (OVERRIDES; a value of None is not one)."""
+    mods = set_modules(P, k)
+    out = {}
+    for name, kind in OVERRIDES.items():
+        mod = mods[kind]
+        if mod is not None and getattr(mod, name, None) is not None:
+            out[name] = getattr(mod, name)
     return out
-
-
-def names_the_single_wants_but_the_dual_lacks():
-    """Names of the Single Generator's rule table that no dual file and no fixed value supplies: they appear when
-    the Single Generator gains a parameter.  The dual checker reports them."""
-    return sorted(SingleRules.KNOWN_NAMES - supplied_names())
 
 
 def build(P, k, band=None, edges=None):
@@ -140,16 +120,17 @@ def build(P, k, band=None, edges=None):
                it are set to None); None = the set's file values as they are
       edges  : (bore, outline) for INNER_EDGE_RADIUS_MM / OUTER_EDGE_RADIUS_MM; None = the board file's values
     A name missing from a dual file is left out, so that the Single Generator's checker reports it."""
-    rx, tx, ro = modules(P, k)
+    mods = set_modules(P, k)
     d = {}
     for n in BOARD_SHARED:
         if hasattr(P.BOARD, n):
             d[n] = getattr(P.BOARD, n)
-    for src, names in ((rx, RX_NAMES), (tx, TX_NAMES), (ro, ROTOR_NAMES), (ic_module(P, k), IC_NAMES)):
+    for kind, names in (("RX", RX_NAMES), ("TX", TX_NAMES), ("ROTOR", ROTOR_NAMES), ("IC", IC_NAMES)):
+        src = mods[kind]
         for n in names:
             if src is not None and hasattr(src, n):
                 d[n] = getattr(src, n)
-    d.update(fixed_values(P))
+    d.update(overridden(P, k))
     if band is not None:
         for n in BAND_NAMES:
             d[n] = None
@@ -162,30 +143,37 @@ def build(P, k, band=None, edges=None):
 _FILE_AT_END = re.compile(r"\((Dual_\w+_Parameters\.py)\)\s*$")
 
 
-def dual_file_of(name, k):
-    """The dual file of set k that holds the parameter `name`, or None."""
-    for file, names in NAMES_BY_FILE.items():
-        if name in names and (file in ("Dual_Board_Parameters.py", FIXED_FILE) or f"{k}_" in file):
-            return file
+def dual_file_of(name, k, own=()):
+    """The dual file of set k that holds the parameter `name`, or None.  own: the board values set k sets for itself
+    (overridden), which are then in the set's file."""
+    if name in OVERRIDES and name in own:
+        return set_file(OVERRIDES[name], k)
+    if name in BOARD_SHARED or name in BOARD_DUAL:
+        return BOARD_FILE
+    for kind, names in (("RX", RX_NAMES), ("TX", TX_NAMES), ("ROTOR", ROTOR_NAMES), ("IC", IC_NAMES)):
+        if name in names:
+            return set_file(kind, k)
     return None
 
 
-def rename_single_files(text, k):
+def rename_single_files(text, k, own=()):
     """A Single Generator message with its file names replaced by the dual files of set k.  A few names live in
-    another dual file than the Single's file suggests (EXCITATION_FREQ_HZ in the TX file, the rotor disc names in
-    the board file): the file named at the end of a message follows the name the message starts with."""
+    another dual file than the Single's file suggests (MOVED, and a board value the set sets for itself): the file
+    named at the end of a message follows the name the message starts with."""
     for old, new in SINGLE_FILE_WORDS[k].items():
         text = text.replace(old, new)
     m = re.match(r"([A-Z][A-Z0-9_]*)\b", text)
-    file = dual_file_of(m.group(1), k) if m else None
+    file = dual_file_of(m.group(1), k, own) if m else None
     if file is not None:
         text = _FILE_AT_END.sub(f"({file})", text)
     return text
 
 
-def for_set(rep, k):
+def for_set(rep, k, P=None):
     """A Single Generator report as findings of set k: each message with "set k: " in front and the Single
-    Generator's file names replaced by set k's dual files (rename_single_files).  Returns a new Report."""
+    Generator's file names replaced by set k's dual files (rename_single_files; with P, a board value that set k
+    sets for itself is named in the set's file).  Returns a new Report."""
+    own = tuple(overridden(P, k)) if P is not None else ()
     out = Report()
-    out.items = [(level, f"set {k}: " + rename_single_files(msg, k), names) for level, msg, names in rep.items]
+    out.items = [(level, f"set {k}: " + rename_single_files(msg, k, own), names) for level, msg, names in rep.items]
     return out

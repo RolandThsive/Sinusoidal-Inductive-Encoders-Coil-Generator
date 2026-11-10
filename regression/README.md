@@ -22,7 +22,7 @@ regression/
   DualGenerator_regression/
     README.md
     tests/
-    Board001-default/              the eleven Dual_..._Parameters.py files, and the three written files
+    Board001-default/              the ten Dual_..._Parameters.py files, and the three written files
     ...
 ```
 
@@ -73,7 +73,7 @@ that caused it:
 The first argument is the generator, the second what the board tests: the folder becomes `BoardNNN-<what it tests>`,
 with the next free number.  Each `NAME=VALUE` changes one value, written as in a parameter file; a Dual Generator
 name starts with its file (`BOARD.`, `RX1.`, `RX2.`, `TX1.`, `TX2.`, `ROTOR1.`, `ROTOR2.`, `IC1.`, `IC2.`,
-`FIXED.`, `SILK.`), a Single Generator silkscreen value with `SILK.`.  The parameter files are copied from
+`SILK.`), a Single Generator silkscreen value with `SILK.`.  The parameter files are copied from
 `Board001-default` (or from the board named with `--from`) and each value is replaced where it stands, so its comment
 stays with it.  Then the board is written, its files saved, its tests run and the table in the suite's README
 written anew.  A board that does not build, or fails its tests, is removed again; read what the run printed.

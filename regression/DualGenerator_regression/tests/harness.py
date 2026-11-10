@@ -12,8 +12,8 @@ parameter files are never touched), writing boards into a temporary folder.
     board_values(name)        the overrides the board's parameter files amount to
 
 Overrides name the dual parameter module and the value: {"BOARD.DUAL_MODE": 1, "RX2.LOOPS": 8,
-"TX1.TX_WIRING": "parallel", "FIXED.PCB_LAYERS": 2, "SILK.SILKSCREEN_SIDES": "top", "BOARD.DUAL_MODE": DELETE}.
-The modules are BOARD, RX1, RX2, TX1, TX2, ROTOR1, ROTOR2, IC1, IC2, FIXED (the ten Dual_..._Parameters.py files)
+"TX1.TX_WIRING": "parallel", "BOARD.PCB_LAYERS": 2, "SILK.SILKSCREEN_SIDES": "top", "BOARD.DUAL_MODE": DELETE}.
+The modules are BOARD, RX1, RX2, TX1, TX2, ROTOR1, ROTOR2, IC1, IC2 (the nine Dual_..._Parameters.py files)
 and SILK (Dual_SilkScreenSuggestion_Parameters.py).  DELETE removes the name, as if its line were missing from
 the file.  Every run starts from the values of Board001-default (the suite's first board folder), whatever the
 generator's own parameter files hold: nothing an earlier test set survives.
@@ -45,7 +45,7 @@ DELETE = RH.DELETE
 UPDATE_REFERENCES = RH.UPDATE_REFERENCES
 KEEP_OUTPUT = RH.KEEP_OUTPUT
 MODULES = {"BOARD": P.BOARD, "RX1": P.RX1, "RX2": P.RX2, "TX1": P.TX1, "TX2": P.TX2, "ROTOR1": P.ROTOR1,
-           "ROTOR2": P.ROTOR2, "IC1": P.IC1, "IC2": P.IC2, "FIXED": P.FIXED, "SILK": SILK}
+           "ROTOR2": P.ROTOR2, "IC1": P.IC1, "IC2": P.IC2, "SILK": SILK}
 PARAMETER_FILES = RH.SUITES["dual"]["files"]     # {parameter file: the module it feeds}
 
 

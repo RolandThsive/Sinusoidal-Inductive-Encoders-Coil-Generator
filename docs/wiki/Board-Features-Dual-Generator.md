@@ -11,13 +11,14 @@ oscillators) and writes the files.
 |---|---|
 | Coil Sets | Two: set 1 inside (coarse, 1 loop by default) and set 2 outside (fine, 16 loops by default). Each has its own RX pair, its own TX ring and its own receiver IC |
 | Copper Layers | Always 4. Each set's RX and TX layers are chosen freely (`RX_LAYER_A` / `B`, `TX_LAYER_A` / `B`); both sets may use the same layers, since their copper never overlaps radially |
-| Nets | Six, one per coil: `SIN_1`, `COS_1`, `TX_1`, `SIN_2`, `COS_2`, `TX_2` by default. A name used twice is an error, because KiCad would join the two coils |
+| Nets | Six, one per coil: `SIN_1`, `COS_1`, `TX_1`, `SIN_2`, `COS_2`, `TX_2` by default. A name used twice is a warning, because KiCad would join the two coils into one net |
 | Board Edges | One bore and one outline for both sets, given or computed as `DUAL_MODE` says (see [Quick Guide - Dual Generator](Quick-Guide-To-Parameters-Selections-Dual-Generator.md)) |
 | Gap Between The Sets | Measured on the built copper, from the outermost copper of set 1 to the innermost copper of set 2 |
-| Vias | Through vias (0.6 / 0.3 mm by default), or (`VIA_TYPE = "blind"`) blind vias between the two layers each via joins. A through via of one set is checked against the other set's copper on every layer |
-| Clearance | Each set gets the Single Generator's own clearance checks. `GENERATOR_MODE`: `"normal"` prints a clearance warning and writes the boards, `"strict"` makes it an error. A short (copper touching copper of another net) is always an error, and so is copper of one set inside the other set's ring |
+| Copper Layers | 4 by default (`PCB_LAYERS`), or 2: each set's RX then runs on Top and Bottom, and no layer is left free for set 1's leads (a warning) |
+| Vias | Through vias (0.6 / 0.3 mm by default), or (`VIA_TYPE = "blind"`) blind vias between the two layers each via joins. A set may have its own via size and type (`Dual_RX1` / `Dual_RX2`). A through via of one set is checked against the other set's copper on every layer |
+| Clearance | Each set gets the Single Generator's own clearance checks, with its own `MIN_CLEARANCE_MM` when its RX file gives one; between the sets the larger one applies. `GENERATOR_MODE`: `"normal"` prints a clearance warning and writes the boards, `"strict"` makes it an error. A short (copper touching copper of another net) is always an error, and so is copper of one set inside the other set's ring |
 | TX Ends | Each set is turned so that its TX ends sit at its own angle: `TERMINAL_1_DEG` (180°, the left) and `TERMINAL_2_DEG` (0°, the right) |
-| RX Fingers, TX Tails | None. Both RX rings are plain bands and each TX ring ends one pitch outside its last turn (fixed in `Dual_Fixed_Parameters.py`) |
+| RX Fingers, TX Tails | None by default: both RX rings are plain bands and each TX ring ends one pitch outside its last turn. Either set may have fingers (`RX_TABS`) and a tail (`TX_TAIL_EXTRA_MM`); set 1's push set 2 outwards, set 2's push the outline out |
 | Title Block | Title `Dual stator <loops 1>x<loops 2> loops`. One comment line per set (loops, RX band, SIN / COS nets, rising and falling layers, TX net, wiring, turns per layer and the angle its ends sit at), then the radii and the measured gap, the trace widths and the layer count. The rotor's title block names the sectors, metal fraction and radii of each ring |
 | Page Size | Chosen automatically, as on a single board, so the title block never overlaps the board |
 | Silkscreen | A lead-cutting suggestion for both sets, drawn on `F.SilkS` and `B.SilkS` as the last step (see [Silkscreen - Dual Generator](Silkscreen-Dual-Generator.md)). No pads are created |
@@ -28,7 +29,7 @@ oscillators) and writes the files.
 The recommended layers, which are the defaults, put each set's RX on Top + Inner-1 and its TX on Top + Inner-2. That
 leaves **Bottom free of both sets' copper**. Set 1's six leads must cross set 2 on their way to set 1's IC; on the free
 Bottom layer, the one farthest from the rotor, they can do that radially, as tight pairs, at one angle. The checker
-warns when set 2 uses all four layers, because then no layer is free for those leads.
+warns when set 2 uses all four layers, or the board has only two, because then no layer is free for those leads.
 
 ![Dual Board 2: The Four Layers](https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/images/dual_board_2_layers.png)
 
