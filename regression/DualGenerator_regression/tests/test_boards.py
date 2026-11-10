@@ -1,7 +1,7 @@
 """
 test_boards.py  -  the test boards.  Each folder BoardNNN-<what it tests> next to this tests folder holds a complete
-set of the Dual Generator's parameter files and the files the generator wrote from them: Stator.kicad_pcb.gz,
-Rotor.kicad_pcb.gz and Parameters.txt (without the lines that change with every run).  Every board is written again
+set of the Dual Generator's parameter files and the files the generator wrote from them: Stator.kicad_pcb,
+Rotor.kicad_pcb and Parameters.txt (without the lines that change with every run).  Every board is written again
 from its own parameter files, and each of the three files must equal the copy in the folder character for character.
 
 Also checked: every board folder sets exactly the names that the generator's own parameter files set (a parameter

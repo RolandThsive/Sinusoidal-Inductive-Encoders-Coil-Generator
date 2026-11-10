@@ -32,7 +32,6 @@ their own (regression/RegressionTools.py) on purpose, so that the boards are not
 tested, and a test holds the two readers to the same values on every reference board.
 """
 
-import gzip
 import math
 import re
 from collections import namedtuple
@@ -215,9 +214,8 @@ def _stack_order(name):
 
 
 def read(source):
-    """The board in `source`: a path to a .kicad_pcb file (or a .kicad_pcb.gz), or the text of one."""
+    """The board in `source`: a path to a .kicad_pcb file, or the text of one."""
     if "\n" in source or source.lstrip().startswith("("):
         return Board(parse(source))
-    opener = gzip.open if source.endswith(".gz") else open
-    with opener(source, "rt", encoding="utf-8") as fh:
+    with open(source, encoding="utf-8") as fh:
         return Board(parse(fh.read()), source)

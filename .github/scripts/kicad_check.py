@@ -5,8 +5,7 @@ of .github/workflows/ci.yml), one KiCad version at a time:
     python3 .github/scripts/kicad_check.py --kicad 8.0 DIR [DIR ...]            check
     python3 .github/scripts/kicad_check.py --kicad 8.0 --update DIR [DIR ...]   write this version's baseline anew
 
-Every Stator / Rotor board found under the folders (.kicad_pcb, or .kicad_pcb.gz as the regression references are
-kept) is
+Every Stator.kicad_pcb / Rotor.kicad_pcb found under the folders is
   - loaded by KiCad:  `kicad-cli pcb export svg` must succeed and write a picture (every KiCad version), and
   - checked by KiCad's DRC:  `kicad-cli pcb drc --format json --severity-all --all-track-errors` (KiCad 8 and
     newer; KiCad 7's command line has no DRC).  --all-track-errors makes the count repeatable: without it KiCad
@@ -15,13 +14,12 @@ kept) is
     the committed baseline (.github/kicad-drc-baseline.json), so a new violation fails, and so does one that went away
     (then the baseline is written anew with --update, in the same pull request, so the improvement is kept).
 
-The board's name in the baseline is its path below the folder it was found in, without .gz, e.g.
+The board's name in the baseline is its path below the folder it was found in, e.g.
 "Single Generator/Board001-default/Stator.kicad_pcb".  Needs only the standard library (Python 3.9 or newer) and
 kicad-cli.
 """
 
 import argparse
-import gzip
 import json
 import os
 import shutil
@@ -42,23 +40,18 @@ def find_boards(roots):
         for dirpath, dirnames, filenames in os.walk(root):
             dirnames.sort()
             for f in sorted(filenames):
-                plain = f[:-3] if f.endswith(".gz") else f
-                if plain in BOARD_NAMES:
-                    rel = os.path.relpath(os.path.join(dirpath, plain), root).replace(os.sep, "/")
+                if f in BOARD_NAMES:
+                    rel = os.path.relpath(os.path.join(dirpath, f), root).replace(os.sep, "/")
                     found.append((f"{label}/{rel}", os.path.join(dirpath, f)))
     return found
 
 
-def unpack(path, work, n):
-    """The board as a plain .kicad_pcb file in its own folder under work (KiCad writes nothing next to it)."""
+def copy_board(path, work, n):
+    """A copy of the board in its own folder under work, so that KiCad writes nothing next to the original."""
     folder = os.path.join(work, f"{n:03d}")
     os.makedirs(folder)
-    out = os.path.join(folder, os.path.basename(path)[:-3] if path.endswith(".gz") else os.path.basename(path))
-    if path.endswith(".gz"):
-        with gzip.open(path, "rb") as src, open(out, "wb") as dst:
-            shutil.copyfileobj(src, dst)
-    else:
-        shutil.copyfile(path, out)
+    out = os.path.join(folder, os.path.basename(path))
+    shutil.copyfile(path, out)
     return out
 
 
@@ -126,7 +119,7 @@ def main(argv=None):
     work = tempfile.mkdtemp(prefix="kicad_check_")
     try:
         for n, (name, path) in enumerate(boards):
-            board = unpack(path, work, n)
+            board = copy_board(path, work, n)
             why = load_test(board)
             if why:
                 problems.append(f"{name}: KiCad {args.kicad} cannot load it: {why}")

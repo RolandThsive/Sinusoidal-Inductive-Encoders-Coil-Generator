@@ -15,11 +15,9 @@ about the generators: it only reads what they wrote.  Needs Python 3 and numpy, 
     compare_text   two texts compared token by token: numbers within a tolerance, everything else exactly
     normalise_record  Parameters.txt without the lines that change with every run (time, folder, command, the
                    verbatim copies of the parameter files)
-    read_reference / write_reference   references stored gzip-compressed (<name>.gz) or plain
+    read_reference / write_reference   the reference files, plain text with LF line endings
 """
 
-import gzip
-import io
 import math
 import os
 import re
@@ -570,28 +568,15 @@ def normalise_record(text, project_dir=None):
 
 
 def read_reference(path):
-    """The reference text, from <path> or <path>.gz (whichever exists); None when there is none."""
-    if os.path.isfile(path + ".gz"):
-        with gzip.open(path + ".gz", "rt", encoding="utf-8", newline="") as fh:
-            return fh.read().replace("\r\n", "\n")
-    if os.path.isfile(path):
-        with open(path, encoding="utf-8", newline="") as fh:
-            return fh.read().replace("\r\n", "\n")
-    return None
+    """The reference text in <path>; None when there is none."""
+    if not os.path.isfile(path):
+        return None
+    with open(path, encoding="utf-8", newline="") as fh:
+        return fh.read().replace("\r\n", "\n")
 
 
-def write_reference(path, text, compress=True):
+def write_reference(path, text):
+    """Writes the reference <path> anew, with LF line endings on every system."""
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    if compress:
-        if os.path.isfile(path):
-            os.remove(path)
-        # no time stamp and no name in the gzip header: the same text gives the same bytes (a clean git diff)
-        with open(path + ".gz", "wb") as raw, \
-                gzip.GzipFile(filename="", mode="wb", compresslevel=9, fileobj=raw, mtime=0) as gz, \
-                io.TextIOWrapper(gz, encoding="utf-8", newline="\n") as fh:
-            fh.write(text)
-    else:
-        if os.path.isfile(path + ".gz"):
-            os.remove(path + ".gz")
-        with open(path, "w", encoding="utf-8", newline="\n") as fh:
-            fh.write(text)
+    with open(path, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write(text)

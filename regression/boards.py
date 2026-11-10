@@ -6,9 +6,6 @@ boards.py  -  looks after the test board folders (BoardNNN-<what it tests>) of t
     python regression/boards.py sync                  every board folder's parameter files written anew from the
                                                       generators' own files, with the board's values
     python regression/boards.py table                 the board table in each suite's README.md written anew
-    python regression/boards.py unpack single Board007 [FOLDER]
-                                                      the board's Stator and Rotor as plain .kicad_pcb files, to
-                                                      open in KiCad
 
 new: the first argument is the generator (single or dual), the second what the board tests (the folder becomes
 BoardNNN-<what it tests>, NNN the next free number).  Each NAME=VALUE changes one value, VALUE written as in a
@@ -26,12 +23,10 @@ generator's value, one removed goes, and changed comments follow.  Then run run_
 
 import argparse
 import ast
-import gzip
 import os
 import shutil
 import subprocess
 import sys
-import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
@@ -199,22 +194,6 @@ def cmd_table(args):
     return 0
 
 
-def cmd_unpack(args):
-    s = SUITES[args.generator]
-    name, folder = next(iter(RH.select_boards(RH.find_boards(s["root"]), [args.board]).items()))
-    out = args.folder or tempfile.mkdtemp(prefix=f"{name}_")
-    os.makedirs(out, exist_ok=True)
-    for f in RH.STORED_FILES:
-        src = os.path.join(folder, f)
-        if f.endswith(".gz"):
-            with gzip.open(src, "rb") as a, open(os.path.join(out, f[:-3]), "wb") as b:
-                shutil.copyfileobj(a, b)
-        else:
-            shutil.copyfile(src, os.path.join(out, f))
-    print(f"{name}: Stator.kicad_pcb, Rotor.kicad_pcb and Parameters.txt are in {out}")
-    return 0
-
-
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Look after the test board folders of the regression suites.")
     sub = ap.add_subparsers(dest="command", required=True)
@@ -229,12 +208,8 @@ def main(argv=None):
     p.add_argument("generator", nargs="?", choices=sorted(SUITES))
     p = sub.add_parser("table", help="write the board table of the suites' README.md anew")
     p.add_argument("generator", nargs="?", choices=sorted(SUITES))
-    p = sub.add_parser("unpack", help="a board's files as plain .kicad_pcb files, to open in KiCad")
-    p.add_argument("generator", choices=sorted(SUITES))
-    p.add_argument("board", help="BoardNNN or the folder's whole name")
-    p.add_argument("folder", nargs="?", help="where to put them (default: a new temporary folder)")
     args = ap.parse_args(argv)
-    return {"new": cmd_new, "sync": cmd_sync, "table": cmd_table, "unpack": cmd_unpack}[args.command](args)
+    return {"new": cmd_new, "sync": cmd_sync, "table": cmd_table}[args.command](args)
 
 
 if __name__ == "__main__":

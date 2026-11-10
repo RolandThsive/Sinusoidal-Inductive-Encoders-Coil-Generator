@@ -10,8 +10,8 @@ run_regression.py  -  runs the regression tests of both generators, or of one (f
                                                              the board tests on these boards only (by name or by
                                                              number), every other test as usual
     python regression/run_regression.py dual --update-references
-                                                             write each board's Stator.kicad_pcb.gz,
-                                                             Rotor.kicad_pcb.gz and Parameters.txt anew from the
+                                                             write each board's Stator.kicad_pcb,
+                                                             Rotor.kicad_pcb and Parameters.txt anew from the
                                                              generator as it is now (only after reading the
                                                              differences the failing tests printed)
     python regression/run_regression.py single --keep        keep the temporary output folder (its path is printed)

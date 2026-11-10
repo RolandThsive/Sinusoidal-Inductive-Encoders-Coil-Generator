@@ -17,7 +17,7 @@ from its file.
 
 The board folders.  Each test board is a folder BoardNNN-<what it tests> next to the suite's tests folder, holding a
 complete copy of the generator's parameter files with the board's own values, and the files the generator wrote from
-them: Stator.kicad_pcb.gz, Rotor.kicad_pcb.gz and Parameters.txt (without the lines that change with every run).
+them: Stator.kicad_pcb, Rotor.kicad_pcb and Parameters.txt (without the lines that change with every run).
 
     suite.boards()                   {board name: folder}, in the order of their numbers
     suite.board_values(name)         the overrides that the board's parameter files amount to
@@ -45,7 +45,7 @@ DELETE = object()
 BOARD_FOLDER = re.compile(r"^Board(\d{3,})-[A-Za-z0-9][A-Za-z0-9_.+-]*$")
 RECORD = "Parameters.txt"
 OUTPUT_FILES = ("Stator.kicad_pcb", "Rotor.kicad_pcb", RECORD)        # what a run writes that a board folder keeps
-STORED_FILES = ("Stator.kicad_pcb.gz", "Rotor.kicad_pcb.gz", RECORD)  # ... as the board folder keeps them
+STORED_FILES = ("Stator.kicad_pcb", "Rotor.kicad_pcb", RECORD)  # ... as the board folder keeps them
 TABLE_START = "<!-- board table: written by `python regression/boards.py table`, do not edit by hand -->"
 TABLE_END = "<!-- end of board table -->"
 UPDATE_REFERENCES = os.environ.get("REGRESSION_UPDATE_REFERENCES") == "1"
@@ -300,10 +300,10 @@ class Suite:
         actual = self.written(name, file)
         path = self.reference_path(name, file)
         if UPDATE_REFERENCES:
-            RT.write_reference(path, actual, compress=file != RECORD)
+            RT.write_reference(path, actual)
             return
         expected = RT.read_reference(path)
-        test.assertIsNotNone(expected, f"no {os.path.relpath(path, REPO)}(.gz): run_regression.py "
+        test.assertIsNotNone(expected, f"no {os.path.relpath(path, REPO)}: run_regression.py "
                                        f"{self.name.lower()} --update-references --board {name} creates it")
         diff = RT.exact_differences(expected, actual)
         test.assertFalse(diff, f"{name}/{file} is not what the generator writes now ({len(diff)} shown):\n  "

@@ -5,7 +5,6 @@ few board values), the layout (the 32 combinations of what it is given), the out
 checks between the sets.  Fast, no board written.
 """
 
-import gzip
 import math
 import os
 import re
@@ -403,9 +402,9 @@ class KiCadReading(unittest.TestCase):
 
     def test_every_reference_board_reads_as_the_test_parser_reads_it(self):
         for name, folder in H.S.boards().items():
-            for file in ("Stator.kicad_pcb.gz", "Rotor.kicad_pcb.gz"):
+            for file in ("Stator.kicad_pcb", "Rotor.kicad_pcb"):
                 with self.subTest(board=name, file=file):
-                    with gzip.open(os.path.join(folder, file), "rt", encoding="utf-8", newline="") as fh:
+                    with open(os.path.join(folder, file), encoding="utf-8", newline="") as fh:
                         text = fh.read()
                     self.assertEqual(RT.reader_differences(KiCadReader.read(text), RT.Board(text)), [])
 

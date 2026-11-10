@@ -37,7 +37,7 @@ regression/
 ├── SingleGenerator_regression/
 │   ├── README.md                 What each test checks, and the table of the boards
 │   ├── tests/                    The test files
-│   ├── Board001-default/          The six parameter files, Stator.kicad_pcb.gz, Rotor.kicad_pcb.gz, Parameters.txt
+│   ├── Board001-default/          The six parameter files, Stator.kicad_pcb, Rotor.kicad_pcb, Parameters.txt
 │   ├── Board002-loops-4-subcoils-2/
 │   └── ...
 └── DualGenerator_regression/
@@ -52,8 +52,8 @@ with the board's values, so a board can be read, copied into the generator's `Pa
 Each suite's README has a table of its boards with the values each one sets differently from `Board001-default`.
 
 Every board is written again from its own parameter files, and the three files that come out must equal the ones in
-its folder character for character: `Stator.kicad_pcb.gz` and `Rotor.kicad_pcb.gz` (kept gzipped) and
-`Parameters.txt` (without the lines that change with every run: the time, the folder, the command and the verbatim
+its folder character for character: `Stator.kicad_pcb` and `Rotor.kicad_pcb` (plain text, so KiCad opens them as they
+are) and `Parameters.txt` (without the lines that change with every run: the time, the folder, the command and the verbatim
 copies of the parameter files). The same boards are measured by the invariant tests, and opened by KiCad 7 to 10 in the
 CI. Every other test starts from the values of `Board001-default`, so the values in a generator's own `Parameters`
 folder, the ones you design with, never change a test.
@@ -76,7 +76,6 @@ tests, is removed again.
 | `python regression/boards.py new ...` | Makes a new test board, as above |
 | `python regression/boards.py sync` | After a generator gained or lost a parameter: copies the new name, with its value and comment, into every board folder, and removes a name the generator no longer has |
 | `python regression/boards.py table` | Writes the board table of each suite's README anew |
-| `python regression/boards.py unpack single Board007` | Puts the board's Stator and Rotor as plain `.kicad_pcb` files in a folder, to open in KiCad |
 
 ## 29.3 What Is Tested
 

@@ -255,20 +255,19 @@ class Parts(unittest.TestCase):
     def test_board_reads_a_file_kicad_saved_again(self):
         """The step reads the stator with resources/KiCadReader.py, so a stator that KiCad 10 saved again (its own
         order of the items, each over several lines, the nets given by name) gives it the same copper."""
-        import gzip
         self.assertEqual(os.path.basename(os.path.dirname(LCS.READER_FILE)), "resources")
 
         def copper(name):
-            with gzip.open(os.path.join(H.HERE, "kicad_files", name), "rt", encoding="utf-8", newline="") as fh:
+            with open(os.path.join(H.HERE, "kicad_files", name), encoding="utf-8", newline="") as fh:
                 b = LCS.Board(fh.read(), H.P)
             segs = sorted((*map(float, r), str(lay), b.net_name[int(n)]) for r, lay, n in zip(b.seg, b.layer, b.net,
                                                                                            strict=True))
             vias = sorted((*map(float, r), b.net_name[int(n)]) for r, n in zip(b.vias, b.via_net, strict=True))
             return segs, vias, b.bore, b.outline
 
-        written = copper("board047_stator.kicad_pcb.gz")
+        written = copper("board047_stator.kicad_pcb")
         self.assertGreater(len(written[0]), 100)
-        self.assertEqual(copper("board047_stator_saved_by_kicad10.kicad_pcb.gz"), written)
+        self.assertEqual(copper("board047_stator_saved_by_kicad10.kicad_pcb"), written)
 
     def test_a_missing_reader_leaves_the_file_as_it_was(self):
         """Without resources/KiCadReader.py the step cannot read the board: it says so, and the stator file stays as

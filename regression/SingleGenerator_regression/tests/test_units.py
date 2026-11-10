@@ -5,7 +5,6 @@ resources/ (the picture makers and the KiCad reader).  Fast, no board written.
 """
 
 import collections
-import gzip
 import io
 import contextlib
 import os
@@ -413,13 +412,12 @@ class Pictures(unittest.TestCase):
     OUTLINE, BORE = "(end 100 127)", "(end 100 115)"      # the rotor's two Edge.Cuts circles in Board001-default
 
     def test_rotor_with_and_without_its_edges(self):
-        import gzip
         import ActualSVGMaker
         import RepresentativeSVGMaker as R
         board = os.path.join(H.SUITE, "Board001-default")
-        with gzip.open(os.path.join(board, "Stator.kicad_pcb.gz"), "rt", encoding="utf-8", newline="") as fh:
+        with open(os.path.join(board, "Stator.kicad_pcb"), encoding="utf-8", newline="") as fh:
             stator = fh.read()
-        with gzip.open(os.path.join(board, "Rotor.kicad_pcb.gz"), "rt", encoding="utf-8", newline="") as fh:
+        with open(os.path.join(board, "Rotor.kicad_pcb"), encoding="utf-8", newline="") as fh:
             rotor = fh.read()
         self.assertEqual(sum(self.OUTLINE in l or self.BORE in l for l in rotor.splitlines()), 2)
         for keep, want in (((self.OUTLINE, self.BORE), (27.0, 15.0)), ((self.OUTLINE,), (27.0, None)),
@@ -452,8 +450,8 @@ class Pictures(unittest.TestCase):
         for kind in ("", "_saved_by_kicad7", "_saved_by_kicad10"):
             folder = tempfile.mkdtemp(dir=H.temp_root())
             for part in ("stator", "rotor"):
-                with gzip.open(os.path.join(KiCadReading.FILES, f"board047_{part}{kind}.kicad_pcb.gz"), "rt",
-                               encoding="utf-8", newline="") as src, \
+                with open(os.path.join(KiCadReading.FILES, f"board047_{part}{kind}.kicad_pcb"), encoding="utf-8",
+                          newline="") as src, \
                         open(os.path.join(folder, part.capitalize() + ".kicad_pcb"), "w", encoding="utf-8",
                              newline="") as dst:
                     dst.write(src.read())
@@ -481,8 +479,7 @@ class KiCadReading(unittest.TestCase):
     @staticmethod
     def text(name):
         path = os.path.join(KiCadReading.FILES, name)
-        opener = gzip.open if name.endswith(".gz") else open
-        with opener(path, "rt", encoding="utf-8", newline="") as fh:
+        with open(path, encoding="utf-8", newline="") as fh:
             return fh.read()
 
     @staticmethod
@@ -506,22 +503,22 @@ class KiCadReading(unittest.TestCase):
 
     def test_every_reference_board_reads_as_the_test_parser_reads_it(self):
         for name, folder in H.S.boards().items():
-            for file in ("Stator.kicad_pcb.gz", "Rotor.kicad_pcb.gz"):
+            for file in ("Stator.kicad_pcb", "Rotor.kicad_pcb"):
                 with self.subTest(board=name, file=file):
-                    with gzip.open(os.path.join(folder, file), "rt", encoding="utf-8", newline="") as fh:
+                    with open(os.path.join(folder, file), encoding="utf-8", newline="") as fh:
                         text = fh.read()
                     self.assertEqual(RT.reader_differences(KiCadReader.read(text), RT.Board(text)), [])
 
     def test_a_board_saved_again_by_kicad_reads_the_same(self):
         for part in ("stator", "rotor"):
-            written = KiCadReader.read(self.text(f"board047_{part}.kicad_pcb.gz"))
-            self.assertEqual(RT.reader_differences(written, RT.Board(self.text(f"board047_{part}.kicad_pcb.gz"))), [])
+            written = KiCadReader.read(self.text(f"board047_{part}.kicad_pcb"))
+            self.assertEqual(RT.reader_differences(written, RT.Board(self.text(f"board047_{part}.kicad_pcb"))), [])
             for version in (7, 10):
                 with self.subTest(part=part, kicad=version):
-                    text = self.text(f"board047_{part}_saved_by_kicad{version}.kicad_pcb.gz")
+                    text = self.text(f"board047_{part}_saved_by_kicad{version}.kicad_pcb")
                     self.assertIn("(uuid " if version == 10 else "(tstamp ", text, "the file is KiCad's own")
                     self.assertEqual(self.content(KiCadReader.read(text)), self.content(written))
-        k10 = self.text("board047_stator_saved_by_kicad10.kicad_pcb.gz")
+        k10 = self.text("board047_stator_saved_by_kicad10.kicad_pcb")
         self.assertNotIn("\n\t(net 1 ", k10, "KiCad 10 lists no nets ...")
         self.assertIn('(net "TX")', k10, "... and names the net of each track")
         self.assertEqual(sorted(KiCadReader.read(k10).nets.values()), ["1", "2", "TX"])
@@ -529,13 +526,13 @@ class KiCadReading(unittest.TestCase):
     def test_every_via_kind(self):
         want = [("blind", ("F.Cu", "In2.Cu"), "SIN_1"), ("buried", ("In1.Cu", "In2.Cu"), "COS_1"),
                 ("micro", ("F.Cu", "In1.Cu"), "COS_1"), ("through", ("F.Cu", "B.Cu"), "SIN_1")]
-        for name in ("every_via_kind.kicad_pcb", "every_via_kind_saved_by_kicad10.kicad_pcb.gz"):
+        for name in ("every_via_kind.kicad_pcb", "every_via_kind_saved_by_kicad10.kicad_pcb"):
             with self.subTest(file=name):
                 board = KiCadReader.read(self.text(name))
                 self.assertEqual(sorted((v.kind, v.layers, board.nets[v.net]) for v in board.vias), want)
                 self.assertEqual(board.copper_layers, ["F.Cu", "In1.Cu", "In2.Cu", "B.Cu"])
                 self.assertEqual(len(board.segments), 4)
-        self.assertEqual(self.content(KiCadReader.read(self.text("every_via_kind_saved_by_kicad10.kicad_pcb.gz"))),
+        self.assertEqual(self.content(KiCadReader.read(self.text("every_via_kind_saved_by_kicad10.kicad_pcb"))),
                          self.content(KiCadReader.read(self.text("every_via_kind.kicad_pcb"))))
 
     def test_numbers_keep_their_text(self):
@@ -575,15 +572,10 @@ class KiCadReading(unittest.TestCase):
                     KiCadReader.read(text)
                 self.assertIn(says, str(e.exception))
 
-    def test_a_path_a_gz_path_and_the_text_read_alike(self):
-        text = self.text("board047_rotor.kicad_pcb.gz")
-        folder = tempfile.mkdtemp(dir=H.temp_root())
-        path = os.path.join(folder, "Rotor.kicad_pcb")
-        with open(path, "w", encoding="utf-8", newline="") as fh:
-            fh.write(text)
-        boards = [KiCadReader.read(text), KiCadReader.read(path),
-                  KiCadReader.read(os.path.join(self.FILES, "board047_rotor.kicad_pcb.gz"))]
-        self.assertEqual([self.content(b) for b in boards[1:]], [self.content(boards[0])] * 2)
+    def test_a_path_and_the_text_read_alike(self):
+        path = os.path.join(self.FILES, "board047_rotor.kicad_pcb")
+        boards = [KiCadReader.read(self.text("board047_rotor.kicad_pcb")), KiCadReader.read(path)]
+        self.assertEqual(self.content(boards[1]), self.content(boards[0]))
         self.assertEqual(boards[1].path, path)
 
 

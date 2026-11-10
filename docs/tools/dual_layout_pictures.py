@@ -623,7 +623,7 @@ def build():
         rec = read_record(os.path.join(BOARDS, name, "Parameters.txt"))
         if rec["combination"] != n:
             raise SystemExit(f"{name} gives combination {rec['combination']}, not {n}")
-        stator = read_stator(os.path.join(BOARDS, name, "Stator.kicad_pcb.gz"))
+        stator = read_stator(os.path.join(BOARDS, name, "Stator.kicad_pcb"))
         records[n] = (name, rec)
         files[path] = board_picture(n, name, rec, stator)
     with open(PAGE, encoding="utf-8") as fh:

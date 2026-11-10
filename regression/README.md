@@ -16,7 +16,7 @@ regression/
     Board001-default/              the generator's defaults
       Board_Parameters.py  IC_Parameters.py  RX_Parameters.py  Rotor_Parameters.py  TX_Parameters.py
       SilkScreenSuggestion_Parameters.py
-      Stator.kicad_pcb.gz  Rotor.kicad_pcb.gz  Parameters.txt
+      Stator.kicad_pcb  Rotor.kicad_pcb  Parameters.txt
     Board002-loops-4-subcoils-2/
     ...
   DualGenerator_regression/
@@ -46,8 +46,8 @@ The pull request checks run both suites on Windows, macOS and Linux
 Each board folder is written again from its own parameter files, in memory (no parameter file is touched), and the
 three files that come out must equal the ones in the folder character for character:
 
-- `Stator.kicad_pcb.gz` and `Rotor.kicad_pcb.gz`, the boards (kept gzipped: they are large and nobody edits them;
-  `python regression/boards.py unpack single Board007` puts plain copies in a folder for KiCad),
+- `Stator.kicad_pcb` and `Rotor.kicad_pcb`, the boards, as plain text files that KiCad opens as they are (git
+  stores a changed board as the difference to the one before, which a compressed file would not allow),
 - `Parameters.txt`, the record of the run, without the lines that change with every run (the time, the folder and
   the command, and the verbatim copies of the parameter files, whose comments are not a regression).
 
