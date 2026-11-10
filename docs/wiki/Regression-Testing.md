@@ -123,7 +123,7 @@ the workflows get a read-only token.
 The same checks run locally:
 
 ```bash
-python -m pip install -r requirements-dev.txt
+python -m pip install -r requirements.txt      # numpy, and the tools of the checks
 ruff check .                                   # the lint (or: pip install pre-commit; pre-commit install)
 python .github/scripts/repo_guard.py           # the repo guard
 python .github/scripts/check_docs.py           # the docs links

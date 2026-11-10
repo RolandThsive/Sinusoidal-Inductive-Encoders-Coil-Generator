@@ -40,7 +40,7 @@ contributions of every kind are welcome, from a measurement on a real board to a
   --check` from the `Generators/Single Generator` folder, `python Dual_Generator/Run/Dual_RunCoilGenerator.py --check` from the
   `Generators/Dual Generator` folder) and the regression tests (`python regression/run_regression.py single` or `dual` from the
   repository root; a change that alters the boards adds a test board, see `regression/README.md`), and the lint
-  (`python -m pip install -r requirements-dev.txt`, then `ruff check .`). Every pull request runs the CI on GitHub: both
+  (`python -m pip install -r requirements.txt`, then `ruff check .`). Every pull request runs the CI on GitHub: both
   suites on Ubuntu, Windows and macOS, the install on Python 3.11 to 3.15, the boards in KiCad 7 to 10, the lint and the
   repository checks (see [Regression Testing](wiki/Regression-Testing.md)).
 - **Parameters stay in the parameter files.** The only files a user edits are in `Generators/Single Generator/Parameters/` and

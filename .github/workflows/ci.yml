@@ -53,9 +53,9 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      - name: Install ruff (the version in requirements-dev.txt)
+      - name: Install ruff (the version in requirements.txt)
         run: |
-          python -m pip install --only-binary=:all: "$(grep -E '^ruff==' requirements-dev.txt)"
+          python -m pip install --only-binary=:all: "$(grep -E '^ruff==' requirements.txt)"
       - name: ruff
         run: ruff check --output-format=github .
       - name: actionlint
@@ -108,10 +108,10 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      - name: Install requirements.txt and coverage
+      - name: Install requirements.txt (numpy and coverage)
         shell: bash
         run: |
-          python -m pip install --only-binary=:all: -r requirements.txt "$(grep -E '^coverage==' requirements-dev.txt)"
+          python -m pip install --only-binary=:all: -r requirements.txt
       - name: Make the folder the suite writes into (kept as the artifact when a test fails)
         shell: python
         run: |

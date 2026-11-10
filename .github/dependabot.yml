@@ -1,4 +1,4 @@
-# Dependabot proposes, once a week, a pull request when a newer numpy, a newer CI tool (requirements-dev.txt) or a newer
+# Dependabot proposes, once a week, a pull request when a newer numpy, a newer CI tool (requirements.txt) or a newer
 # version of an action used by the workflows comes out.  Each proposal runs the whole CI before it can be merged.
 version: 2
 updates:

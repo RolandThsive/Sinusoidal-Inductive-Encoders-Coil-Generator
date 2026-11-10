@@ -1,7 +1,7 @@
 # Security checks of the dependencies: on every pull request, after each push to main and every Monday.
 #
-#   pip-audit           the pins of requirements.txt (one numpy for Python 3.11, one for 3.12 to 3.15) against the
-#                       known vulnerabilities of PyPI's advisory database
+#   pip-audit           the pins of requirements.txt (one numpy for Python 3.11, one for 3.12 to 3.15, and the CI's
+#                       tools) against the known vulnerabilities of PyPI's advisory database
 #   Dependency review   a pull request that adds or changes a dependency (a requirements file, an action) with a known
 #                       vulnerability of moderate severity or worse fails
 #
@@ -43,9 +43,9 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: ${{ matrix.python }}
-      - name: Install pip-audit (the version in requirements-dev.txt)
+      - name: Install pip-audit (the version in requirements.txt)
         run: |
-          python -m pip install --only-binary=:all: "$(grep -E '^pip-audit==' requirements-dev.txt)"
+          python -m pip install --only-binary=:all: "$(grep -E '^pip-audit==' requirements.txt)"
       - name: Audit requirements.txt
         run: pip-audit --requirement requirements.txt --progress-spinner off --desc on
 
