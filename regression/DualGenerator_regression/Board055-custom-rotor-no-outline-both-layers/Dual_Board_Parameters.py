@@ -189,7 +189,7 @@ ROTOR_AUTO_EDGE_CLEARANCE_MM = 0.5  # according_to_stator: ring copper stays thi
 #               The record file prints each set's zero, so you can add it by hand.
 ROTOR_START_ANGLE_ZERO = "rx_zero"
 ROTOR_CUSTOM_OUTLINE_RADIUS_MM  = None # custom: outer edge of the disc (None = no outline); the values here are what
-ROTOR_CUSTOM_BORE_RADIUS_MM     = None   # custom: centre hole (None = no hole);  "according_to_stator" computes for the default board
+ROTOR_CUSTOM_BORE_RADIUS_MM     = 7.25   # custom: centre hole (None = no hole);  "according_to_stator" computes for the default board
 
 # ROTOR_TRACK_GAP_MM = the bare ring that must stay between ring 1's outer radius and ring 2's inner radius
 # (an error when smaller, naming the extension to change).  Dual boards in practice keep 2.3 ... 3.0 mm.  It is

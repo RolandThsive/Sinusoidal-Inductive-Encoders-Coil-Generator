@@ -103,8 +103,8 @@ each set has its own, in `Dual_TX1` / `Dual_TX2`. A set may have its own `TX_AC_
 | `ROTOR_MODE` | `"according_to_stator"` | `according_to_stator`, `custom` | Once for the disc. `according_to_stator`: each ring follows its own set (`LOOPS` sectors, extent from its RX band and TX ring); the disc's bore and outline are the stator's. `custom`: each ring from its `ROTOR_CUSTOM_*` values, the disc's edges from the two lines below |
 | `ROTOR_AUTO_EDGE_CLEARANCE_MM` | 0.5 | ≥ 0 | `according_to_stator`: ring copper stays this far from the bore and the outline |
 | `ROTOR_START_ANGLE_ZERO` | `"rx_zero"` | `rx_zero`, `board` | Where each ring's start angle is measured from. `rx_zero`: from its own set's RX pattern zero (the set's turn is added), so both tracks read 0 at the same shaft angle. `board`: from the board's +x axis, as the Single Generator measures it |
-| `ROTOR_CUSTOM_OUTLINE_RADIUS_MM` | 26.875 | > 0 or None | `custom`: outer edge of the disc (None = no outline) |
-| `ROTOR_CUSTOM_BORE_RADIUS_MM` | 7.25 | > 0 or None | `custom`: centre hole (None = no hole) |
+| `ROTOR_CUSTOM_OUTLINE_RADIUS_MM` | 26.875 | > 0 or None | `custom`: outer edge of the disc (None = no outline; the bore must then be given) |
+| `ROTOR_CUSTOM_BORE_RADIUS_MM` | 7.25 | > 0 or None | `custom`: centre hole (None = no hole; the outline must then be given) |
 | `ROTOR_TRACK_GAP_MM` | 2.0 | ≥ 0 | Bare ring that must stay between ring 1's outer radius and ring 2's inner radius. Smaller is an error naming the extension to change |
 | `ROTOR_1_TO_RX2_MM` | 3.0 | ≥ 0 | Least distance from ring 1's outer radius to the innermost RX2 copper; smaller is a warning. Use 5.0 when the radius allows it |
 | `ROTOR_2_TO_RX1_MM` | 2.0 | ≥ 0 | Least distance from ring 2's inner radius to the outermost RX1 copper; smaller is a warning |

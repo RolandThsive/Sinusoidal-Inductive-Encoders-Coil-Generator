@@ -11,7 +11,8 @@ solder mask) is set once, in `Dual_Board_Parameters.py`. Mount the copper side t
 With `ROTOR_MODE = "according_to_stator"` (the default) each ring has one copper lobe for every loop of its own set,
 and its radial extent comes from that set's RX band and TX ring. With `ROTOR_MODE = "custom"` each ring is drawn from
 its own `ROTOR_CUSTOM_*` values (sectors, metal fraction, start angle, inner and outer radius, layers), and the disc's
-edges from `ROTOR_CUSTOM_OUTLINE_RADIUS_MM` and `ROTOR_CUSTOM_BORE_RADIUS_MM`.
+edges from `ROTOR_CUSTOM_OUTLINE_RADIUS_MM` and `ROTOR_CUSTOM_BORE_RADIUS_MM` (either may be None, not both: the disc needs
+an edge).
 
 ![Dual Rotor 1: Ring 2 Lobes](https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/images/dual_rotor_1_lobes.png)
 

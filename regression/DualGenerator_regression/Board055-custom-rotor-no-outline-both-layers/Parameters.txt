@@ -56,7 +56,7 @@ Set 2 (outer), TX ends at 0 deg, RX pattern zero at 351.56 deg:
 
 ROTOR
 -----
-Dual rotor (custom): ring 1 1 sector(s), ring 2 16 sector(s); bore r = None, outline r = None; 5.80 mm bare between the rings
+Dual rotor (custom): ring 1 1 sector(s), ring 2 16 sector(s); bore r = 7.25, outline r = None; 5.80 mm bare between the rings
   both rings start at their own set's RX pattern zero (ROTOR_START_ANGLE_ZERO = "rx_zero"), so the coarse and the fine track read 0 at the same shaft angle and turn the same way (no nominal zero shift: the coarse-to-fine decision tolerates at most +-180/LOOPS of set 2 degrees of it); the firmware still has to calibrate the residual at the nominal air gap
 Ring 1, sector start measured from set 1's RX pattern zero (45.00 deg, ROTOR_START_ANGLE_ZERO = "rx_zero"):
   Rotor (custom): 1 sector(s), metal fraction 0.5 (180.00 deg mechanical each)
@@ -64,7 +64,7 @@ Ring 1, sector start measured from set 1's RX pattern zero (45.00 deg, ROTOR_STA
     RX band r = 8.45 ... 11.7 mm: the copper reaches 0.68 mm past the band at the inner edge and 0.00 mm past the band at the outer edge
     TX turns r = 12.425 ... 13.625 mm (copper): the rotor copper ends 0.73 mm inside the TX ring (it does not cover the TX turns)
     solder mask: stays over the copper (ROTOR_SOLDER_MASK_EXPANSION_MM = -1), no mask openings
-    outline r = None, bore r = None
+    outline r = None, bore r = 7.25
     copper skin depth at 3 MHz = 38 um; 35 um copper (1 oz) screens the TX field by about 96-99 %, 70 um (2 oz) by about 98-100 % (thin-sheet estimate): thicker copper adds little signal
     note: 1 sector (half disc) is mechanically unbalanced: add a non-metal counterweight if the shaft turns fast.
     note: spatial period at mid radius 63.3 mm -> signal falls about exp(-2*pi*gap/period) = 0.91 at the nominal 1 mm gap
@@ -74,7 +74,7 @@ Ring 2, sector start measured from set 2's RX pattern zero (351.56 deg, ROTOR_ST
     RX band r = 18 ... 23.9 mm: the copper reaches 0.50 mm past the band at the inner edge and 2.42 mm past the band at the outer edge
     TX turns r = 24.625 ... 25.825 mm (copper): the rotor copper covers the TX turns and ends 0.50 mm past the outermost one
     solder mask: stays over the copper (ROTOR_SOLDER_MASK_EXPANSION_MM = -1), no mask openings
-    outline r = None, bore r = None
+    outline r = None, bore r = 7.25
     copper skin depth at 4.3 MHz = 32 um; 35 um copper (1 oz) screens the TX field by about 97-99 %, 70 um (2 oz) by about 99-100 % (thin-sheet estimate): thicker copper adds little signal
     note: spatial period at mid radius 8.2 mm -> signal falls about exp(-2*pi*gap/period) = 0.47 at the nominal 1 mm gap
 
@@ -131,7 +131,7 @@ PARAMETER VALUES USED
   ROTOR_MODE                     = 'custom'
   ROTOR_AUTO_EDGE_CLEARANCE_MM   = 0.5
   ROTOR_CUSTOM_OUTLINE_RADIUS_MM = None
-  ROTOR_CUSTOM_BORE_RADIUS_MM    = None
+  ROTOR_CUSTOM_BORE_RADIUS_MM    = 7.25
   ROTOR_PCB_THICKNESS_MM         = None
   ROTOR_ARC_STEPS_PER_SECTOR     = 'auto'
   ROTOR_CHORD_TOLERANCE_MM       = 0.001
@@ -380,7 +380,7 @@ THE TWO SETS AS HANDED TO THE SINGLE GENERATOR (its names)
   ROTOR_CUSTOM_OUTER_RADIUS_MM   = 11.7
   ROTOR_CUSTOM_COPPER_LAYERS     = ['F.Cu', 'B.Cu']
   ROTOR_CUSTOM_OUTLINE_RADIUS_MM = None
-  ROTOR_CUSTOM_BORE_RADIUS_MM    = None
+  ROTOR_CUSTOM_BORE_RADIUS_MM    = 7.25
   ROTOR_PCB_THICKNESS_MM         = None
   ROTOR_ARC_STEPS_PER_SECTOR     = 'auto'
   ROTOR_CHORD_TOLERANCE_MM       = 0.001
@@ -474,7 +474,7 @@ THE TWO SETS AS HANDED TO THE SINGLE GENERATOR (its names)
   ROTOR_CUSTOM_OUTER_RADIUS_MM   = 26.32
   ROTOR_CUSTOM_COPPER_LAYERS     = ['F.Cu']
   ROTOR_CUSTOM_OUTLINE_RADIUS_MM = None
-  ROTOR_CUSTOM_BORE_RADIUS_MM    = None
+  ROTOR_CUSTOM_BORE_RADIUS_MM    = 7.25
   ROTOR_PCB_THICKNESS_MM         = None
   ROTOR_ARC_STEPS_PER_SECTOR     = 'auto'
   ROTOR_CHORD_TOLERANCE_MM       = 0.001

@@ -646,6 +646,12 @@ def _rotor_custom_rules(c):
             rep.conflict(("ROTOR_CUSTOM_SECTORS", "LOOPS"), f"the rotor has {n} sector(s) but the stator {v['LOOPS']} "
                          f"loop(s): the rotor needs one sector per loop, otherwise the sensor does not give a single "
                          f"clean sine period per sector", level="warning")
+        edges = ("ROTOR_CUSTOM_OUTLINE_RADIUS_MM", "ROTOR_CUSTOM_BORE_RADIUS_MM")
+        if all(e in v and v[e] is None for e in edges):
+            rep.conflict(edges, "a custom rotor needs an outline or a bore: with both None the rotor file has no board "
+                                "edge at all, which KiCad's design-rule check reports as an invalid board outline and "
+                                "nobody can cut. Give the disc's outer edge (ROTOR_CUSTOM_OUTLINE_RADIUS_MM), its centre "
+                                "hole (ROTOR_CUSTOM_BORE_RADIUS_MM), or both")
         ri_, ro_ = v.get("ROTOR_CUSTOM_INNER_RADIUS_MM"), v.get("ROTOR_CUSTOM_OUTER_RADIUS_MM")
         if ri_ is not None and ro_ is not None:
             if ri_ >= ro_:

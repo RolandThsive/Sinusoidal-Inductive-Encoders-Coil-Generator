@@ -175,8 +175,8 @@ cannot see a TX turn touching another: the generator checks the clearance itself
 | `ROTOR_CUSTOM_START_ANGLE_DEG` | 0.0 | number | Mechanical angle of the first sector edge. |
 | `ROTOR_CUSTOM_INNER_RADIUS_MM`, `ROTOR_CUSTOM_OUTER_RADIUS_MM` | 15.53, 24.3 | > 0 | Copper inner and outer radius. |
 | `ROTOR_CUSTOM_COPPER_LAYERS` | `["F.Cu"]` | layer list | Layer(s) carrying the copper. |
-| `ROTOR_CUSTOM_OUTLINE_RADIUS_MM` | 27.0 | > 0 or None | Outer board edge (None = no outline). |
-| `ROTOR_CUSTOM_BORE_RADIUS_MM` | 15.0 | > 0 or None | Centre hole (None = no hole). |
+| `ROTOR_CUSTOM_OUTLINE_RADIUS_MM` | 27.0 | > 0 or None | Outer board edge (None = no outline; the bore must then be given). |
+| `ROTOR_CUSTOM_BORE_RADIUS_MM` | 15.0 | > 0 or None | Centre hole (None = no hole; the outline must then be given). |
 
 ### 21.4.3 Both modes
 

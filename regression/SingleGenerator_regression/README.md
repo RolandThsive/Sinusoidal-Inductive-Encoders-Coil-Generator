@@ -146,7 +146,7 @@ lists what each board sets differently from Board001-default.
 | [Board092-rotor-mask-open-0-05-thickness-1-0](Board092-rotor-mask-open-0-05-thickness-1-0/) | `ROTOR_PCB_THICKNESS_MM = 1.0`<br>`ROTOR_SOLDER_MASK_EXPANSION_MM = 0.05` |
 | [Board093-rotor-b-cu-only](Board093-rotor-b-cu-only/) | `ROTOR_AUTO_COPPER_LAYERS = ["B.Cu"]` |
 | [Board094-custom-rotor-4-sectors-both-layers](Board094-custom-rotor-4-sectors-both-layers/) | `ROTOR_MODE = "custom"`<br>`ROTOR_CUSTOM_SECTORS = 4`<br>`ROTOR_CUSTOM_DUTY = 0.4`<br>`ROTOR_CUSTOM_START_ANGLE_DEG = 10.0`<br>`ROTOR_CUSTOM_COPPER_LAYERS = ["F.Cu", "B.Cu"]` |
-| [Board095-custom-rotor-no-outline-no-bore](Board095-custom-rotor-no-outline-no-bore/) | `ROTOR_MODE = "custom"`<br>`ROTOR_CUSTOM_OUTLINE_RADIUS_MM = None`<br>`ROTOR_CUSTOM_BORE_RADIUS_MM = None` |
+| [Board095-custom-rotor-no-outline](Board095-custom-rotor-no-outline/) | `ROTOR_MODE = "custom"`<br>`ROTOR_CUSTOM_OUTLINE_RADIUS_MM = None` |
 | [Board096-custom-rotor-radii-12-25-outline-30](Board096-custom-rotor-radii-12-25-outline-30/) | `ROTOR_MODE = "custom"`<br>`ROTOR_CUSTOM_INNER_RADIUS_MM = 12.0`<br>`ROTOR_CUSTOM_OUTER_RADIUS_MM = 25.0`<br>`ROTOR_CUSTOM_OUTLINE_RADIUS_MM = 30.0`<br>`ROTOR_CUSTOM_BORE_RADIUS_MM = 10.0` |
 | [Board097-silkscreen-bottom-only](Board097-silkscreen-bottom-only/) | `SILK.SILKSCREEN_SIDES = "bottom"` |
 | [Board098-silkscreen-no-labels](Board098-silkscreen-no-labels/) | `SILK.SILKSCREEN_LABELS = False` |

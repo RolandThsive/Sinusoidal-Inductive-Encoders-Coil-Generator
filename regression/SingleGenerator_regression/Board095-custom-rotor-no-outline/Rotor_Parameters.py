@@ -58,7 +58,7 @@ ROTOR_CUSTOM_INNER_RADIUS_MM    = 15.53  # (these values match the example stato
 ROTOR_CUSTOM_OUTER_RADIUS_MM    = 24.3   #  TX turns to 23.8, bore 15, outer edge 27)
 ROTOR_CUSTOM_COPPER_LAYERS      = ["F.Cu"]
 ROTOR_CUSTOM_OUTLINE_RADIUS_MM  = None   # outer board edge (None = no outline)
-ROTOR_CUSTOM_BORE_RADIUS_MM     = None   # centre hole (None = no hole)
+ROTOR_CUSTOM_BORE_RADIUS_MM     = 15.0   # centre hole (None = no hole)
 
 # ---- both modes -------------------------------------------------------------
 ROTOR_PCB_THICKNESS_MM = None   # thickness of the rotor board written into the KiCad file (mm); None = the

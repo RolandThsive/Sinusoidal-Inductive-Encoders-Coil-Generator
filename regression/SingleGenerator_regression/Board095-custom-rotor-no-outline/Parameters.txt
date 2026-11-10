@@ -29,7 +29,7 @@ Rotor (custom): 1 sector(s), metal fraction 0.5 (180.00 deg mechanical each)
   RX band r = 16.2 ... 21.4 mm: the copper reaches 0.67 mm past the band at the inner edge and 2.90 mm past the band at the outer edge
   TX turns r = 22.4 ... 23.8 mm (copper): the rotor copper covers the TX turns and ends 0.50 mm past the outermost one
   solder mask: stays over the copper (ROTOR_SOLDER_MASK_EXPANSION_MM = -1), no mask openings
-  outline r = None, bore r = None
+  outline r = None, bore r = 15.0
   copper skin depth at 3.5 MHz = 35 um; 35 um copper (1 oz) screens the TX field by about 96-99 %, 70 um (2 oz) by about 98-99 % (thin-sheet estimate): thicker copper adds little signal
   note: 1 sector (half disc) is mechanically unbalanced: add a non-metal counterweight if the shaft turns fast.
   note: spatial period at mid radius 118.1 mm -> signal falls about exp(-2*pi*gap/period) = 0.95 at the nominal 1 mm gap
@@ -136,7 +136,7 @@ PARAMETER VALUES USED
   ROTOR_CUSTOM_OUTER_RADIUS_MM   = 24.3
   ROTOR_CUSTOM_COPPER_LAYERS     = ['F.Cu']
   ROTOR_CUSTOM_OUTLINE_RADIUS_MM = None
-  ROTOR_CUSTOM_BORE_RADIUS_MM    = None
+  ROTOR_CUSTOM_BORE_RADIUS_MM    = 15.0
   ROTOR_PCB_THICKNESS_MM         = None
   ROTOR_ARC_STEPS_PER_SECTOR     = 'auto'
   ROTOR_CHORD_TOLERANCE_MM       = 0.001

@@ -99,6 +99,10 @@ CASES = [
      [r"ERROR", r"ROTOR_START_ANGLE_ZERO = 'shaft': must be one of 'rx_zero', 'board'"], []),
     ("err_rotor_zero_missing", base(**{"BOARD.ROTOR_START_ANGLE_ZERO": DELETE}), 1, [r"ERROR", r"ROTOR_START_ANGLE_ZERO is missing"], []),
     ("custom_rotor_mode", base(**{"BOARD.ROTOR_MODE": "custom"}), 0, [r"CHECK PASSED"], [r"ERROR"]),
+    ("custom_rotor_no_outline_no_bore", base(**{"BOARD.ROTOR_MODE": "custom", "BOARD.ROTOR_CUSTOM_OUTLINE_RADIUS_MM": None,
+                                                "BOARD.ROTOR_CUSTOM_BORE_RADIUS_MM": None}), 1,
+     [r"ERROR.*ROTOR_CUSTOM_OUTLINE_RADIUS_MM.*ROTOR_CUSTOM_BORE_RADIUS_MM", r"set 1: a custom rotor needs an outline or a bore"],
+     []),
     # ------------------------------------------------------------------ the dual rules
     ("single_layer_tx1", {"TX1.TX_WIRING": "single"}, 0, [r"CHECK PASSED"], [r"ERROR", r"no place"]),
     ("single_layer_tx2", base(**{"TX2.TX_WIRING": "single"}), 0, [r"CHECK PASSED"], [r"ERROR"]),
