@@ -12,7 +12,7 @@ oscillators) and writes the files.
 | Coil Sets | Two: set 1 inside (coarse, 1 loop by default) and set 2 outside (fine, 16 loops by default). Each has its own RX pair, its own TX ring and its own receiver IC |
 | Copper Layers | Always 4. Each set's RX and TX layers are chosen freely (`RX_LAYER_A` / `B`, `TX_LAYER_A` / `B`); both sets may use the same layers, since their copper never overlaps radially |
 | Nets | Six, one per coil: `SIN_1`, `COS_1`, `TX_1`, `SIN_2`, `COS_2`, `TX_2` by default. A name used twice is a warning, because KiCad would join the two coils into one net |
-| Board Edges | One bore and one outline for both sets, given or computed as `DUAL_MODE` says (see [Quick Guide - Dual Generator](Quick-Guide-To-Parameters-Selections-Dual-Generator.md)) |
+| Board Edges | One bore and one outline for both sets, given, or worked out from the bands (see [Dual Layout](Dual-Layout.md)) |
 | Gap Between The Sets | Measured on the built copper, from the outermost copper of set 1 to the innermost copper of set 2 |
 | Copper Layers | 4 by default (`PCB_LAYERS`), or 2: each set's RX then runs on Top and Bottom, and no layer is left free for set 1's leads (a warning) |
 | Vias | Through vias (0.6 / 0.3 mm by default), or (`VIA_TYPE = "blind"`) blind vias between the two layers each via joins. A set may have its own via size and type (`Dual_RX1` / `Dual_RX2`). A through via of one set is checked against the other set's copper on every layer |
@@ -52,7 +52,8 @@ bore | RX1 band | TX1 ring | TRACK_GAP_MM | RX2 band | TX2 ring | outline
   outside the last turn) to the innermost copper of set 2 (the RX2 band start minus half an RX trace or a via radius,
   whichever is larger).
 - The outline leaves at least `OUTER_EDGE_OFFSET_MM` (2.0 mm) past the RX2 band and `OUTER_EDGE_TAIL_MARGIN_MM` (0.7 mm)
-  past the TX2 ring. In modes 1 to 3, when ring 2 of the rotor covers the TX2 turns (the default), the outline must also
+  past the TX2 ring. When the generator works out the outline, or places the RX2 band up to a given one, and ring 2 of
+  the rotor covers the TX2 turns (the default), the outline must also
   hold ring 2: the outermost TX2 copper plus `ROTOR_AUTO_TX_OVERHANG_MM` (0.5 mm), `ROTOR_AUTO_EDGE_CLEARANCE_MM`
   (0.5 mm) and `LAYOUT_TOLERANCE_MM` (0.05 mm, or half the edge line plus the sag of the ring's polygon when that is
   more). On the default board this rule sets the outline: 25.825 + 0.5 + 0.5 + 0.05 = 26.875 mm, where the first two
@@ -94,8 +95,8 @@ coupling k below 0.3.
 
 On top of the Single Generator's checks for each set, the Dual Generator checks:
 
-- **The gap between the sets**, on the built copper. Less than `TRACK_GAP_MM` (modes 1 and 3) or `MIN_CLEARANCE_MM`
-  (modes 2 and 4) is an error that says how far to move the RX2 band out.
+- **The gap between the sets**, on the built copper. Less than `TRACK_GAP_MM`, or `MIN_CLEARANCE_MM` when that is `None`,
+  is an error that says how far to move the RX2 band out.
 - **The layout formulas**. When the built copper differs from the formulas by more than `LAYOUT_TOLERANCE_MM`
   (0.05 mm), the run warns; the boards are as built.
 - **The rotor rings**: the bare ring between them (an error below `ROTOR_TRACK_GAP_MM`), each ring's distance from the
@@ -109,4 +110,4 @@ Every message is listed in [Checks, Errors And Warnings](Checks-Errors-And-Warni
 
 | Previous | Next |
 |:---|---:|
-| [Rotor Features - Dual Generator](Rotor-Features-Dual-Generator.md) | [Silkscreen - Dual Generator](Silkscreen-Dual-Generator.md) |
+| [Rotor Features - Dual Generator](Rotor-Features-Dual-Generator.md) | [Dual Layout](Dual-Layout.md) |

@@ -24,7 +24,7 @@ Generator's own, so a parameter the Single Generator gains is a dual parameter a
 
 | File | What It Sets |
 |---|---|
-| `Dual_Board_Parameters.py` | The one board both sets share: output, layer count, vias, clearance, the layout mode, bore and outline, the gap between the sets, where each set's TX ends go, the frequency rules, the stack-up, the electrical estimate, and the rotor disc (mode, edges, the distances between the rings, arc resolution, mask) |
+| `Dual_Board_Parameters.py` | The one board both sets share: output, layer count, vias, clearance, bore and outline, the gap between the sets, where each set's TX ends go, the frequency rules, the stack-up, the electrical estimate, and the rotor disc (mode, edges, the distances between the rings, arc resolution, mask) |
 | `Dual_RX1_Parameters.py`, `Dual_RX2_Parameters.py` | The RX coils of set 1 (inner) and set 2 (outer): loops, band, nets, profile, sub-coils, layers, bridging fingers, and the set's own vias and clearance |
 | `Dual_TX1_Parameters.py`, `Dual_TX2_Parameters.py` | The TX ring of each set: excitation frequency, net, wiring, turns, pitch, shape, tail, layers, and the set's own AC resistance factor |
 | `Dual_Rotor1_Parameters.py`, `Dual_Rotor2_Parameters.py` | Ring 1 (faces set 1) and ring 2 (faces set 2) of the rotor disc |
@@ -52,23 +52,22 @@ Generator's own, so a parameter the Single Generator gains is a dual parameter a
 | `MIN_CLEARANCE_MM` | 0.15 | Copper-to-copper rule. A through via of one set is checked against the other set's copper on every layer. A set may have its own (22.3); between the sets the larger of the two applies |
 | `VIA_TYPE` | `"through"` | `"through"` or `"blind"`. Blind: every via is written as a blind via between the two layers it joins. The checker warns about a pair that skips a layer and about a drill wider than about 0.15 mm; the clearance checks treat every via as a through via. A set may have its own (22.3) |
 
-### 22.2.3 Layout: Edges, Gap And Mode
+### 22.2.3 Layout: Edges And Gap
 
-See [Quick Guide To Parameters Selections - Dual Generator](Quick-Guide-To-Parameters-Selections-Dual-Generator.md) for
-pictures of each mode.
+Give any of the two RX bands (22.3), the bore, the outline and the gap, each one or not (`None`): the generator places
+what is not given. [Dual Layout](Dual-Layout.md) has the rules and all 32 combinations, each with a picture.
 
 | Name | Default | Range | Meaning |
 |---|---|---|---|
-| `DUAL_MODE` | 2 | 1, 2, 3, 4 | Which radii you give. 1: the gap, both edges and `BAND_SPLIT` (both bands `None`). 2: both bands (gap and edges `None`). 3: one band and the gap (the other band and the edges `None`). 4: both bands and both edges (gap `None`). Anything that does not match the mode is an error that names it |
-| `INNER_EDGE_RADIUS_MM` | None | > 0 or None | The centre hole. Must sit `INNER_EDGE_INSET_MM` inside the RX1 band |
-| `OUTER_EDGE_RADIUS_MM` | None | > 0 or None | The board edge. Must leave `OUTER_EDGE_OFFSET_MM` past the RX2 band and `OUTER_EDGE_TAIL_MARGIN_MM` past the TX2 ring |
+| `INNER_EDGE_RADIUS_MM` | None | > 0 or None | The centre hole. Must sit `INNER_EDGE_INSET_MM` inside the RX1 band. None: the RX1 band start minus `INNER_EDGE_INSET_MM`. Given with no RX1 band, a placed RX1 band starts at the bore plus `INNER_EDGE_INSET_MM` |
+| `OUTER_EDGE_RADIUS_MM` | None | > 0 or None | The board edge. Must leave `OUTER_EDGE_OFFSET_MM` past the RX2 band and `OUTER_EDGE_TAIL_MARGIN_MM` past the TX2 ring. None: worked out from the RX2 band. Given with no RX2 band, a placed RX2 band runs out to it, less that room |
 | `INNER_EDGE_INSET_MM` | 1.2 | ≥ 0 | Bore = RX1 band start minus this (the RX1 inner-tip vias sit on the band start) |
 | `OUTER_EDGE_OFFSET_MM` | 2.0 | ≥ 0 | Outline = RX2 band end plus this, at least |
 | `OUTER_EDGE_TAIL_MARGIN_MM` | 0.7 | ≥ 0 | Outline = the end of the TX2 tail plus this, at least (with `TX_TAIL_EXTRA_MM = 0` the ring ends one pitch outside its last turn), and set 2's fingers plus this |
 | `EDGE_LINE_WIDTH_MM` | 0.05 | > 0 up to 1 | Line width of the `Edge.Cuts` circles |
-| `TRACK_GAP_MM` | None | > 0 or None | The copper-free ring between the sets, from the outermost copper of set 1 (its TX ring and tail, or its fingers and the go-around brackets, whichever reach farther) to the innermost copper of set 2 (the RX2 band start minus half an RX trace or a via radius, whichever is larger). Modes 1 and 3: the gap to leave. Modes 2 and 4: must be `None`; the measured gap must be at least `MIN_CLEARANCE_MM` (the larger of the two sets') |
-| `LAYOUT_TOLERANCE_MM` | 0.05 | 0 to 1 | The rounding allowance: the built copper may differ from the layout formulas by this much before the run warns. In modes 1 to 3, when ring 2 covers the TX2 turns, it is also the room left between ring 2 and the outline beyond `ROTOR_AUTO_EDGE_CLEARANCE_MM` (half the edge line plus the polygon sag, when that is more). 0 = no allowance |
-| `BAND_SPLIT` | 0.5 | between 0 and 1, both excluded | Mode 1 only: set 1's share of the free radial width. 0.5 = equal band widths; a 1x / 16x board is usually near 0.5 |
+| `TRACK_GAP_MM` | None | > 0 or None | The copper-free ring between the sets, from the outermost copper of set 1 (its TX ring and tail, or its fingers and the go-around brackets, whichever reach farther) to the innermost copper of set 2 (the RX2 band start minus half an RX trace or a via radius, whichever is larger). A band the generator places sits exactly this far from the other set; when both bands are given, the measured gap must be at least this. None: `MIN_CLEARANCE_MM` (the larger of the two sets') in its place |
+| `LAYOUT_TOLERANCE_MM` | 0.05 | 0 to 1 | The rounding allowance: the built copper may differ from the layout formulas by this much before the run warns. When the outline is worked out (or a placed RX2 band runs out to a given one) and ring 2 covers the TX2 turns, it is also the room left between ring 2 and the outline beyond `ROTOR_AUTO_EDGE_CLEARANCE_MM` (half the edge line plus the polygon sag, when that is more). 0 = no allowance |
+| `BAND_SPLIT` | 0.5 | between 0 and 1, both excluded | Read only when no RX band is given (both bands fitted between the edges): set 1's share of the free radial width. 0.5 = equal band widths; a 1x / 16x board is usually near 0.5 |
 
 ### 22.2.4 TX Ends And Frequencies
 
@@ -123,7 +122,7 @@ vias and clearance.
 |---|---|---|---|
 | `LOOPS` | 1 | 16 | Electrical periods per turn, 1 to 16. Set 1 is the coarse, absolute track; set 2 the fine one. Set 1's angle error must stay below 180 / `LOOPS` of set 2 degrees |
 | `INSIDE_RADIUS_MM`, `OUTSIDE_RADIUS_MM` | 8.45, 11.7 | 18.0, 23.9 | The band as a radii pair (with `RX_R_BASE_MM`, `RX_A_MM` = None) |
-| `RX_R_BASE_MM`, `RX_A_MM` | None, None | None, None | The band as centre and half width: `RX_R_BASE_MM ± RX_A_MM` (with the radii pair = None). All four None: the generator places the band (mode 1, or mode 3) |
+| `RX_R_BASE_MM`, `RX_A_MM` | None, None | None, None | The band as centre and half width: `RX_R_BASE_MM ± RX_A_MM` (with the radii pair = None). All four None: the generator places the band ([Dual Layout](Dual-Layout.md)) |
 | `RX_TRACE_WIDTH_MM` | 0.15 | 0.15 | RX trace width |
 | `RX_NET_PHASE_0_2` | `"SIN_1"` | `"SIN_2"` | Net of phases 0 and 2 (sine). Every net of the two sets must have its own name |
 | `RX_NET_PHASE_1_3` | `"COS_1"` | `"COS_2"` | Net of phases 1 and 3 (cosine) |

@@ -10,16 +10,16 @@
    "track_dangling (warning)": 4,
    "track_width (error)": 199
   },
-  "Dual Generator/Board002-mode1-fitted-bands/Rotor.kicad_pcb": {},
-  "Dual Generator/Board002-mode1-fitted-bands/Stator.kicad_pcb": {
+  "Dual Generator/Board002-layout-32-fitted-bands/Rotor.kicad_pcb": {},
+  "Dual Generator/Board002-layout-32-fitted-bands/Stator.kicad_pcb": {
    "track_dangling (warning)": 4
   },
-  "Dual Generator/Board003-mode3-rx1-band-gap/Rotor.kicad_pcb": {},
-  "Dual Generator/Board003-mode3-rx1-band-gap/Stator.kicad_pcb": {
+  "Dual Generator/Board003-layout-10-rx1-band-and-gap/Rotor.kicad_pcb": {},
+  "Dual Generator/Board003-layout-10-rx1-band-and-gap/Stator.kicad_pcb": {
    "track_dangling (warning)": 4
   },
-  "Dual Generator/Board004-mode4-all-given/Rotor.kicad_pcb": {},
-  "Dual Generator/Board004-mode4-all-given/Stator.kicad_pcb": {
+  "Dual Generator/Board004-layout-07-all-given/Rotor.kicad_pcb": {},
+  "Dual Generator/Board004-layout-07-all-given/Stator.kicad_pcb": {
    "track_dangling (warning)": 4
   },
   "Dual Generator/Board005-parallel-both-sets/Rotor.kicad_pcb": {},
@@ -75,13 +75,13 @@
    "track_dangling (warning)": 4,
    "track_width (error)": 199
   },
-  "Dual Generator/Board016-mode1-band-split-0-4/Rotor.kicad_pcb": {},
-  "Dual Generator/Board016-mode1-band-split-0-4/Stator.kicad_pcb": {
+  "Dual Generator/Board016-band-split-0-4/Rotor.kicad_pcb": {},
+  "Dual Generator/Board016-band-split-0-4/Stator.kicad_pcb": {
    "track_dangling (warning)": 4,
    "track_width (error)": 199
   },
-  "Dual Generator/Board017-mode1-band-split-0-6/Rotor.kicad_pcb": {},
-  "Dual Generator/Board017-mode1-band-split-0-6/Stator.kicad_pcb": {
+  "Dual Generator/Board017-band-split-0-6/Rotor.kicad_pcb": {},
+  "Dual Generator/Board017-band-split-0-6/Stator.kicad_pcb": {
    "track_dangling (warning)": 4,
    "track_width (error)": 199
   },
@@ -409,9 +409,123 @@
    "track_dangling (warning)": 4,
    "track_width (error)": 199
   },
-  "Dual Generator/Board082-mode1-fingers-both-sets/Rotor.kicad_pcb": {},
-  "Dual Generator/Board082-mode1-fingers-both-sets/Stator.kicad_pcb": {
+  "Dual Generator/Board082-fitted-bands-fingers-both-sets/Rotor.kicad_pcb": {},
+  "Dual Generator/Board082-fitted-bands-fingers-both-sets/Stator.kicad_pcb": {
    "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board083-layout-02-both-bands-and-gap/Rotor.kicad_pcb": {},
+  "Dual Generator/Board083-layout-02-both-bands-and-gap/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4,
+   "track_width (error)": 199
+  },
+  "Dual Generator/Board084-layout-03-both-bands-and-bore/Rotor.kicad_pcb": {},
+  "Dual Generator/Board084-layout-03-both-bands-and-bore/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4,
+   "track_width (error)": 199
+  },
+  "Dual Generator/Board085-layout-04-both-bands-bore-and-gap/Rotor.kicad_pcb": {},
+  "Dual Generator/Board085-layout-04-both-bands-bore-and-gap/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4,
+   "track_width (error)": 199
+  },
+  "Dual Generator/Board086-layout-05-both-bands-and-outline/Rotor.kicad_pcb": {},
+  "Dual Generator/Board086-layout-05-both-bands-and-outline/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4,
+   "track_width (error)": 199
+  },
+  "Dual Generator/Board087-layout-06-both-bands-outline-and-gap/Rotor.kicad_pcb": {},
+  "Dual Generator/Board087-layout-06-both-bands-outline-and-gap/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4,
+   "track_width (error)": 199
+  },
+  "Dual Generator/Board088-layout-08-everything-given/Rotor.kicad_pcb": {},
+  "Dual Generator/Board088-layout-08-everything-given/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4,
+   "track_width (error)": 199
+  },
+  "Dual Generator/Board089-layout-09-rx1-band/Rotor.kicad_pcb": {},
+  "Dual Generator/Board089-layout-09-rx1-band/Stator.kicad_pcb": {
+   "clearance (error)": 4,
+   "track_dangling (warning)": 4,
+   "track_width (error)": 199
+  },
+  "Dual Generator/Board090-layout-11-rx1-band-and-bore/Rotor.kicad_pcb": {},
+  "Dual Generator/Board090-layout-11-rx1-band-and-bore/Stator.kicad_pcb": {
+   "clearance (error)": 4,
+   "track_dangling (warning)": 4,
+   "track_width (error)": 199
+  },
+  "Dual Generator/Board091-layout-12-rx1-band-bore-and-gap/Rotor.kicad_pcb": {},
+  "Dual Generator/Board091-layout-12-rx1-band-bore-and-gap/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4,
+   "track_width (error)": 199
+  },
+  "Dual Generator/Board092-layout-13-rx1-band-and-outline/Rotor.kicad_pcb": {},
+  "Dual Generator/Board092-layout-13-rx1-band-and-outline/Stator.kicad_pcb": {
+   "clearance (error)": 4,
+   "track_dangling (warning)": 4,
+   "track_width (error)": 199
+  },
+  "Dual Generator/Board093-layout-14-rx1-band-outline-and-gap/Rotor.kicad_pcb": {},
+  "Dual Generator/Board093-layout-14-rx1-band-outline-and-gap/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4,
+   "track_width (error)": 199
+  },
+  "Dual Generator/Board094-layout-15-rx1-band-bore-and-outline/Rotor.kicad_pcb": {},
+  "Dual Generator/Board094-layout-15-rx1-band-bore-and-outline/Stator.kicad_pcb": {
+   "clearance (error)": 4,
+   "track_dangling (warning)": 4,
+   "track_width (error)": 199
+  },
+  "Dual Generator/Board095-layout-16-rx1-band-bore-outline-and-gap/Rotor.kicad_pcb": {},
+  "Dual Generator/Board095-layout-16-rx1-band-bore-outline-and-gap/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4,
+   "track_width (error)": 199
+  },
+  "Dual Generator/Board096-layout-17-rx2-band/Rotor.kicad_pcb": {},
+  "Dual Generator/Board096-layout-17-rx2-band/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4,
+   "track_width (error)": 199
+  },
+  "Dual Generator/Board097-layout-18-rx2-band-and-gap/Rotor.kicad_pcb": {},
+  "Dual Generator/Board097-layout-18-rx2-band-and-gap/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4,
+   "track_width (error)": 199
+  },
+  "Dual Generator/Board098-layout-19-rx2-band-and-bore/Rotor.kicad_pcb": {},
+  "Dual Generator/Board098-layout-19-rx2-band-and-bore/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4,
+   "track_width (error)": 199
+  },
+  "Dual Generator/Board099-layout-20-rx2-band-bore-and-gap/Rotor.kicad_pcb": {},
+  "Dual Generator/Board099-layout-20-rx2-band-bore-and-gap/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4,
+   "track_width (error)": 199
+  },
+  "Dual Generator/Board100-layout-21-rx2-band-and-outline/Rotor.kicad_pcb": {},
+  "Dual Generator/Board100-layout-21-rx2-band-and-outline/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4,
+   "track_width (error)": 199
+  },
+  "Dual Generator/Board101-layout-22-rx2-band-outline-and-gap/Rotor.kicad_pcb": {},
+  "Dual Generator/Board101-layout-22-rx2-band-outline-and-gap/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4,
+   "track_width (error)": 199
+  },
+  "Dual Generator/Board102-layout-23-rx2-band-bore-and-outline/Rotor.kicad_pcb": {},
+  "Dual Generator/Board102-layout-23-rx2-band-bore-and-outline/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4,
+   "track_width (error)": 199
+  },
+  "Dual Generator/Board103-layout-24-rx2-band-bore-outline-and-gap/Rotor.kicad_pcb": {},
+  "Dual Generator/Board103-layout-24-rx2-band-bore-outline-and-gap/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4,
+   "track_width (error)": 199
+  },
+  "Dual Generator/Board104-layout-31-both-edges/Rotor.kicad_pcb": {},
+  "Dual Generator/Board104-layout-31-both-edges/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4,
+   "track_width (error)": 199
   },
   "Single Generator fresh run/Rotor.kicad_pcb": {},
   "Single Generator fresh run/Stator.kicad_pcb": {
@@ -856,16 +970,16 @@
   "Dual Generator/Board001-default/Stator.kicad_pcb": {
    "track_dangling (warning)": 4
   },
-  "Dual Generator/Board002-mode1-fitted-bands/Rotor.kicad_pcb": {},
-  "Dual Generator/Board002-mode1-fitted-bands/Stator.kicad_pcb": {
+  "Dual Generator/Board002-layout-32-fitted-bands/Rotor.kicad_pcb": {},
+  "Dual Generator/Board002-layout-32-fitted-bands/Stator.kicad_pcb": {
    "track_dangling (warning)": 4
   },
-  "Dual Generator/Board003-mode3-rx1-band-gap/Rotor.kicad_pcb": {},
-  "Dual Generator/Board003-mode3-rx1-band-gap/Stator.kicad_pcb": {
+  "Dual Generator/Board003-layout-10-rx1-band-and-gap/Rotor.kicad_pcb": {},
+  "Dual Generator/Board003-layout-10-rx1-band-and-gap/Stator.kicad_pcb": {
    "track_dangling (warning)": 4
   },
-  "Dual Generator/Board004-mode4-all-given/Rotor.kicad_pcb": {},
-  "Dual Generator/Board004-mode4-all-given/Stator.kicad_pcb": {
+  "Dual Generator/Board004-layout-07-all-given/Rotor.kicad_pcb": {},
+  "Dual Generator/Board004-layout-07-all-given/Stator.kicad_pcb": {
    "track_dangling (warning)": 4
   },
   "Dual Generator/Board005-parallel-both-sets/Rotor.kicad_pcb": {},
@@ -915,12 +1029,12 @@
   "Dual Generator/Board015-inset-offset-tail-margin/Stator.kicad_pcb": {
    "track_dangling (warning)": 4
   },
-  "Dual Generator/Board016-mode1-band-split-0-4/Rotor.kicad_pcb": {},
-  "Dual Generator/Board016-mode1-band-split-0-4/Stator.kicad_pcb": {
+  "Dual Generator/Board016-band-split-0-4/Rotor.kicad_pcb": {},
+  "Dual Generator/Board016-band-split-0-4/Stator.kicad_pcb": {
    "track_dangling (warning)": 4
   },
-  "Dual Generator/Board017-mode1-band-split-0-6/Rotor.kicad_pcb": {},
-  "Dual Generator/Board017-mode1-band-split-0-6/Stator.kicad_pcb": {
+  "Dual Generator/Board017-band-split-0-6/Rotor.kicad_pcb": {},
+  "Dual Generator/Board017-band-split-0-6/Stator.kicad_pcb": {
    "track_dangling (warning)": 4
   },
   "Dual Generator/Board018-terminals-45-225/Rotor.kicad_pcb": {},
@@ -1183,8 +1297,100 @@
   "Dual Generator/Board081-tank-caps-ac-factor-per-set/Stator.kicad_pcb": {
    "track_dangling (warning)": 4
   },
-  "Dual Generator/Board082-mode1-fingers-both-sets/Rotor.kicad_pcb": {},
-  "Dual Generator/Board082-mode1-fingers-both-sets/Stator.kicad_pcb": {
+  "Dual Generator/Board082-fitted-bands-fingers-both-sets/Rotor.kicad_pcb": {},
+  "Dual Generator/Board082-fitted-bands-fingers-both-sets/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board083-layout-02-both-bands-and-gap/Rotor.kicad_pcb": {},
+  "Dual Generator/Board083-layout-02-both-bands-and-gap/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board084-layout-03-both-bands-and-bore/Rotor.kicad_pcb": {},
+  "Dual Generator/Board084-layout-03-both-bands-and-bore/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board085-layout-04-both-bands-bore-and-gap/Rotor.kicad_pcb": {},
+  "Dual Generator/Board085-layout-04-both-bands-bore-and-gap/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board086-layout-05-both-bands-and-outline/Rotor.kicad_pcb": {},
+  "Dual Generator/Board086-layout-05-both-bands-and-outline/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board087-layout-06-both-bands-outline-and-gap/Rotor.kicad_pcb": {},
+  "Dual Generator/Board087-layout-06-both-bands-outline-and-gap/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board088-layout-08-everything-given/Rotor.kicad_pcb": {},
+  "Dual Generator/Board088-layout-08-everything-given/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board089-layout-09-rx1-band/Rotor.kicad_pcb": {},
+  "Dual Generator/Board089-layout-09-rx1-band/Stator.kicad_pcb": {
+   "clearance (error)": 4,
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board090-layout-11-rx1-band-and-bore/Rotor.kicad_pcb": {},
+  "Dual Generator/Board090-layout-11-rx1-band-and-bore/Stator.kicad_pcb": {
+   "clearance (error)": 4,
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board091-layout-12-rx1-band-bore-and-gap/Rotor.kicad_pcb": {},
+  "Dual Generator/Board091-layout-12-rx1-band-bore-and-gap/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board092-layout-13-rx1-band-and-outline/Rotor.kicad_pcb": {},
+  "Dual Generator/Board092-layout-13-rx1-band-and-outline/Stator.kicad_pcb": {
+   "clearance (error)": 4,
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board093-layout-14-rx1-band-outline-and-gap/Rotor.kicad_pcb": {},
+  "Dual Generator/Board093-layout-14-rx1-band-outline-and-gap/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board094-layout-15-rx1-band-bore-and-outline/Rotor.kicad_pcb": {},
+  "Dual Generator/Board094-layout-15-rx1-band-bore-and-outline/Stator.kicad_pcb": {
+   "clearance (error)": 4,
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board095-layout-16-rx1-band-bore-outline-and-gap/Rotor.kicad_pcb": {},
+  "Dual Generator/Board095-layout-16-rx1-band-bore-outline-and-gap/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board096-layout-17-rx2-band/Rotor.kicad_pcb": {},
+  "Dual Generator/Board096-layout-17-rx2-band/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board097-layout-18-rx2-band-and-gap/Rotor.kicad_pcb": {},
+  "Dual Generator/Board097-layout-18-rx2-band-and-gap/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board098-layout-19-rx2-band-and-bore/Rotor.kicad_pcb": {},
+  "Dual Generator/Board098-layout-19-rx2-band-and-bore/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board099-layout-20-rx2-band-bore-and-gap/Rotor.kicad_pcb": {},
+  "Dual Generator/Board099-layout-20-rx2-band-bore-and-gap/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board100-layout-21-rx2-band-and-outline/Rotor.kicad_pcb": {},
+  "Dual Generator/Board100-layout-21-rx2-band-and-outline/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board101-layout-22-rx2-band-outline-and-gap/Rotor.kicad_pcb": {},
+  "Dual Generator/Board101-layout-22-rx2-band-outline-and-gap/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board102-layout-23-rx2-band-bore-and-outline/Rotor.kicad_pcb": {},
+  "Dual Generator/Board102-layout-23-rx2-band-bore-and-outline/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board103-layout-24-rx2-band-bore-outline-and-gap/Rotor.kicad_pcb": {},
+  "Dual Generator/Board103-layout-24-rx2-band-bore-outline-and-gap/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board104-layout-31-both-edges/Rotor.kicad_pcb": {},
+  "Dual Generator/Board104-layout-31-both-edges/Stator.kicad_pcb": {
    "track_dangling (warning)": 4
   },
   "Single Generator fresh run/Rotor.kicad_pcb": {},
@@ -1629,16 +1835,16 @@
   "Dual Generator/Board001-default/Stator.kicad_pcb": {
    "track_dangling (warning)": 4
   },
-  "Dual Generator/Board002-mode1-fitted-bands/Rotor.kicad_pcb": {},
-  "Dual Generator/Board002-mode1-fitted-bands/Stator.kicad_pcb": {
+  "Dual Generator/Board002-layout-32-fitted-bands/Rotor.kicad_pcb": {},
+  "Dual Generator/Board002-layout-32-fitted-bands/Stator.kicad_pcb": {
    "track_dangling (warning)": 4
   },
-  "Dual Generator/Board003-mode3-rx1-band-gap/Rotor.kicad_pcb": {},
-  "Dual Generator/Board003-mode3-rx1-band-gap/Stator.kicad_pcb": {
+  "Dual Generator/Board003-layout-10-rx1-band-and-gap/Rotor.kicad_pcb": {},
+  "Dual Generator/Board003-layout-10-rx1-band-and-gap/Stator.kicad_pcb": {
    "track_dangling (warning)": 4
   },
-  "Dual Generator/Board004-mode4-all-given/Rotor.kicad_pcb": {},
-  "Dual Generator/Board004-mode4-all-given/Stator.kicad_pcb": {
+  "Dual Generator/Board004-layout-07-all-given/Rotor.kicad_pcb": {},
+  "Dual Generator/Board004-layout-07-all-given/Stator.kicad_pcb": {
    "track_dangling (warning)": 4
   },
   "Dual Generator/Board005-parallel-both-sets/Rotor.kicad_pcb": {},
@@ -1688,12 +1894,12 @@
   "Dual Generator/Board015-inset-offset-tail-margin/Stator.kicad_pcb": {
    "track_dangling (warning)": 4
   },
-  "Dual Generator/Board016-mode1-band-split-0-4/Rotor.kicad_pcb": {},
-  "Dual Generator/Board016-mode1-band-split-0-4/Stator.kicad_pcb": {
+  "Dual Generator/Board016-band-split-0-4/Rotor.kicad_pcb": {},
+  "Dual Generator/Board016-band-split-0-4/Stator.kicad_pcb": {
    "track_dangling (warning)": 4
   },
-  "Dual Generator/Board017-mode1-band-split-0-6/Rotor.kicad_pcb": {},
-  "Dual Generator/Board017-mode1-band-split-0-6/Stator.kicad_pcb": {
+  "Dual Generator/Board017-band-split-0-6/Rotor.kicad_pcb": {},
+  "Dual Generator/Board017-band-split-0-6/Stator.kicad_pcb": {
    "track_dangling (warning)": 4
   },
   "Dual Generator/Board018-terminals-45-225/Rotor.kicad_pcb": {},
@@ -1956,8 +2162,100 @@
   "Dual Generator/Board081-tank-caps-ac-factor-per-set/Stator.kicad_pcb": {
    "track_dangling (warning)": 4
   },
-  "Dual Generator/Board082-mode1-fingers-both-sets/Rotor.kicad_pcb": {},
-  "Dual Generator/Board082-mode1-fingers-both-sets/Stator.kicad_pcb": {
+  "Dual Generator/Board082-fitted-bands-fingers-both-sets/Rotor.kicad_pcb": {},
+  "Dual Generator/Board082-fitted-bands-fingers-both-sets/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board083-layout-02-both-bands-and-gap/Rotor.kicad_pcb": {},
+  "Dual Generator/Board083-layout-02-both-bands-and-gap/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board084-layout-03-both-bands-and-bore/Rotor.kicad_pcb": {},
+  "Dual Generator/Board084-layout-03-both-bands-and-bore/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board085-layout-04-both-bands-bore-and-gap/Rotor.kicad_pcb": {},
+  "Dual Generator/Board085-layout-04-both-bands-bore-and-gap/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board086-layout-05-both-bands-and-outline/Rotor.kicad_pcb": {},
+  "Dual Generator/Board086-layout-05-both-bands-and-outline/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board087-layout-06-both-bands-outline-and-gap/Rotor.kicad_pcb": {},
+  "Dual Generator/Board087-layout-06-both-bands-outline-and-gap/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board088-layout-08-everything-given/Rotor.kicad_pcb": {},
+  "Dual Generator/Board088-layout-08-everything-given/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board089-layout-09-rx1-band/Rotor.kicad_pcb": {},
+  "Dual Generator/Board089-layout-09-rx1-band/Stator.kicad_pcb": {
+   "clearance (error)": 4,
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board090-layout-11-rx1-band-and-bore/Rotor.kicad_pcb": {},
+  "Dual Generator/Board090-layout-11-rx1-band-and-bore/Stator.kicad_pcb": {
+   "clearance (error)": 4,
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board091-layout-12-rx1-band-bore-and-gap/Rotor.kicad_pcb": {},
+  "Dual Generator/Board091-layout-12-rx1-band-bore-and-gap/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board092-layout-13-rx1-band-and-outline/Rotor.kicad_pcb": {},
+  "Dual Generator/Board092-layout-13-rx1-band-and-outline/Stator.kicad_pcb": {
+   "clearance (error)": 4,
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board093-layout-14-rx1-band-outline-and-gap/Rotor.kicad_pcb": {},
+  "Dual Generator/Board093-layout-14-rx1-band-outline-and-gap/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board094-layout-15-rx1-band-bore-and-outline/Rotor.kicad_pcb": {},
+  "Dual Generator/Board094-layout-15-rx1-band-bore-and-outline/Stator.kicad_pcb": {
+   "clearance (error)": 4,
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board095-layout-16-rx1-band-bore-outline-and-gap/Rotor.kicad_pcb": {},
+  "Dual Generator/Board095-layout-16-rx1-band-bore-outline-and-gap/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board096-layout-17-rx2-band/Rotor.kicad_pcb": {},
+  "Dual Generator/Board096-layout-17-rx2-band/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board097-layout-18-rx2-band-and-gap/Rotor.kicad_pcb": {},
+  "Dual Generator/Board097-layout-18-rx2-band-and-gap/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board098-layout-19-rx2-band-and-bore/Rotor.kicad_pcb": {},
+  "Dual Generator/Board098-layout-19-rx2-band-and-bore/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board099-layout-20-rx2-band-bore-and-gap/Rotor.kicad_pcb": {},
+  "Dual Generator/Board099-layout-20-rx2-band-bore-and-gap/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board100-layout-21-rx2-band-and-outline/Rotor.kicad_pcb": {},
+  "Dual Generator/Board100-layout-21-rx2-band-and-outline/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board101-layout-22-rx2-band-outline-and-gap/Rotor.kicad_pcb": {},
+  "Dual Generator/Board101-layout-22-rx2-band-outline-and-gap/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board102-layout-23-rx2-band-bore-and-outline/Rotor.kicad_pcb": {},
+  "Dual Generator/Board102-layout-23-rx2-band-bore-and-outline/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board103-layout-24-rx2-band-bore-outline-and-gap/Rotor.kicad_pcb": {},
+  "Dual Generator/Board103-layout-24-rx2-band-bore-outline-and-gap/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Generator/Board104-layout-31-both-edges/Rotor.kicad_pcb": {},
+  "Dual Generator/Board104-layout-31-both-edges/Stator.kicad_pcb": {
    "track_dangling (warning)": 4
   },
   "Single Generator fresh run/Rotor.kicad_pcb": {},

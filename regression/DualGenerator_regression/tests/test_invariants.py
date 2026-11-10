@@ -456,19 +456,19 @@ class Determinism(unittest.TestCase):
         self.assertEqual(a.normalised_record, b.normalised_record)
 
     def test_second_run_gets_a_new_folder(self):
-        a = H.write(H.MODE1_BASE, subdir="twice")
-        b = H.write(dict(H.MODE1_BASE, **{"BOARD.OUTPUT_DIR": a.out_dir}), subdir="twice")
+        a = H.write(H.BASE, subdir="twice")
+        b = H.write(dict(H.BASE, **{"BOARD.OUTPUT_DIR": a.out_dir}), subdir="twice")
         self.assertEqual((a.rc, b.rc), (0, 0))
         self.assertEqual(b.made, [a.made[0], a.made[0] + "__1"])
 
     def test_stator_only_and_rotor_only(self):
         import os
-        s = H.write(H.MODE1_BASE, args=["--stator", "--no-color"], subdir="stator_only")
-        r = H.write(H.MODE1_BASE, args=["--rotor", "--no-color"], subdir="rotor_only")
+        s = H.write(H.BASE, args=["--stator", "--no-color"], subdir="stator_only")
+        r = H.write(H.BASE, args=["--rotor", "--no-color"], subdir="rotor_only")
         self.assertEqual((s.rc, r.rc), (0, 0))
         self.assertEqual(sorted(os.listdir(s.folder)), ["Parameters.txt", "Stator.kicad_pcb"])
         self.assertEqual(sorted(os.listdir(r.folder)), ["Parameters.txt", "Rotor.kicad_pcb"])
-        full = H.board("Board002-mode1-fitted-bands")
+        full = H.board("Board002-layout-32-fitted-bands")
         self.assertEqual(s.text("Stator.kicad_pcb"), full.text("Stator.kicad_pcb"))
         self.assertEqual(r.text("Rotor.kicad_pcb"), full.text("Rotor.kicad_pcb"))
         self.assertTrue(s.has(r"SUCCESS: 1 board file\(s\)"))

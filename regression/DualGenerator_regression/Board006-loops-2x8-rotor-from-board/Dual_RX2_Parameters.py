@@ -15,13 +15,13 @@ Layers are numbered 1 = Top, 2 = Inner 1, 3 = Inner 2, 4 = Bottom (PCB_LAYERS, D
 LOOPS = 8
 
 # Radial band occupied by the RX copper (centre line of the traces).  Give it in ONE of two ways, or not at all
-# (DUAL_MODE, Dual_Board_Parameters.py, says which):
+# (the generator then places it, Dual_Board_Parameters.py says how):
 #   INSIDE_RADIUS_MM / OUTSIDE_RADIUS_MM : the two radii of the band          (RX_R_BASE_MM / RX_A_MM = None)
 #   RX_R_BASE_MM / RX_A_MM               : its centre and how far the coils swing in and out from it:
 #                                          band = RX_R_BASE_MM - RX_A_MM ... RX_R_BASE_MM + RX_A_MM
 #                                          (INSIDE_RADIUS_MM / OUTSIDE_RADIUS_MM = None)
-#   all four None                        : the generator places this band (DUAL_MODE = 1, or 3 when the other
-#                                          band is set); the record file prints the values it chose
+#   all four None                        : the generator places this band, across the gap from the other band
+#                                          or between the board edges; the record file prints the values it chose
 # Each pair goes together (both numbers or both None); both pairs set is an error (the band would be given twice).
 INSIDE_RADIUS_MM  = 18.0
 OUTSIDE_RADIUS_MM = 23.9

@@ -7,7 +7,7 @@ In this order:
   1. Dual_ParameterRules.check_files       every name in its file, nothing missing, nothing that does not belong
   2. Dual_ParameterRules.check_dual_values the dual-only values (gaps, split, angles)
   3. Dual_ParameterRules.dual_rules        the rules between the two sets
-  4. Dual_TrackLayout.resolve             the mode, the two bands, the bore, the outline, the gap
+  4. Dual_TrackLayout.resolve             the two bands, the bore, the outline and the gap, from what is given
   5. the Single Generator's own check_parameters on each set, in the Single Generator's names with the set's own
      values (every rule about a set on its own: present, in range, settings that cannot hold together), its
      findings prefixed "set 1:" / "set 2:" with the dual file names

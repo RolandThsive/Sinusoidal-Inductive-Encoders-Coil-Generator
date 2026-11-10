@@ -24,7 +24,7 @@ class CommandLine(unittest.TestCase):
         p = run(SCRIPT, ["--check", "--no-color"], H.PROJECT)
         self.assertEqual(p.returncode, 0, p.stdout[-800:] + p.stderr[-800:])
         self.assertIn("CHECK PASSED (--check: no files written)", p.stdout)
-        self.assertIn("layout: DUAL_MODE = 2", p.stdout)
+        self.assertIn("(combination 1 of 32)", p.stdout)
         self.assertEqual(p.stderr, "")
 
     def test_check_from_another_folder(self):

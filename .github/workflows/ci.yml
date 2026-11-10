@@ -12,7 +12,8 @@
 #                   (8 and newer) compared with .github/kicad-drc-baseline.json
 #   Repo guard      no bytecode, Output files, files over 5 MB or session details in the repository, the commit
 #                   messages or the pull request text
-#   Docs            every relative link of the Markdown files resolves; every wiki page is in the sidebar
+#   Docs            every relative link of the Markdown files resolves; every wiki page is in the sidebar; the
+#                   pictures of the wiki page Dual Layout are what the reference boards give
 #
 # Every action is pinned to a full commit hash (Dependabot keeps them current), the token is read-only and is not
 # kept in the checkout.
@@ -235,3 +236,5 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Relative links and the wiki sidebar
         run: python .github/scripts/check_docs.py
+      - name: The Dual Layout pictures match the reference boards
+        run: python docs/tools/dual_layout_pictures.py --check

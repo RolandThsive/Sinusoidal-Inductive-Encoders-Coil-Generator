@@ -30,6 +30,7 @@ builds two coil sets (a coarse and a fine track) on one board and one rotor with
 - [Stator Features](Stator-Features-Dual-Generator.md)
 - [Rotor Features](Rotor-Features-Dual-Generator.md)
 - [Board Features](Board-Features-Dual-Generator.md)
+- [Dual Layout](Dual-Layout.md)
 - [Silkscreen](Silkscreen-Dual-Generator.md)
 - [Quick Guide To Parameters Selections](Quick-Guide-To-Parameters-Selections-Dual-Generator.md)
 

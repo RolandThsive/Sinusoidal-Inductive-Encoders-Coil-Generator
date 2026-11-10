@@ -18,7 +18,7 @@
 | TX Terminal | Placed automatically where it keeps the largest gap from the RX copper (with `RX_TABS = "single"`, as close to the two fingers as the clearance allows); the board is turned so it sits at 0° |
 | Rotor | Generated from the stator, or fully custom |
 | Board | 2 or 4 copper layers (a dual board too), through or blind vias (`VIA_TYPE`), fixed or automatic board edges |
-| Dual Layout | Four `DUAL_MODE`s: the bands fitted between fixed edges, the edges from the bands, one band placed across a gap, or everything given; the gap between the sets and the rotor rings measured and checked |
+| Dual Layout | Give any of the two RX bands, the bore, the outline and the gap, and the generator places the rest: 26 of the 32 combinations build (see [Dual Layout](Dual-Layout.md)); the gap between the sets and the rotor rings measured and checked |
 | Silkscreen | A lead-cutting suggestion on the stator's silkscreen: where to break each RX coil and where the TX ends get their vias, with the lead names; no copper changed |
 | Checks | Parameter rules, finished-geometry rules and the generator's own TX self-clearance check, with named conflicts; `GENERATOR_MODE` `normal` or `strict` |
 | Electrical Estimate | TX inductance, resistance, Q, tank capacitors, oscillator frequency and tank resistance against the IC limits in `IC_Parameters.py` (no receiver voltage); on a dual board for each set against its own IC |

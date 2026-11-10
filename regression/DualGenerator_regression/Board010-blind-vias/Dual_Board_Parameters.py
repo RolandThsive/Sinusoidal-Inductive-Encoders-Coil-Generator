@@ -63,23 +63,18 @@ VIA_TYPE          = "blind"
 # ---- board edges (Edge.Cuts circles) and the gap between the sets ----------
 # From the centre out, the stator is:
 #     bore | RX1 band | TX1 ring | TRACK_GAP_MM | RX2 band | TX2 ring | outline
-# Which of these you give and which the generator computes is DUAL_MODE, one of FOUR MODES:
-#
-#   DUAL_MODE = 1  you give TRACK_GAP_MM, INNER_EDGE_RADIUS_MM, OUTER_EDGE_RADIUS_MM and BAND_SPLIT; both RX bands
-#                  stay None (Dual_RX1 / RX2: all four radii None)
-#                  -> both bands are fitted between the edges; BAND_SPLIT shares the free width between them
-#   DUAL_MODE = 2  you give both RX bands (Dual_RX1 and Dual_RX2); TRACK_GAP_MM and both edges stay None
-#                  -> bore and outline come from the bands; the gap is measured and reported
-#   DUAL_MODE = 3  you give ONE RX band (Dual_RX1 or Dual_RX2) and TRACK_GAP_MM; the other band and both edges
-#                  stay None
-#                  -> the other band is placed across the gap with the same half width (RX_A_MM); then as mode 2
-#   DUAL_MODE = 4  you give both RX bands and both edges; TRACK_GAP_MM stays None
-#                  -> everything as given; each edge is checked for room; the gap is measured and reported
-#
-# The checker holds what is set against the chosen mode: a value the mode needs that is None, or a value that
-# must be None for the mode and is set, is an error that names it (and names the mode that matches what is set,
-# when one does).  Change the values, or change DUAL_MODE.
-DUAL_MODE = 1
+# You give what you know and the generator places the rest: there is no mode to choose.  Five things can be given,
+# each one or not (None): the RX1 band and the RX2 band (Dual_RX1 / RX2_Parameters.py), the bore
+# (INNER_EDGE_RADIUS_MM), the outline (OUTER_EDGE_RADIUS_MM) and the gap (TRACK_GAP_MM).  Of the 32 combinations,
+# 26 build, by four rules:
+#   the gap   TRACK_GAP_MM, or the larger of the two sets' MIN_CLEARANCE_MM when it is None.  A band the generator
+#             places sits exactly that far from the other set; with both bands given, the gap must be at least that
+#   a band    one band given: the other is placed across the gap (RX2 outwards, RX1 inwards).  It runs to the board
+#             edge on its side when that edge is given, and is as wide as the given band when it is not
+#   an edge   not given: from the band, as in the Single Generator.  Given: used as given, and checked
+#   no band   needs both edges: the two bands share what is left between them by BAND_SPLIT
+# The 6 combinations with no band and at most one edge leave nothing to size a band from; the checker says what to
+# give.  The record file prints which combination was used and every radius; the wiki page Dual Layout shows all 32.
 
 INNER_EDGE_RADIUS_MM  = 8.5         # the centre hole.  Must sit INNER_EDGE_INSET_MM inside the RX1 band.
 OUTER_EDGE_RADIUS_MM  = 29.5        # the board edge.  Must leave OUTER_EDGE_OFFSET_MM past the RX2 band, and
@@ -94,8 +89,9 @@ EDGE_LINE_WIDTH_MM    = 0.05
 # tail, or its RX fingers and the go-around brackets, whichever reach farther) to the innermost copper of set 2
 # (the RX2 band start minus half an RX trace or a via radius, whichever is larger).  These reaches come from the
 # Single Generator's own formulas and are verified on the built copper.
-#   DUAL_MODE 1 and 3: the gap to leave.  DUAL_MODE 2 and 4: must be None; the measured gap must be at least
-#   MIN_CLEARANCE_MM (the larger of the two sets' values).
+#   A number: a band the generator places sits exactly this far from the other set; when you give both bands, the
+#   gap between them must be at least this.  None: the same with MIN_CLEARANCE_MM (the larger of the two sets'
+#   values) in its place.
 #   What the gap does NOT do: it is not what isolates the two sets.  A balanced RX band sees no net flux from a
 #   round TX ring, however close; the residual TX1 -> RX2 coupling comes from asymmetry (the exits, the vias,
 #   layer misregistration) and falls only slowly with distance (dual boards in practice leave 1.1 ... 1.4 mm
@@ -110,8 +106,8 @@ TRACK_GAP_MM = 0.5
 # enough for every board tried; 0 = no allowance.
 LAYOUT_TOLERANCE_MM = 0.05
 
-# BAND_SPLIT (DUAL_MODE = 1 only) = set 1's share of the free radial width: 0.5 = equal RX band widths (a 1x/16x board
-# is usually near 0.5, a 1x/32x board near 0.35: the fine track gets the width).
+# BAND_SPLIT (read only when no band is given) = set 1's share of the free radial width: 0.5 = equal RX band
+# widths (a 1x/16x board is usually near 0.5, a 1x/32x board near 0.35: the fine track gets the width).
 BAND_SPLIT = 0.5
 
 

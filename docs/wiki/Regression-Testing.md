@@ -11,7 +11,7 @@ generators. The suites need what the generators need: Python 3.11 to 3.15 and Nu
 From the root of the repository:
 
 ```bash
-python regression/run_regression.py                # both suites, about 30 minutes
+python regression/run_regression.py                # both suites, about 45 minutes
 python regression/run_regression.py single         # the Single Generator's suite only
 python regression/run_regression.py dual           # the Dual Generator's suite only
 ```
@@ -84,12 +84,12 @@ Each suite has the same files in its `tests` folder:
 
 | File | Single Generator | Dual Generator |
 |---|---|---|
-| `test_checker.py` | One value of every kind set wrongly, missing and unknown names, inactive values left alone, the conflicts between values (vias, layers, nets, edges, fingers, rotor), the geometry that stops a run, strict mode. Each case states the return code and the lines the run must print | The four `DUAL_MODE` layouts and every way they can be set wrongly, the names of each dual file, the values a set sets for itself, the dual rules (nets, frequencies, layers, rings), the Single Generator's own checks on each set, strict mode |
+| `test_checker.py` | One value of every kind set wrongly, missing and unknown names, inactive values left alone, the conflicts between values (vias, layers, nets, edges, fingers, rotor), the geometry that stops a run, strict mode. Each case states the return code and the lines the run must print | The 32 combinations of what the layout is given (builds or refused, with the radii it places), the layout's refusals, the names of each dual file, the values a set sets for itself, the dual rules (nets, frequencies, layers, rings), the Single Generator's own checks on each set, strict mode |
 | `test_boards.py` | Every board folder written again and compared with the files saved in it (stator, rotor, record), character for character; the run's output folder must hold exactly these three files and the two [output pictures](Output-Pictures.md); every board folder must set exactly the generator's parameter names, hold nothing else and be in the README table | The same, for the dual boards |
 | `test_invariants.py` | What every written board must obey: the file format, the layer table, the nets, copper inside the edges with the right widths, the clearance between nets, closed RX coils, the TX in one piece with its terminal at 0°, the rotor sectors, the record; the same values written twice are identical | The same for a dual board, each set with its own values (layers, fingers, vias, clearance): six nets, set 1 inside set 2 by the recorded gap, the TX ends at `TERMINAL_1_DEG` / `TERMINAL_2_DEG`, the two rotor rings |
 | `test_silkscreen.py` | The lead-cutting silkscreen: three suggestions on both sides, via sites with room, lettering off the vias and mirrored on the bottom, the settings with their fallbacks, the font, the name placer | Six suggestions, names with the set number, breaks near each set's terminal, sides and labels options |
 | `test_cli.py` | The generator started as a script in a fresh Python process, from its folder and from elsewhere, with `--check`, `--help` and a bad option | The same, plus the checker on its own and the promise that a dual run leaves no `__pycache__` in the Single Generator |
-| `test_units.py` | The folder names, the OUTPUT_DIR rule, the KiCad writer, the report and colour classes, the parameter and geometry helpers, and the hooks the Dual Generator builds on | The set parameters handed to the Single Generator and the "set k:" findings, the layout modes, the folder names, the Single's OUTPUT_DIR rule, and a guard that the dual files supply every name the Single Generator knows |
+| `test_units.py` | The folder names, the OUTPUT_DIR rule, the KiCad writer, the report and colour classes, the parameter and geometry helpers, and the hooks the Dual Generator builds on | The set parameters handed to the Single Generator and the "set k:" findings, the layout combinations, the folder names, the Single's OUTPUT_DIR rule, and a guard that the dual files supply every name the Single Generator knows |
 
 `harness.py` loads the generator, applies the overrides, runs it, and writes each board once per run for all the tests
 that need it.
@@ -111,7 +111,7 @@ pull request cancels the run still going for it.
 | Tests | Both suites on Python 3.15, on Ubuntu, Windows and macOS. On Ubuntu they run under coverage (line and branch), which may not drop below `.github/coverage-baseline.json` | A changed board or record on any system, code no test reaches. A failed run keeps its boards as a downloadable artifact for 14 days |
 | KiCad | Every test board and a fresh default board of each generator opened by KiCad 7, 8, 9 and 10 in the official `kicad/kicad` Docker images; KiCad's DRC (8 and newer) compared with `.github/kicad-drc-baseline.json` | A board KiCad cannot open, a DRC report that appears or goes away ([KiCad Compatibility](KiCad-Compatibility.md)) |
 | Repo guard | `.github/scripts/repo_guard.py`: no `__pycache__` or `.pyc`, no generated files in an `Output` folder, no file over 5 MB, no AI session links or session trailers in a file, a commit message or the pull request text | Files that never belong in git |
-| Docs | `.github/scripts/check_docs.py`: every relative link and image of the Markdown files resolves, and every wiki page is in `_Sidebar.md` | Broken wiki links before they reach the wiki |
+| Docs | `.github/scripts/check_docs.py`: every relative link and image of the Markdown files resolves, and every wiki page is in `_Sidebar.md`. `docs/tools/dual_layout_pictures.py --check`: the pictures and combination sections of [Dual Layout](Dual-Layout.md) are what the reference boards give | Broken wiki links before they reach the wiki; a Dual Layout picture that no longer shows what the generator builds |
 
 Two more workflows check the dependencies and the code's security: `security.yml` (pip-audit on the pins, and GitHub's
 dependency review on pull requests) and `codeql.yml` (GitHub's CodeQL analysis). Dependabot (`.github/dependabot.yml`)
@@ -125,12 +125,15 @@ python -m pip install -r requirements-dev.txt
 ruff check .                                   # the lint (or: pip install pre-commit; pre-commit install)
 python .github/scripts/repo_guard.py           # the repo guard
 python .github/scripts/check_docs.py           # the docs links
+python docs/tools/dual_layout_pictures.py --check   # the Dual Layout pictures
 ```
 
 When a change adds code that no test reaches, the coverage check fails: add a test, or remove the code. When a change
 raises the coverage by half a point or more, the check suggests raising the number in `.github/coverage-baseline.json`
 so the gain is kept. When KiCad's DRC changes on purpose, the KiCad check is run with `--update` inside the KiCad image
-(the command is in `.github/scripts/kicad_check.py`) and the new baseline is committed with the change.
+(the command is in `.github/scripts/kicad_check.py`) and the new baseline is committed with the change. When a board
+that a Dual Layout picture is drawn from changes on purpose, run `python docs/tools/dual_layout_pictures.py` and commit
+the pictures and the page section it writes.
 
 ## 29.5 When A Test Fails
 

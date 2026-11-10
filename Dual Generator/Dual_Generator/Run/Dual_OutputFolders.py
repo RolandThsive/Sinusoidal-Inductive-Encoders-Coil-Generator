@@ -13,11 +13,11 @@ A relative OUTPUT_DIR is taken from the "Dual Generator" folder, not from the fo
 
 Inside the folder:
     Stator.kicad_pcb, Rotor.kicad_pcb   (STATOR_FILE / ROTOR_FILE)
-    Parameters.txt                      what was generated, with which values: the mode and every value the
-                                        generator computed (bands, edges, gap, zeros), the summaries and the
-                                        electrical estimate of each set, the value of every parameter by dual
-                                        file, each set as handed to the Single Generator, and a verbatim copy of
-                                        every parameter file
+    Parameters.txt                      what was generated, with which values: the layout combination and every
+                                        value the generator computed (bands, edges, gap, zeros), the summaries
+                                        and the electrical estimate of each set, the value of every parameter
+                                        by dual file, each set as handed to the Single Generator, and a verbatim
+                                        copy of every parameter file
 
 The numbers in the name, the new folder (never reused), the record's head, its value lines and its file copies are
 the Single Generator's own (OutputFolders.py); only the dual name and the dual record sections are here.

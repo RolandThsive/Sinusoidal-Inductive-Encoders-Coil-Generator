@@ -28,7 +28,7 @@ regression/
 
 ## Running the tests
 
-    python regression/run_regression.py                        both suites (about 30 minutes)
+    python regression/run_regression.py                        both suites (about 45 minutes)
     python regression/run_regression.py single                 the Single Generator's suite only
     python regression/run_regression.py dual -v                the Dual Generator's, one line per test
     python regression/run_regression.py single -k checker      only the tests whose name contains "checker"

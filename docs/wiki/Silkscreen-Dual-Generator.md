@@ -65,4 +65,4 @@ generation: a wrong value falls back to its default with a warning.
 
 | Previous | Next |
 |:---|---:|
-| [Board Features - Dual Generator](Board-Features-Dual-Generator.md) | [Quick Guide To Parameters Selections - Dual Generator](Quick-Guide-To-Parameters-Selections-Dual-Generator.md) |
+| [Dual Layout](Dual-Layout.md) | [Quick Guide To Parameters Selections - Dual Generator](Quick-Guide-To-Parameters-Selections-Dual-Generator.md) |

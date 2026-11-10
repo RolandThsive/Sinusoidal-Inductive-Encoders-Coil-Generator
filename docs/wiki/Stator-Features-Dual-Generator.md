@@ -71,14 +71,14 @@ TX ring sits between the two sets, so every turn and every millimetre of pitch t
 
 ### 16.3.1 Number Of Turns
 
-More turns raise the inductance and the Q of each tank. With fixed board edges (`DUAL_MODE = 1`) both RX bands shrink
+More turns raise the inductance and the Q of each tank. With fixed board edges (both edges given, no band) both RX bands shrink
 as the TX rings grow. The electrical estimate checks each set's tank against its own IC: with 2 turns per layer at
 3 MHz the inner tank falls below the IPS2550's least parallel resistance, and the estimate says so.
 
 ![Dual Stator 3: TX Turns](https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/images/dual_stator_3_tx_turns.png)
 
 *Dual Stator 3. 2 to 6 TX turns per layer in both sets (series TX on Top + Inner-2, pitch 0.35 mm, inner set 1 loop,
-outer set 16 loops). `DUAL_MODE = 1` keeps the bore (7.25 mm), the outline (30 mm) and the gap between the sets (3 mm)
+outer set 16 loops). The bore (7.25 mm), the outline (30 mm) and the gap between the sets (3 mm) are given, so they stay
 the same in every picture.*
 
 ### 16.3.2 Series Versus Parallel
@@ -129,8 +129,9 @@ layer, pitch 0.35 mm, trace 0.15 mm). The inner set follows the same rule.*
 ## 16.4 Related Pages
 
 - [Board Features - Dual Generator](Board-Features-Dual-Generator.md): the layout from the centre out and the checks.
-- [Quick Guide To Parameters Selections - Dual Generator](Quick-Guide-To-Parameters-Selections-Dual-Generator.md): the
-  four `DUAL_MODE`s.
+- [Dual Layout](Dual-Layout.md): what you give and what the generator places, all 32 combinations.
+- [Quick Guide To Parameters Selections - Dual Generator](Quick-Guide-To-Parameters-Selections-Dual-Generator.md): a
+  starting point for every setting.
 - [Parameter Reference Dual Generator](Parameter-Reference-Dual-Generator.md): every dual parameter and its default.
 
 [<img align="right" src="https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/logo/Logo_1_V2.png" alt="Sinusoidal Coil Generator logo, click to see it spin" width="72">](https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/logo/Logo_1_V2_rotor_spin_400px.webp)

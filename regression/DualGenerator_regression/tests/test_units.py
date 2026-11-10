@@ -1,8 +1,8 @@
 """
 test_units.py  -  the dual generator's own building blocks on their own: the set parameters handed to the Single
 Generator (every name the Single Generator's rule table knows, each in its dual file, and a set's own values for a
-few board values), the layout modes, the output folder names and the design checks between the sets.  Fast, no
-board written.
+few board values), the layout (the 32 combinations of what it is given), the output folder names and the design
+checks between the sets.  Fast, no board written.
 """
 
 import math
@@ -16,6 +16,7 @@ import harness as H
 from Generator.Core.Conflict import ParameterConflict, Report
 from Generator.Stator import StatorAssembly
 from Dual_Generator.Checks import Dual_DesignChecks as DDC
+from Dual_Generator.Checks import Dual_ParameterRules as DR
 from Dual_Generator.Core import Dual_SetParameters as SP
 from Dual_Generator.Core import Dual_TrackLayout as TL
 from Dual_Generator.Run import Dual_OutputFolders as OF
@@ -156,7 +157,7 @@ class TrackLayout(unittest.TestCase):
 
     def test_default_layout(self):
         lay = TL.resolve(H.P)
-        self.assertEqual(lay.mode, 2)
+        self.assertEqual(lay.combination, 1)
         self.assertAlmostEqual(lay.bore, 7.25)
         self.assertAlmostEqual(lay.outline, 26.875)
         self.assertEqual((lay.band1["ri"], lay.band1["ro"]), (8.45, 11.7))
@@ -165,30 +166,72 @@ class TrackLayout(unittest.TestCase):
         self.assertIsNone(lay.gap_setting)
         self.assertEqual(lay.set_band(1), lay.band1["names"])
         self.assertEqual(lay.edges(), (lay.bore, lay.outline))
-        self.assertTrue(lay.lines()[0].startswith("layout: DUAL_MODE = 2"))
+        self.assertEqual(lay.lines()[0], "layout: both RX bands given, at least MIN_CLEARANCE_MM apart; bore and outline "
+                                         "from the bands (combination 1 of 32)")
 
-    def test_mode1_layout_fits_the_bands(self):
-        H.apply(H.MODE1_BASE)
+    def test_fitted_layout_fits_the_bands(self):
+        H.apply(H.BASE)
         lay = TL.resolve(H.P)
-        self.assertEqual(lay.mode, 1)
+        self.assertEqual(lay.combination, 32)
         self.assertEqual((lay.bore, lay.outline), (8.5, 29.5))
         self.assertEqual(lay.gap_setting, 0.5)
         self.assertEqual((lay.band1["how"], lay.band2["how"]), ("placed", "placed"))
         self.assertLess(lay.band1["ro"], lay.band2["ri"])
 
-    def test_mode_table(self):
-        self.assertEqual(TL.MODE_NEEDS, {1: (True, True, 0), 2: (False, False, 2), 3: (True, False, 1), 4: (False, True, 2)})
-        for m, needs in TL.MODE_NEEDS.items():
-            self.assertEqual(TL.mode_matching(*needs), m)
-        self.assertIsNone(TL.mode_matching(True, True, 2))
+    def test_combination_numbers(self):
+        """combination() numbers what is given as the table on the wiki page Dual Layout (harness.combination)."""
+        for n in range(1, 33):
+            H.restore()
+            H.apply(H.combination(n))
+            B = H.P.BOARD
+            got = TL.combination(TL.band_of(H.P.RX1, 1), TL.band_of(H.P.RX2, 2), B.INNER_EDGE_RADIUS_MM,
+                                 B.OUTER_EDGE_RADIUS_MM, B.TRACK_GAP_MM)
+            self.assertEqual(got, n)
 
-    def test_mode_of_errors(self):
-        for bad in (0, 5, 2.5, "2", True, None):
-            H.apply({"BOARD.DUAL_MODE": bad})
-            with self.assertRaises(ParameterConflict, msg=repr(bad)):
-                TL.mode_of(H.P)
-        H.apply({"BOARD.DUAL_MODE": 3})
-        self.assertEqual(TL.mode_of(H.P), 3)
+    def test_every_combination_builds_or_is_refused(self):
+        """26 combinations give a layout that keeps the gap (exactly, where a band is placed); 25 ... 30 give no band
+        and at most one edge, and are refused."""
+        for n in range(1, 33):
+            H.restore()
+            H.apply(H.combination(n))
+            if 25 <= n <= 30:
+                with self.assertRaises(ParameterConflict, msg=n) as cm:
+                    TL.resolve(H.P)
+                self.assertIn("no RX band", cm.exception.message)
+                continue
+            lay = TL.resolve(H.P)
+            self.assertEqual(lay.combination, n)
+            self.assertTrue(lay.describe().endswith(f"(combination {n} of 32)"))
+            self.assertGreaterEqual(lay.gap_expected, lay.gap_required - 1e-9, n)
+            if lay.placed(1) or lay.placed(2):
+                self.assertAlmostEqual(lay.gap_expected, lay.gap_required, 9, msg=n)
+            self.assertEqual(lay.bore_given, bool((n - 1) % 8 & 2))
+            self.assertEqual(lay.outline_given, bool((n - 1) % 8 & 4))
+
+    def test_dual_mode_is_retired(self):
+        H.apply({"BOARD.DUAL_MODE": 1})
+        self.assertEqual(TL.resolve(H.P).combination, 1, "DUAL_MODE is not read")
+        self.assertIn("DUAL_MODE", DR._RETIRED)
+
+    def test_the_wiki_pictures_number_and_refuse_as_the_generator(self):
+        """docs/tools/dual_layout_pictures.py writes the wiki page Dual Layout.  Its combination numbers are the
+        generator's, and the message it shows for each refused combination is the generator's own, word for word."""
+        import importlib.util
+        path = os.path.join(H.REPO, "docs", "tools", "dual_layout_pictures.py")
+        spec = importlib.util.spec_from_file_location("dual_layout_pictures", path)
+        pictures = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(pictures)
+        for n in range(1, 33):
+            g = pictures.given_of(n)
+            self.assertEqual(pictures.number(g), n)
+            self.assertEqual(TL.combination(*(1 if g[k] else None for k in ("band1", "band2", "bore", "outline", "gap"))), n)
+        self.assertEqual(list(pictures.REFUSED), list(range(25, 31)))
+        for n in pictures.REFUSED:
+            H.restore()
+            H.apply(H.combination(n))
+            with self.assertRaises(ParameterConflict, msg=n) as cm:
+                TL.resolve(H.P)
+            self.assertEqual(cm.exception.message, pictures.REFUSAL[n], n)
 
     def test_band_of(self):
         self.assertIsNone(TL.band_of(types.SimpleNamespace(RX_TRACE_WIDTH_MM=0.2), 1))
@@ -210,14 +253,17 @@ class TrackLayout(unittest.TestCase):
                          "Dual_RX2_Parameters.py. Set both (the RX band is RX_R_BASE_MM - RX_A_MM ... RX_R_BASE_MM + "
                          "RX_A_MM), or both to None")
 
-    def test_check_mode_names_the_hint(self):
-        with self.assertRaises(ParameterConflict) as cm:
-            TL.check_mode(H.P, 1, None, None, None, {"names": {"INSIDE_RADIUS_MM": 1, "OUTSIDE_RADIUS_MM": 2}},
-                          {"names": {"RX_R_BASE_MM": 3, "RX_A_MM": 4}})
-        self.assertIn("matches DUAL_MODE = 2", str(cm.exception))
-        self.assertIn("DUAL_MODE", cm.exception.names)
-        self.assertIsNone(TL.check_mode(H.P, 2, None, None, None, {"names": {}}, {"names": {}}))
-        self.assertIsNone(TL.mode_matching(True, None, 0), "one edge alone matches no mode")
+    def test_fitted_names_what_to_change(self):
+        """A placed band whose width is the room an edge left names that edge (the run's hint when a set fails)."""
+        expect = {13: "raise OUTER_EDGE_RADIUS_MM", 19: "lower INNER_EDGE_RADIUS_MM", 31: "move BAND_SPLIT"}
+        for n in (1, 9, 13, 17, 19, 31):
+            H.restore()
+            H.apply(H.combination(n))
+            fitted = TL.resolve(H.P).fitted()
+            if n in expect:
+                self.assertIn(expect[n], fitted[1])
+            else:
+                self.assertIsNone(fitted, n)
 
     def test_outer_room_as_rotor_builder_limits_ring_2(self):
         """With ring 2 over the TX2 turns the outline keeps: the overhang, ROTOR_AUTO_EDGE_CLEARANCE_MM, half the

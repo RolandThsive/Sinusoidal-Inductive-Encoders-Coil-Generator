@@ -41,9 +41,9 @@ for _board in H.BOARDS:
 class BoardFolders(unittest.TestCase):
     EXPECTED_NAMES = {
         "Board001-default": "DualCoil_7.25_26.875_1x16_4x4",
-        "Board002-mode1-fitted-bands": "DualCoil_8.5_29.5_1x16_3x3",
-        "Board003-mode3-rx1-band-gap": "DualCoil_8.5_29.5_1x16_3x3",
-        "Board004-mode4-all-given": "DualCoil_8.5_29.5_1x16_3x3",
+        "Board002-layout-32-fitted-bands": "DualCoil_8.5_29.5_1x16_3x3",
+        "Board003-layout-10-rx1-band-and-gap": "DualCoil_8.5_29.5_1x16_3x3",
+        "Board004-layout-07-all-given": "DualCoil_8.5_29.5_1x16_3x3",
         "Board005-parallel-both-sets": "DualCoil_8.5_29.5_1x16_3x3",
         "Board006-loops-2x8-rotor-from-board": "DualCoil_7.25_26.875_2x8_4x4",
     }

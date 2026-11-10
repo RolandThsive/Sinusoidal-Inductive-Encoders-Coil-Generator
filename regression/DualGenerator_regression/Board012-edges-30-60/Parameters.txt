@@ -8,7 +8,7 @@ set 2       turned by 351.56 deg so that its TX ends sit at 0 deg; its RX patter
 
 LAYOUT (what the generator computed)
 ------------------------------------
-layout: DUAL_MODE = 1: TRACK_GAP_MM and both board edges set, both RX bands None - the bands are fitted between the edges
+layout: both RX bands fitted between the edges, split by BAND_SPLIT, TRACK_GAP_MM apart; bore and outline as given (combination 32 of 32)
   RX1 band r = 16.2 ... 19.55 mm (RX_R_BASE_MM 17.875, RX_A_MM 1.675): placed by the generator
   RX2 band r = 23.05 ... 26.4 mm (RX_R_BASE_MM 24.725, RX_A_MM 1.675): placed by the generator
   bore r = 15 mm (INNER_EDGE_RADIUS_MM), outline r = 30 mm (OUTER_EDGE_RADIUS_MM)
@@ -17,7 +17,7 @@ layout: DUAL_MODE = 1: TRACK_GAP_MM and both board edges set, both RX bands None
 STATOR
 ------
 Dual stator: set 1 (inner) 1 loop(s), set 2 (outer) 16 loop(s); bore r = 15 mm, outline r = 30 mm
-  layout: DUAL_MODE = 1: TRACK_GAP_MM and both board edges set, both RX bands None - the bands are fitted between the edges
+  layout: both RX bands fitted between the edges, split by BAND_SPLIT, TRACK_GAP_MM apart; bore and outline as given (combination 32 of 32)
     RX1 band r = 16.2 ... 19.55 mm (RX_R_BASE_MM 17.875, RX_A_MM 1.675): placed by the generator
     RX2 band r = 23.05 ... 26.4 mm (RX_R_BASE_MM 24.725, RX_A_MM 1.675): placed by the generator
     bore r = 15 mm (INNER_EDGE_RADIUS_MM), outline r = 30 mm (OUTER_EDGE_RADIUS_MM)
@@ -136,7 +136,6 @@ PARAMETER VALUES USED
   ROTOR_ARC_STEPS_PER_SECTOR     = 'auto'
   ROTOR_CHORD_TOLERANCE_MM       = 0.001
   ROTOR_SOLDER_MASK_EXPANSION_MM = -1
-  DUAL_MODE                      = 1
   TRACK_GAP_MM                   = 0.5
   BAND_SPLIT                     = 0.5
   LAYOUT_TOLERANCE_MM            = 0.05

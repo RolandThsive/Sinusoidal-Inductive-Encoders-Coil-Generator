@@ -1,56 +1,65 @@
 # 20. Quick Guide To Parameters Selections - Dual Generator
 
-A dual board is two coil sets on one board, so before it is built you choose how the radii are given: which of the two
-RX bands, the two board edges and the gap between the sets you set, and which the generator works out. That choice is
-`DUAL_MODE`, in `Dual_Board_Parameters.py`. This page shows the four modes, the two settings that only some modes
-use (`BAND_SPLIT` in mode 1, `TRACK_GAP_MM` in modes 1 and 3), and a starting point for the rest. Every picture is a run of the Dual Generator
+A dual board is two coil sets on one board, so before it is built the generator decides where each sits: the two RX
+bands, the two board edges and the gap between the sets. You give what you know and the generator places the rest;
+there is no mode to choose. This page shows what to give, the two settings that only some layouts use (`BAND_SPLIT`
+when no band is given, `TRACK_GAP_MM`), and a starting point for the rest. Every picture is a run of the Dual Generator
 with only the named settings changed, silkscreen off; colour shows the copper layer (Top red, Inner-1 green, Inner-2
 dark yellow). Each parameter is described in full in the
 [Parameter Reference Dual Generator](Parameter-Reference-Dual-Generator.md).
 
-## 20.1 The Four Modes
+## 20.1 What You Give
 
-From the centre out the stator is `bore | RX1 band | TX1 ring | TRACK_GAP_MM | RX2 band | TX2 ring | outline`. The TX
-rings always follow from their RX bands (`TX_OFFSET_MM`, `TX_TURNS`, `TX_PITCH_MM`), so the choice is between the two
-bands, the two edges and the gap:
+From the centre out the stator is `bore | RX1 band | TX1 ring | gap | RX2 band | TX2 ring | outline`. The TX rings
+always follow from their RX bands (`TX_OFFSET_MM`, `TX_TURNS`, `TX_PITCH_MM`), so five things can be given, each one or
+not (`None`): the RX1 band, the RX2 band, the bore (`INNER_EDGE_RADIUS_MM`), the outline (`OUTER_EDGE_RADIUS_MM`) and the
+gap (`TRACK_GAP_MM`). The generator places what is not given by four rules:
 
-| `DUAL_MODE` | You Give | Must Be `None` | The Generator |
-|---|---|---|---|
-| **1** | `TRACK_GAP_MM`, `INNER_EDGE_RADIUS_MM`, `OUTER_EDGE_RADIUS_MM`, `BAND_SPLIT` | Both RX bands (all four radii in `Dual_RX1` and `Dual_RX2`) | Fits both bands between the edges; `BAND_SPLIT` shares the free width between them |
-| **2** (default) | Both RX bands | `TRACK_GAP_MM` and both edges | Computes the bore and the outline from the bands, and measures and reports the gap |
-| **3** | One RX band (in `Dual_RX1` or `Dual_RX2`) and `TRACK_GAP_MM` | The other band and both edges | Places the other band across the gap with the same half width (`RX_A_MM`), then works as mode 2 |
-| **4** | Both RX bands and both edges | `TRACK_GAP_MM` | Uses everything as given, checks that each edge leaves room, and measures and reports the gap |
+| What | Rule |
+|---|---|
+| The gap | `TRACK_GAP_MM`, or the larger of the two sets' `MIN_CLEARANCE_MM` when it is `None`. A band the generator places sits exactly that far from the other set; when you give both bands, the gap between them must be at least that |
+| A band you leave out | Placed across the gap from the band you give: RX2 outwards, RX1 inwards. It runs to the board edge on its side when you give that edge, and is as wide as the other band when you do not |
+| An edge you leave out | Follows from its band, as in the Single Generator: the bore is the RX1 band start less `INNER_EDGE_INSET_MM`, the outline the RX2 band end plus the TX2 ring and the margins. An edge you give is used as given and checked |
+| No band at all | Needs both edges: both bands are fitted between them, and `BAND_SPLIT` shares the width |
 
-![Dual Parameters 1: The Four DUAL_MODEs](https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/images/dual_params_1_modes.png)
+Of the 32 combinations, 26 build. The other 6 give no band and at most one edge, so there is nothing to size a band
+from. [Dual Layout](Dual-Layout.md) lists all 32, each with a picture of a board the generator builds.
+
+![Dual Parameters 1: Four Of The 32 Combinations](https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/images/dual_params_1_combinations.png)
 
 *Dual Parameters 1. The same two sets (inner 1 loop, outer 16 loops, 4 + 4 series TX turns per set, pitch 0.35 mm) laid
 out four ways, at the same scale. Next to each board: what was given and what the generator computed, read from the
-run's `Parameters.txt` (radii in mm). Mode 1: bore 7.25, outline 30, gap 3, `BAND_SPLIT` 0.5 give RX1 8.45 to 14.95 and
-RX2 20.525 to 27.025. Mode 2: the default bands give bore 7.25, outline 26.875 and a measured gap of 3.725. Mode 3: RX1
-8.45 to 11.7 and a gap of 3 give RX2 17.275 to 20.525 (the same half width, 1.625) and outline 23.5. Mode 4: the default
-bands with bore 6.5 and outline 28.*
+run's `Parameters.txt` (radii in mm). Bore 7.25, outline 30, gap 3 and `BAND_SPLIT` 0.5 (combination 32) give RX1 8.45
+to 14.95 and RX2 20.525 to 27.025. The default bands alone (combination 1) give bore 7.25, outline 26.875 and a measured
+gap of 3.725. RX1 8.45 to 11.7 and a gap of 3 (combination 10) give RX2 17.275 to 20.525 (the same half width, 1.625)
+and outline 23.5. The default bands with bore 6.5 and outline 28 (combination 7) are built as given.*
 
-Which mode to use:
+What to give:
 
-- **Mode 1** when the board outline and the shaft hole are fixed (a housing, a bearing) and you want the largest bands
-  that fit.
-- **Mode 2** when both bands matter, for example to match a known design; the board grows to suit them.
-- **Mode 3** when one track is fixed and the other may go wherever the gap puts it.
-- **Mode 4** when everything is fixed and you only want it built and checked.
+- **Both edges** (with `TRACK_GAP_MM`, or not) when the board outline and the shaft hole are fixed (a housing, a
+  bearing) and you want the largest bands that fit.
+- **Both bands** when both bands matter, for example to match a known design; the board grows to suit them, unless
+  you give the edges too, which are then checked.
+- **One band** when one track is fixed and the other may go wherever the gap puts it. Give the edge on the other side
+  as well, and the placed band runs out to it.
+- **Everything** when everything is fixed and you only want it built and checked.
 
 ### 20.1.1 What The Checker Says
 
-The checker holds what is set against the chosen mode. A value the mode needs that is `None`, or a value that must be
-`None` and is set, is an error that names every such value. When what is set matches another mode, the error names
-that mode too. For example, with `DUAL_MODE = 2` and `TRACK_GAP_MM = 3.0`:
+A combination with nothing to size a band from is refused with a message that says what to give. For example, with no
+band and only the bore:
 
 ```text
-ERROR   DUAL_MODE conflicts with TRACK_GAP_MM
-        DUAL_MODE = 2 (the edges from the bands) does not match what is set: TRACK_GAP_MM = 3.0 (Dual_Board_Parameters.py)
-        but the mode measures the gap: set it to None. Change the values, or choose another DUAL_MODE.
+ERROR   INSIDE_RADIUS_MM conflicts with OUTSIDE_RADIUS_MM, RX_R_BASE_MM, RX_A_MM, INNER_EDGE_RADIUS_MM and OUTER_EDGE_RADIUS_MM
+        no RX band is given and of the board edges only the bore: OUTER_EDGE_RADIUS_MM is missing to fit both bands
+        between the edges. Set OUTER_EDGE_RADIUS_MM (Dual_Board_Parameters.py), or give one RX band (INSIDE_RADIUS_MM /
+        OUTSIDE_RADIUS_MM or RX_R_BASE_MM / RX_A_MM in Dual_RX1 or Dual_RX2_Parameters.py)
 ```
 
-The error then lists the four modes. Change the values, or change `DUAL_MODE`.
+A combination that builds can still be refused for a real reason, and the message names what to change: a given
+outline that leaves a placed band no room, a placed RX1 band that would push the bore to zero, or a set the Single
+Generator refuses. When a band fitted to an edge comes out too narrow for its vias, a hint names the edge to move. A
+parameter file from before that still has `DUAL_MODE` gets a warning that it is no longer used, and builds as before.
 
 ## 20.2 Giving A Band
 
@@ -61,13 +70,13 @@ Each set's band is the ring of radii its RX curves weave in, given in its own fi
 |---|---|---|
 | Radii pair | `INSIDE_RADIUS_MM`, `OUTSIDE_RADIUS_MM` (with `RX_R_BASE_MM`, `RX_A_MM` = `None`) | From the inside radius to the outside radius |
 | R base and A pair | `RX_R_BASE_MM`, `RX_A_MM` (with `INSIDE_RADIUS_MM`, `OUTSIDE_RADIUS_MM` = `None`) | `RX_R_BASE_MM - RX_A_MM` to `RX_R_BASE_MM + RX_A_MM` |
-| Not given | All four `None` | Placed by the generator (mode 1, or mode 3 for the band you leave out); `Parameters.txt` prints the values it chose |
+| Not given | All four `None` | Placed by the generator (20.1); `Parameters.txt` prints the values it chose |
 
 Each pair goes together: a pair with only one value set is an error, and so is a band given by both pairs at once.
 
-## 20.3 Sharing The Width: `BAND_SPLIT` (Mode 1)
+## 20.3 Sharing The Width: `BAND_SPLIT` (No Band Given)
 
-In mode 1 the free radial width between the edges, after both TX rings and the gap, is shared between the two bands.
+When no band is given, the free radial width between the edges, after both TX rings and the gap, is shared between the two bands.
 `BAND_SPLIT` is set 1's share, strictly between 0 and 1: 0.5 gives both bands the same width. A 1x / 16x board is
 usually near 0.5; the more loops the fine track has, the more width it should get (a smaller `BAND_SPLIT`).
 
@@ -76,16 +85,16 @@ usually near 0.5; the more loops the fine track has, the more width it should ge
 *Dual Parameters 2. `BAND_SPLIT` = 0.35, 0.5 (the default) and 0.65 with the bore at 7.25 mm, the outline at 30 mm and
 `TRACK_GAP_MM` at 3 mm. The two bands always share 13 mm: 4.55 + 8.45, 6.5 + 6.5 and 8.45 + 4.55 mm.*
 
-## 20.4 The Gap Between The Sets: `TRACK_GAP_MM` (Modes 1 And 3)
+## 20.4 The Gap Between The Sets: `TRACK_GAP_MM`
 
 `TRACK_GAP_MM` is the copper-free ring between the sets: from the outermost copper of set 1 (its TX1 ring) to the
-innermost copper of set 2 (the RX2 band start minus half an RX trace or a via radius, whichever is larger). In modes 1
-and 3 it is the gap to leave; in modes 2 and 4 it must be `None`, and the measured gap must be at least
-`MIN_CLEARANCE_MM`.
+innermost copper of set 2 (the RX2 band start minus half an RX trace or a via radius, whichever is larger). When the generator
+places a band, it is the gap to leave; when both bands are given, the measured gap must be at least this. When it is
+`None`, `MIN_CLEARANCE_MM` (the larger of the two sets') takes its place.
 
 ![Dual Parameters 3: TRACK_GAP_MM](https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/images/dual_params_3_gap.png)
 
-*Dual Parameters 3. Mode 3 with the RX1 band given (8.45 to 11.7 mm) and `TRACK_GAP_MM` = 0.5, 2 and 4 mm. RX2 is placed
+*Dual Parameters 3. The RX1 band given (8.45 to 11.7 mm, combination 10) and `TRACK_GAP_MM` = 0.5, 2 and 4 mm. RX2 is placed
 across the gap with the same half width (1.625 mm), and the outline follows it: 21, 22.5 and 24.5 mm.*
 
 The gap does not isolate the two sets electrically: a balanced RX band sees no net flux from a round TX ring, however

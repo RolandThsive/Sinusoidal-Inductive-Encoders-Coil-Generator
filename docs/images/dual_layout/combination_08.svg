@@ -1,0 +1,148 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="825" viewBox="0 0 1400 825" font-family="DejaVu Sans, Arial, Helvetica, sans-serif">
+<title>Combination 8: Both RX bands, bore, outline and TRACK_GAP_MM given</title>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<rect x="24" y="137" width="1352" height="546" fill="#d5dce5" stroke="#c4c4c4" stroke-width="1"/>
+<text x="24" y="48" font-size="24" font-weight="bold" fill="#1a1a1a">Combination 8: Both RX bands, bore, outline and TRACK_GAP_MM given</text>
+<text x="24" y="77" font-size="15" fill="#555555">Drawn from the reference board Board088-layout-08-everything-given (regression/DualGenerator_regression), cut along the radius at 90 deg: the copper is what</text>
+<text x="24" y="98" font-size="15" fill="#555555">that cut meets in its Stator.kicad_pcb. Given: the RX1 band (8.45 ... 11.7 mm, Dual_RX1), the RX2 band (18 ... 23.9 mm, Dual_RX2), the bore (6 mm), the outline</text>
+<text x="24" y="119" font-size="15" fill="#555555">(28 mm), TRACK_GAP_MM (3 mm). Across the board true scale; through the board not to scale, the copper drawn thicker.</text>
+<rect x="766" y="151" width="596" height="30" rx="3" fill="#ffffff" stroke="#bdbdbd" stroke-width="1"/>
+<line x1="778" y1="166" x2="808" y2="166" stroke="#1a1a1a" stroke-width="2"/>
+<text x="816" y="171" font-size="13" fill="#1a1a1a">given in the parameter files</text>
+<line x1="1056" y1="166" x2="1086" y2="166" stroke="#1d5fa6" stroke-width="2"/>
+<text x="1094" y="171" font-size="13" fill="#1d5fa6">placed or worked out by the generator</text>
+<line x1="326.91" y1="229" x2="486.52" y2="229" stroke="#1a1a1a" stroke-width="1.2"/>
+<line x1="326.91" y1="223" x2="326.91" y2="235" stroke="#1a1a1a" stroke-width="1.2"/>
+<line x1="486.52" y1="223" x2="486.52" y2="235" stroke="#1a1a1a" stroke-width="1.2"/>
+<rect x="274.92" y="199" width="263.6" height="21" rx="3" fill="#ffffff" stroke="#bdbdbd" stroke-width="1"/>
+<text x="406.72" y="214" font-size="13" text-anchor="middle" fill="#1a1a1a">RX1 band 8.45 ... 11.7 mm, given</text>
+<line x1="795.94" y1="229" x2="1085.7" y2="229" stroke="#1a1a1a" stroke-width="1.2"/>
+<line x1="795.94" y1="223" x2="795.94" y2="235" stroke="#1a1a1a" stroke-width="1.2"/>
+<line x1="1085.7" y1="223" x2="1085.7" y2="235" stroke="#1a1a1a" stroke-width="1.2"/>
+<rect x="816.82" y="199" width="248" height="21" rx="3" fill="#ffffff" stroke="#bdbdbd" stroke-width="1"/>
+<text x="940.82" y="214" font-size="13" text-anchor="middle" fill="#1a1a1a">RX2 band 18 ... 23.9 mm, given</text>
+<line x1="206.58" y1="280" x2="206.58" y2="295" stroke="#1a1a1a" stroke-width="1.2"/>
+<rect x="121.58" y="259" width="170" height="21" rx="3" fill="#ffffff" stroke="#bdbdbd" stroke-width="1"/>
+<text x="206.58" y="274" font-size="13" text-anchor="middle" fill="#1a1a1a">bore r = 6 mm, given</text>
+<line x1="598.26" y1="289" x2="781.2" y2="289" stroke="#1d5fa6" stroke-width="1.2"/>
+<line x1="598.26" y1="283" x2="598.26" y2="295" stroke="#1d5fa6" stroke-width="1.2"/>
+<line x1="781.2" y1="283" x2="781.2" y2="295" stroke="#1d5fa6" stroke-width="1.2"/>
+<rect x="538.43" y="259" width="302.6" height="21" rx="3" fill="#ffffff" stroke="#9db7d6" stroke-width="1"/>
+<text x="689.73" y="274" font-size="13" text-anchor="middle" fill="#1d5fa6">gap 3.725 mm, at least TRACK_GAP_MM 3</text>
+<line x1="1287.06" y1="280" x2="1287.06" y2="295" stroke="#1a1a1a" stroke-width="1.2"/>
+<rect x="1166.8" y="259" width="201.2" height="21" rx="3" fill="#ffffff" stroke="#bdbdbd" stroke-width="1"/>
+<text x="1267.4" y="274" font-size="13" text-anchor="middle" fill="#1a1a1a">outline r = 28 mm, given</text>
+<line x1="206.58" y1="349" x2="326.91" y2="349" stroke="#1d5fa6" stroke-width="1.2"/>
+<line x1="206.58" y1="343" x2="206.58" y2="355" stroke="#1d5fa6" stroke-width="1.2"/>
+<line x1="326.91" y1="343" x2="326.91" y2="355" stroke="#1d5fa6" stroke-width="1.2"/>
+<rect x="220.74" y="319" width="92" height="21" rx="3" fill="#ffffff" stroke="#9db7d6" stroke-width="1"/>
+<text x="266.74" y="334" font-size="13" text-anchor="middle" fill="#1d5fa6">inset 2.45</text>
+<line x1="486.52" y1="349" x2="598.26" y2="349" stroke="#1d5fa6" stroke-width="1.2"/>
+<line x1="486.52" y1="343" x2="486.52" y2="355" stroke="#1d5fa6" stroke-width="1.2"/>
+<line x1="598.26" y1="343" x2="598.26" y2="355" stroke="#1d5fa6" stroke-width="1.2"/>
+<rect x="426.19" y="319" width="232.4" height="21" rx="3" fill="#ffffff" stroke="#9db7d6" stroke-width="1"/>
+<text x="542.39" y="334" font-size="13" text-anchor="middle" fill="#1d5fa6">set 1 copper past RX1: 2.275</text>
+<line x1="1085.7" y1="349" x2="1287.06" y2="349" stroke="#1d5fa6" stroke-width="1.2"/>
+<line x1="1085.7" y1="343" x2="1085.7" y2="355" stroke="#1d5fa6" stroke-width="1.2"/>
+<line x1="1287.06" y1="343" x2="1287.06" y2="355" stroke="#1d5fa6" stroke-width="1.2"/>
+<rect x="1081.88" y="319" width="209" height="21" rx="3" fill="#ffffff" stroke="#9db7d6" stroke-width="1"/>
+<text x="1186.38" y="334" font-size="13" text-anchor="middle" fill="#1d5fa6">TX2 ring and margins: 4.1</text>
+<line x1="206.58" y1="235" x2="206.58" y2="383" stroke="#8a96a3" stroke-width="0.7" stroke-dasharray="3 3"/>
+<line x1="326.91" y1="235" x2="326.91" y2="383" stroke="#8a96a3" stroke-width="0.7" stroke-dasharray="3 3"/>
+<line x1="486.52" y1="235" x2="486.52" y2="383" stroke="#8a96a3" stroke-width="0.7" stroke-dasharray="3 3"/>
+<line x1="598.26" y1="235" x2="598.26" y2="383" stroke="#8a96a3" stroke-width="0.7" stroke-dasharray="3 3"/>
+<line x1="781.2" y1="235" x2="781.2" y2="383" stroke="#8a96a3" stroke-width="0.7" stroke-dasharray="3 3"/>
+<line x1="795.94" y1="235" x2="795.94" y2="383" stroke="#8a96a3" stroke-width="0.7" stroke-dasharray="3 3"/>
+<line x1="1085.7" y1="235" x2="1085.7" y2="383" stroke="#8a96a3" stroke-width="0.7" stroke-dasharray="3 3"/>
+<line x1="1287.06" y1="235" x2="1287.06" y2="383" stroke="#8a96a3" stroke-width="0.7" stroke-dasharray="3 3"/>
+<rect x="206.58" y="393" width="1080.48" height="150" fill="#968a58" stroke="none" stroke-width="1"/>
+<rect x="350.17" y="385" width="7.44" height="8" fill="#cd803e" stroke="none" stroke-width="1"/>
+<rect x="462.33" y="385" width="7.4" height="8" fill="#cd803e" stroke="none" stroke-width="1"/>
+<rect x="522.13" y="385" width="7.37" height="8" fill="#cd803e" stroke="none" stroke-width="1"/>
+<rect x="539.32" y="385" width="7.37" height="8" fill="#cd803e" stroke="none" stroke-width="1"/>
+<rect x="556.51" y="385" width="7.37" height="8" fill="#cd803e" stroke="none" stroke-width="1"/>
+<rect x="573.7" y="385" width="7.37" height="8" fill="#cd803e" stroke="none" stroke-width="1"/>
+<rect x="836.18" y="385" width="16.08" height="8" fill="#cd803e" stroke="none" stroke-width="1"/>
+<rect x="1041.79" y="385" width="12.12" height="8" fill="#cd803e" stroke="none" stroke-width="1"/>
+<rect x="1121.31" y="385" width="7.37" height="8" fill="#cd803e" stroke="none" stroke-width="1"/>
+<rect x="1138.5" y="385" width="7.37" height="8" fill="#cd803e" stroke="none" stroke-width="1"/>
+<rect x="1155.69" y="385" width="7.37" height="8" fill="#cd803e" stroke="none" stroke-width="1"/>
+<rect x="1172.88" y="385" width="7.37" height="8" fill="#cd803e" stroke="none" stroke-width="1"/>
+<rect x="350.17" y="398.38" width="7.44" height="8" fill="#cd803e" stroke="none" stroke-width="1"/>
+<rect x="462.33" y="398.38" width="7.4" height="8" fill="#cd803e" stroke="none" stroke-width="1"/>
+<rect x="836.03" y="398.38" width="16.06" height="8" fill="#cd803e" stroke="none" stroke-width="1"/>
+<rect x="1041.65" y="398.38" width="12.13" height="8" fill="#cd803e" stroke="none" stroke-width="1"/>
+<rect x="522.13" y="529.62" width="7.37" height="8" fill="#cd803e" stroke="none" stroke-width="1"/>
+<rect x="539.32" y="529.62" width="7.37" height="8" fill="#cd803e" stroke="none" stroke-width="1"/>
+<rect x="556.51" y="529.62" width="7.37" height="8" fill="#cd803e" stroke="none" stroke-width="1"/>
+<rect x="573.7" y="529.62" width="7.37" height="8" fill="#cd803e" stroke="none" stroke-width="1"/>
+<rect x="1121.31" y="529.62" width="7.37" height="8" fill="#cd803e" stroke="none" stroke-width="1"/>
+<rect x="1138.5" y="529.62" width="7.37" height="8" fill="#cd803e" stroke="none" stroke-width="1"/>
+<rect x="1155.69" y="529.62" width="7.37" height="8" fill="#cd803e" stroke="none" stroke-width="1"/>
+<rect x="1172.88" y="529.62" width="7.37" height="8" fill="#cd803e" stroke="none" stroke-width="1"/>
+<text x="214.58" y="533" font-size="13" fill="#f4f1e6">laminate</text>
+<line x1="206.58" y1="295" x2="206.58" y2="561" stroke="#1a1a1a" stroke-width="1" stroke-dasharray="6 3"/>
+<line x1="1287.06" y1="295" x2="1287.06" y2="561" stroke="#1a1a1a" stroke-width="1" stroke-dasharray="6 3"/>
+<text x="214.58" y="474" font-size="16" font-weight="bold" fill="#f4f1e6">set 1 (inner)</text>
+<text x="789.2" y="474" font-size="16" font-weight="bold" fill="#f4f1e6">set 2 (outer)</text>
+<line x1="466.03" y1="585" x2="466.03" y2="407.38" stroke="#1a1a1a" stroke-width="0.9"/>
+<circle cx="466.03" cy="407.38" r="2.6" fill="#1a1a1a"/>
+<rect x="306.8" y="585" width="281.2" height="27" rx="3" fill="#ffffff" stroke="#bdbdbd" stroke-width="1"/>
+<text x="314.8" y="605" font-size="13" fill="#1a1a1a">RX1 coil traces on Top and Inner 1</text>
+<line x1="604" y1="585" x2="560.19" y2="538.62" stroke="#1a1a1a" stroke-width="0.9"/>
+<circle cx="560.19" cy="538.62" r="2.6" fill="#1a1a1a"/>
+<rect x="598" y="585" width="234.4" height="27" rx="3" fill="#ffffff" stroke="#bdbdbd" stroke-width="1"/>
+<text x="606" y="605" font-size="13" fill="#1a1a1a">TX1 turns on Top and Inner 2</text>
+<line x1="1047.72" y1="585" x2="1047.72" y2="407.38" stroke="#1a1a1a" stroke-width="0.9"/>
+<circle cx="1047.72" cy="407.38" r="2.6" fill="#1a1a1a"/>
+<rect x="842.4" y="585" width="281.2" height="27" rx="3" fill="#ffffff" stroke="#bdbdbd" stroke-width="1"/>
+<text x="850.4" y="605" font-size="13" fill="#1a1a1a">RX2 coil traces on Top and Inner 1</text>
+<line x1="1159.37" y1="585" x2="1159.37" y2="538.62" stroke="#1a1a1a" stroke-width="0.9"/>
+<circle cx="1159.37" cy="538.62" r="2.6" fill="#1a1a1a"/>
+<rect x="1133.6" y="585" width="234.4" height="27" rx="3" fill="#ffffff" stroke="#bdbdbd" stroke-width="1"/>
+<text x="1141.6" y="605" font-size="13" fill="#1a1a1a">TX2 turns on Top and Inner 2</text>
+<line x1="58" y1="649" x2="110" y2="649" stroke="#1a1a1a" stroke-width="1" stroke-dasharray="4 3"/>
+<line x1="110" y1="642" x2="104" y2="656" stroke="#1a1a1a" stroke-width="1.2"/>
+<line x1="116" y1="642" x2="110" y2="656" stroke="#1a1a1a" stroke-width="1.2"/>
+<line x1="116" y1="649" x2="1346" y2="649" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="58" y1="642" x2="58" y2="656" stroke="#1a1a1a" stroke-width="1.4"/>
+<text x="58" y="671" font-size="13" text-anchor="middle" fill="#1a1a1a">centre</text>
+<line x1="157.47" y1="649" x2="157.47" y2="657" stroke="#1a1a1a" stroke-width="1"/>
+<text x="157.47" y="671" font-size="13" text-anchor="middle" fill="#1a1a1a">5 mm</text>
+<line x1="206.58" y1="649" x2="206.58" y2="653" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="255.69" y1="649" x2="255.69" y2="653" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="304.81" y1="649" x2="304.81" y2="653" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="353.92" y1="649" x2="353.92" y2="653" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="403.03" y1="649" x2="403.03" y2="657" stroke="#1a1a1a" stroke-width="1"/>
+<text x="403.03" y="671" font-size="13" text-anchor="middle" fill="#1a1a1a">10 mm</text>
+<line x1="452.15" y1="649" x2="452.15" y2="653" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="501.26" y1="649" x2="501.26" y2="653" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="550.37" y1="649" x2="550.37" y2="653" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="599.48" y1="649" x2="599.48" y2="653" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="648.6" y1="649" x2="648.6" y2="657" stroke="#1a1a1a" stroke-width="1"/>
+<text x="648.6" y="671" font-size="13" text-anchor="middle" fill="#1a1a1a">15 mm</text>
+<line x1="697.71" y1="649" x2="697.71" y2="653" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="746.82" y1="649" x2="746.82" y2="653" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="795.94" y1="649" x2="795.94" y2="653" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="845.05" y1="649" x2="845.05" y2="653" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="894.16" y1="649" x2="894.16" y2="657" stroke="#1a1a1a" stroke-width="1"/>
+<text x="894.16" y="671" font-size="13" text-anchor="middle" fill="#1a1a1a">20 mm</text>
+<line x1="943.27" y1="649" x2="943.27" y2="653" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="992.39" y1="649" x2="992.39" y2="653" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="1041.5" y1="649" x2="1041.5" y2="653" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="1090.61" y1="649" x2="1090.61" y2="653" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="1139.73" y1="649" x2="1139.73" y2="657" stroke="#1a1a1a" stroke-width="1"/>
+<text x="1139.73" y="671" font-size="13" text-anchor="middle" fill="#1a1a1a">25 mm</text>
+<line x1="1188.84" y1="649" x2="1188.84" y2="653" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="1237.95" y1="649" x2="1237.95" y2="653" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="1287.06" y1="649" x2="1287.06" y2="653" stroke="#1a1a1a" stroke-width="1"/>
+<line x1="1336.18" y1="649" x2="1336.18" y2="653" stroke="#1a1a1a" stroke-width="1"/>
+<text x="1346" y="641" font-size="13" text-anchor="end" fill="#555555">radius from the board centre (true scale)</text>
+<circle cx="46" cy="159" r="12" fill="#1a1a1a"/>
+<text x="46" y="164" font-size="15" font-weight="bold" text-anchor="middle" fill="#ffffff">1</text>
+<text x="24" y="711" font-size="17" font-weight="bold" fill="#1a1a1a">1  Both RX bands, bore, outline and TRACK_GAP_MM given</text>
+<text x="24" y="736" font-size="15" fill="#555555">Both bands are used as given. The bore is used as given; the Single Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 band. The outline is used</text>
+<text x="24" y="757" font-size="15" fill="#555555">as given; the Single Generator checks that it leaves room for the TX2 ring, its tail or fingers, and the margins. The gap between set 1's outermost copper and</text>
+<text x="24" y="778" font-size="15" fill="#555555">set 2's innermost copper is measured, and must be at least TRACK_GAP_MM. Here the RX1 band runs 8.45 ... 11.7 mm and the RX2 band 18 ... 23.9 mm; set 1's copper</text>
+<text x="24" y="799" font-size="15" fill="#555555">reaches r = 13.975 mm and set 2's starts at r = 17.7 mm, 3.725 mm apart; the bore is 6 mm and the outline 28 mm.</text>
+</svg>

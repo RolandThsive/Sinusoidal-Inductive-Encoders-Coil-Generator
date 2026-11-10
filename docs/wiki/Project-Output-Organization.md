@@ -36,7 +36,7 @@ Single Generator/
 
 Dual Generator/
 ├── Parameters/                 Every dual setting: the only files you edit
-│   ├── Dual_Board_Parameters.py  Output, layers, vias, clearance, DUAL_MODE, edges, gap, TX ends, frequency rules, rotor disc
+│   ├── Dual_Board_Parameters.py  Output, layers, vias, clearance, edges, gap, TX ends, frequency rules, rotor disc
 │   ├── Dual_RX1_Parameters.py    RX and fingers of set 1 (inner); Dual_RX2_Parameters.py for set 2 (outer)
 │   ├── Dual_TX1_Parameters.py    TX ring and frequency of set 1; Dual_TX2_Parameters.py for set 2
 │   ├── Dual_Rotor1_Parameters.py Ring 1 of the rotor; Dual_Rotor2_Parameters.py for ring 2
@@ -46,7 +46,7 @@ Dual Generator/
 ├── Dual_Generator/
 │   ├── Run/                      Dual_RunCoilGenerator.py (the program to run), Dual_OutputFolders.py
 │   ├── Checks/                   Dual_CheckParameters.py, Dual_ParameterRules.py, Dual_DesignChecks.py
-│   ├── Core/                     Dual_SetParameters.py (one Single Generator parameter set per coil set), Dual_TrackLayout.py (DUAL_MODE)
+│   ├── Core/                     Dual_SetParameters.py (one Single Generator parameter set per coil set), Dual_TrackLayout.py (the layout)
 │   ├── Stator/                   Dual_StatorAssembler.py, Dual_LeadCutting_SilkscreenSuggestion.py
 │   └── Rotor/                    Dual_RotorBuilder.py
 └── Output/

@@ -11,7 +11,7 @@ This is the only program of the dual generator that writes boards.
 Colours: red = error (nothing is written), yellow = warning, green = success.
 
 Steps (the same six as the Single Generator's RunCoilGenerator.py, each done twice where there are two sets)
-  1. Dual_CheckParameters.check_parameters   the dual rules, the mode (Dual_TrackLayout), then the Single
+  1. Dual_CheckParameters.check_parameters   the dual rules, the layout (Dual_TrackLayout), then the Single
                                              Generator's own parameter checks on each set
   2. the Single Generator's chain for each set (RX -> TX -> assemble -> clearances, DesignChecks), set 1 turned
      so that its TX ends sit at TERMINAL_1_DEG and set 2 at TERMINAL_2_DEG; then Dual_StatorAssembler puts the
@@ -64,16 +64,14 @@ SET_WORD = {1: "set 1 (inner)", 2: "set 2 (outer)"}
 
 
 def narrow_band_hint(layout):
-    """DUAL_MODE 1 fits the bands into whatever is left between the edges; when a set cannot be built, the usual
-    reason is that the leftover was too little for its vias."""
-    if layout.mode != 1:
+    """A band the generator fitted to a board edge gets whatever room is left; when a set cannot be built, the usual
+    reason is that the room was too little for its vias (Dual_TrackLayout.Layout.fitted)."""
+    fitted = layout.fitted()
+    if fitted is None:
         return
-    w1 = layout.band1["ro"] - layout.band1["ri"]
-    w2 = layout.band2["ro"] - layout.band2["ri"]
-    print("  " + Colour.yellow(f"hint    DUAL_MODE 1 fitted the RX bands into the room between the board edges: RX1 came out "
-                               f"{w1:.2f} mm wide, RX2 {w2:.2f} mm. If the errors above are vias touching copper, the "
-                               f"bands are too narrow: raise OUTER_EDGE_RADIUS_MM, lower INNER_EDGE_RADIUS_MM, or move "
-                               f"BAND_SPLIT towards the set that failed"))
+    what, change = fitted
+    print("  " + Colour.yellow(f"hint    the generator fitted {what}. If the errors above are about the vias of a "
+                               f"fitted band (narrower than a via, a via touching copper), {change}"))
 
 
 def electrical(Pk, k, stator, rotor):
@@ -102,6 +100,8 @@ def main(argv=None):
     rep.print()
     warn_texts = list(rep.warnings)
     if rep.errors or layout is None:
+        if layout is not None:
+            narrow_band_hint(layout)
         return stop(f"{len(rep.errors)} parameter error(s)")
     print("  " + Colour.green("parameters OK"))
     strict = RS.is_strict(P.BOARD)
