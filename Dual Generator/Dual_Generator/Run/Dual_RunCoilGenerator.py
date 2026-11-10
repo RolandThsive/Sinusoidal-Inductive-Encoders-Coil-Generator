@@ -22,7 +22,8 @@ Steps (the same six as the Single Generator's RunCoilGenerator.py, each done twi
      the estimate)
   5. decide (GENERATOR_MODE, --check)
   6. write the files - only if no step reported an error.  Dual_OutputFolders.py makes a new folder for every
-     run inside OUTPUT_DIR and writes Stator.kicad_pcb, Rotor.kicad_pcb and Parameters.txt into it.
+     run inside OUTPUT_DIR and writes Stator.kicad_pcb, Rotor.kicad_pcb (each with its KiCad project file, the
+     board's design rules) and Parameters.txt into it.
      Last, Dual_LeadCutting_SilkscreenSuggestion.py draws the lead-cutting suggestion (where to break each RX
      coil, where the TX ends get their vias) on the silkscreen of the written stator file and adds it to the record.
      When both boards were written, resources/RepresentativeSVGMaker.py and resources/ActualSVGMaker.py draw them

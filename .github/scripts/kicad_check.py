@@ -5,14 +5,16 @@ of .github/workflows/ci.yml), one KiCad version at a time:
     python3 .github/scripts/kicad_check.py --kicad 8.0 DIR [DIR ...]            check
     python3 .github/scripts/kicad_check.py --kicad 8.0 --update DIR [DIR ...]   write this version's baseline anew
 
-Every Stator.kicad_pcb / Rotor.kicad_pcb found under the folders is
+Every Stator.kicad_pcb / Rotor.kicad_pcb found under the folders, with the project file next to it that holds its
+design rules (Stator.kicad_pro / Rotor.kicad_pro, which the generators write; a board without one fails), is
   - loaded by KiCad:  `kicad-cli pcb export svg` must succeed and write a picture (every KiCad version), and
   - checked by KiCad's DRC:  `kicad-cli pcb drc --format json --severity-all --all-track-errors` (KiCad 8 and
     newer; KiCad 7's command line has no DRC).  --all-track-errors makes the count repeatable: without it KiCad
     reports only the first error it meets on each track, and which one comes first changes from run to run (KiCad 10
     gave 61 to 76 clearance reports on the same board).  The number of reports of each type on each board must equal
     the committed baseline (.github/kicad-drc-baseline.json), so a new violation fails, and so does one that went away
-    (then the baseline is written anew with --update, in the same pull request, so the improvement is kept).
+    (then the baseline is written anew with --update, in the same pull request, so the improvement is kept).  KiCad
+    checks each board against the rules in its project file, so what it reports breaks the board's own rules.
 
 The board's name in the baseline is its path below the folder it was found in, e.g.
 "Single Generator/Board001-default/Stator.kicad_pcb".  Needs only the standard library (Python 3.9 or newer) and
@@ -46,12 +48,19 @@ def find_boards(roots):
     return found
 
 
+def project_of(path):
+    """The KiCad project file that belongs to the board at `path` (the same name, ending in .kicad_pro)."""
+    return os.path.splitext(path)[0] + ".kicad_pro"
+
+
 def copy_board(path, work, n):
-    """A copy of the board in its own folder under work, so that KiCad writes nothing next to the original."""
+    """A copy of the board and its project file in a folder of their own under work, so that KiCad writes nothing
+    next to the originals."""
     folder = os.path.join(work, f"{n:03d}")
     os.makedirs(folder)
     out = os.path.join(folder, os.path.basename(path))
     shutil.copyfile(path, out)
+    shutil.copyfile(project_of(path), project_of(out))
     return out
 
 
@@ -119,6 +128,11 @@ def main(argv=None):
     work = tempfile.mkdtemp(prefix="kicad_check_")
     try:
         for n, (name, path) in enumerate(boards):
+            if not os.path.isfile(project_of(path)):
+                problems.append(f"{name}: no {os.path.basename(project_of(path))} next to it, so KiCad would check it "
+                                f"against its own default rules instead of the board's")
+                rows.append((name, "NO PROJECT", ""))
+                continue
             board = copy_board(path, work, n)
             why = load_test(board)
             if why:

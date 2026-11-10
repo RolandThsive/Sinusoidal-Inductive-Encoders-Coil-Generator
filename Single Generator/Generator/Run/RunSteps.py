@@ -28,6 +28,7 @@ import sys
 
 from Generator.Checks import DesignChecks
 from Generator.Core.Conflict import Colour, Report
+from Generator.Core.PCBWriter import project_path
 from Generator.Run.OutputFolders import RECORD_FILE
 
 RESOURCES = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))),
@@ -176,8 +177,9 @@ def draw_pictures(folder):
 
 def write_files(make_folder, stator, rotor, stator_file, rotor_file, add_silkscreen, append_silkscreen, write_record,
                 remove_if_empty, n=6, total=6):
-    """Step 6: a new output folder, the stator (then its lead-cutting silkscreen suggestion), the rotor, the record,
-    and the pictures when both boards were written.
+    """Step 6: a new output folder, the stator (then its lead-cutting silkscreen suggestion), the rotor, each with
+    its KiCad project file (the board's design rules, PCBWriter.py), the record, and the pictures when both boards
+    were written.
       make_folder()                    makes the new output folder, returns its path
       stator, rotor                    the boards to write (each has write(path)); None = not written
       add_silkscreen(path)             the lead-cutting step on the written stator file; returns its result
@@ -193,13 +195,13 @@ def write_files(make_folder, stator, rotor, stator_file, rotor_file, add_silkscr
         print(f"  folder  {folder}")
         if stator is not None:
             path = stator.write(os.path.join(folder, stator_file))
-            written.append(path)
-            print("  " + Colour.green(f"stator  -> {path}"))
+            written += [path, project_path(path)]
+            print("  " + Colour.green(f"stator  -> {path}  (and {os.path.basename(project_path(path))}: its design rules)"))
             silk = add_silkscreen(path)                  # the lead-cutting silkscreen suggestion, drawn into the file
         if rotor is not None:
             path = rotor.write(os.path.join(folder, rotor_file))
-            written.append(path)
-            print("  " + Colour.green(f"rotor   -> {path}"))
+            written += [path, project_path(path)]
+            print("  " + Colour.green(f"rotor   -> {path}  (and {os.path.basename(project_path(path))}: its design rules)"))
         path = write_record(folder, written)
         if silk is not None:
             append_silkscreen(path, silk)
@@ -220,6 +222,7 @@ def write_files(make_folder, stator, rotor, stator_file, rotor_file, add_silkscr
 def success(written, folder, all_warn):
     """Print the SUCCESS line: the files written and the number of warnings.  Returns the exit code, 0."""
     print()
-    print(Colour.green(f"SUCCESS: {len(written)} board file(s) + {RECORD_FILE} written to {folder}")
+    names = [os.path.basename(p) for p in written]
+    print(Colour.green(f"SUCCESS: {', '.join(names)} and {RECORD_FILE} written to {folder}")
           + (Colour.yellow(f"  ({all_warn} warning(s) above)") if all_warn else ""))
     return 0

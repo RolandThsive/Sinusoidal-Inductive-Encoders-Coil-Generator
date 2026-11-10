@@ -13,6 +13,7 @@ A relative OUTPUT_DIR is taken from the "Dual Generator" folder, not from the fo
 
 Inside the folder:
     Stator.kicad_pcb, Rotor.kicad_pcb   (STATOR_FILE / ROTOR_FILE)
+    Stator.kicad_pro, Rotor.kicad_pro   the KiCad project file of each board: its design rules (PCBWriter.py)
     Parameters.txt                      what was generated, with which values: the layout combination and every
                                         value the generator computed (bands, edges, gap, zeros), the summaries
                                         and the electrical estimate of each set, the value of every parameter

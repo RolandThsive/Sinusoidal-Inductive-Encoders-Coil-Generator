@@ -1,7 +1,7 @@
 DUAL COIL GENERATION RECORD
 ===========================
 
-files       Stator.kicad_pcb, Rotor.kicad_pcb
+files       Stator.kicad_pcb, Stator.kicad_pro, Rotor.kicad_pcb, Rotor.kicad_pro
 name        DualCoil_8.5_29.5_1x4_3x3  = DualCoil_<bore radius>_<outline radius>_<set 1 loops>x<set 2 loops>_<set 1 TX turns>x<set 2 TX turns>
 set 1       turned by 315.00 deg so that its TX ends sit at 90 deg; its RX pattern's zero is at 315.00 deg
 set 2       turned by 236.25 deg so that its TX ends sit at 270 deg; its RX pattern's zero is at 236.25 deg

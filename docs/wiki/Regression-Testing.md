@@ -37,13 +37,13 @@ regression/
 ├── SingleGenerator_regression/
 │   ├── README.md                 What each test checks, and the table of the boards
 │   ├── tests/                    The test files
-│   ├── Board001-default/          The six parameter files, Stator.kicad_pcb, Rotor.kicad_pcb, Parameters.txt
+│   ├── Board001-default/          The six parameter files, the two boards and their .kicad_pro, Parameters.txt
 │   ├── Board002-loops-4-subcoils-2/
 │   └── ...
 └── DualGenerator_regression/
     ├── README.md
     ├── tests/
-    ├── Board001-default/          The ten Dual_..._Parameters.py files and the same three written files
+    ├── Board001-default/          The ten Dual_..._Parameters.py files and the same five written files
     └── ...
 ```
 
@@ -51,9 +51,10 @@ Each board folder is named `BoardNNN-<what it tests>`. Its parameter files are a
 with the board's values, so a board can be read, copied into the generator's `Parameters` folder and run by hand.
 Each suite's README has a table of its boards with the values each one sets differently from `Board001-default`.
 
-Every board is written again from its own parameter files, and the three files that come out must equal the ones in
+Every board is written again from its own parameter files, and the five files that come out must equal the ones in
 its folder character for character: `Stator.kicad_pcb` and `Rotor.kicad_pcb` (plain text, so KiCad opens them as they
-are) and `Parameters.txt` (without the lines that change with every run: the time, the folder, the command and the verbatim
+are), their project files `Stator.kicad_pro` and `Rotor.kicad_pro` (the design rules KiCad checks them against) and
+`Parameters.txt` (without the lines that change with every run: the time, the folder, the command and the verbatim
 copies of the parameter files). The same boards are measured by the invariant tests, and opened by KiCad 7 to 10 in the
 CI. Every other test starts from the values of `Board001-default`, so the values in a generator's own `Parameters`
 folder, the ones you design with, never change a test.
@@ -84,7 +85,7 @@ Each suite has the same files in its `tests` folder:
 | File | Single Generator | Dual Generator |
 |---|---|---|
 | `test_checker.py` | One value of every kind set wrongly, missing and unknown names, inactive values left alone, the conflicts between values (vias, layers, nets, edges, fingers, rotor), the geometry that stops a run, strict mode. Each case states the return code and the lines the run must print | The 32 combinations of what the layout is given (builds or refused, with the radii it places), the layout's refusals, the names of each dual file, the values a set sets for itself, the dual rules (nets, frequencies, layers, rings), the Single Generator's own checks on each set, strict mode |
-| `test_boards.py` | Every board folder written again and compared with the files saved in it (stator, rotor, record), character for character; the run's output folder must hold exactly these three files and the two [output pictures](Output-Pictures.md); every board folder must set exactly the generator's parameter names, hold nothing else and be in the README table | The same, for the dual boards |
+| `test_boards.py` | Every board folder written again and compared with the files saved in it (stator, rotor, their project files, record), character for character; the run's output folder must hold exactly these three files and the two [output pictures](Output-Pictures.md); every board folder must set exactly the generator's parameter names, hold nothing else and be in the README table | The same, for the dual boards |
 | `test_invariants.py` | What every written board must obey: the file format, the layer table, the nets, copper inside the edges with the right widths, the clearance between nets, closed RX coils, the TX in one piece with its terminal at 0°, the rotor sectors, the record; the same values written twice are identical | The same for a dual board, each set with its own values (layers, fingers, vias, clearance): six nets, set 1 inside set 2 by the recorded gap, the TX ends at `TERMINAL_1_DEG` / `TERMINAL_2_DEG`, the two rotor rings |
 | `test_silkscreen.py` | The lead-cutting silkscreen: three suggestions on both sides, via sites with room, lettering off the vias and mirrored on the bottom, the settings with their fallbacks, the font, the name placer, a board KiCad saved again, a missing KiCad reader | Six suggestions, names with the set number, breaks near each set's terminal, sides and labels options |
 | `test_cli.py` | The generator started as a script in a fresh Python process, from its folder and from elsewhere, with `--check`, `--help` and a bad option | The same, plus the checker on its own and the promise that a dual run leaves no `__pycache__` in the Single Generator |

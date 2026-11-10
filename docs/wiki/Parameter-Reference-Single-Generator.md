@@ -19,7 +19,7 @@ under construction on the [`analyser_and_optimizer` branch](https://github.com/R
 | Name | Default | Range | Meaning |
 |---|---|---|---|
 | `OUTPUT_DIR` | `"Output"` | text | Folder in which each run's `Coil_...` folder is made. A relative path is taken from the `Single Generator` folder; a full path is used as it is. |
-| `STATOR_FILE`, `ROTOR_FILE` | `Stator.kicad_pcb`, `Rotor.kicad_pcb` | file names | Names of the two boards inside each run folder. They must differ and should end in `.kicad_pcb`. |
+| `STATOR_FILE`, `ROTOR_FILE` | `Stator.kicad_pcb`, `Rotor.kicad_pcb` | file names | Names of the two boards inside each run folder. They must differ, also without the extension (each board gets a KiCad project file of its own name, ending in `.kicad_pro`, with its design rules), and should end in `.kicad_pcb`. |
 | `GENERATOR_MODE` | `"normal"` | `normal`, `strict` | What a warning about the finished boards does (a clearance, the board edge, the page, the rotor). `normal`: such a warning, for example a gap smaller than `MIN_CLEARANCE_MM`, is printed and the boards are written. `strict`: every such warning is an error and nothing is written. Warnings from the parameter check and from the electrical estimate never stop the run. Copper that overlaps copper of another net (a short) is always an error. Capitals do not matter. |
 | `CENTER_X_MM`, `CENTER_Y_MM` | 100, 100 | number | Position of the sensor axis on the KiCad page. |
 | `PAGE_SIZE_MM` | (200, 200) | pair | Smallest KiCad "User" page size. The generator grows it to the right and down so that the board stays clear of the drawing frame and the title block. A board too close to the top or left edge is only warned about: raise `CENTER_X_MM` / `CENTER_Y_MM`. |

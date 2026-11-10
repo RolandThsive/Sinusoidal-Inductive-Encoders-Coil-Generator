@@ -1,8 +1,9 @@
 """
 test_boards.py  -  the test boards.  Each folder BoardNNN-<what it tests> next to this tests folder holds a complete
-set of the Dual Generator's parameter files and the files the generator wrote from them: Stator.kicad_pcb,
-Rotor.kicad_pcb and Parameters.txt (without the lines that change with every run).  Every board is written again
-from its own parameter files, and each of the three files must equal the copy in the folder character for character.
+set of the Dual Generator's parameter files and the files the generator wrote from them: Stator.kicad_pcb and
+Rotor.kicad_pcb, their project files Stator.kicad_pro and Rotor.kicad_pro, and Parameters.txt (without the lines that
+change with every run).  Every board is written again from its own parameter files, and each of the five files must
+equal the copy in the folder character for character.
 
 Also checked: every board folder sets exactly the names that the generator's own parameter files set (a parameter
 added to the generator has to be added to every board: python regression/boards.py sync), holds nothing else, and
@@ -23,7 +24,8 @@ PICTURES = ("_Representative.svg", "_Actual.svg")   # resources/RepresentativeSV
 
 
 class BoardReferences(unittest.TestCase):
-    """One test per board and file: test_Board007-custom-rotor__Stator and so on."""
+    """One test per board and file: test_Board007-custom-rotor__Stator, test_Board007-custom-rotor__Stator_project
+    (its Stator.kicad_pro) and so on."""
 
 
 def _make(board, file):
@@ -35,7 +37,9 @@ def _make(board, file):
 
 for _board in H.BOARDS:
     for _file in RH.OUTPUT_FILES:
-        setattr(BoardReferences, f"test_{_board}__{_file.split('.')[0]}", _make(_board, _file))
+        _stem, _ext = _file.split(".")
+        setattr(BoardReferences, f"test_{_board}__{_stem}" + ("_project" if _ext == "kicad_pro" else ""),
+                _make(_board, _file))
 
 
 class BoardFolders(unittest.TestCase):
@@ -63,11 +67,12 @@ class BoardFolders(unittest.TestCase):
                 name = os.path.basename(res.folder)
                 self.assertEqual(sorted(os.listdir(res.folder)),
                                  sorted(RH.OUTPUT_FILES + tuple(name + s for s in PICTURES)))
-                self.assertTrue(res.has(r"SUCCESS: 2 board file\(s\) \+ Parameters\.txt written"), res.out[-400:])
+                self.assertTrue(res.has(r"SUCCESS: Stator\.kicad_pcb, Stator\.kicad_pro, Rotor\.kicad_pcb, Rotor\.kicad_pro and "
+                                         r"Parameters\.txt written"), res.out[-400:])
                 self.assertEqual(res.made, [os.path.basename(res.folder)], "exactly one folder per run")
 
     def test_board_folders_are_complete(self):
-        """Each board folder: every parameter file, with exactly the names the generator's own file sets, the three
+        """Each board folder: every parameter file, with exactly the names the generator's own file sets, the five
         written files, and nothing else."""
         self.assertTrue(H.S.boards(every=True), "no board folders")
         for case in H.S.boards(every=True):

@@ -395,7 +395,10 @@ def single_value_warnings(v, rep):
         rep.warn(f"RX_TAB_WIDTH_MM = {v['RX_TAB_WIDTH_MM']:g}: narrower than about 0.6 mm is hard to etch")
     if has("STATOR_FILE", "ROTOR_FILE"):
         for nm in ("STATOR_FILE", "ROTOR_FILE"):
-            if not v[nm].lower().endswith(".kicad_pcb"):
+            if v[nm].lower().endswith(".kicad_pro"):
+                rep.error(f"{nm} = {v[nm]!r} is the name of a KiCad project file: the board's own project file (its "
+                          f"design rules) is written next to it under that name", (nm,))
+            elif not v[nm].lower().endswith(".kicad_pcb"):
                 rep.warn(f"{nm} = {v[nm]!r} does not end in .kicad_pcb; KiCad will not offer to open it")
     if has("OUTPUT_DIR"):
         from Generator.Run import OutputFolders

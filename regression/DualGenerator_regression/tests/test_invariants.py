@@ -429,7 +429,7 @@ class Record(unittest.TestCase):
                     self.assertIn(s, rec, s)
                 for f in self.FILES:
                     self.assertIn(f"########## {f} ", rec, f)
-                self.assertIn("files       Stator.kicad_pcb, Rotor.kicad_pcb", rec)
+                self.assertIn("files       Stator.kicad_pcb, Stator.kicad_pro, Rotor.kicad_pcb, Rotor.kicad_pro", rec)
                 for name, value in H.board_values(case).items():
                     module, attr = name.split(".")
                     if module == "SILK" or value is H.DELETE:
@@ -466,12 +466,12 @@ class Determinism(unittest.TestCase):
         s = H.write(H.BASE, args=["--stator", "--no-color"], subdir="stator_only")
         r = H.write(H.BASE, args=["--rotor", "--no-color"], subdir="rotor_only")
         self.assertEqual((s.rc, r.rc), (0, 0))
-        self.assertEqual(sorted(os.listdir(s.folder)), ["Parameters.txt", "Stator.kicad_pcb"])
-        self.assertEqual(sorted(os.listdir(r.folder)), ["Parameters.txt", "Rotor.kicad_pcb"])
+        self.assertEqual(sorted(os.listdir(s.folder)), ["Parameters.txt", "Stator.kicad_pcb", "Stator.kicad_pro"])
+        self.assertEqual(sorted(os.listdir(r.folder)), ["Parameters.txt", "Rotor.kicad_pcb", "Rotor.kicad_pro"])
         full = H.board("Board002-layout-32-fitted-bands")
         self.assertEqual(s.text("Stator.kicad_pcb"), full.text("Stator.kicad_pcb"))
         self.assertEqual(r.text("Rotor.kicad_pcb"), full.text("Rotor.kicad_pcb"))
-        self.assertTrue(s.has(r"SUCCESS: 1 board file\(s\)"))
+        self.assertTrue(s.has(r"SUCCESS: Stator\.kicad_pcb, Stator\.kicad_pro and Parameters\.txt written"))
 
 
 if __name__ == "__main__":

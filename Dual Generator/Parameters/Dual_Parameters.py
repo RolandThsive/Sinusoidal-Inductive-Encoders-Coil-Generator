@@ -30,7 +30,7 @@ The Single Generator itself is not changed in any way.
 Run, from the "Dual Generator" folder:
     python Dual_Generator/Run/Dual_RunCoilGenerator.py
         ->  Output/DualCoil_<bore r>_<outline r>_<set 1 loops>x<set 2 loops>_<set 1 TX turns>x<set 2 TX turns>/
-            Stator.kicad_pcb, Rotor.kicad_pcb, Parameters.txt
+            Stator.kicad_pcb, Rotor.kicad_pcb (with their project files .kicad_pro), Parameters.txt
 """
 
 from Dual_Board_Parameters import *          # noqa: F401,F403   (the board: its names at the top level)

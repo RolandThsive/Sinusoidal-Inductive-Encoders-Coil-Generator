@@ -119,7 +119,7 @@ class Stator:
         self.add_copper(board)
         board.circle((self.cx, self.cy), self.inner_edge_radius, "Edge.Cuts", P.EDGE_LINE_WIDTH_MM)
         board.circle((self.cx, self.cy), self.outer_edge_radius, "Edge.Cuts", P.EDGE_LINE_WIDTH_MM)
-        board.save(path)
+        board.save(path, P.MIN_CLEARANCE_MM)
         return path
 
     def nets(self):

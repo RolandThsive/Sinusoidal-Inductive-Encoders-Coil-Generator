@@ -38,7 +38,7 @@ Generator's own, so a parameter the Single Generator gains is a dual parameter a
 | Name | Default | Meaning |
 |---|---|---|
 | `OUTPUT_DIR` | `"Output"` | Folder in which each run's `DualCoil_...` folder is made. A relative path is taken from the `Dual Generator` folder; a full path is used as it is. The folder is `DualCoil_<bore radius>_<outline radius>_<set 1 loops>x<set 2 loops>_<set 1 TX turns>x<set 2 TX turns>`, with `__1`, `__2`, ... added if it exists |
-| `STATOR_FILE`, `ROTOR_FILE` | `Stator.kicad_pcb`, `Rotor.kicad_pcb` | Names of the two boards inside each run folder |
+| `STATOR_FILE`, `ROTOR_FILE` | `Stator.kicad_pcb`, `Rotor.kicad_pcb` | Names of the two boards inside each run folder; each gets a KiCad project file of its own name (`.kicad_pro`) with its design rules |
 | `GENERATOR_MODE` | `"normal"` | `"normal"`: a clearance warning on the finished boards is printed and the boards are written. `"strict"`: every such warning is an error. A short, and copper of one set inside the other set's ring, are always errors |
 | `CENTER_X_MM`, `CENTER_Y_MM` | 100, 100 | Sensor axis position on the KiCad page |
 | `PAGE_SIZE_MM` | (150, 150) | Smallest KiCad "User" page size; grown as needed |

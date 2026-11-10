@@ -173,11 +173,37 @@ class Writer(unittest.TestCase):
     def test_save_uses_lf(self):
         b = KiCadBoard()
         p = os.path.join(tempfile.mkdtemp(dir=H.temp_root()), "x.kicad_pcb")
-        b.save(p)
-        with open(p, "rb") as fh:
-            raw = fh.read()
-        self.assertNotIn(b"\r", raw)
-        self.assertEqual(raw.decode(), b.text())
+        b.save(p, 0.2)
+        for path, want in ((p, b.text()), (p[:-len(".kicad_pcb")] + ".kicad_pro", b.project(p, 0.2))):
+            with open(path, "rb") as fh:
+                raw = fh.read()
+            self.assertNotIn(b"\r", raw)
+            self.assertEqual(raw.decode(), want)
+
+    def test_project_file_holds_the_boards_own_rules(self):
+        """The .kicad_pro next to a board: MIN_CLEARANCE_MM, and the smallest track, via and drill on the board, as
+        the board's minimum and as the Default net class (KiCad's DRC checks against these, not its defaults)."""
+        import json
+        from Generator.Core.PCBWriter import project_path
+        self.assertEqual(project_path(os.path.join("out", "Stator.kicad_pcb")), os.path.join("out", "Stator.kicad_pro"))
+        self.assertEqual(project_path("Rotor.pcb"), "Rotor.kicad_pro")
+        b = KiCadBoard()
+        b.segment((0, 0), (1, 0), 0.2, "F.Cu", "1")
+        b.segment((0, 0), (0, 1), 0.15000000001, "B.Cu", "2")
+        b.via((1, 1), 0.6, 0.3, "1")
+        b.via((2, 2), 0.45, 0.2, "2", layers=("F.Cu", "In1.Cu"), blind=True)
+        b.circle((0, 0), 5, "Edge.Cuts", 0.05)                                  # not copper: no rule
+        rules = {"min_clearance": 0.15, "min_track_width": 0.15, "min_via_diameter": 0.45,
+                 "min_through_hole_diameter": 0.2}
+        self.assertEqual(json.loads(b.project(os.path.join("out", "Stator.kicad_pcb"), 0.15)), {
+            "board": {"design_settings": {"rules": rules}},
+            "meta": {"filename": "Stator.kicad_pro", "version": 1},
+            "net_settings": {"classes": [{"name": "Default", "clearance": 0.15, "track_width": 0.15,
+                                          "via_diameter": 0.45, "via_drill": 0.2}], "meta": {"version": 3}}})
+        rotor = KiCadBoard()
+        rotor.polygon([(0, 0), (1, 0), (0, 1)], "F.Cu")
+        self.assertEqual(json.loads(rotor.project("Rotor.kicad_pcb", 0.2))["net_settings"]["classes"],
+                         [{"name": "Default", "clearance": 0.2}], "no tracks, no vias: KiCad's defaults for them")
 
     def test_page_grows_for_large_boards(self):
         H.restore()

@@ -28,7 +28,8 @@ python -m pip install -r requirements.txt
    python Generator/Run/RunCoilGenerator.py
    ```
 
-4. Open `Stator.kicad_pcb` and `Rotor.kicad_pcb` from the new folder in `Single Generator/Output/` with KiCad 7, 8, 9 or 10. See
+4. Open `Stator.kicad_pcb` and `Rotor.kicad_pcb` from the new folder in `Single Generator/Output/` with KiCad 7, 8, 9 or 10.
+   KiCad reads each board's design rules from the project file next to it (`Stator.kicad_pro`, `Rotor.kicad_pro`). See
    [KiCad Compatibility](KiCad-Compatibility.md).
 
 ## 3.3 All Commands

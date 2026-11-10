@@ -1,7 +1,7 @@
 COIL GENERATION RECORD
 ======================
 
-files       Stator.kicad_pcb, Rotor.kicad_pcb
+files       Stator.kicad_pcb, Stator.kicad_pro, Rotor.kicad_pcb, Rotor.kicad_pro
 name        Coil_15_27_2_1_3_Series_SteppedDiagonal  = Coil_<board inside radius>_<board outside radius>_<RX loops>_<RX sub-coils>_<TX turns>_<TX wiring>_<TX shape>
 rotation    292.50 deg: the board is turned by this so that the TX terminal sits at 0 deg (the right); the RX pattern's zero is at this angle
 

@@ -19,7 +19,7 @@ passed.  [../README.md](../README.md) explains the board folders and how to add 
 | file | what it tests |
 |---|---|
 | `tests/test_checker.py` | one value of every kind set wrongly, missing and unknown names, inactive values left alone, the conflicts between values (vias, layers, nets, edges, fingers, rotor), the geometry that stops a run, strict mode; each case says the return code and the lines the run must print |
-| `tests/test_boards.py` | every board folder written again from its own parameter files and compared with the files kept in it (stator, rotor, record), character for character; every board folder complete (the generator's parameter names, the three files, nothing else) and listed below |
+| `tests/test_boards.py` | every board folder written again from its own parameter files and compared with the files kept in it (stator, rotor, their project files, record), character for character; every board folder complete (the generator's parameter names, the three files, nothing else) and listed below |
 | `tests/test_invariants.py` | what must hold for every board: the file format, the layer table, the nets, copper inside the edges with the right widths, the clearance between nets, closed RX coils, the TX in one piece with its terminal at 0 deg, the rotor sectors (count, angle, radii, mask, edges), the record with every value as used; the same values written twice are identical; --stator and --rotor |
 | `tests/test_silkscreen.py` | the lead-cutting silkscreen: three suggestions on both sides, via sites with room, lettering off the vias and mirrored on the bottom, the settings with their fallbacks, the font, the name placer, a board KiCad saved again, a missing KiCad reader |
 | `tests/test_units.py` | the folder names, the OUTPUT_DIR rule, the KiCad writer, the report and colour classes, the parameter helpers, the geometry helpers (checked against the suite's own), and the hooks the Dual Generator builds on (a stator turned to any terminal angle, its copper on a shared board, the rotor's start offset), and the shared files of `resources/`: the picture makers, and the KiCad reader (every reference board read as the test parser reads it, Board047 as KiCad 7 and KiCad 10 saved it again, a board with one via of each kind; the files are in `tests/kicad_files/`) |
@@ -46,7 +46,7 @@ The suite cannot notice a feature that arrived without a test: that part is the 
 
 ## The boards
 
-Each board folder holds the six parameter files and the three files the generator wrote from them.  The table
+Each board folder holds the six parameter files and the five files the generator wrote from them.  The table
 lists what each board sets differently from Board001-default.
 
 <!-- board table: written by `python regression/boards.py table`, do not edit by hand -->

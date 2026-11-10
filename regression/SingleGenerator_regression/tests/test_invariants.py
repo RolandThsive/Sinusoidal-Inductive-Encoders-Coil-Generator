@@ -343,7 +343,7 @@ class Record(unittest.TestCase):
                 rec = res.record
                 for s in self.SECTIONS:
                     self.assertIn(s, rec)
-                self.assertIn("files       Stator.kicad_pcb, Rotor.kicad_pcb", rec)
+                self.assertIn("files       Stator.kicad_pcb, Stator.kicad_pro, Rotor.kicad_pcb, Rotor.kicad_pro", rec)
                 self.assertIn(f"folder      {res.folder}", rec)
                 for name, value in H.board_values(case).items():
                     if "." in name or value is H.DELETE:
@@ -400,14 +400,14 @@ class Determinism(unittest.TestCase):
         r = H.write({}, args=["--rotor", "--no-color"], subdir="rotor_only")
         self.assertEqual((s.rc, r.rc), (0, 0))
         import os
-        self.assertEqual(sorted(os.listdir(s.folder)), ["Parameters.txt", "Stator.kicad_pcb"])
-        self.assertEqual(sorted(os.listdir(r.folder)), ["Parameters.txt", "Rotor.kicad_pcb"])
+        self.assertEqual(sorted(os.listdir(s.folder)), ["Parameters.txt", "Stator.kicad_pcb", "Stator.kicad_pro"])
+        self.assertEqual(sorted(os.listdir(r.folder)), ["Parameters.txt", "Rotor.kicad_pcb", "Rotor.kicad_pro"])
         full = H.board("Board001-default")
         self.assertEqual(s.text("Stator.kicad_pcb"), full.text("Stator.kicad_pcb"), "--stator writes the same stator")
         self.assertEqual(r.text("Rotor.kicad_pcb"), full.text("Rotor.kicad_pcb"), "--rotor writes the same rotor")
-        self.assertIn("files       Stator.kicad_pcb\n", s.record)
-        self.assertIn("files       Rotor.kicad_pcb\n", r.record)
-        self.assertTrue(s.has(r"SUCCESS: 1 board file\(s\)"))
+        self.assertIn("files       Stator.kicad_pcb, Stator.kicad_pro\n", s.record)
+        self.assertIn("files       Rotor.kicad_pcb, Rotor.kicad_pro\n", r.record)
+        self.assertTrue(s.has(r"SUCCESS: Stator\.kicad_pcb, Stator\.kicad_pro and Parameters\.txt written"))
 
 
 if __name__ == "__main__":

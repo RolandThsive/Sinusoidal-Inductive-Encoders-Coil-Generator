@@ -30,7 +30,8 @@ Steps (the chain: every step reads only what the steps before it made)
          Coil_<board inside radius>_<board outside radius>_<RX loops>_<RX sub-coils>_<TX turns>_<TX wiring>_<TX shape>
      e.g. Coil_15_27_1_1_3_Single_SteppedDiagonal (TX wiring: Single, Series or Parallel; TX shape:
      SteppedDiagonal, SteppedArc or Spiral), with __1, __2, ... added when that name exists already, and writes Stator.kicad_pcb,
-     Rotor.kicad_pcb and Parameters.txt (every value used, the summaries, the electrical estimate
+     Rotor.kicad_pcb (each with its KiCad project file, Stator.kicad_pro / Rotor.kicad_pro: the board's design
+     rules) and Parameters.txt (every value used, the summaries, the electrical estimate
      and copies of the parameter files) into it.  Nothing is ever overwritten.
      Last, LeadCutting_SilkscreenSuggestion.py draws the suggestion for cutting the leads (where to break each RX
      coil, where the TX ends get their vias) on the silkscreen of the written stator file and adds it to the record.

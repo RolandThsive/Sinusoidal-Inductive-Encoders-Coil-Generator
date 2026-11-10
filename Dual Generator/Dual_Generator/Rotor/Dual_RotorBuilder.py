@@ -91,7 +91,7 @@ class DualRotor:
             board.circle((self.cx, self.cy), self.bore, "Edge.Cuts", B.EDGE_LINE_WIDTH_MM)
         if self.outline is not None:
             board.circle((self.cx, self.cy), self.outline, "Edge.Cuts", B.EDGE_LINE_WIDTH_MM)
-        board.save(path)
+        board.save(path, B.MIN_CLEARANCE_MM)
         return path
 
     def summary(self):

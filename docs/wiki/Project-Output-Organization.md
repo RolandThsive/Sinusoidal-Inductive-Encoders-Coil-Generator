@@ -29,7 +29,9 @@ Single Generator/
 └── Output/
     └── Coil_<Inner Radius>_<Outer Radius>_<Loops>_<Sub-Coils>_<TX Turns>_<Single|Series|Parallel>_<SteppedDiagonal|SteppedArc|Spiral>/
         ├── Stator.kicad_pcb
+        ├── Stator.kicad_pro               The stator's design rules for KiCad (clearance, track, via, drill)
         ├── Rotor.kicad_pcb
+        ├── Rotor.kicad_pro                The rotor's design rules
         ├── Parameters.txt
         ├── <Folder Name>_Representative.svg   The boards as a picture to look at
         └── <Folder Name>_Actual.svg           The copper 1:1 in mm, one Inkscape layer per copper layer
@@ -52,7 +54,9 @@ Dual Generator/
 └── Output/
     └── DualCoil_<Bore Radius>_<Outline Radius>_<Set 1 Loops>x<Set 2 Loops>_<Set 1 TX Turns>x<Set 2 TX Turns>/
         ├── Stator.kicad_pcb
+        ├── Stator.kicad_pro               The stator's design rules for KiCad (clearance, track, via, drill)
         ├── Rotor.kicad_pcb
+        ├── Rotor.kicad_pro                The rotor's design rules
         ├── Parameters.txt
         ├── <Folder Name>_Representative.svg   The boards as a picture to look at
         └── <Folder Name>_Actual.svg           The copper 1:1 in mm, one Inkscape layer per copper layer
@@ -79,7 +83,7 @@ and leaves no `__pycache__` there.
 Its folder name carries the radii, the loops of both sets and the TX turns of both sets, for example
 `DualCoil_7.25_26.875_1x16_4x4`.
 
-The Single Generator's folder name carries the board radii, the RX loops and sub-coils, the TX turns, the TX wiring and the TX shape, for example `Coil_15_27_1_1_3_Single_SteppedDiagonal`. A run never overwrites anything: if a folder name already exists, `__1`, `__2` and so on are added. `Parameters.txt` lists every value used, marks the parameters that this design does not use, and records the angle the board was turned by to put the TX terminal at 0°. The two SVG pictures are drawn from the written boards at the end of the run; see [Output Pictures](Output-Pictures.md).
+The Single Generator's folder name carries the board radii, the RX loops and sub-coils, the TX turns, the TX wiring and the TX shape, for example `Coil_15_27_1_1_3_Single_SteppedDiagonal`. A run never overwrites anything: if a folder name already exists, `__1`, `__2` and so on are added. `Parameters.txt` lists every value used, marks the parameters that this design does not use, and records the angle the board was turned by to put the TX terminal at 0°. Each board's `.kicad_pro` holds the design rules KiCad checks it against: `MIN_CLEARANCE_MM` and the smallest track, via and drill on the board; see [KiCad Compatibility](KiCad-Compatibility.md). The two SVG pictures are drawn from the written boards at the end of the run; see [Output Pictures](Output-Pictures.md).
 
 The analyser and optimizer (`Analyser_And_Optimizer/` and `OptimizerParameters.py`) are not on main. They are under construction on the [`analyser_and_optimizer` branch](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/tree/analyser_and_optimizer).
 

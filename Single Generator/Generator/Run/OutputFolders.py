@@ -23,6 +23,7 @@ from the folder the program is run from, so the boards always land in the same p
 
 Inside the folder:
     Stator.kicad_pcb, Rotor.kicad_pcb   (STATOR_FILE / ROTOR_FILE)
+    Stator.kicad_pro, Rotor.kicad_pro   the KiCad project file of each board: its design rules (PCBWriter.py)
     Parameters.txt                      what was generated, with which values: the value of every
                                         parameter, the summaries and the electrical estimate of
                                         this run, and a verbatim copy of the four parameter files

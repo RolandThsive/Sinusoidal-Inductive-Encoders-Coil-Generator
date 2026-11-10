@@ -20,7 +20,7 @@ passed.  [../README.md](../README.md) explains the board folders and how to add 
 | file | what it tests |
 |---|---|
 | `tests/test_checker.py` | the layout: every one of the 32 combinations of what is given (built with its radii, or refused with its message), the refusals a placed band can meet, a DUAL_MODE left in an old file; the names of each dual file, the values a set sets for itself, the dual rules (nets, frequencies, layers, rings), the Single Generator's own checks on each set, strict mode; each case says the return code and the lines the run must print |
-| `tests/test_boards.py` | every board folder written again from its own parameter files and compared with the files kept in it (stator, rotor, record), character for character; every board folder complete (the generator's parameter names, the three files, nothing else) and listed below |
+| `tests/test_boards.py` | every board folder written again from its own parameter files and compared with the files kept in it (stator, rotor, their project files, record), character for character; every board folder complete (the generator's parameter names, the three files, nothing else) and listed below |
 | `tests/test_invariants.py` | what must hold for every dual board: the file format, the layers of PCB_LAYERS, six nets, copper inside the edges on the layers each set asked for (RX, fingers, TX turns and tail), each set's via size, drill and type, the clearance between nets (each set's own), set 1 inside set 2 by the recorded gap, closed RX coils, TX terminals at TERMINAL_1_DEG / TERMINAL_2_DEG, the two rotor rings, the record with every value as used; the same values written twice are identical |
 | `tests/test_silkscreen.py` | the lead-cutting silkscreen of both sets: six suggestions, names with the set number, breaks near each set's terminal, via sites with room, lettering off the vias, sides and labels options |
 | `tests/test_units.py` | the set parameters handed to the Single Generator and the "set k:" findings, the layout (combination numbers, every combination built or refused, the hint for a fitted band, the wiki picture script's numbers and messages the same as the generator's), folder names, the Single's OUTPUT_DIR rule, the guard that the dual files supply every name the Single Generator knows, the KiCad reader of `resources/` on every dual reference board |
@@ -47,7 +47,7 @@ The suite cannot notice a feature that arrived without a test: that part is the 
 
 ## The boards
 
-Each board folder holds the ten parameter files and the three files the generator wrote from them.  The
+Each board folder holds the ten parameter files and the five files the generator wrote from them.  The
 table lists what each board sets differently from Board001-default (a name starts with its file: BOARD., RX1., TX2.,
 ROTOR1., SILK. and so on).
 

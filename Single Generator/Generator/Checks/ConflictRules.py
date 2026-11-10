@@ -14,6 +14,7 @@ DesignChecks.py.  Nothing to edit here.
 """
 
 import math
+import os
 import types
 
 from Generator.Core import BoardLayout, Layers
@@ -571,6 +572,10 @@ def _file_rules(c):
         if v["STATOR_FILE"] == v["ROTOR_FILE"]:
             rep.conflict(("STATOR_FILE", "ROTOR_FILE"), "both boards have the same file name: the rotor would overwrite "
                                                         "the stator")
+        elif os.path.splitext(v["STATOR_FILE"])[0] == os.path.splitext(v["ROTOR_FILE"])[0]:
+            rep.conflict(("STATOR_FILE", "ROTOR_FILE"), "both boards have the same name before the extension, so they "
+                                                        "would share one KiCad project file (the design rules written "
+                                                        "next to each board): the rotor's would overwrite the stator's")
 
 
 def _rotor_duty_rules(c):

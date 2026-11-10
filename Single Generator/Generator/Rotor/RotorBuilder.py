@@ -456,7 +456,7 @@ class RotorDesign:
             board.circle((self.cx, self.cy), self.bore_radius, "Edge.Cuts", P.EDGE_LINE_WIDTH_MM)
         if self.outline_radius is not None:
             board.circle((self.cx, self.cy), self.outline_radius, "Edge.Cuts", P.EDGE_LINE_WIDTH_MM)
-        board.save(path)
+        board.save(path, P.MIN_CLEARANCE_MM)
         return path
 
     def add_copper(self, board):

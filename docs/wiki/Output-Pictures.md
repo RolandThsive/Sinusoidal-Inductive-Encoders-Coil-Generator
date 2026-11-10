@@ -1,7 +1,7 @@
 # 27. Output Pictures
 
 Every run that writes both boards also draws two SVG pictures of them into the same output folder, next to
-`Stator.kicad_pcb`, `Rotor.kicad_pcb` and `Parameters.txt`:
+`Stator.kicad_pcb`, `Rotor.kicad_pcb`, their project files and `Parameters.txt`:
 
 - `<folder name>_Representative.svg`: a picture of the board for people, with a title, a legend and the layers made
   easy to tell apart.

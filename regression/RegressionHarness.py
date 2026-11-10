@@ -17,7 +17,8 @@ from its file.
 
 The board folders.  Each test board is a folder BoardNNN-<what it tests> next to the suite's tests folder, holding a
 complete copy of the generator's parameter files with the board's own values, and the files the generator wrote from
-them: Stator.kicad_pcb, Rotor.kicad_pcb and Parameters.txt (without the lines that change with every run).
+them: Stator.kicad_pcb and Rotor.kicad_pcb, the KiCad project file of each (Stator.kicad_pro, Rotor.kicad_pro: the
+board's design rules) and Parameters.txt (without the lines that change with every run).
 
     suite.boards()                   {board name: folder}, in the order of their numbers
     suite.board_values(name)         the overrides that the board's parameter files amount to
@@ -44,8 +45,10 @@ REPO = os.path.dirname(HERE)
 DELETE = object()
 BOARD_FOLDER = re.compile(r"^Board(\d{3,})-[A-Za-z0-9][A-Za-z0-9_.+-]*$")
 RECORD = "Parameters.txt"
-OUTPUT_FILES = ("Stator.kicad_pcb", "Rotor.kicad_pcb", RECORD)        # what a run writes that a board folder keeps
-STORED_FILES = ("Stator.kicad_pcb", "Rotor.kicad_pcb", RECORD)  # ... as the board folder keeps them
+# what a run writes that a board folder keeps: each board with its KiCad project file (its design rules), the record
+OUTPUT_FILES = ("Stator.kicad_pcb", "Stator.kicad_pro", "Rotor.kicad_pcb", "Rotor.kicad_pro", RECORD)
+# what KiCad writes next to a board it opened (its window settings, a lock, backups); never committed (.gitignore)
+KICAD_LOCAL_FILES = re.compile(r"(\.kicad_prl|\.lck|-backups|fp-info-cache)$|^_autosave-")
 TABLE_START = "<!-- board table: written by `python regression/boards.py table`, do not edit by hand -->"
 TABLE_END = "<!-- end of board table -->"
 UPDATE_REFERENCES = os.environ.get("REGRESSION_UPDATE_REFERENCES") == "1"
@@ -388,11 +391,11 @@ def folder_problems(folder, files, parameters_dir):
         if extra:
             problems.append(f"{f} sets {', '.join(extra)}, which the generator's own {f} does not; "
                             f"python regression/boards.py sync removes them")
-    for f in STORED_FILES:
+    for f in OUTPUT_FILES:
         if not os.path.isfile(os.path.join(folder, f)):
             problems.append(f"{f} is missing (run_regression.py --update-references --board "
                             f"{os.path.basename(folder)} writes it)")
-    stray = sorted(set(os.listdir(folder)) - set(files) - set(STORED_FILES))
+    stray = sorted(f for f in set(os.listdir(folder)) - set(files) - set(OUTPUT_FILES) if not KICAD_LOCAL_FILES.search(f))
     if stray:
         problems.append(f"files that do not belong in a board folder: {', '.join(stray)}")
     return problems
