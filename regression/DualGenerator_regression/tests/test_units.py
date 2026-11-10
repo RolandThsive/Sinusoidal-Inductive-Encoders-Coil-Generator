@@ -5,6 +5,7 @@ few board values), the layout (the 32 combinations of what it is given), the out
 checks between the sets.  Fast, no board written.
 """
 
+import gzip
 import math
 import os
 import re
@@ -13,6 +14,8 @@ import types
 import unittest
 
 import harness as H
+import KiCadReader
+import RegressionTools as RT
 from Generator.Core.Conflict import ParameterConflict, Report
 from Generator.Stator import StatorAssembly
 from Dual_Generator.Checks import Dual_DesignChecks as DDC
@@ -391,6 +394,20 @@ class Assembler(unittest.TestCase):
         self.assertAlmostEqual(s1.rotation_deg, (180.0 - s1.tx.angle_deg) % 360.0, 12)
         self.assertIn("so that it sits at 180 deg", s1.summary(), "the set's own angle in its summary")
         self.assertEqual(StatorAssembly.TERMINAL_DEG, 0.0, "the Single Generator's angle is never changed")
+
+
+class KiCadReading(unittest.TestCase):
+    """resources/KiCadReader.py reads every Dual reference board as the test parser (RegressionTools.Board, which
+    shares no code with it) does.  Its other tests (boards KiCad saved again, every via kind) are in the Single suite's
+    test_units.py."""
+
+    def test_every_reference_board_reads_as_the_test_parser_reads_it(self):
+        for name, folder in H.S.boards().items():
+            for file in ("Stator.kicad_pcb.gz", "Rotor.kicad_pcb.gz"):
+                with self.subTest(board=name, file=file):
+                    with gzip.open(os.path.join(folder, file), "rt", encoding="utf-8", newline="") as fh:
+                        text = fh.read()
+                    self.assertEqual(RT.reader_differences(KiCadReader.read(text), RT.Board(text)), [])
 
 
 if __name__ == "__main__":

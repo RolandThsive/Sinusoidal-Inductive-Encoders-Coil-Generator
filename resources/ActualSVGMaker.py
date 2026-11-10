@@ -22,14 +22,18 @@ Edge_Cuts (only the layers the board has copper on).  The groups are Inkscape la
 one by one; a browser simply draws them.  The layers are stacked as on the board: B_Cu at the bottom, F_Cu on top.
 The rotor is moved to the right of the stator by a translation of its group; nothing inside it is changed.
 
-Needs only Python 3 (no third-party package).
+The board files are read by KiCadReader.py, next to this file.  Needs only Python 3 (no third-party package).
 """
 
 import argparse
 import math
 import os
-import re
 import sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+if HERE not in sys.path:                                   # KiCadReader.py lies next to this file
+    sys.path.insert(0, HERE)
+import KiCadReader  # noqa: E402
 
 LAYER_ID = {"F.Cu": "F_Cu", "In1.Cu": "Inner_1", "In2.Cu": "Inner_2", "B.Cu": "B_Cu"}
 STACK = ("F.Cu", "In1.Cu", "In2.Cu", "B.Cu")              # top to bottom
@@ -38,37 +42,22 @@ EDGE_COLOUR = "#555555"
 GAP_MM = 5.0                                               # between the stator's and the rotor's outline
 MARGIN_MM = 1.0                                            # around both
 
-N = r"(-?[\d.]+)"
-SEG = re.compile(rf'\(segment \(start {N} {N}\) \(end {N} {N}\) \(width {N}\) \(layer "([^"]+)"\)')
-VIA = re.compile(rf'\(via (?:blind |micro )?\(at {N} {N}\) \(size {N}\) \(drill {N}\) \(layers "([^"]+)" "([^"]+)"\)')
-POLY = re.compile(r'\(gr_poly \(pts ((?:\(xy -?[\d.]+ -?[\d.]+\) ?)+)\)(.*?)\(layer "([^"]+)"\)')
-XY = re.compile(rf'\(xy {N} {N}\)')
-CIRCLE = re.compile(rf'\(gr_circle \(center {N} {N}\) \(end {N} {N}\)(.*?)\(layer "([^"]+)"\)')
-WIDTH = re.compile(rf'\(width {N}\)')
-BOARD_LAYERS = re.compile(r'\(\d+ "((?:F|In\d+|B)\.Cu)" signal\)')
-NOT_DRAWN = re.compile(r'\((arc|zone|footprint) ')
-
 STATOR_FILE, ROTOR_FILE = "Stator.kicad_pcb", "Rotor.kicad_pcb"
 
 
 def read(path, edge_needed=True):
-    """The copper and the board edge of one KiCad file, with every number kept as the text in the file.  A stator always
-    has its Edge.Cuts circles; a rotor may have none (edge_needed=False)."""
-    with open(path, encoding="utf-8") as fh:
-        text = fh.read()
-    board = [l for l in STACK if l in set(BOARD_LAYERS.findall(text))] or list(STACK)
-    segs = SEG.findall(text)
-    vias = VIA.findall(text)
-    polys = [(XY.findall(pts), lay) for pts, _rest, lay in POLY.findall(text) if lay in LAYER_ID]
-    edges = []
-    for cx, cy, ex, ey, rest, lay in CIRCLE.findall(text):
-        if lay == "Edge.Cuts":
-            w = WIDTH.search(rest)
-            edges.append((cx, cy, math.hypot(float(ex) - float(cx), float(ey) - float(cy)), w.group(1) if w else "0.05"))
+    """The copper and the board edge of one KiCad file, read by KiCadReader.py, with every number kept as the text in
+    the file.  A stator always has its Edge.Cuts circles; a rotor may have none (edge_needed=False)."""
+    b = KiCadReader.read(path)
+    board = [l for l in STACK if l in b.copper_layers] or list(STACK)
+    segs = [(s.start[0], s.start[1], s.end[0], s.end[1], s.width, s.layer) for s in b.segments]
+    vias = [(v.at[0], v.at[1], v.size, v.drill, v.layers[0], v.layers[-1]) for v in b.vias]
+    polys = [(p.points, p.layer) for p in b.polygons if p.layer in LAYER_ID]
+    edges = [(c.center[0], c.center[1], c.radius, "0.05" if c.width is None else c.width)
+             for c in b.circles if c.layer == "Edge.Cuts"]
     if not edges and edge_needed:
         raise ValueError(f"no Edge.Cuts circle in {path}: is this a board the generator wrote?")
-    skipped = sorted({k for k in NOT_DRAWN.findall(text)})
-    return board, segs, vias, polys, edges, skipped
+    return board, segs, vias, polys, edges, b.skipped
 
 
 def via_layers(board, a, b):

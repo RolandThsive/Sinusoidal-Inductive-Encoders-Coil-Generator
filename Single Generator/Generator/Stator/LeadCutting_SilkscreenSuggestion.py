@@ -16,8 +16,10 @@ The names are drawn as strokes of the repository's own font (resources/Silkscree
 repository, loaded by its path), not as KiCad text, and each name is placed where it covers no other mark, no
 other name and no via, inside the board edges.  The marks go on F.SilkS and/or B.SilkS (bottom text mirrored).
 The settings are in Parameters/SilkScreenSuggestion_Parameters.py.  No copper is changed and nothing else in
-the generator is touched: the step reads the written file, appends the drawings before the closing bracket and writes it back.  It
-never fails a generation: anything it cannot do is printed as a warning and the file stays as it was.
+the generator is touched: the step reads the written file (with the repository's KiCad reader,
+resources/KiCadReader.py, loaded by its path like the font), appends the drawings before the closing bracket and
+writes it back.  It never fails a generation: anything it cannot do is printed as a warning and the file stays as
+it was.
 
     result = add_to_file(path, P)       path: the written Stator.kicad_pcb;  P: Parameters
     append_record(record_path, result)  adds the result to Parameters.txt
@@ -28,6 +30,7 @@ parameter file.  With the label "" (the Single Generator's one set) the names ca
 with a label k they do (SIN1_1, TX2_2) and every warning starts with "set k: ".
 """
 
+import functools
 import importlib
 import importlib.util
 import math
@@ -42,9 +45,26 @@ from Generator.Stator.StatorAssembly import TERMINAL_DEG
 PARAMETER_MODULE = "SilkScreenSuggestion_Parameters"
 PARAMETER_FILE = PARAMETER_MODULE + ".py"
 
-# the stroke font: resources/SilkscreenFont.py at the root of the repository (this file is four folders below it)
-FONT_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))),
-                         "resources", "SilkscreenFont.py")
+# the repository's shared files, loaded by their path: resources/ at the root of the repository (this file is four
+# folders below it) holds the stroke font and the KiCad board reader
+RESOURCES = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))),
+                         "resources")
+FONT_FILE = os.path.join(RESOURCES, "SilkscreenFont.py")
+READER_FILE = os.path.join(RESOURCES, "KiCadReader.py")
+
+
+def _load(name, path):
+    spec = importlib.util.spec_from_file_location(name, path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+@functools.cache
+def kicad_reader():
+    """resources/KiCadReader.py, loaded once.  When it is missing the suggestion fails with that reason, and the
+    generation goes on without it (add_to_file)."""
+    return _load("KiCadReader", READER_FILE)
 
 
 def load_font():
@@ -52,9 +72,7 @@ def load_font():
     if not os.path.isfile(FONT_FILE):
         return None, f"the font {FONT_FILE} was not found: the lead names are not drawn"
     try:
-        spec = importlib.util.spec_from_file_location("SilkscreenFont", FONT_FILE)
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
+        module = _load("SilkscreenFont", FONT_FILE)
         module.layout("A", 0.0, 0.0, 1.0)
         return module, None
     except Exception as e:
@@ -70,13 +88,6 @@ DEFAULTS = dict(
 
 LAYER_WORD = {"F.Cu": "Top", "In1.Cu": "In1", "In2.Cu": "In2", "B.Cu": "Bottom"}
 LABEL_WORD = {"F.Cu": "TOP", "In1.Cu": "IN1", "In2.Cu": "IN2", "B.Cu": "BOT"}   # on the silkscreen (capitals)
-
-_SEG = re.compile(r'\(segment \(start ([-\d.]+) ([-\d.]+)\) \(end ([-\d.]+) ([-\d.]+)\) \(width ([\d.]+)\) '
-                  r'\(layer "([^"]+)"\) \(net (\d+)\)\)')
-_VIA = re.compile(r'\(via (?:blind )?\(at ([-\d.]+) ([-\d.]+)\) \(size ([\d.]+)\) \(drill ([\d.]+)\) \(layers "[^"]+" "[^"]+"\) '
-                  r'\(net (\d+)\)\)')
-_NET = re.compile(r'\(net (\d+) "([^"]*)"\)')
-_EDGE = re.compile(r'\(gr_circle \(center ([-\d.]+) ([-\d.]+)\) \(end ([-\d.]+) ([-\d.]+)\) \(layer "Edge.Cuts"\)')
 
 
 # ====================================================================== settings
@@ -139,21 +150,23 @@ class Settings:
 
 # ====================================================================== the board as written
 class Board:
-    """The copper of the written stator file: segments (n, 5: x1 y1 x2 y2 width) with their layer and net, the vias,
-    the net names and the two Edge.Cuts circles.  B: the board values (CENTER_X_MM, VIA_DIAMETER_MM, ...)."""
+    """The copper of the written stator file, read by resources/KiCadReader.py: segments (n, 5: x1 y1 x2 y2 width) with
+    their layer and net, the vias, the net names and the two Edge.Cuts circles.  B: the board values (CENTER_X_MM,
+    VIA_DIAMETER_MM, ...)."""
 
     def __init__(self, text, B):
         self.cx, self.cy = float(B.CENTER_X_MM), float(B.CENTER_Y_MM)
-        self.net_name = {int(n): name for n, name in _NET.findall(text)}
+        board = kicad_reader().read(text)
+        self.net_name = dict(board.nets)
         self.net_id = {name: n for n, name in self.net_name.items()}
-        rows = _SEG.findall(text)
-        self.seg = np.array([[float(a), float(b), float(c), float(d), float(w)] for a, b, c, d, w, l, n in rows]).reshape(-1, 5)
-        self.layer = np.array([l for *_, l, n in rows])
-        self.net = np.array([int(n) for *_, n in rows])
-        via_rows = _VIA.findall(text)
-        self.vias = np.array([[float(x), float(y), float(s)] for x, y, s, _d, _n in via_rows]).reshape(-1, 3)
-        self.via_net = np.array([int(n) for *_, n in via_rows])
-        radii = sorted(math.hypot(float(ex) - float(x), float(ey) - float(y)) for x, y, ex, ey in _EDGE.findall(text))
+        segs = board.segments
+        self.seg = np.array([[float(s.start[0]), float(s.start[1]), float(s.end[0]), float(s.end[1]), float(s.width)]
+                             for s in segs]).reshape(-1, 5)
+        self.layer = np.array([s.layer for s in segs])
+        self.net = np.array([s.net for s in segs])
+        self.vias = np.array([[float(v.at[0]), float(v.at[1]), float(v.size)] for v in board.vias]).reshape(-1, 3)
+        self.via_net = np.array([v.net for v in board.vias])
+        radii = sorted(c.radius for c in board.circles if c.layer == "Edge.Cuts")
         self.bore = radii[0] if len(radii) >= 2 else None
         self.outline = radii[-1] if radii else None
         self.via_d = float(B.VIA_DIAMETER_MM)
@@ -457,6 +470,10 @@ def suggest(text, P, settings, font=None, sets=None):
     (None = the Single Generator's one set, single_set(P)).  Returns (new text or None, Result)."""
     res = Result()
     s = settings
+    stripped = text.rstrip()
+    if not stripped.endswith(")"):
+        res.warnings.append("the stator file does not end with the closing bracket of (kicad_pcb ...); nothing added")
+        return None, res
     board = Board(text, P)
     silk = Silk(s, s.SILKSCREEN_SIDES, font)
     need = board.clear
@@ -575,11 +592,7 @@ def suggest(text, P, settings, font=None, sets=None):
     res.lines.insert(0, f"  marks on {sides}, colour {s.SILKSCREEN_COLOR}, labels {'on' if s.SILKSCREEN_LABELS else 'off'}; "
                         f"a via of the suggestion keeps {need:g} mm from copper on every layer and "
                         f"{edge_clear:g} mm from the board edges")
-    end = text.rstrip()
-    if not end.endswith(")"):
-        res.warnings.append("the stator file does not end with the closing bracket of (kicad_pcb ...); nothing added")
-        return None, res
-    new = end[:-1].rstrip("\n") + "\n\n" + "\n".join(silk.items) + "\n)\n"
+    new = stripped[:-1].rstrip("\n") + "\n\n" + "\n".join(silk.items) + "\n)\n"
     res.done = True
     return new, res
 

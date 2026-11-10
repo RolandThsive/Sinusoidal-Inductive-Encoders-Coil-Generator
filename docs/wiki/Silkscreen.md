@@ -32,7 +32,8 @@ per dot. TX: extend each end along the dashed line to its dot.*
 
 ## 14.2 Where The Breaks Go
 
-The step reads the written board and looks for a spot on each coil where both vias have room on every layer:
+The step reads the written board (with `resources/KiCadReader.py`) and looks for a spot on each coil where both
+vias have room on every layer:
 
 - The break is looked for on the coil's traces within `SILKSCREEN_SEARCH_SPAN_DEG` (30°) of the TX terminal, which the
   generator turns to 0° (the right), so all leads come together at one place.

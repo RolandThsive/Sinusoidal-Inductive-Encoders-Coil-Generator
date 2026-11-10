@@ -10,6 +10,7 @@
 | Layers | `F.Cu` and `B.Cu` (Top, Bottom); a 4-layer stator (every dual stator) also has `In1.Cu` and `In2.Cu` (Inner-1, Inner-2) |
 | Vias | Through vias, or with `VIA_TYPE = "blind"` KiCad's blind via between the two layers each via joins (a buried pair uses the same token) |
 | Title Block | Filled in automatically on every board |
+| Saved Again | A board opened and saved again in KiCad 7 to 10 still reads the same in the repository's own tools (the output pictures): `resources/KiCadReader.py` parses KiCad's format and does not depend on the order or line layout of what KiCad writes, nor on KiCad 10 naming the nets instead of numbering them |
 | DRC | Clean apart from the expected `track_dangling` reports at the TX ends (two per coil set: the coils have no terminals yet), when the board's design rules allow the sizes the parameters ask for (see below). The CI checks this in KiCad 8, 9 and 10 on every board |
 
 ![KiCad 1: Title Blocks](https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/images/kicad_1_title_block.png)

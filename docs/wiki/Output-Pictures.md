@@ -8,7 +8,8 @@ Every run that writes both boards also draws two SVG pictures of them into the s
 - `<folder name>_Actual.svg`: the copper of the board as it is, 1:1 in mm, with no text and nothing widened.
 
 Both are drawn by `resources/RepresentativeSVGMaker.py` and `resources/ActualSVGMaker.py`. They read only the two
-`.kicad_pcb` files the run wrote, need nothing but Python 3, and open in any browser. In both, the stator is on the
+`.kicad_pcb` files the run wrote, with the repository's KiCad reader (`resources/KiCadReader.py`), need nothing but
+Python 3, and open in any browser. In both, the stator is on the
 left and the rotor on the right, and the layers have the same colours: Top red, Inner 1 green, Inner 2 yellow,
 Bottom blue.
 
@@ -99,7 +100,11 @@ python resources/ActualSVGMaker.py "Dual Generator/Output/<folder>" --out board.
 ```
 
 Without `--out`, the picture is written into the folder of the stator file under the names above, replacing a
-picture of the same name. The look of the Representative picture is set at the top of `RepresentativeSVGMaker.py`:
+picture of the same name. The boards may also have been opened and saved again in KiCad 7 to 10: the reader does not
+depend on the order of the fields or on how KiCad spreads them over lines, so the pictures show the same copper. Only
+what the generators write is drawn (tracks, vias, copper polygons and the `Edge.Cuts` circles); arcs, zones and
+footprints added in KiCad are left out, and the Actual maker prints a note when a board has them.
+The look of the Representative picture is set at the top of `RepresentativeSVGMaker.py`:
 the colours (`COLOUR`, `ROTOR_COPPER`), and `UNDER_TOP_WIDTH` (1.9; set it to 1.0 to draw every trace at its true
 width).
 

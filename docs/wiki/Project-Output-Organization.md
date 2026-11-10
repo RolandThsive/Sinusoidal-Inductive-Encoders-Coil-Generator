@@ -59,6 +59,7 @@ Dual Generator/
 
 resources/                      Shared by both generators
 ├── SilkscreenFont.py             The stroke font of the silkscreen lead names
+├── KiCadReader.py                Reads a written .kicad_pcb back (the silkscreen step, the pictures)
 ├── RepresentativeSVGMaker.py     Draws <Folder Name>_Representative.svg from the written boards
 └── ActualSVGMaker.py             Draws <Folder Name>_Actual.svg from the written boards
 

@@ -26,7 +26,8 @@ Set UNDER_TOP_WIDTH = 1.0 for true widths.
 On the rotor the Top copper is filled; the copper of every layer under it lies at the same place and is shown as a
 dashed outline in its layer colour, a little heavier for each level further down.
 
-Needs only Python 3 (no third-party package).  The SVG opens in any browser.
+The board files are read by KiCadReader.py, next to this file.  Needs only Python 3 (no third-party package).  The
+SVG opens in any browser.
 """
 
 import argparse
@@ -34,6 +35,11 @@ import math
 import os
 import re
 import sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+if HERE not in sys.path:                                   # KiCadReader.py lies next to this file
+    sys.path.insert(0, HERE)
+import KiCadReader  # noqa: E402
 
 # ---- the look ---------------------------------------------------------------------------------------------
 COLOUR = {"F.Cu": "#d62828",      # Top        red
@@ -52,34 +58,19 @@ BOARD_FILL, EDGE_LINE = "#eef3e8", "#555555"
 FONT = "Inter, Helvetica, Arial, sans-serif"
 SVG_WIDTH_PX = 2240                                        # the size the SVG opens at; it scales without loss
 
-# ---- what is read from the KiCad files --------------------------------------------------------------------
-SEG = re.compile(r'\(segment \(start ([-\d.]+) ([-\d.]+)\) \(end ([-\d.]+) ([-\d.]+)\) \(width ([\d.]+)\) '
-                 r'\(layer "([^"]+)"\) \(net (\d+)\)')
-VIA = re.compile(r'\(via (?:blind |micro )?\(at ([-\d.]+) ([-\d.]+)\) \(size ([\d.]+)\)')
-NET = re.compile(r'\(net (\d+) "([^"]*)"\)')
-CIRCLE = re.compile(r'\(gr_circle \(center ([-\d.]+) ([-\d.]+)\) \(end ([-\d.]+) ([-\d.]+)\) \(layer "([^"]+)"\)')
-POLY = re.compile(r'\(gr_poly \(pts ((?:\(xy [-\d.]+ [-\d.]+\) ?)+)\) \(layer "([^"]+)"\)')
-XY = re.compile(r'\(xy ([-\d.]+) ([-\d.]+)\)')
-TITLE = re.compile(r'\(title "([^"]*)"\)')
-COMMENT = re.compile(r'\(comment (\d) "([^"]*)"\)')
-
 STATOR_FILE, ROTOR_FILE = "Stator.kicad_pcb", "Rotor.kicad_pcb"
 
 
 def read(path):
-    """segments, vias, circles, polygons, title, {comment number: text} of one KiCad board file."""
-    with open(path, encoding="utf-8") as fh:
-        text = fh.read()
-    nets = {int(n): name for n, name in NET.findall(text)}
-    segs = [(float(a), float(b), float(c), float(d), float(w), lay, nets.get(int(n), ""))
-            for a, b, c, d, w, lay, n in SEG.findall(text)]
-    vias = [(float(x), float(y), float(s)) for x, y, s in VIA.findall(text)]
-    circles = [(float(cx), float(cy), math.hypot(float(ex) - float(cx), float(ey) - float(cy)), lay)
-               for cx, cy, ex, ey, lay in CIRCLE.findall(text)]
-    polys = [([(float(x), float(y)) for x, y in XY.findall(pts)], lay) for pts, lay in POLY.findall(text)]
-    title = TITLE.search(text)
-    comments = {int(n): t for n, t in COMMENT.findall(text)}
-    return segs, vias, circles, polys, (title.group(1) if title else ""), comments
+    """segments, vias, circles, polygons, title, {comment number: text} of one KiCad board file (read by
+    KiCadReader.py)."""
+    b = KiCadReader.read(path)
+    segs = [(float(s.start[0]), float(s.start[1]), float(s.end[0]), float(s.end[1]), float(s.width), s.layer,
+             b.nets.get(s.net, "")) for s in b.segments]
+    vias = [(float(v.at[0]), float(v.at[1]), float(v.size)) for v in b.vias]
+    circles = [(float(c.center[0]), float(c.center[1]), c.radius, c.layer) for c in b.circles]
+    polys = [([(float(x), float(y)) for x, y in p.points], p.layer) for p in b.polygons]
+    return segs, vias, circles, polys, b.title, b.comments
 
 
 def edges(circles):

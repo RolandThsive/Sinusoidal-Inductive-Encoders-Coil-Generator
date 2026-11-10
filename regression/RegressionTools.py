@@ -10,6 +10,7 @@ about the generators: it only reads what they wrote.  Needs Python 3 and numpy, 
                    layer), measured on the written coordinates with a cell grid, not with the generator's own code
     connectivity   per net: connected components, free ends, free ends that do not sit on a via of that net
     copper_extent  per layer: the innermost and outermost copper radius from the board centre
+    reader_differences  where resources/KiCadReader.py and this module's Board read the same file differently
     exact_differences  two texts compared character for character; the lines that differ, for the test's message
     compare_text   two texts compared token by token: numbers within a tolerance, everything else exactly
     normalise_record  Parameters.txt without the lines that change with every run (time, folder, command, the
@@ -202,6 +203,50 @@ class Board:
 
     def silk(self, layer):
         return [l for l in self.lines if l["layer"] == layer] + [c for c in self.circles if c["layer"] == layer]
+
+
+def reader_differences(read, board):
+    """Where the generators' own reader (read: a resources/KiCadReader.py Board) and this module's Board (board) of the
+    same file disagree, as lines for a test's message; [] when they read every value alike.  The two readers share no
+    code, so each checks the other."""
+    out = []
+
+    def same(what, a, b):
+        if a != b:
+            out.append(f"{what}: KiCadReader {a!r}, RegressionTools {b!r}"[:300])
+
+    same("version", int(read.version), board.version)
+    same("thickness", float(read.thickness), board.thickness)
+    same("copper layers", read.copper_layers, board.copper_layers)
+    same("nets", read.nets, board.nets)
+    same("title", read.title, board.title)
+    same("comments", read.comments, board.comments)
+    same("items not read", read.skipped, [])
+    seg = np.array([[float(v) for v in (*s.start, *s.end, s.width)] for s in read.segments], dtype=float).reshape(-1, 5)
+    same("segment count", len(seg), len(board.seg))
+    if len(seg) == len(board.seg):
+        same("segment coordinates and widths", np.array_equal(seg, board.seg), True)
+        same("segment layers", [s.layer for s in read.segments], list(board.seg_layer))
+        same("segment nets", [s.net for s in read.segments], [int(n) for n in board.seg_net])
+    via = np.array([[float(v) for v in (*v.at, v.size, v.drill)] for v in read.vias], dtype=float).reshape(-1, 4)
+    same("via count", len(via), len(board.via))
+    if len(via) == len(board.via):
+        same("via positions, sizes and drills", np.array_equal(via, board.via), True)
+        same("via layers", [v.layers for v in read.vias], list(board.via_layers))
+        same("via nets", [v.net for v in read.vias], [int(n) for n in board.via_net])
+        same("via kinds", [{"buried": "blind"}.get(v.kind, v.kind) for v in read.vias],     # KiCad writes both as blind
+             ["blind" if b else "through" for b in board.via_blind])
+    edges = [c for c in read.circles if c.layer == "Edge.Cuts"]
+    same("Edge.Cuts circles", [(float(c.center[0]), float(c.center[1]), c.radius) for c in edges], board.edges)
+    others = [c for c in read.circles if c.layer != "Edge.Cuts"]
+    same("other circles", [(float(c.center[0]), float(c.center[1]), c.radius, float(c.width), c.layer, c.filled)
+                           for c in others],
+         [(*c["centre"], c["radius"], c["width"], c["layer"], c["fill"] in ("solid", "yes")) for c in board.circles])
+    same("polygon count", len(read.polygons), len(board.polys))
+    for i, (p, (layer, pts, fill)) in enumerate(zip(read.polygons, board.polys, strict=False)):
+        same(f"polygon {i}", (p.layer, np.array(p.points, dtype=float).tolist(), p.filled),
+             (layer, pts.tolist(), fill in ("solid", "yes")))
+    return out
 
 
 def brackets_balanced(text):

@@ -252,6 +252,46 @@ class Parts(unittest.TestCase):
         self.assertEqual(len(b.vias), len(self.res.stator.via))
         self.assertEqual(set(b.net_name.values()), {"", "TX", "1", "2"})
 
+    def test_board_reads_a_file_kicad_saved_again(self):
+        """The step reads the stator with resources/KiCadReader.py, so a stator that KiCad 10 saved again (its own
+        order of the items, each over several lines, the nets given by name) gives it the same copper."""
+        import gzip
+        self.assertEqual(os.path.basename(os.path.dirname(LCS.READER_FILE)), "resources")
+
+        def copper(name):
+            with gzip.open(os.path.join(H.HERE, "kicad_files", name), "rt", encoding="utf-8", newline="") as fh:
+                b = LCS.Board(fh.read(), H.P)
+            segs = sorted((*map(float, r), str(lay), b.net_name[int(n)]) for r, lay, n in zip(b.seg, b.layer, b.net,
+                                                                                           strict=True))
+            vias = sorted((*map(float, r), b.net_name[int(n)]) for r, n in zip(b.vias, b.via_net, strict=True))
+            return segs, vias, b.bore, b.outline
+
+        written = copper("board047_stator.kicad_pcb.gz")
+        self.assertGreater(len(written[0]), 100)
+        self.assertEqual(copper("board047_stator_saved_by_kicad10.kicad_pcb.gz"), written)
+
+    def test_a_missing_reader_leaves_the_file_as_it_was(self):
+        """Without resources/KiCadReader.py the step cannot read the board: it says so, and the stator file stays as
+        it was (the step never fails a generation)."""
+        folder = tempfile.mkdtemp(dir=H.temp_root())
+        path = os.path.join(folder, "Stator.kicad_pcb")
+        with open(path, "w", encoding="utf-8", newline="") as fh:
+            fh.write(self.text)
+        saved = LCS.READER_FILE
+        LCS.READER_FILE = os.path.join(folder, "KiCadReader.py")
+        LCS.kicad_reader.cache_clear()
+        try:
+            H.restore()
+            res = LCS.add_to_file(path, H.P, quiet=True)
+        finally:
+            LCS.READER_FILE = saved
+            LCS.kicad_reader.cache_clear()
+        self.assertFalse(res.done)
+        self.assertTrue(any(w.startswith("the suggestion failed (FileNotFoundError") and "KiCadReader.py" in w
+                            for w in res.warnings), res.warnings)
+        with open(path, encoding="utf-8", newline="") as fh:
+            self.assertEqual(fh.read(), self.text)
+
     def test_angle_follows_the_generator(self):
         """Board.angle_deg uses the generator's convention (x = cx + r cos a, y = cy + r sin a, the same as
         TERMINAL_DEG), so the search centres on the terminal's side of the board."""

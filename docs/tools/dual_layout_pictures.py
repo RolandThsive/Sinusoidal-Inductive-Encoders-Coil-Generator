@@ -12,12 +12,11 @@ which hold those boards byte for byte, keep it current.
                                                          the boards give (CI runs this check)
 
 The reference board of combination n is the board folder named BoardNNN-layout-<n>-..., or Board001-default for
-combination 1.  Standard library only.
+combination 1.  The boards are read by resources/KiCadReader.py.  Standard library only.
 """
 
 import argparse
 import ast
-import gzip
 import math
 import os
 import re
@@ -25,7 +24,10 @@ import sys
 
 sys.dont_write_bytecode = True
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+                                "resources"))                                       # KiCadReader.py
 
+import KiCadReader                                                                  # noqa: E402
 import svgfig as F                                                                  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -180,27 +182,19 @@ def read_record(path):
     return rec
 
 
-_SEG = re.compile(r'\(segment \(start ([-\d.]+) ([-\d.]+)\) \(end ([-\d.]+) ([-\d.]+)\) \(width ([\d.]+)\) '
-                  r'\(layer "([^"]+)"\) \(net (\d+)\)\)')
-_VIA = re.compile(r'\(via (?:\w+ )?\(at ([-\d.]+) ([-\d.]+)\) \(size ([\d.]+)\) \(drill [\d.]+\) '
-                  r'\(layers "([^"]+)" "([^"]+)"\) \(net (\d+)\)\)')
-_NET = re.compile(r'^\s*\(net (\d+) "([^"]*)"\)', re.M)
-_EDGE = re.compile(r'\(gr_circle \(center ([-\d.]+) ([-\d.]+)\) \(end ([-\d.]+) ([-\d.]+)\) \(layer "Edge.Cuts"\)')
-_LAYER = re.compile(r'\(\d+ "([^"]+\.Cu)" signal\)')
-
-
 def read_stator(path):
-    """The copper of a stator file the generator wrote: layers (top to bottom), nets, segments, vias, centre."""
-    with gzip.open(path, "rt", encoding="utf-8") as fh:
-        text = fh.read()
-    edges = [tuple(float(v) for v in m.groups()) for m in _EDGE.finditer(text)]
+    """The copper of a stator file the generator wrote, read by resources/KiCadReader.py: layers (top to bottom),
+    nets, segments, vias, centre."""
+    board = KiCadReader.read(path)
+    edges = [c for c in board.circles if c.layer == "Edge.Cuts"]
     if not edges:
         raise ValueError(f"{path}: no Edge.Cuts circle")
-    return dict(layers=_LAYER.findall(text), nets={int(a): b for a, b in _NET.findall(text)},
-                centre=edges[0][:2],
-                segments=[(float(a), float(b), float(c), float(d), float(w), lay, int(net))
-                          for a, b, c, d, w, lay, net in _SEG.findall(text)],
-                vias=[(float(x), float(y), float(s), l1, l2, int(net)) for x, y, s, l1, l2, net in _VIA.findall(text)])
+    return dict(layers=board.copper_layers, nets=dict(board.nets),
+                centre=(float(edges[0].center[0]), float(edges[0].center[1])),
+                segments=[(float(s.start[0]), float(s.start[1]), float(s.end[0]), float(s.end[1]), float(s.width),
+                           s.layer, s.net) for s in board.segments],
+                vias=[(float(v.at[0]), float(v.at[1]), float(v.size), v.layers[0], v.layers[-1], v.net)
+                      for v in board.vias])
 
 
 # ------------------------------------------------------------------------------------------------- the cut
