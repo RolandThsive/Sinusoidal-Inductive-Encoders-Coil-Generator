@@ -50,8 +50,8 @@ PAGE_SIZE_MM = (200, 200)           # smallest KiCad "User" page (width, height)
 PCB_LAYERS = 2
 
 # Via / copper-to-copper rules the generator must respect when it places vias.
-VIA_DIAMETER_MM   = 0.8
-VIA_DRILL_MM      = 0.4
+VIA_DIAMETER_MM   = 0.6
+VIA_DRILL_MM      = 0.3
 MIN_CLEARANCE_MM  = 0.2
 
 # VIA_TYPE = what every via the generator places is:

@@ -5,10 +5,6 @@ files       Stator.kicad_pcb, Stator.kicad_pro, Rotor.kicad_pcb, Rotor.kicad_pro
 name        Coil_15_27_4_2_3_Single_SteppedDiagonal  = Coil_<board inside radius>_<board outside radius>_<RX loops>_<RX sub-coils>_<TX turns>_<TX wiring>_<TX shape>
 rotation    337.50 deg: the board is turned by this so that the TX terminal sits at 0 deg (the right); the RX pattern's zero is at this angle
 
-WARNINGS OF THIS RUN
---------------------
-  a via sits only 0.150 mm from other copper (wanted 0.2 mm); phase/node (6, 324)
-
 STATOR
 ------
 Stator: 4 loop(s) -> 4 electrical period(s) per turn, unique range 90 deg
@@ -17,14 +13,14 @@ Stator: 4 loop(s) -> 4 electrical period(s) per turn, unique range 90 deg
   RX sub-coils per coil: 2, split 45 electrical deg (requested 45), 6 junctions
   TX (single layer): 3 turns on B.Cu, inner tail on F.Cu, stepped_diagonal turns
   TX steps: 45 deg to the turns (TX_STEPPED_ANGLE_DEG), 0.60 mm along the turn each, 0.224 mm between neighbouring steps
-  TX copper: gap between different turns not measured (no window or stitching via; the nominal pitch gives 0.400 mm), TX via to RX copper 0.464 mm
-  RX segments 4608, RX vias 76 (+1 TX), TX segments 1038
+  TX copper: gap between different turns not measured (no window or stitching via; the nominal pitch gives 0.400 mm), TX via to RX copper 0.564 mm
+  RX segments 4608, RX vias 76 (+1 TX), TX segments 1035
   RX bridging fingers: none
-  TX ring r = 22.5 ... 23.7 mm (tail end 26.3 mm); terminal via 0.3 mm inside the first turn (TX_INSIDE_VIA_DISTANCE_MM), 0.216 mm from the other turns
+  TX ring r = 22.5 ... 23.7 mm (tail end 26.3 mm); terminal via 0.3 mm inside the first turn (TX_INSIDE_VIA_DISTANCE_MM), 0.232 mm from the other turns
   board edge: bore r = 15 mm, outer r = 27 mm
-  TX terminal: found at 22.50 deg of the RX pattern (0.464 mm from the nearest RX copper); the board is turned by 337.50 deg so that it sits at 0 deg (the right, horizontal axis); the RX pattern's zero is at 337.50 deg
+  TX terminal: found at 22.50 deg of the RX pattern (0.564 mm from the nearest RX copper); the board is turned by 337.50 deg so that it sits at 0 deg (the right, horizontal axis); the RX pattern's zero is at 337.50 deg
   board bore and outer edge as given (RX band and board edge both set)
-  smallest via-to-copper clearance 0.150 mm
+  smallest via-to-copper clearance 0.250 mm
 
 ROTOR
 -----
@@ -58,8 +54,8 @@ PARAMETER VALUES USED
   CENTER_Y_MM               = 100.0
   PAGE_SIZE_MM              = (200, 200)
   PCB_LAYERS                = 2
-  VIA_DIAMETER_MM           = 0.8
-  VIA_DRILL_MM              = 0.4
+  VIA_DIAMETER_MM           = 0.6
+  VIA_DRILL_MM              = 0.3
   VIA_TYPE                  = 'through'
   MIN_CLEARANCE_MM          = 0.2
   INNER_EDGE_INSET_MM       = 1.2
@@ -165,6 +161,6 @@ LEAD CUTTING SILKSCREEN SUGGESTION
   WARNING no spot on 2 within 30 deg of 0 deg, 4 mm from the other marks, has room for two vias (layers F.Cu, B.Cu); widen SILKSCREEN_SEARCH_SPAN_DEG, lower SILKSCREEN_BREAK_SEPARATION_MM, or cut the coil by hand
   WARNING no spot on 1 within 30 deg of 0 deg, 4 mm from the other marks, has room for two vias (layers F.Cu, B.Cu); widen SILKSCREEN_SEARCH_SPAN_DEG, lower SILKSCREEN_BREAK_SEPARATION_MM, or cut the coil by hand
   marks on F.SilkS and B.SilkS, colour #FFFFFF, labels on; a via of the suggestion keeps 0.2 mm from copper on every layer and 0.25 mm from the board edges
-  TX (TX): both ends at (126.3, 100) (r = 26.30 mm, 0.0 deg), Top and Bottom; extend the Top end to a via TX_1 at (126.0153, 101.0625) and the Bottom end to a via TX_2 at (126.0153, 98.9375), clearance 0.51 mm (at least 0.2 needed)
+  TX (TX): both ends at (126.3, 100) (r = 26.30 mm, 0.0 deg), Top and Bottom; extend the Top end to a via TX_1 at (126.1437, 100.8863) and the Bottom end to a via TX_2 at (126.1437, 99.1137), clearance 0.49 mm (at least 0.2 needed)
 
 SilkScreenSuggestion_Parameters.py

@@ -53,7 +53,7 @@ lists what each board sets differently from Board001-default.
 | Board | Values that differ from Board001-default |
 |---|---|
 | [Board001-default](Board001-default/) | the generator defaults |
-| [Board002-loops-4-subcoils-2](Board002-loops-4-subcoils-2/) | `LOOPS = 4`<br>`RX_SUBCOILS = 2`<br>`RX_TABS = "none"` |
+| [Board002-loops-4-subcoils-2](Board002-loops-4-subcoils-2/) | `VIA_DIAMETER_MM = 0.6`<br>`VIA_DRILL_MM = 0.3`<br>`LOOPS = 4`<br>`RX_SUBCOILS = 2`<br>`RX_TABS = "none"` |
 | [Board003-loops-16-tabs-single](Board003-loops-16-tabs-single/) | `LOOPS = 16`<br>`RX_TABS = "single"` |
 | [Board004-four-layer-series](Board004-four-layer-series/) | `PCB_LAYERS = 4`<br>`RX_LAYER_A = 2`<br>`RX_LAYER_B = 3`<br>`RX_TABS = "none"`<br>`TX_WIRING = "series"`<br>`TX_LAYER_A = 1`<br>`TX_LAYER_B = 4` |
 | [Board005-four-layer-parallel-staggered](Board005-four-layer-parallel-staggered/) | `PCB_LAYERS = 4`<br>`RX_LAYER_A = 2`<br>`RX_LAYER_B = 3`<br>`TX_WIRING = "parallel"`<br>`TX_LAYER_A = 1`<br>`TX_LAYER_B = 4`<br>`TX_PARALLEL_BREAK_STYLE = "staggered"` |
