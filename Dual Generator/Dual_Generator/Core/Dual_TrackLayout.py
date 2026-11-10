@@ -49,6 +49,7 @@ import types
 
 from Generator.Core import BoardLayout
 from Generator.Rotor import RotorBuilder as RB
+from Generator.Stator.RX import RX_Builder
 from Generator.Core.Conflict import ParameterConflict
 
 from Dual_Generator.Core import Dual_SetParameters as SP
@@ -210,10 +211,13 @@ def outer_room(P2, board):
     return room
 
 
-def inner_margin(P2):
+def inner_margin(P2, band=None):
     """From the RX2 band start inwards to the set's innermost copper (mm): the inner-tip vias (set 2's own
-    VIA_DIAMETER_MM), or half a trace."""
-    return max(float(P2.RX_TRACE_WIDTH_MM) / 2.0, float(P2.VIA_DIAMETER_MM) / 2.0)
+    VIA_DIAMETER_MM), centred where the Single Generator's RX builder puts them (RX_Builder.inner_via_radius: on the
+    band start at RX_VIA_ELECTRICAL_DEG = 90, a little inside the band at any other angle), or half a trace.  band:
+    the RX2 band (dict ri, ro); None when it is still to be placed (the vias then taken on the band start)."""
+    inside = 0.0 if band is None else RX_Builder.inner_via_radius(P2, band["ri"], band["ro"]) - band["ri"]
+    return max(float(P2.RX_TRACE_WIDTH_MM) / 2.0, float(P2.VIA_DIAMETER_MM) / 2.0 - inside)
 
 
 # ---------------------------------------------------------------------------------------------------- what is refused
@@ -334,16 +338,28 @@ def resolve(P):
     g = "TRACK_GAP_MM" if gap is not None else "MIN_CLEARANCE_MM"
     required = gap if gap is not None else max(float(P1.MIN_CLEARANCE_MM), float(P2.MIN_CLEARANCE_MM))
     room1 = tx_room(P1)                          # set 1's copper past the RX1 band end
-    margin2 = inner_margin(P2)                   # set 2's copper inside its RX2 band start
+    margin2 = inner_margin(P2, b2)               # set 2's copper inside its RX2 band start
     room2 = outer_room(P2, B)                    # from the RX2 band end to the outline (ring 2's overhang included)
 
-    # ---- 1. the bands: one not given is placed across the gap from the other
-    if b1 is None and b2 is None:
-        b1, b2 = _fit_both(B, e_in, e_out, inset, room1, required, g, margin2, room2)
-    elif b2 is None:
-        b2 = _place_rx2(b1, e_out, room1, required, g, margin2, room2)
-    elif b1 is None:
-        b1 = _place_rx1(b2, e_in, inset, room1, required, g, margin2)
+    # ---- 1. the bands: one not given is placed across the gap from the other.  Where set 2's inner vias sit
+    # depends a little on its band (inner_margin, when they are not at 90 deg): a placed band is placed again with the
+    # margin of the RX2 band it came out as, until that margin no longer changes (it moves by micrometres).  The
+    # resolution of the curves can jump between two placements; after 10 passes a band whose vias need no more than
+    # the margin it was placed with is kept (its gap is then a little wider than required)
+    given = b1, b2
+    for passes in range(1, 51):
+        b1, b2 = given
+        if b1 is None and b2 is None:
+            b1, b2 = _fit_both(B, e_in, e_out, inset, room1, required, g, margin2, room2)
+        elif b2 is None:
+            b2 = _place_rx2(b1, e_out, room1, required, g, margin2, room2)
+        elif b1 is None:
+            b1 = _place_rx1(b2, e_in, inset, room1, required, g, margin2)
+        settled = inner_margin(P2, b2)
+        done = abs(settled - margin2) <= 1e-9 or (passes > 10 and settled < margin2)
+        margin2 = settled
+        if done:
+            break
 
     # ---- 2. the edges: as given (the Single Generator checks each against its own set's band), or from the bands
     if e_in is not None:

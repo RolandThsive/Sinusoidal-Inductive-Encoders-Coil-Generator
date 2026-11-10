@@ -419,6 +419,30 @@ class SharedHooks(unittest.TestCase):
         self.assertEqual(len(ours), 4 + len(self.s0.rx_segments) + len(self.s0.tx_segments) + len(self.s0.rx_vias)
                          + len(self.s0.tx_vias), "the empty net and the three nets, then every piece of copper")
 
+    def test_inner_via_radius_is_where_the_builder_puts_the_vias(self):
+        """RX_Builder.inner_via_radius (the Dual Generator places its RX2 band by it): the centre radius of the
+        innermost RX vias that build_rx makes, at 90 deg on the band start, at any other angle on the curve at the
+        node nearest that angle; ri when the curves cannot be made."""
+        from Generator.Stator.RX import RX_Builder
+        for changes in ({}, {"RX_VIA_ELECTRICAL_DEG": 70.0}, {"RX_VIA_ELECTRICAL_DEG": 110.0, "RX_PROFILE": "cosine_r"},
+                        {"RX_VIA_ELECTRICAL_DEG": 100.0, "RX_SUBCOILS": 2},
+                        {"RX_VIA_ELECTRICAL_DEG": 80.0, "STEPS_PER_LOOP": 48}):
+            H.restore()
+            H.apply(changes)
+            with contextlib.redirect_stderr(io.StringIO()):
+                rx = RX_Builder.build_rx(H.P)
+            innermost = min(np.hypot(v.at[0] - rx.cx, v.at[1] - rx.cy) for v in rx.rx_vias)
+            r = RX_Builder.inner_via_radius(H.P, rx.ri, rx.ro)
+            self.assertAlmostEqual(r, innermost, 9, changes)
+            if not changes:
+                self.assertAlmostEqual(r, rx.ri, 9, "at 90 deg on the band start")
+            else:
+                self.assertGreater(r, rx.ri + 0.01, changes)
+        H.restore()
+        H.apply({"RX_VIA_ELECTRICAL_DEG": 80.0, "LOOPS": 0})
+        self.assertEqual(RX_Builder.inner_via_radius(H.P, 15.0, 18.0), 15.0, "no curves: the band start")
+        H.restore()
+
     def test_rotor_start_offset(self):
         from Generator.Rotor import RotorBuilder as RB
         a = RB.RotorDesign(H.P, stator=self.s0, start_offset_deg=30.0)

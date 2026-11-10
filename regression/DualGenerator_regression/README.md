@@ -158,4 +158,5 @@ ROTOR1., SILK. and so on).
 | [Board102-layout-23-rx2-band-bore-and-outline](Board102-layout-23-rx2-band-bore-and-outline/) | `BOARD.INNER_EDGE_RADIUS_MM = 6.0`<br>`BOARD.OUTER_EDGE_RADIUS_MM = 28.0`<br>`RX1.INSIDE_RADIUS_MM = None`<br>`RX1.OUTSIDE_RADIUS_MM = None` |
 | [Board103-layout-24-rx2-band-bore-outline-and-gap](Board103-layout-24-rx2-band-bore-outline-and-gap/) | `BOARD.INNER_EDGE_RADIUS_MM = 6.0`<br>`BOARD.OUTER_EDGE_RADIUS_MM = 28.0`<br>`BOARD.TRACK_GAP_MM = 1.0`<br>`RX1.INSIDE_RADIUS_MM = None`<br>`RX1.OUTSIDE_RADIUS_MM = None` |
 | [Board104-layout-31-both-edges](Board104-layout-31-both-edges/) | `BOARD.INNER_EDGE_RADIUS_MM = 6.0`<br>`BOARD.OUTER_EDGE_RADIUS_MM = 28.0`<br>`RX1.INSIDE_RADIUS_MM = None`<br>`RX1.OUTSIDE_RADIUS_MM = None`<br>`RX2.INSIDE_RADIUS_MM = None`<br>`RX2.OUTSIDE_RADIUS_MM = None` |
+| [Board105-layout-09-rx2-vias-100-deg](Board105-layout-09-rx2-vias-100-deg/) | `RX2.INSIDE_RADIUS_MM = None`<br>`RX2.OUTSIDE_RADIUS_MM = None`<br>`RX2.RX_VIA_ELECTRICAL_DEG = 100.0` |
 <!-- end of board table -->

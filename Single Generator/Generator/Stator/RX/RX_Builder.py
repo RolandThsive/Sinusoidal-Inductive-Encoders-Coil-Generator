@@ -21,6 +21,19 @@ def build_rx(P):
     return RXBuilder(P).build()
 
 
+def inner_via_radius(P, ri, ro):
+    """Where build_rx puts the centres of the inner-tip vias for the RX band ri ... ro (mm from the board centre):
+    on the band start at RX_VIA_ELECTRICAL_DEG = 90, a little inside the band at any other angle, on the curve at
+    the node nearest that angle.  The Dual Generator places a band across the gap by it.  When the curves cannot be
+    made on that band (a value not checked yet, or junction vias that do not fit: the build stops and says why),
+    ri, the vias on the band start."""
+    try:
+        rx = RXBuilder(P).curves(float(ri), float(ro))
+    except (ParameterConflict, ArithmeticError, TypeError, ValueError):
+        return float(ri)
+    return float(rx.rnode[rx._low_tip])
+
+
 class RXBuilder:
     """The RX coils under construction: band, layers, curves, junctions, fingers and the copper made so far."""
 
@@ -28,20 +41,41 @@ class RXBuilder:
         self.P = P
 
     def build(self):
-        """Build the RX coils: the layers and the band, the resolution, the curves and their series junctions, the
-        fingers, then the copper.  Returns self."""
+        """Build the RX coils: the layers and the band, the curves on it (curves()), the fingers, then the copper.
+        Returns self."""
         P = self.P
         self.tx_lay = Layers.layer_plan(P)                 # the finger layer (and the RX layers)
         resolve_layers(self)
-        self.N = int(P.LOOPS)
-        self.cx, self.cy = float(P.CENTER_X_MM), float(P.CENTER_Y_MM)
         self.band = BoardLayout.rx_band(P)
-        self.ri, self.ro, self.inner_edge_radius = self.band["ri"], self.band["ro"], self.band["hole"]
-        self.L = 2.0 * math.pi / self.N                       # one loop (rad)
+        self.inner_edge_radius = self.band["hole"]
+        self.curves(self.band["ri"], self.band["ro"])
         # the finger legs reach exactly RX_TAB_LENGTH_MM past the band (the checks make sure that clears the TX); the
         # straight middle piece between the legs dips a little inside that radius (RX_Fingers.finger_starts caps it)
         self.tab_end_radius = self.ro + float(P.RX_TAB_LENGTH_MM) if RX_Fingers.fingers_on(self) else None
+        # the tip vias are kept clear of the crossings (RX_Coils.assign_layers): say so when that moved them
+        if abs(self.via_deg - float(P.RX_VIA_ELECTRICAL_DEG)) > 180.0 / self.S + 1e-9:
+            print(f"WARNING: RX_VIA_ELECTRICAL_DEG = {P.RX_VIA_ELECTRICAL_DEG:g} is too close to the crossings for "
+                  f"{self.S} segments per period; the vias sit at {self.via_deg:.1f} electrical degrees (at this resolution "
+                  f"they can only sit at about {45 + 720.0 / self.S:.1f} ... {135 - 720.0 / self.S:.1f}: raise STEPS_PER_LOOP or "
+                  f"use \"auto\")", file=sys.stderr)
+        # the fingers: every outer tip, one neighbouring pair of tips (RX_TABS = "single"), or none
+        self.single_tabs = []
+        tab_starts, self.tab_q = RX_Fingers.finger_starts(self)
+        starts_of = {k: tab_starts for k in range(self.ncurves)}
+        if RX_Fingers.fingers_single(self):
+            starts_of = RX_Fingers.single_pair(self, tab_starts, self.tab_q)
+        RX_Coils.emit_copper(self, starts_of, self.tab_q)
+        return self
 
+    def curves(self, ri, ro):
+        """The curves on the band ri ... ro, before any copper: the radius law, the resolution (segments per loop),
+        the sub-coils, the nodes, and the layer of every edge with the series junctions (ParameterConflict when one
+        does not fit).  Sets via_deg, the electrical angle the tip vias sit at.  Returns self."""
+        P = self.P
+        self.N = int(P.LOOPS)
+        self.cx, self.cy = float(P.CENTER_X_MM), float(P.CENTER_Y_MM)
+        self.ri, self.ro = ri, ro
+        self.L = 2.0 * math.pi / self.N                       # one loop (rad)
         RX_Profiles.radius_law(self)
         S0 = RX_Coils.pick_steps(self)
         tries = [S0]
@@ -63,20 +97,7 @@ class RXBuilder:
             except ParameterConflict:                    # the junction vias do not fit at this resolution
                 if attempt == len(tries) - 1:
                     raise
-        # the tip vias are kept clear of the crossings (RX_Coils.assign_layers): say so when that moved them
         self.via_deg = self._tip * 360.0 / self.S
-        if abs(self.via_deg - float(P.RX_VIA_ELECTRICAL_DEG)) > 180.0 / self.S + 1e-9:
-            print(f"WARNING: RX_VIA_ELECTRICAL_DEG = {P.RX_VIA_ELECTRICAL_DEG:g} is too close to the crossings for "
-                  f"{self.S} segments per period; the vias sit at {self.via_deg:.1f} electrical degrees (at this resolution "
-                  f"they can only sit at about {45 + 720.0 / self.S:.1f} ... {135 - 720.0 / self.S:.1f}: raise STEPS_PER_LOOP or "
-                  f"use \"auto\")", file=sys.stderr)
-        # the fingers: every outer tip, one neighbouring pair of tips (RX_TABS = "single"), or none
-        self.single_tabs = []
-        tab_starts, self.tab_q = RX_Fingers.finger_starts(self)
-        starts_of = {k: tab_starts for k in range(self.ncurves)}
-        if RX_Fingers.fingers_single(self):
-            starts_of = RX_Fingers.single_pair(self, tab_starts, self.tab_q)
-        RX_Coils.emit_copper(self, starts_of, self.tab_q)
         return self
 
     def inner_edge_clear(self):

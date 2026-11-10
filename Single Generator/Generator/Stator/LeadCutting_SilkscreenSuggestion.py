@@ -383,7 +383,8 @@ class Placer:
     where the text covers none of the marks (boxes, dots, lines), none of the names placed before and none of the
     board's vias (silkscreen on a via is wiped by the fab), and lies inside the board edges.  The directions around
     the site are tried in the order of their angle from the wanted one, then further out; the vias are given up
-    before anything else; if nothing is free the name goes to the wanted spot and that is reported."""
+    before anything else; if nothing is free the name goes to the nearest spot on the board, over other marks (or,
+    on a board with no room for it at all, to the wanted spot), and that is reported."""
     PAD = 0.15            # the names keep this much from the marks and from each other
     EDGE = 0.3            # and this much from the bore and the outline
 
@@ -413,7 +414,9 @@ class Placer:
         w, h = self.font.width(label, self.height), self.height
         a0 = math.atan2(want[1], want[0])
         rels = sorted(range(-180, 180, 30), key=lambda a: (abs(a), a))
-        for allow_vias in (False, True):
+
+        def spots():
+            """(centre x, centre y, text rectangle) of every spot tried that lies on the board, nearest first"""
             for extra in np.arange(0.0, 2.01, 0.25):
                 for rel in rels:
                     a = a0 + math.radians(rel)
@@ -422,15 +425,21 @@ class Placer:
                     d = keep_off + extra + half
                     cx, cy = site[0] + dx * d, site[1] + dy * d
                     rect = _rect(cx, cy, w, h)
-                    padded = _rect(cx, cy, w + 2 * self.PAD, h + 2 * self.PAD)
-                    if not self._on_board(rect):
-                        continue
-                    if any(_overlap(padded, m) for m in self.marks) or any(_overlap(padded, n) for n in self.names):
-                        continue
-                    if not allow_vias and any(_overlap(rect, v) for v in self.vias):
-                        continue
-                    self.names.append(rect)
-                    return (cx - w / 2.0, cy), True
+                    if self._on_board(rect):
+                        yield cx, cy, rect
+
+        for allow_vias in (False, True):
+            for cx, cy, rect in spots():
+                padded = _rect(cx, cy, w + 2 * self.PAD, h + 2 * self.PAD)
+                if any(_overlap(padded, m) for m in self.marks) or any(_overlap(padded, n) for n in self.names):
+                    continue
+                if not allow_vias and any(_overlap(rect, v) for v in self.vias):
+                    continue
+                self.names.append(rect)
+                return (cx - w / 2.0, cy), True
+        for cx, cy, rect in spots():                    # nothing is free: the nearest spot on the board, over other marks
+            self.names.append(rect)
+            return (cx - w / 2.0, cy), False
         half = w / 2.0 * abs(want[0]) + h / 2.0 * abs(want[1])
         cx, cy = site[0] + want[0] * (keep_off + half), site[1] + want[1] * (keep_off + half)
         self.names.append(_rect(cx, cy, w, h))
@@ -582,8 +591,8 @@ def suggest(text, P, settings, font=None, sets=None):
             if not free:
                 crowded.append(name)
         if crowded:
-            res.warnings.append(f"no free place was found for the name(s) {', '.join(crowded)}: drawn at the default "
-                                f"spot, where they may cover other marks or vias")
+            res.warnings.append(f"no free place was found for the name(s) {', '.join(crowded)}: drawn at the nearest "
+                                f"spot on the board, where they may cover other marks or vias")
 
     if s.SILKSCREEN_DOT_ON_ALL_VIAS:
         for x, y, _size in board.vias:

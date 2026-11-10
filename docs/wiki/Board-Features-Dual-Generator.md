@@ -49,8 +49,10 @@ bore | RX1 band | TX1 ring | TRACK_GAP_MM | RX2 band | TX2 ring | outline
 - Each TX ring starts `TX_OFFSET_MM` outside its RX band and ends one pitch outside its last turn, where the two TX ends
   sit. Its room comes from the Single Generator's own TX ring formula and is verified on the built copper.
 - The gap is the copper-free ring from the outermost copper of set 1 (its TX1 ring ends, half a trace past one pitch
-  outside the last turn) to the innermost copper of set 2 (the RX2 band start minus half an RX trace or a via radius,
-  whichever is larger).
+  outside the last turn) to the innermost copper of set 2: its inner-tip vias, or half an RX trace inside the RX2 band
+  start, whichever reaches farther in. The vias are taken where the Single Generator's RX builder puts them: on the
+  band start at `RX_VIA_ELECTRICAL_DEG` = 90, a little inside the band at any other angle (on the curve at the node
+  nearest that angle). So a placed band keeps exactly the gap, whatever the via angle.
 - The outline leaves at least `OUTER_EDGE_OFFSET_MM` (2.0 mm) past the RX2 band and `OUTER_EDGE_TAIL_MARGIN_MM` (0.7 mm)
   past the TX2 ring. When the generator works out the outline, or places the RX2 band up to a given one, and ring 2 of
   the rotor covers the TX2 turns (the default), the outline must also

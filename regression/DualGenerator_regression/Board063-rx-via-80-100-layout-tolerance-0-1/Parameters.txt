@@ -12,7 +12,7 @@ layout: both RX bands given, at least MIN_CLEARANCE_MM apart; bore and outline f
   RX1 band r = 8.45 ... 11.7 mm (RX_R_BASE_MM 10.075, RX_A_MM 1.625): INSIDE_RADIUS_MM / OUTSIDE_RADIUS_MM as given
   RX2 band r = 18 ... 23.9 mm (RX_R_BASE_MM 20.95, RX_A_MM 2.95): INSIDE_RADIUS_MM / OUTSIDE_RADIUS_MM as given
   bore r = 7.25 mm (RX1 band start - INNER_EDGE_INSET_MM), outline r = 26.925 mm (RX2 band end + the TX2 ring and the margin)
-  set 1 copper reaches r = 13.975 mm; set 2 copper starts at r = 17.7 mm: gap 3.725 mm (measured; at least MIN_CLEARANCE_MM = 0.15 needed)
+  set 1 copper reaches r = 13.975 mm; set 2 copper starts at r = 17.758 mm: gap 3.783 mm (measured; at least MIN_CLEARANCE_MM = 0.15 needed)
 
 STATOR
 ------
@@ -21,7 +21,7 @@ Dual stator: set 1 (inner) 1 loop(s), set 2 (outer) 16 loop(s); bore r = 7.25 mm
     RX1 band r = 8.45 ... 11.7 mm (RX_R_BASE_MM 10.075, RX_A_MM 1.625): INSIDE_RADIUS_MM / OUTSIDE_RADIUS_MM as given
     RX2 band r = 18 ... 23.9 mm (RX_R_BASE_MM 20.95, RX_A_MM 2.95): INSIDE_RADIUS_MM / OUTSIDE_RADIUS_MM as given
     bore r = 7.25 mm (RX1 band start - INNER_EDGE_INSET_MM), outline r = 26.925 mm (RX2 band end + the TX2 ring and the margin)
-    set 1 copper reaches r = 13.975 mm; set 2 copper starts at r = 17.7 mm: gap 3.725 mm (measured; at least MIN_CLEARANCE_MM = 0.15 needed)
+    set 1 copper reaches r = 13.975 mm; set 2 copper starts at r = 17.758 mm: gap 3.783 mm (measured; at least MIN_CLEARANCE_MM = 0.15 needed)
   on the built copper: set 1 r = 8.178 ... 13.975 mm, set 2 r = 17.758 ... 26.175 mm, 3.783 mm free between them
 Set 1 (inner), TX ends at 180 deg, RX pattern zero at 45.00 deg:
   Stator: 1 loop(s) -> 1 electrical period(s) per turn, unique range 360 deg

@@ -5,6 +5,8 @@ few board values), the layout (the 32 combinations of what it is given), the out
 checks between the sets.  Fast, no board written.
 """
 
+import contextlib
+import io
 import math
 import os
 import re
@@ -316,6 +318,41 @@ class TrackLayout(unittest.TestCase):
         self.assertAlmostEqual(TL.inner_margin(SP.build(H.P, 2)), H.P.BOARD.VIA_DIAMETER_MM / 2.0, 9)
         H.apply({"RX2.VIA_DIAMETER_MM": 0.9, "RX2.VIA_DRILL_MM": 0.45})
         self.assertAlmostEqual(TL.inner_margin(SP.build(H.P, 2)), 0.45, 9, "set 2's own via")
+
+    def test_set_2_vias_are_taken_where_they_sit(self):
+        """Set 2's inner vias sit where the Single Generator's RX builder puts them (RX_Builder.inner_via_radius): on
+        the RX2 band start at 90 deg, a little inside the band at any other angle.  A placed band is placed by where
+        they really sit, so the built copper keeps exactly the gap the layout expects; a given band is measured the
+        same way."""
+        # combination 9: RX1 given, RX2 placed; 17: RX2 given, RX1 placed; 32: both placed
+        for n, deg, profile in ((9, 70.0, "equal_area"), (9, 110.0, "cosine_r"), (17, 100.0, "equal_area"),
+                                (32, 80.0, "equal_area")):
+            H.restore()
+            H.apply(dict(H.combination(n), **{"RX2.RX_VIA_ELECTRICAL_DEG": deg, "RX2.RX_PROFILE": profile}))
+            lay = TL.resolve(H.P)
+            P2 = SP.build(H.P, 2, lay.set_band(2), lay.edges())
+            self.assertLess(lay.margin2, P2.VIA_DIAMETER_MM / 2.0 - 0.05, (n, deg, "the vias sit inside the band"))
+            with contextlib.redirect_stderr(io.StringIO()):
+                inner, _outer = DDC.copper_extent(StatorAssembly.build_stator(P2, 0.0))
+            self.assertAlmostEqual(inner, lay.inner2, 6, (n, deg, "set 2 starts where the layout said"))
+            self.assertAlmostEqual(lay.gap_expected, lay.gap_required, 9, (n, deg))
+
+    def test_the_gap_is_measured_on_the_built_copper(self):
+        """Dual_DesignChecks.check_sets: the gap between the sets on the built copper, a conflict when it is below the
+        required gap, and a warning when it is not what the layout formulas expected (within LAYOUT_TOLERANCE_MM)."""
+        H.restore()
+        lay = TL.resolve(H.P)
+        with contextlib.redirect_stderr(io.StringIO()):
+            s1, s2 = (StatorAssembly.build_stator(SP.build(H.P, k, lay.set_band(k), lay.edges()), 0.0) for k in (1, 2))
+        rep, gap = DDC.check_sets(H.P, lay, s1, s2)
+        self.assertAlmostEqual(gap, lay.gap_expected, 6)
+        self.assertEqual((rep.errors, rep.warnings), ([], []))
+        off = TL.Layout(**dict(vars(lay), gap_required=gap + 0.1, gap_expected=gap + 0.2))
+        rep, _gap = DDC.check_sets(H.P, off, s1, s2)
+        self.assertEqual(len(rep.errors), 1)
+        self.assertIn("Move the RX2 band out by 0.100 mm or more", rep.errors[0])
+        self.assertEqual(len(rep.warnings), 1)
+        self.assertIn("differs from the layout formulas by more than LAYOUT_TOLERANCE_MM", rep.warnings[0])
 
 
 class Assembler(unittest.TestCase):

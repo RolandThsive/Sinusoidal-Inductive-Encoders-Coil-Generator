@@ -13,9 +13,10 @@ the Single Generator's own code:
 1. **The layout.** From the dual parameter files, the layout (`Dual_TrackLayout.py`, the rules on this page) decides
    the two RX bands, the bore and the outline. It uses the Single Generator's own formulas on each set's own values:
    how far set 1's copper reaches past its RX band (the TX turns, the TX tail, the RX bridging fingers and the TX's
-   go-around brackets, `BoardLayout.outer_copper_reach`), where set 2's copper starts inside its band (its inner vias),
-   and how much room the outline needs past the RX2 band (`BoardLayout.outer_edge_room`, plus the overhang of ring 2
-   of the rotor when it covers the TX2 turns).
+   go-around brackets, `BoardLayout.outer_copper_reach`), where set 2's copper starts inside its band (its inner vias,
+   where the RX builder puts them: on the band start at `RX_VIA_ELECTRICAL_DEG` = 90, a little inside the band at any
+   other angle, `RX_Builder.inner_via_radius`), and how much room the outline needs past the RX2 band
+   (`BoardLayout.outer_edge_room`, plus the overhang of ring 2 of the rotor when it covers the TX2 turns).
 2. **Two Single parameter sets.** For each set, `Dual_SetParameters.build` puts together exactly the parameter set of
    a Single Generator board: the board values of `Dual_Board_Parameters.py`, the set's own RX, TX, rotor and IC files,
    the vias and clearance the set gives itself, and the band and edges the layout decided.
