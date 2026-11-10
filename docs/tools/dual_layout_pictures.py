@@ -12,7 +12,7 @@ which hold those boards byte for byte, keep it current.
                                                          the boards give (CI runs this check)
 
 The reference board of combination n is the board folder named BoardNNN-layout-<n>-..., or Board001-default for
-combination 1.  The boards are read by resources/KiCadReader.py.  Standard library only.
+combination 1.  The boards are read by Generators/resources/KiCadReader.py.  Standard library only.
 """
 
 import argparse
@@ -25,7 +25,7 @@ import sys
 sys.dont_write_bytecode = True
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
-                                "resources"))                                       # KiCadReader.py
+                                "Generators", "resources"))                         # KiCadReader.py
 
 import KiCadReader                                                                  # noqa: E402
 import svgfig as F                                                                  # noqa: E402
@@ -183,8 +183,8 @@ def read_record(path):
 
 
 def read_stator(path):
-    """The copper of a stator file the generator wrote, read by resources/KiCadReader.py: layers (top to bottom),
-    nets, segments, vias, centre."""
+    """The copper of a stator file the generator wrote, read by Generators/resources/KiCadReader.py: layers (top to
+    bottom), nets, segments, vias, centre."""
     board = KiCadReader.read(path)
     edges = [c for c in board.circles if c.layer == "Edge.Cuts"]
     if not edges:

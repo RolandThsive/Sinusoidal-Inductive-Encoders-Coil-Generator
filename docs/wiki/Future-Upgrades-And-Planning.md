@@ -15,7 +15,7 @@
 *Strike-through means done.*
 
 The generators, their testing and their examples are also the project's milestones, listed in
-[`MILESTONES.md`](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/blob/main/MILESTONES.md).
+[`MILESTONES.md`](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/blob/main/docs/funding/MILESTONES.md).
 When every milestone is done, the commercial fee stops and the project opens under a new license, the same as the GPL (see
 [License](License.md#342-commercial-use)).
 

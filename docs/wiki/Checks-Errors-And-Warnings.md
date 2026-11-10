@@ -2,7 +2,7 @@
 
 Before and after a board is built, the generator checks it. The rules live in `Generator/Checks/`
 (`ParameterRules.py`, `ConflictRules.py` and `DesignChecks.py`). The parameter rules can also be run alone, from the
-`Single Generator` folder, to check the parameter files without generating anything:
+`Generators/Single Generator` folder, to check the parameter files without generating anything:
 
 ```bash
 python Generator/Run/CheckParameters.py
@@ -104,10 +104,10 @@ range is below the limit, you get an info line that gives the range, not a warni
 
 ## 24.6 Dual Generator
 
-The Dual Generator's rules live in `Dual Generator/Dual_Generator/Checks/`: `Dual_ParameterRules.py`, run by
+The Dual Generator's rules live in `Generators/Dual Generator/Dual_Generator/Checks/`: `Dual_ParameterRules.py`, run by
 `Dual_CheckParameters.py` before anything is built, and `Dual_DesignChecks.py`, run on the built copper. The checker on
 its own builds nothing, so it does not measure the gap between the sets or the rotor rings; `--check` and a run do.
-From the `Dual Generator` folder:
+From the `Generators/Dual Generator` folder:
 
 ```bash
 python Dual_Generator/Checks/Dual_CheckParameters.py

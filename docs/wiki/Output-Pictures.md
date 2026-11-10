@@ -7,8 +7,8 @@ Every run that writes both boards also draws two SVG pictures of them into the s
   easy to tell apart.
 - `<folder name>_Actual.svg`: the copper of the board as it is, 1:1 in mm, with no text and nothing widened.
 
-Both are drawn by `resources/RepresentativeSVGMaker.py` and `resources/ActualSVGMaker.py`. They read only the two
-`.kicad_pcb` files the run wrote, with the repository's KiCad reader (`resources/KiCadReader.py`), need nothing but
+Both are drawn by `Generators/resources/RepresentativeSVGMaker.py` and `Generators/resources/ActualSVGMaker.py`. They read only the two
+`.kicad_pcb` files the run wrote, with the repository's KiCad reader (`Generators/resources/KiCadReader.py`), need nothing but
 Python 3, and open in any browser. In both, the stator is on the
 left and the rotor on the right, and the layers have the same colours: Top red, Inner 1 green, Inner 2 yellow,
 Bottom blue.
@@ -77,7 +77,7 @@ rings.*
 
 - At the end of every Single and Dual run that writes both boards, after `Parameters.txt` and the silkscreen
   suggestion. A run with `--stator` or `--rotor` writes one board and makes no pictures.
-- A picture that cannot be made (a maker missing from `resources/`, or an error while drawing) is printed as a yellow
+- A picture that cannot be made (a maker missing from `Generators/resources/`, or an error while drawing) is printed as a yellow
   warning, `WARNING picture not made by <file>: <reason>; the boards are not affected`, and counted in the run's
   warnings. The boards and `Parameters.txt` are already written, and the run still ends with `SUCCESS`, in either
   `GENERATOR_MODE`. See [Checks, Errors And Warnings](Checks-Errors-And-Warnings.md).
@@ -90,13 +90,13 @@ Both makers run on any folder that holds `Stator.kicad_pcb` and `Rotor.kicad_pcb
 first. From the repository folder:
 
 ```bash
-python resources/RepresentativeSVGMaker.py "Single Generator/Output/<folder>"
-python resources/RepresentativeSVGMaker.py "Single Generator/Output/<folder>" --air-gap 1     # Air gap in the title
-python resources/RepresentativeSVGMaker.py "Single Generator/Output/<folder>" --title "My title" --out picture.svg
-python resources/RepresentativeSVGMaker.py Stator.kicad_pcb Rotor.kicad_pcb
+python Generators/resources/RepresentativeSVGMaker.py "Generators/Single Generator/Output/<folder>"
+python Generators/resources/RepresentativeSVGMaker.py "Generators/Single Generator/Output/<folder>" --air-gap 1     # Air gap in the title
+python Generators/resources/RepresentativeSVGMaker.py "Generators/Single Generator/Output/<folder>" --title "My title" --out picture.svg
+python Generators/resources/RepresentativeSVGMaker.py Stator.kicad_pcb Rotor.kicad_pcb
 
-python resources/ActualSVGMaker.py "Dual Generator/Output/<folder>"
-python resources/ActualSVGMaker.py "Dual Generator/Output/<folder>" --out board.svg
+python Generators/resources/ActualSVGMaker.py "Generators/Dual Generator/Output/<folder>"
+python Generators/resources/ActualSVGMaker.py "Generators/Dual Generator/Output/<folder>" --out board.svg
 ```
 
 Without `--out`, the picture is written into the folder of the stator file under the names above, replacing a

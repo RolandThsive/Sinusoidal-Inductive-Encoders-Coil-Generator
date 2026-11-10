@@ -81,9 +81,9 @@ jobs:
         run: |
           python -m pip install --only-binary=:all: -r requirements.txt
       - name: Single Generator --check
-        run: python "Single Generator/Generator/Run/RunCoilGenerator.py" --check --no-color
+        run: python "Generators/Single Generator/Generator/Run/RunCoilGenerator.py" --check --no-color
       - name: Dual Generator --check
-        run: python "Dual Generator/Dual_Generator/Run/Dual_RunCoilGenerator.py" --check --no-color
+        run: python "Generators/Dual Generator/Dual_Generator/Run/Dual_RunCoilGenerator.py" --check --no-color
 
   tests:
     name: ${{ matrix.suite }} Generator tests (${{ matrix.os }})
@@ -97,10 +97,10 @@ jobs:
         include:
           - suite: Single
             key: single          # the name run_regression.py takes (macOS has bash 3.2, which cannot lower a case)
-            source: Single Generator/Generator
+            source: Generators/Single Generator/Generator
           - suite: Dual
             key: dual
-            source: Single Generator/Generator,Dual Generator/Dual_Generator
+            source: Generators/Single Generator/Generator,Generators/Dual Generator/Dual_Generator
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -179,11 +179,11 @@ jobs:
           python -m pip install --only-binary=:all: -r requirements.txt
       - name: Write a fresh default board with each generator
         run: |
-          python "Single Generator/Generator/Run/RunCoilGenerator.py" --no-color
-          python "Dual Generator/Dual_Generator/Run/Dual_RunCoilGenerator.py" --no-color
+          python "Generators/Single Generator/Generator/Run/RunCoilGenerator.py" --no-color
+          python "Generators/Dual Generator/Dual_Generator/Run/Dual_RunCoilGenerator.py" --no-color
           for g in Single Dual; do
             mkdir -p ".fresh/$g"
-            cp "$g Generator/Output/"*/Stator.kicad_* "$g Generator/Output/"*/Rotor.kicad_* ".fresh/$g/"
+            cp "Generators/$g Generator/Output/"*/Stator.kicad_* "Generators/$g Generator/Output/"*/Rotor.kicad_* ".fresh/$g/"
           done
       - name: Pull KiCad ${{ matrix.kicad }}
         run: docker pull --quiet "kicad/kicad:${{ matrix.kicad }}"

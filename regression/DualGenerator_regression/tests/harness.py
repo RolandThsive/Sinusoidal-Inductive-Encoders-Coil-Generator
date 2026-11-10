@@ -26,9 +26,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))               # .../DualGenera
 SUITE = os.path.dirname(HERE)                                    # .../DualGenerator_regression
 REGRESSION = os.path.dirname(SUITE)                              # .../regression
 REPO = os.path.dirname(REGRESSION)
-PROJECT = os.path.join(REPO, "Dual Generator")
-SINGLE = os.path.join(REPO, "Single Generator")
-RESOURCES = os.path.join(REPO, "resources")
+PROJECT = os.path.join(REPO, "Generators", "Dual Generator")
+SINGLE = os.path.join(REPO, "Generators", "Single Generator")
+RESOURCES = os.path.join(REPO, "Generators", "resources")
 
 sys.dont_write_bytecode = True
 for _p in (PROJECT, RESOURCES, REGRESSION):

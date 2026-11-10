@@ -1,6 +1,6 @@
 # Licenses Of This Repository
 
-This repository is **open for research use**, and free for non-commercial use. Researchers, students, hobbyists and curious engineers are completely welcome to use this open tool. It uses three licenses, each for a different part. The full text of each one is in its own file in the root of the repository: [PolyForm-Noncommercial-1.0.0](PolyForm-Noncommercial-1.0.0), [CC-BY-NC-SA-4.0](CC-BY-NC-SA-4.0) and [PolyForm-Strict-1.0.0](PolyForm-Strict-1.0.0).
+This repository is **open for research use**, and free for non-commercial use. Researchers, students, hobbyists and curious engineers are completely welcome to use this open tool. It uses three licenses, each for a different part. The full text of each one is in its own file in `docs/licenses/`: [PolyForm-Noncommercial-1.0.0](docs/licenses/PolyForm-Noncommercial-1.0.0), [CC-BY-NC-SA-4.0](docs/licenses/CC-BY-NC-SA-4.0) and [PolyForm-Strict-1.0.0](docs/licenses/PolyForm-Strict-1.0.0).
 
 > **Commercial use of anything in this repository requires written permission from the author.** Contact: [rolandthsive@yahoo.com](mailto:rolandthsive@yahoo.com).
 
@@ -8,9 +8,9 @@ This repository is **open for research use**, and free for non-commercial use. R
 
 | License | Full Text | Covers | Where |
 |---|---|---|---|
-| **PolyForm Noncommercial 1.0.0** | [PolyForm-Noncommercial-1.0.0](PolyForm-Noncommercial-1.0.0) | The source code: the Single Generator and the Dual Generator with their parameter files and regression tests, the shared files in `resources/`, and the analyser and optimizer | `Single Generator/` (`Generator/`, `Parameters/`), `Dual Generator/` (`Dual_Generator/`, `Parameters/`), `regression/` (the regression tests of both and their test boards) and `resources/` on `main`; the `analyser_and_optimizer` branch |
-| **CC BY-NC-SA 4.0** | [CC-BY-NC-SA-4.0](CC-BY-NC-SA-4.0) | The pictures and the documentation | `docs/images/` (except the Web UI pictures), `docs/wiki/`, `README.md`, `CONTRIBUTING.md` |
-| **PolyForm Strict 1.0.0** | [PolyForm-Strict-1.0.0](PolyForm-Strict-1.0.0) | The Web UI and every aspect of it: its code, the workflow that publishes it, every page where the author publishes it, and its design (layout, look and feel, colours, panels, controls, icons, wording, help texts, and pictures and recordings of it) | `WebGUI/` and `.github/workflows/WebGUI-Pages.yml` on the `WebUI` branch, the published Web Tool, `docs/images/webui_*.png`; its own notice is `WebGUI/LICENSE.md` |
+| **PolyForm Noncommercial 1.0.0** | [PolyForm-Noncommercial-1.0.0](docs/licenses/PolyForm-Noncommercial-1.0.0) | The source code: the Single Generator and the Dual Generator with their parameter files and regression tests, the shared files in `Generators/resources/`, and the analyser and optimizer | `Generators/Single Generator/` (`Generator/`, `Parameters/`), `Generators/Dual Generator/` (`Dual_Generator/`, `Parameters/`), `regression/` (the regression tests of both and their test boards) and `Generators/resources/` on `main`; the `analyser_and_optimizer` branch |
+| **CC BY-NC-SA 4.0** | [CC-BY-NC-SA-4.0](docs/licenses/CC-BY-NC-SA-4.0) | The pictures and the documentation | `docs/images/` (except the Web UI pictures), `docs/wiki/`, `README.md`, `docs/CONTRIBUTING.md` |
+| **PolyForm Strict 1.0.0** | [PolyForm-Strict-1.0.0](docs/licenses/PolyForm-Strict-1.0.0) | The Web UI and every aspect of it: its code, the workflow that publishes it, every page where the author publishes it, and its design (layout, look and feel, colours, panels, controls, icons, wording, help texts, and pictures and recordings of it) | `WebGUI/` and `.github/workflows/WebGUI-Pages.yml` on the `WebUI` branch, the published Web Tool, `docs/images/webui_*.png`; its own notice is `WebGUI/LICENSE.md` |
 
 The Web UI runs the Single Generator unchanged. The generators, their pictures and their documentation stay under
 their own licenses above, not under the Web UI's.
@@ -47,10 +47,10 @@ author's written permission under those licenses, for everyone who accepts and f
    can never be raised.
 2. **Who gets it.** The fee is paid to RolandThsive (the author).
 3. **How it is reported.** You show your invoices against your payments to the project, so that anyone can check that
-   the balance is right. Both are recorded in the public [LEDGER.md](LEDGER.md), with proof.
+   the balance is right. Both are recorded in the public [LEDGER.md](docs/funding/LEDGER.md), with proof.
 4. **Where it goes.** All of it goes back into this project, and whatever is left over is donated, as described in the
    pledge below.
-5. **When it stops.** The fee stops after all the milestones in [MILESTONES.md](MILESTONES.md) are done. After that, a
+5. **When it stops.** The fee stops after all the milestones in [MILESTONES.md](docs/funding/MILESTONES.md) are done. After that, a
    new license applies, the same as the GPL.
 6. **Contributing back.** The permission above holds only while you contribute back appropriately: you credit this
    project, report what breaks and share what you improve. If you do not, you need written permission from the
@@ -67,7 +67,7 @@ Please get in touch by email (above) before you start. Approved organizations wi
 > **100% on record. 100% invested back. 100% disclosed.**
 
 Any money I accept from commercial users is invested back into this project in full, 100%, and is on record in the
-public [LEDGER.md](LEDGER.md), visible to everyone who can see this repository. Whatever is left over is donated to a
+public [LEDGER.md](docs/funding/LEDGER.md), visible to everyone who can see this repository. Whatever is left over is donated to a
 fund that supports innovation worldwide, chosen together by me and the paying company. See the
 [README](README.md#every-commercial-payment-goes-back-into-the-project).
 

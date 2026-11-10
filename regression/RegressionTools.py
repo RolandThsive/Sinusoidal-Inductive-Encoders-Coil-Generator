@@ -10,7 +10,8 @@ about the generators: it only reads what they wrote.  Needs Python 3 and numpy, 
                    layer), measured on the written coordinates with a cell grid, not with the generator's own code
     connectivity   per net: connected components, free ends, free ends that do not sit on a via of that net
     copper_extent  per layer: the innermost and outermost copper radius from the board centre
-    reader_differences  where resources/KiCadReader.py and this module's Board read the same file differently
+    reader_differences  where Generators/resources/KiCadReader.py and this module's Board read the same file
+                        differently
     exact_differences  two texts compared character for character; the lines that differ, for the test's message
     compare_text   two texts compared token by token: numbers within a tolerance, everything else exactly
     normalise_record  Parameters.txt without the lines that change with every run (time, folder, command, the
@@ -204,9 +205,9 @@ class Board:
 
 
 def reader_differences(read, board):
-    """Where the generators' own reader (read: a resources/KiCadReader.py Board) and this module's Board (board) of the
-    same file disagree, as lines for a test's message; [] when they read every value alike.  The two readers share no
-    code, so each checks the other."""
+    """Where the generators' own reader (read: a Generators/resources/KiCadReader.py Board) and this module's Board
+    (board) of the same file disagree, as lines for a test's message; [] when they read every value alike.  The two
+    readers share no code, so each checks the other."""
     out = []
 
     def same(what, a, b):

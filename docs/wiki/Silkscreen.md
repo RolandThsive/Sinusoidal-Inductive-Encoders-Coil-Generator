@@ -19,7 +19,7 @@ routed.
 | TX coil | A filled dot at each of the two via sites beside the stacked end, and a dashed line from the end to each site. Extend each end along its dashed line to its dot | `TX_1 TOP`, `TX_2 BOT`: each end with its layer |
 | Option | A dot on every via the generator placed (`SILKSCREEN_DOT_ON_ALL_VIAS = True`) | |
 
-The names are drawn with the repository's own stroke font (`resources/SilkscreenFont.py`: capitals, digits and a few
+The names are drawn with the repository's own stroke font (`Generators/resources/SilkscreenFont.py`: capitals, digits and a few
 signs), not as KiCad text, and each name is placed where it covers no other mark, name or via. The text on `B.SilkS` is
 mirrored, so it reads correctly from the bottom.
 
@@ -32,7 +32,7 @@ per dot. TX: extend each end along the dashed line to its dot.*
 
 ## 14.2 Where The Breaks Go
 
-The step reads the written board (with `resources/KiCadReader.py`) and looks for a spot on each coil where both
+The step reads the written board (with `Generators/resources/KiCadReader.py`) and looks for a spot on each coil where both
 vias have room on every layer:
 
 - The break is looked for on the coil's traces within `SILKSCREEN_SEARCH_SPAN_DEG` (30°) of the TX terminal, which the
@@ -57,7 +57,7 @@ TX (TX): both ends at (126.3, 100) (r = 26.30 mm, 0.0 deg), Top and Bottom; exte
 
 ## 14.3 Settings
 
-The settings are in `Single Generator/Parameters/SilkScreenSuggestion_Parameters.py`; each one is described in the
+The settings are in `Generators/Single Generator/Parameters/SilkScreenSuggestion_Parameters.py`; each one is described in the
 [Parameter Reference Single Generator](Parameter-Reference-Single-Generator.md#226-silkscreen-suggestion-silkscreensuggestion_parameterspy).
 The step never stops a generation: a wrong value falls back to its default with a warning, and anything the step cannot
 do (no spot with room, no free place for a name, a missing font) is printed as a warning while the boards are written

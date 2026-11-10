@@ -39,8 +39,8 @@ SILKSCREEN_DOT_ON_ALL_VIAS = False  # True: also a dot on every via the generato
 # GEOMETRY OF THE MARKS
 # =============================================================================
 SILKSCREEN_LINE_WIDTH_MM  = 0.12    # line width of the boxes, lines and dot outlines
-# The lead names are drawn with the repository's own stroke font (resources/SilkscreenFont.py at the root of the
-# repository: capitals, digits, a few signs; no KiCad font), as lines on the silkscreen, each name placed where it
+# The lead names are drawn with the repository's own stroke font (Generators/resources/SilkscreenFont.py, next to the
+# generators: capitals, digits, a few signs; no KiCad font), as lines on the silkscreen, each name placed where it
 # covers no other mark, name or via.
 SILKSCREEN_TEXT_SIZE_MM   = 0.5     # height of a capital (mm); a glyph is 2/3 as wide, the letter pitch 5/6 of the height
 SILKSCREEN_TEXT_STROKE_MM = 0.1     # line width of the lettering.  Most fabs print silkscreen lines down to about

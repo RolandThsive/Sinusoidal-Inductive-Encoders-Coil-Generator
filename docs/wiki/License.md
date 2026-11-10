@@ -5,8 +5,8 @@ content, an extra term on everything the tool produces (34.1), and commercial te
 
 | Content | License | What it allows |
 |---|---|---|
-| Generator code (`Single Generator/` and `Dual Generator/` with their parameter files, their regression tests and test boards in `regression/`, and `resources/`, on `main`; the `analyser_and_optimizer` branch) | [PolyForm Noncommercial 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0/) | Use, change and share, for noncommercial purposes |
-| Documentation and images (`docs/images/` except the Web Tool pictures, `docs/wiki/` and this wiki, `README.md`, `CONTRIBUTING.md`) | [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) | Share and adapt with credit, noncommercial, under the same license |
+| Generator code (`Generators/Single Generator/` and `Generators/Dual Generator/` with their parameter files, their regression tests and test boards in `regression/`, and `Generators/resources/`, on `main`; the `analyser_and_optimizer` branch) | [PolyForm Noncommercial 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0/) | Use, change and share, for noncommercial purposes |
+| Documentation and images (`docs/images/` except the Web Tool pictures, `docs/wiki/` and this wiki, `README.md`, `docs/CONTRIBUTING.md`) | [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) | Share and adapt with credit, noncommercial, under the same license |
 | Web Tool (`WebGUI/` and `.github/workflows/WebGUI-Pages.yml` on the `WebUI` branch, the published tool, its design, and the `docs/images/webui_*.png` pictures) | [PolyForm Strict 1.0.0](https://polyformproject.org/licenses/strict/1.0.0/) | Noncommercial use only; no changes and no redistribution |
 
 The Web Tool's license covers the tool and every aspect of it: its code, design, layout, look and feel, colours,
@@ -27,7 +27,7 @@ for an overview, the links to the full license texts and the contact details.
 > back.**
 >
 > - **On record.** Every payment in and every payment out is entered, with proof, in the public
->   [`LEDGER.md`](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/blob/main/LEDGER.md).
+>   [`LEDGER.md`](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/blob/main/docs/funding/LEDGER.md).
 >   Money that is not in the ledger is not accepted, not even a single cent.
 > - **Fully disclosed.** The ledger is open to everyone who can see this repository. The transparency has no opaque
 >   portions. A contributor's name may be struck out to protect confidentiality, but never the receipt or the
@@ -68,12 +68,12 @@ licenses above, and using the project commercially means accepting them.
 2. **Who gets it.** The fee is paid to RolandThsive (the author).
 3. **How it is reported.** You show your invoices against your payments to the project, so that anyone can check that
    the balance is right. Both are recorded in the public
-   [`LEDGER.md`](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/blob/main/LEDGER.md), with
+   [`LEDGER.md`](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/blob/main/docs/funding/LEDGER.md), with
    proof.
 4. **Where it goes.** All of it goes back into this project, and whatever is left over is donated, as the pledge above
    describes.
 5. **When it stops.** The fee stops after all the milestones in
-   [`MILESTONES.md`](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/blob/main/MILESTONES.md)
+   [`MILESTONES.md`](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/blob/main/docs/funding/MILESTONES.md)
    are done. After that, a new license applies, the same as the GPL.
 6. **Contributing back.** The permission holds only while you contribute back appropriately: you credit this project,
    report what breaks and share what you improve. If you do not, you need written permission from the author.
@@ -85,7 +85,7 @@ channels in the [README](https://github.com/RolandThsive/Inductive-Encoder-Sinus
 ## 34.3 Contributions
 
 Contributions are welcome. This is the contributor agreement from the repository's
-[`CONTRIBUTING.md`](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/blob/main/CONTRIBUTING.md#contributor-agreement).
+[`CONTRIBUTING.md`](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/blob/main/docs/CONTRIBUTING.md#contributor-agreement).
 
 By sending a pull request, patch, issue text, measurement, picture or any other contribution ("Contribution"), you
 agree to the following, and you confirm it by adding the line `Signed-off-by: Your Name <email>` to every commit and to
@@ -138,12 +138,12 @@ published statements, listed at the end. It is not legal advice and is not a sta
 - **The format is published.** KiCad documents its file formats openly for developers, including the board format the
   generator writes (the s-expression `.kicad_pcb` format, used by every KiCad version from 6.0). The documentation sets
   no license condition on reading or writing the format.
-- **The generator writes the format from scratch.** Its writer (`Single Generator/Generator/Core/PCBWriter.py`, which the Dual Generator uses too) builds the text of
+- **The generator writes the format from scratch.** Its writer (`Generators/Single Generator/Generator/Core/PCBWriter.py`, which the Dual Generator uses too) builds the text of
   the file itself, using only Python's standard library and NumPy. It does not contain, copy or link any KiCad source
   code, does not use KiCad's Python interface, and does not use any KiCad library (symbols, footprints or 3D models).
   Every board is made only of tracks, vias, outlines, polygons and silkscreen lines and circles drawn by the
   generator, on KiCad's standard layer names, which the format itself defines. The lead names on the silkscreen are
-  drawn with the repository's own stroke font (`resources/SilkscreenFont.py`), not with a KiCad font.
+  drawn with the repository's own stroke font (`Generators/resources/SilkscreenFont.py`), not with a KiCad font.
 - **Using `.kicad_pcb`.** The file extension and the format are what let KiCad open the board. Using them describes
   what the file is, and makes no claim that KiCad produced it.
 

@@ -54,7 +54,7 @@ Route set 1's leads out across set 2 on the free Bottom layer (see
 
 ## 20.3 Settings
 
-The settings are in `Dual Generator/Parameters/Dual_SilkScreenSuggestion_Parameters.py`. They have the same names, defaults
+The settings are in `Generators/Dual Generator/Parameters/Dual_SilkScreenSuggestion_Parameters.py`. They have the same names, defaults
 and ranges as the Single Generator's (see
 [Parameter Reference Single Generator](Parameter-Reference-Single-Generator.md#226-silkscreen-suggestion-silkscreensuggestion_parameterspy)),
 except `SILKSCREEN_BREAK_LAYERS` (`["F.Cu", "In1.Cu"]`). `SILKSCREEN_SUGGESTION = False` leaves the stator file

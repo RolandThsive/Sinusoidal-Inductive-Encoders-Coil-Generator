@@ -1,6 +1,6 @@
 # 22. Parameter Reference Single Generator
 
-Every setting of the Single Generator lives in a parameter file in `Single Generator/Parameters/`. These are the only files you edit. Units are millimetres,
+Every setting of the Single Generator lives in a parameter file in `Generators/Single Generator/Parameters/`. These are the only files you edit. Units are millimetres,
 degrees and hertz unless a name says otherwise. The **Range** column is what the parameter checker accepts; "None"
 usually means the generator works the value out itself (the row says what it does). The Web Tool shows the same names in its Advanced mode, except the output settings of 22.1.1 (`GENERATOR_MODE` is its Strict switch), and the electrical estimate settings of 22.1.4 and 22.5, which it does not use. `VIA_TYPE` and the silkscreen settings of 22.6 are not in it either: the Web Tool runs an older copy of the generator, without blind vias and without the silkscreen suggestion. The Dual Generator's files are described in
 [Parameter Reference Dual Generator](Parameter-Reference-Dual-Generator.md).
@@ -9,7 +9,7 @@ usually means the generator works the value out itself (the row says what it doe
 under construction on the [`analyser_and_optimizer` branch](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/tree/analyser_and_optimizer).
 
 > [!NOTE]
-> Defaults are those of the parameter files in `Single Generator/Parameters/` on `main`. Settings marked *only if* are greyed out ("not used now") in
+> Defaults are those of the parameter files in `Generators/Single Generator/Parameters/` on `main`. Settings marked *only if* are greyed out ("not used now") in
 > the Web Tool when the design does not use them.
 
 ## 22.1 Board (`Board_Parameters.py`)
@@ -18,7 +18,7 @@ under construction on the [`analyser_and_optimizer` branch](https://github.com/R
 
 | Name | Default | Range | Meaning |
 |---|---|---|---|
-| `OUTPUT_DIR` | `"Output"` | text | Folder in which each run's `Coil_...` folder is made. A relative path is taken from the `Single Generator` folder; a full path is used as it is. |
+| `OUTPUT_DIR` | `"Output"` | text | Folder in which each run's `Coil_...` folder is made. A relative path is taken from the `Generators/Single Generator` folder; a full path is used as it is. |
 | `STATOR_FILE`, `ROTOR_FILE` | `Stator.kicad_pcb`, `Rotor.kicad_pcb` | file names | Names of the two boards inside each run folder. They must differ, also without the extension (each board gets a KiCad project file of its own name, ending in `.kicad_pro`, with its design rules), and should end in `.kicad_pcb`. |
 | `GENERATOR_MODE` | `"normal"` | `normal`, `strict` | What a warning about the finished boards does (a clearance, the board edge, the page, the rotor). `normal`: such a warning, for example a gap smaller than `MIN_CLEARANCE_MM`, is printed and the boards are written. `strict`: every such warning is an error and nothing is written. Warnings from the parameter check and from the electrical estimate never stop the run. Copper that overlaps copper of another net (a short) is always an error. Capitals do not matter. |
 | `CENTER_X_MM`, `CENTER_Y_MM` | 100, 100 | number | Position of the sensor axis on the KiCad page. |

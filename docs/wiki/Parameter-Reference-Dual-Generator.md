@@ -1,6 +1,6 @@
 # 23. Parameter Reference Dual Generator
 
-Every setting of the Dual Generator lives in a parameter file in `Dual Generator/Parameters/`. These are the only files
+Every setting of the Dual Generator lives in a parameter file in `Generators/Dual Generator/Parameters/`. These are the only files
 you edit; `Dual_Parameters.py` only gathers them. Units are millimetres, degrees and hertz unless a name says otherwise.
 
 Every name is the Single Generator's own wherever the meaning is the same, so the
@@ -16,7 +16,7 @@ names (23.2.6) are in the board file (one disc carries both rings). The generato
 Generator's own, so a parameter the Single Generator gains is a dual parameter at once, in the matching file.
 
 > [!NOTE]
-> Defaults are those of the parameter files in `Dual Generator/Parameters/` on `main`. A name put in the wrong dual file
+> Defaults are those of the parameter files in `Generators/Dual Generator/Parameters/` on `main`. A name put in the wrong dual file
 > is ignored with a warning that names the file it belongs in. The silkscreen names are the exception: in another file
 > the warning only says the name is not a parameter of this program, and it is ignored too.
 
@@ -37,7 +37,7 @@ Generator's own, so a parameter the Single Generator gains is a dual parameter a
 
 | Name | Default | Meaning |
 |---|---|---|
-| `OUTPUT_DIR` | `"Output"` | Folder in which each run's `DualCoil_...` folder is made. A relative path is taken from the `Dual Generator` folder; a full path is used as it is. The folder is `DualCoil_<bore radius>_<outline radius>_<set 1 loops>x<set 2 loops>_<set 1 TX turns>x<set 2 TX turns>`, with `__1`, `__2`, ... added if it exists |
+| `OUTPUT_DIR` | `"Output"` | Folder in which each run's `DualCoil_...` folder is made. A relative path is taken from the `Generators/Dual Generator` folder; a full path is used as it is. The folder is `DualCoil_<bore radius>_<outline radius>_<set 1 loops>x<set 2 loops>_<set 1 TX turns>x<set 2 TX turns>`, with `__1`, `__2`, ... added if it exists |
 | `STATOR_FILE`, `ROTOR_FILE` | `Stator.kicad_pcb`, `Rotor.kicad_pcb` | Names of the two boards inside each run folder; each gets a KiCad project file of its own name (`.kicad_pro`) with its design rules |
 | `GENERATOR_MODE` | `"normal"` | `"normal"`: a clearance warning on the finished boards is printed and the boards are written. `"strict"`: every such warning is an error. A short, and copper of one set inside the other set's ring, are always errors |
 | `CENTER_X_MM`, `CENTER_Y_MM` | 100, 100 | Sensor axis position on the KiCad page |

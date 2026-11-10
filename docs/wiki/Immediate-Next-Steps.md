@@ -11,7 +11,7 @@
   including whether two free-running TX oscillators work side by side, which has not been shown yet.
 
 The order of the work is set by the milestones in
-[`MILESTONES.md`](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/blob/main/MILESTONES.md):
+[`MILESTONES.md`](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/blob/main/docs/funding/MILESTONES.md):
 the generators first (the single and the dual generator are done, the arc and the linear one are next), then the
 testing of each, the corrections from the measurements,
 and working examples.

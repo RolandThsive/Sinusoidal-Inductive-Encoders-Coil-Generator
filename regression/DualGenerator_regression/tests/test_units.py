@@ -433,9 +433,9 @@ class Assembler(unittest.TestCase):
 
 
 class KiCadReading(unittest.TestCase):
-    """resources/KiCadReader.py reads every Dual reference board as the test parser (RegressionTools.Board, which
-    shares no code with it) does.  Its other tests (boards KiCad saved again, every via kind) are in the Single suite's
-    test_units.py."""
+    """Generators/resources/KiCadReader.py reads every Dual reference board as the test parser (RegressionTools.Board,
+    which shares no code with it) does.  Its other tests (boards KiCad saved again, every via kind) are in the Single
+    suite's test_units.py."""
 
     def test_every_reference_board_reads_as_the_test_parser_reads_it(self):
         for name, folder in H.S.boards().items():

@@ -1,7 +1,7 @@
 """
 test_units.py  -  the small building blocks of the Single Generator on their own: the output folder names, the
 KiCad writer, the report and colour classes, the parameter helpers, the geometry helpers, and the shared files in
-resources/ (the picture makers and the KiCad reader).  Fast, no board written.
+Generators/resources/ (the picture makers and the KiCad reader).  Fast, no board written.
 """
 
 import collections
@@ -456,8 +456,9 @@ class SharedHooks(unittest.TestCase):
 
 
 class Pictures(unittest.TestCase):
-    """resources/RepresentativeSVGMaker.py and ActualSVGMaker.py draw every rotor the generators can write, also a
-    custom rotor without outline or bore (ROTOR_CUSTOM_OUTLINE_RADIUS_MM / ROTOR_CUSTOM_BORE_RADIUS_MM = None)."""
+    """Generators/resources/RepresentativeSVGMaker.py and ActualSVGMaker.py draw every rotor the generators can write,
+    also a custom rotor without outline or bore (ROTOR_CUSTOM_OUTLINE_RADIUS_MM / ROTOR_CUSTOM_BORE_RADIUS_MM =
+    None)."""
 
     OUTLINE, BORE = "(end 100 127)", "(end 100 115)"      # the rotor's two Edge.Cuts circles in Board001-default
 
@@ -517,9 +518,9 @@ class Pictures(unittest.TestCase):
 
 
 class KiCadReading(unittest.TestCase):
-    """resources/KiCadReader.py, which reads the boards for the silkscreen step, the two picture makers and the Dual
-    Layout pictures.  It must read every reference board as the test parser (RegressionTools.Board, which shares no
-    code with it) does, a board that KiCad saved again as the board itself, and every via kind.  The files in
+    """Generators/resources/KiCadReader.py, which reads the boards for the silkscreen step, the two picture makers and
+    the Dual Layout pictures.  It must read every reference board as the test parser (RegressionTools.Board, which
+    shares no code with it) does, a board that KiCad saved again as the board itself, and every via kind.  The files in
     tests/kicad_files: Board047's stator and rotor as the generator wrote them and as KiCad 7 and KiCad 10 saved them
     again (pcbnew.LoadBoard and SaveBoard in the kicad/kicad images the CI uses), and a small 4-layer board with one
     via of each kind, by hand, with its KiCad 10 copy."""

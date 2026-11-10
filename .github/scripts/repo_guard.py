@@ -23,7 +23,7 @@ import subprocess
 import sys
 
 MAX_BYTES = 5 * 1024 * 1024
-OUTPUT_FOLDERS = ("Single Generator/Output/", "Dual Generator/Output/")
+OUTPUT_FOLDERS = ("Generators/Single Generator/Output/", "Generators/Dual Generator/Output/")
 OUTPUT_PLACEHOLDER = "Output Folders Show Up Here.txt"
 BINARY = (".png", ".jpg", ".jpeg", ".gif", ".webp", ".gz", ".pdf", ".ttf", ".otf", ".woff", ".woff2", ".ico")
 

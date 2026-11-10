@@ -89,7 +89,7 @@ Each suite has the same files in its `tests` folder:
 | `test_invariants.py` | What every written board must obey: the file format, the layer table, the nets, copper inside the edges with the right widths, the clearance between nets, closed RX coils, the TX in one piece with its terminal at 0°, the rotor sectors, the record; the same values written twice are identical | The same for a dual board, each set with its own values (layers, fingers, vias, clearance): six nets, set 1 inside set 2 by the recorded gap, the TX ends at `TERMINAL_1_DEG` / `TERMINAL_2_DEG`, the two rotor rings |
 | `test_silkscreen.py` | The lead-cutting silkscreen: three suggestions on both sides, via sites with room, lettering off the vias and mirrored on the bottom, the settings with their fallbacks, the font, the name placer, a board KiCad saved again, a missing KiCad reader | Six suggestions, names with the set number, breaks near each set's terminal, sides and labels options |
 | `test_cli.py` | The generator started as a script in a fresh Python process, from its folder and from elsewhere, with `--check`, `--help` and a bad option | The same, plus the checker on its own and the promise that a dual run leaves no `__pycache__` in the Single Generator |
-| `test_units.py` | The folder names, the OUTPUT_DIR rule, the KiCad writer, the report and colour classes, the parameter and geometry helpers, the hooks the Dual Generator builds on, and the KiCad reader of `resources/`: every reference board read as the test parser reads it, boards KiCad 7 and 10 saved again (in `tests/kicad_files/`), every via kind, the pictures of a board saved again | The set parameters handed to the Single Generator and the "set k:" findings, the layout combinations, the folder names, the Single's OUTPUT_DIR rule, a guard that the dual files supply every name the Single Generator knows, and the KiCad reader on every dual reference board |
+| `test_units.py` | The folder names, the OUTPUT_DIR rule, the KiCad writer, the report and colour classes, the parameter and geometry helpers, the hooks the Dual Generator builds on, and the KiCad reader of `Generators/resources/`: every reference board read as the test parser reads it, boards KiCad 7 and 10 saved again (in `tests/kicad_files/`), every via kind, the pictures of a board saved again | The set parameters handed to the Single Generator and the "set k:" findings, the layout combinations, the folder names, the Single's OUTPUT_DIR rule, a guard that the dual files supply every name the Single Generator knows, and the KiCad reader on every dual reference board |
 
 `harness.py` loads the generator, applies the overrides, runs it, and writes each board once per run for all the tests
 that need it.
@@ -97,7 +97,7 @@ that need it.
 The parsing and measuring code both suites share is `regression/RegressionTools.py`. It reads the written `.kicad_pcb`
 back and measures it independently of the generator: the smallest clearance between nets on a cell grid, the
 connectivity of each net, the copper extent of each layer, and the comparison with the saved files. It shares no code
-with the reader the generators' own tools use, `resources/KiCadReader.py`, on purpose: a test in each suite holds the
+with the reader the generators' own tools use, `Generators/resources/KiCadReader.py`, on purpose: a test in each suite holds the
 two to the same values on every reference board, so each checks the other.
 
 ## 30.4 On Every Pull Request (CI)

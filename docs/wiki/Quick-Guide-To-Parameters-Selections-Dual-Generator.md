@@ -120,7 +120,7 @@ thing at a time:
 | Vias and clearance | 0.6 / 0.3 mm, 0.15 mm | Leave room in the inner set's tight TX ring |
 | Board thickness | 3.2 mm | |
 
-Check before generating, then generate, from the `Dual Generator` folder:
+Check before generating, then generate, from the `Generators/Dual Generator` folder:
 
 ```bash
 python Dual_Generator/Checks/Dual_CheckParameters.py

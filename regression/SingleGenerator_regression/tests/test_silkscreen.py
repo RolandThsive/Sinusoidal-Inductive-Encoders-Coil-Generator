@@ -253,8 +253,8 @@ class Parts(unittest.TestCase):
         self.assertEqual(set(b.net_name.values()), {"", "TX", "1", "2"})
 
     def test_board_reads_a_file_kicad_saved_again(self):
-        """The step reads the stator with resources/KiCadReader.py, so a stator that KiCad 10 saved again (its own
-        order of the items, each over several lines, the nets given by name) gives it the same copper."""
+        """The step reads the stator with Generators/resources/KiCadReader.py, so a stator that KiCad 10 saved again
+        (its own order of the items, each over several lines, the nets given by name) gives it the same copper."""
         self.assertEqual(os.path.basename(os.path.dirname(LCS.READER_FILE)), "resources")
 
         def copper(name):
@@ -270,8 +270,8 @@ class Parts(unittest.TestCase):
         self.assertEqual(copper("board047_stator_saved_by_kicad10.kicad_pcb"), written)
 
     def test_a_missing_reader_leaves_the_file_as_it_was(self):
-        """Without resources/KiCadReader.py the step cannot read the board: it says so, and the stator file stays as
-        it was (the step never fails a generation)."""
+        """Without Generators/resources/KiCadReader.py the step cannot read the board: it says so, and the stator file
+        stays as it was (the step never fails a generation)."""
         folder = tempfile.mkdtemp(dir=H.temp_root())
         path = os.path.join(folder, "Stator.kicad_pcb")
         with open(path, "w", encoding="utf-8", newline="") as fh:

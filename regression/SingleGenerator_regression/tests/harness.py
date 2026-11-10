@@ -25,8 +25,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))               # .../SingleGene
 SUITE = os.path.dirname(HERE)                                    # .../SingleGenerator_regression
 REGRESSION = os.path.dirname(SUITE)                              # .../regression
 REPO = os.path.dirname(REGRESSION)
-PROJECT = os.path.join(REPO, "Single Generator")
-RESOURCES = os.path.join(REPO, "resources")
+PROJECT = os.path.join(REPO, "Generators", "Single Generator")
+RESOURCES = os.path.join(REPO, "Generators", "resources")
 
 sys.dont_write_bytecode = True                                   # the suite leaves no __pycache__ behind
 for _p in (PROJECT, RESOURCES, REGRESSION):

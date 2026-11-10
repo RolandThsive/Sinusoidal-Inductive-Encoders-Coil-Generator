@@ -20,7 +20,7 @@ import unittest
 import harness as H
 import RegressionHarness as RH
 
-PICTURES = ("_Representative.svg", "_Actual.svg")   # resources/RepresentativeSVGMaker.py, ActualSVGMaker.py
+PICTURES = ("_Representative.svg", "_Actual.svg")   # Generators/resources/RepresentativeSVGMaker.py, ActualSVGMaker.py
 
 
 class BoardReferences(unittest.TestCase):

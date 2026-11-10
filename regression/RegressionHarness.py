@@ -58,12 +58,12 @@ ONLY_BOARDS = [b.strip() for b in os.environ.get("REGRESSION_BOARDS", "").split(
 # the two suites: their folder, the generator's own Parameters folder, and which module each parameter file feeds
 SUITES = {
     "single": dict(root=os.path.join(HERE, "SingleGenerator_regression"),
-                   parameters=os.path.join(REPO, "Single Generator", "Parameters"),
+                   parameters=os.path.join(REPO, "Generators", "Single Generator", "Parameters"),
                    files={"Board_Parameters.py": "", "IC_Parameters.py": "", "RX_Parameters.py": "",
                           "Rotor_Parameters.py": "", "TX_Parameters.py": "",
                           "SilkScreenSuggestion_Parameters.py": "SILK"}),
     "dual": dict(root=os.path.join(HERE, "DualGenerator_regression"),
-                 parameters=os.path.join(REPO, "Dual Generator", "Parameters"),
+                 parameters=os.path.join(REPO, "Generators", "Dual Generator", "Parameters"),
                  files={"Dual_Board_Parameters.py": "BOARD", "Dual_RX1_Parameters.py": "RX1",
                         "Dual_RX2_Parameters.py": "RX2", "Dual_TX1_Parameters.py": "TX1",
                         "Dual_TX2_Parameters.py": "TX2", "Dual_Rotor1_Parameters.py": "ROTOR1",

@@ -23,8 +23,8 @@ contributions of every kind are welcome, from a measurement on a real board to a
 
 ## How Can You Get Involved?
 
-1. Read the [README](README.md) and the [Wiki](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki).
-2. Run a generator from the `Single Generator` or the `Dual Generator` folder (see the Quick Start in the README) and
+1. Read the [README](../README.md) and the [Wiki](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki).
+2. Run a generator from the `Generators/Single Generator` or the `Generators/Dual Generator` folder (see the Quick Start in the README) and
    look at what it builds.
 3. Open an issue on GitHub to report a problem, ask a question or propose a change before starting larger work.
 4. Send a pull request for a fix or improvement. Keep it focused, so that it is easy to review.
@@ -37,14 +37,14 @@ contributions of every kind are welcome, from a measurement on a real board to a
   hardware-validation notice wherever figures are given.
 - **Keep changes small and clear.** One topic per pull request, with a short description of what changed and why.
 - **Check before you send.** Run the checks of the generator you changed (`python Generator/Run/RunCoilGenerator.py
-  --check` from the `Single Generator` folder, `python Dual_Generator/Run/Dual_RunCoilGenerator.py --check` from the
-  `Dual Generator` folder) and the regression tests (`python regression/run_regression.py single` or `dual` from the
+  --check` from the `Generators/Single Generator` folder, `python Dual_Generator/Run/Dual_RunCoilGenerator.py --check` from the
+  `Generators/Dual Generator` folder) and the regression tests (`python regression/run_regression.py single` or `dual` from the
   repository root; a change that alters the boards adds a test board, see `regression/README.md`), and the lint
   (`python -m pip install -r requirements-dev.txt`, then `ruff check .`). Every pull request runs the CI on GitHub: both
   suites on Ubuntu, Windows and macOS, the install on Python 3.11 to 3.15, the boards in KiCad 7 to 10, the lint and the
-  repository checks (see [Regression Testing](docs/wiki/Regression-Testing.md)).
-- **Parameters stay in the parameter files.** The only files a user edits are in `Single Generator/Parameters/` and
-  `Dual Generator/Parameters/`.
+  repository checks (see [Regression Testing](wiki/Regression-Testing.md)).
+- **Parameters stay in the parameter files.** The only files a user edits are in `Generators/Single Generator/Parameters/` and
+  `Generators/Dual Generator/Parameters/`.
 - **Update the documentation with the code.** If a parameter, command or output changes, change the wiki and README to
   match.
 - **Do not include secrets or personal data** in issues, pull requests or measurement files.
@@ -73,7 +73,7 @@ the pull request description.
    the project, except the right to be named: contributors are credited in the history and may be listed in the
    README.
 6. **Same terms for output.** Your Contribution and everything made from it follow the project's terms, including the
-   rule that no output may be used commercially without written permission ([LICENSE.md](LICENSE.md)).
+   rule that no output may be used commercially without written permission ([LICENSE.md](../LICENSE.md)).
 7. **No obligation.** The author may refuse, change or remove any Contribution. The Contribution is given as is, without
    warranty.
 8. **Public record.** Your name and email are kept in the public history of the repository.
@@ -85,7 +85,7 @@ Contributions that do not carry the sign-off are not merged.
 The source code is licensed under the [PolyForm Noncommercial License 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0/),
 and the pictures and documentation under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/). The Web
 UI has its own license, [PolyForm Strict 1.0.0](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/blob/WebUI/WebGUI/LICENSE.md).
-The full text and the required notices are in [LICENSE.md](LICENSE.md).
+The full text and the required notices are in [LICENSE.md](../LICENSE.md).
 
 Any copy, fork or derived work must state clearly that it is derived from the Sinusoidal Coil Generator and link to the
 original repository. **Commercial use, including of any output, requires written permission** from the author: contact

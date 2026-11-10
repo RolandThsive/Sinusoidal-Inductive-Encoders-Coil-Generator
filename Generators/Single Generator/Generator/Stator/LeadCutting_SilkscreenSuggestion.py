@@ -12,8 +12,8 @@ for each of those vias that has room on every layer (through vias) and inside th
               lead names (TX_1 TOP, TX_2 BOT: each end with its layer)
     (option)  a dot on every via the generator placed
 
-The names are drawn as strokes of the repository's own font (resources/SilkscreenFont.py at the root of the
-repository, loaded by its path), not as KiCad text, and each name is placed where it covers no other mark, no
+The names are drawn as strokes of the repository's own font (Generators/resources/SilkscreenFont.py, next to the
+generators, loaded by its path), not as KiCad text, and each name is placed where it covers no other mark, no
 other name and no via, inside the board edges.  The marks go on F.SilkS and/or B.SilkS (bottom text mirrored).
 The settings are in Parameters/SilkScreenSuggestion_Parameters.py.  No copper is changed and nothing else in
 the generator is touched: the step reads the written file (with the repository's KiCad reader,
@@ -45,7 +45,7 @@ from Generator.Stator.StatorAssembly import TERMINAL_DEG
 PARAMETER_MODULE = "SilkScreenSuggestion_Parameters"
 PARAMETER_FILE = PARAMETER_MODULE + ".py"
 
-# the repository's shared files, loaded by their path: resources/ at the root of the repository (this file is four
+# the repository's shared files, loaded by their path: resources/ in the Generators folder (this file is four
 # folders below it) holds the stroke font and the KiCad board reader
 RESOURCES = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))),
                          "resources")
