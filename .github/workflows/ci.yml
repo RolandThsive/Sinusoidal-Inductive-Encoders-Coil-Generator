@@ -183,7 +183,8 @@ jobs:
           python "Generators/Dual Generator/Dual_Generator/Run/Dual_RunCoilGenerator.py" --no-color
           for g in Single Dual; do
             mkdir -p ".fresh/$g"
-            cp "Generators/$g Generator/Output/"*/Stator.kicad_* "Generators/$g Generator/Output/"*/Rotor.kicad_* ".fresh/$g/"
+            out="Generators/$g Generator/Output"
+            cp "$out/"*/Stator.kicad_* "$out/"*/Rotor.kicad_* ".fresh/$g/"
           done
       - name: Pull KiCad ${{ matrix.kicad }}
         run: docker pull --quiet "kicad/kicad:${{ matrix.kicad }}"

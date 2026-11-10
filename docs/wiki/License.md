@@ -68,8 +68,8 @@ licenses above, and using the project commercially means accepting them.
 2. **Who gets it.** The fee is paid to RolandThsive (the author).
 3. **How it is reported.** You show your invoices against your payments to the project, so that anyone can check that
    the balance is right. Both are recorded in the public
-   [`LEDGER.md`](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/blob/main/docs/funding/LEDGER.md), with
-   proof.
+   [`LEDGER.md`](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/blob/main/docs/funding/LEDGER.md),
+   with proof.
 4. **Where it goes.** All of it goes back into this project, and whatever is left over is donated, as the pledge above
    describes.
 5. **When it stops.** The fee stops after all the milestones in

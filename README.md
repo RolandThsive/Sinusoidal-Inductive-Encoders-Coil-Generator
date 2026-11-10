@@ -58,9 +58,9 @@ python Generator/Run/RunCoilGenerator.py --stator     # Only the stator
 python Generator/Run/RunCoilGenerator.py --rotor      # Only the rotor
 ```
 
-Edit only the files in `Generators/Single Generator/Parameters/`. Each run writes a new folder in `Generators/Single Generator/Output/`
-with `Stator.kicad_pcb`, `Rotor.kicad_pcb` (each with a KiCad project file that holds its design rules),
-`Parameters.txt` and two SVG pictures of the boards
+Edit only the files in `Generators/Single Generator/Parameters/`. Each run writes a new folder in
+`Generators/Single Generator/Output/` with `Stator.kicad_pcb`, `Rotor.kicad_pcb` (each with a KiCad project file that
+holds its design rules), `Parameters.txt` and two SVG pictures of the boards
 ([Representative and Actual](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Output-Pictures)),
 and never overwrites an earlier one. Prefer a
 browser? Use the [Web Tool](https://ro-h-bots.blogspot.com/p/inductive-encoder-sinusoidal-coil.html). Full
@@ -105,14 +105,15 @@ Help with boards, equipment, measurements, code and documentation is welcome. Re
 ## Licensing
 
 This repository is **open for research use** and free for non-commercial use: researchers, students, hobbyists and
-curious engineers are welcome. Three licenses apply: [PolyForm Noncommercial 1.0.0](docs/licenses/PolyForm-Noncommercial-1.0.0)
-for the source code, [CC BY-NC-SA 4.0](docs/licenses/CC-BY-NC-SA-4.0) for the pictures and documentation, and
-[PolyForm Strict 1.0.0](docs/licenses/PolyForm-Strict-1.0.0) for the Web UI. [LICENSE.md](LICENSE.md) says which one applies where
-and what each allows.
+curious engineers are welcome. Three licenses apply:
+[PolyForm Noncommercial 1.0.0](docs/licenses/PolyForm-Noncommercial-1.0.0) for the source code,
+[CC BY-NC-SA 4.0](docs/licenses/CC-BY-NC-SA-4.0) for the pictures and documentation, and
+[PolyForm Strict 1.0.0](docs/licenses/PolyForm-Strict-1.0.0) for the Web UI. [LICENSE.md](LICENSE.md) says which one
+applies where and what each allows.
 
 **Commercial use requires written permission.** Companies and startups are welcome: you pay 0.2% of the net sale
-price of every unit sold and every paid service, reported in the public [LEDGER.md](docs/funding/LEDGER.md). The full terms are in
-[LICENSE.md](LICENSE.md#commercial-use). Approved organisations will be listed here.
+price of every unit sold and every paid service, reported in the public [LEDGER.md](docs/funding/LEDGER.md). The full
+terms are in [LICENSE.md](LICENSE.md#commercial-use). Approved organisations will be listed here.
 
 **Thanks to our approved commercial users:** *None yet.*
 
@@ -128,9 +129,9 @@ price of every unit sold and every paid service, reported in the public [LEDGER.
 > **100% ON RECORD. 100% INVESTED BACK. 100% DISCLOSED.**
 
 Any money accepted from commercial users goes back into this project in full, and all of it is on record. Nothing is
-taken out as profit. Every payment, expense and donation is in the public [LEDGER.md](docs/funding/LEDGER.md), with proof. The fee
-stops when every milestone in [MILESTONES.md](docs/funding/MILESTONES.md) is done, and the license then becomes the same as the GPL,
-truly open source.
+taken out as profit. Every payment, expense and donation is in the public [LEDGER.md](docs/funding/LEDGER.md), with
+proof. The fee stops when every milestone in [MILESTONES.md](docs/funding/MILESTONES.md) is done, and the license then
+becomes the same as the GPL, truly open source.
 
 <details>
 <summary>The full pledge</summary>

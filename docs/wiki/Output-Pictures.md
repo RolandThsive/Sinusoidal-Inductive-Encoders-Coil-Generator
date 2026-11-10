@@ -7,10 +7,10 @@ Every run that writes both boards also draws two SVG pictures of them into the s
   easy to tell apart.
 - `<folder name>_Actual.svg`: the copper of the board as it is, 1:1 in mm, with no text and nothing widened.
 
-Both are drawn by `Generators/resources/RepresentativeSVGMaker.py` and `Generators/resources/ActualSVGMaker.py`. They read only the two
-`.kicad_pcb` files the run wrote, with the repository's KiCad reader (`Generators/resources/KiCadReader.py`), need nothing but
-Python 3, and open in any browser. In both, the stator is on the
-left and the rotor on the right, and the layers have the same colours: Top red, Inner 1 green, Inner 2 yellow,
+Both are drawn by `Generators/resources/RepresentativeSVGMaker.py` and `Generators/resources/ActualSVGMaker.py`. They
+read only the two `.kicad_pcb` files the run wrote, with the repository's KiCad reader
+(`Generators/resources/KiCadReader.py`), need nothing but Python 3, and open in any browser. In both, the stator is on
+the left and the rotor on the right, and the layers have the same colours: Top red, Inner 1 green, Inner 2 yellow,
 Bottom blue.
 
 ## 28.1 Representative And Actual
@@ -77,9 +77,9 @@ rings.*
 
 - At the end of every Single and Dual run that writes both boards, after `Parameters.txt` and the silkscreen
   suggestion. A run with `--stator` or `--rotor` writes one board and makes no pictures.
-- A picture that cannot be made (a maker missing from `Generators/resources/`, or an error while drawing) is printed as a yellow
-  warning, `WARNING picture not made by <file>: <reason>; the boards are not affected`, and counted in the run's
-  warnings. The boards and `Parameters.txt` are already written, and the run still ends with `SUCCESS`, in either
+- A picture that cannot be made (a maker missing from `Generators/resources/`, or an error while drawing) is printed as
+  a yellow warning, `WARNING picture not made by <file>: <reason>; the boards are not affected`, and counted in the
+  run's warnings. The boards and `Parameters.txt` are already written, and the run still ends with `SUCCESS`, in either
   `GENERATOR_MODE`. See [Checks, Errors And Warnings](Checks-Errors-And-Warnings.md).
 - The [Web Tool](Web-Tool.md) does not make them: its zip holds the boards, `Parameters.txt` and the parameter files.
   Unzip it and run the makers on the run's folder to get them.

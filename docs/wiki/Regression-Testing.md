@@ -97,8 +97,8 @@ that need it.
 The parsing and measuring code both suites share is `regression/RegressionTools.py`. It reads the written `.kicad_pcb`
 back and measures it independently of the generator: the smallest clearance between nets on a cell grid, the
 connectivity of each net, the copper extent of each layer, and the comparison with the saved files. It shares no code
-with the reader the generators' own tools use, `Generators/resources/KiCadReader.py`, on purpose: a test in each suite holds the
-two to the same values on every reference board, so each checks the other.
+with the reader the generators' own tools use, `Generators/resources/KiCadReader.py`, on purpose: a test in each suite
+holds the two to the same values on every reference board, so each checks the other.
 
 ## 30.4 On Every Pull Request (CI)
 

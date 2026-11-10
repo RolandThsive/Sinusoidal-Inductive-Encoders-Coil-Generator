@@ -11,10 +11,11 @@ python -m pip install -r requirements.txt
 
 ## 3.2 First Run
 
-1. Open `Generators/Single Generator/Parameters/` and look at the files you can edit: `Board_Parameters.py`, `RX_Parameters.py`,
-   `TX_Parameters.py`, `Rotor_Parameters.py`, `IC_Parameters.py` and `SilkScreenSuggestion_Parameters.py`. The
-   [Parameter Reference Single Generator](Parameter-Reference-Single-Generator.md) explains every setting. The defaults
-   already build a board.
+1. Open `Generators/Single Generator/Parameters/` and look at the files you can edit: `Board_Parameters.py`,
+   `RX_Parameters.py`, `TX_Parameters.py`, `Rotor_Parameters.py`, `IC_Parameters.py` and
+   `SilkScreenSuggestion_Parameters.py`.
+   The [Parameter Reference Single Generator](Parameter-Reference-Single-Generator.md) explains every setting.
+   The defaults already build a board.
 2. Go to the `Generators/Single Generator` folder and check the parameters without writing anything:
 
    ```bash
@@ -78,8 +79,8 @@ where the silkscreen suggests or wherever you like.
 
 The Dual Generator builds two coil sets on one stator (a coarse inner set and a fine outer set, each with its own IC)
 and one rotor disc with two rings. It uses the Single Generator's own code, so both folders must stay next to each
-other. Its settings are the files in `Generators/Dual Generator/Parameters/` (`Dual_Board_Parameters.py`, `Dual_RX1` / `Dual_RX2`,
-`Dual_TX1` / `Dual_TX2`, `Dual_Rotor1` / `Dual_Rotor2`, `Dual_IC1` / `Dual_IC2` and
+other. Its settings are the files in `Generators/Dual Generator/Parameters/` (`Dual_Board_Parameters.py`, `Dual_RX1` /
+`Dual_RX2`, `Dual_TX1` / `Dual_TX2`, `Dual_Rotor1` / `Dual_Rotor2`, `Dual_IC1` / `Dual_IC2` and
 `Dual_SilkScreenSuggestion_Parameters.py`). The defaults build a 1x / 16x board.
 
 ```bash

@@ -50,8 +50,8 @@ author's written permission under those licenses, for everyone who accepts and f
    the balance is right. Both are recorded in the public [LEDGER.md](docs/funding/LEDGER.md), with proof.
 4. **Where it goes.** All of it goes back into this project, and whatever is left over is donated, as described in the
    pledge below.
-5. **When it stops.** The fee stops after all the milestones in [MILESTONES.md](docs/funding/MILESTONES.md) are done. After that, a
-   new license applies, the same as the GPL.
+5. **When it stops.** The fee stops after all the milestones in [MILESTONES.md](docs/funding/MILESTONES.md) are done.
+   After that, a new license applies, the same as the GPL.
 6. **Contributing back.** The permission above holds only while you contribute back appropriately: you credit this
    project, report what breaks and share what you improve. If you do not, you need written permission from the
    author.
@@ -67,8 +67,8 @@ Please get in touch by email (above) before you start. Approved organizations wi
 > **100% on record. 100% invested back. 100% disclosed.**
 
 Any money I accept from commercial users is invested back into this project in full, 100%, and is on record in the
-public [LEDGER.md](docs/funding/LEDGER.md), visible to everyone who can see this repository. Whatever is left over is donated to a
-fund that supports innovation worldwide, chosen together by me and the paying company. See the
+public [LEDGER.md](docs/funding/LEDGER.md), visible to everyone who can see this repository. Whatever is left over is
+donated to a fund that supports innovation worldwide, chosen together by me and the paying company. See the
 [README](README.md#every-commercial-payment-goes-back-into-the-project).
 
 This project is non-profit, exclusively. Every fee, investment and contribution is used only for the equipment and

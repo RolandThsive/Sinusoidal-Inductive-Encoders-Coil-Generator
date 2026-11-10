@@ -86,10 +86,10 @@ docs/
 └── tools/                        dual_layout_pictures.py: draws the pictures of the Dual Layout page
 ```
 
-The Dual Generator imports the Single Generator's `Generator` package from the `Single Generator` folder next to it
-in `Generators`, so the two folders must stay side by side. It builds every coil, rotor ring and silkscreen mark with the Single
-Generator's own code and shares its run steps and output-folder helpers; it changes nothing in the Single Generator
-and leaves no `__pycache__` there.
+The Dual Generator imports the Single Generator's `Generator` package from the `Single Generator` folder next to it in
+`Generators`, so the two folders must stay side by side. It builds every coil, rotor ring and silkscreen mark with the
+Single Generator's own code and shares its run steps and output-folder helpers; it changes nothing in the Single
+Generator and leaves no `__pycache__` there.
 Its folder name carries the radii, the loops of both sets and the TX turns of both sets, for example
 `DualCoil_7.25_26.875_1x16_4x4`.
 

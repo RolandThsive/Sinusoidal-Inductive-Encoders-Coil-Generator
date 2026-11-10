@@ -1,7 +1,8 @@
 # 23. Parameter Reference Dual Generator
 
-Every setting of the Dual Generator lives in a parameter file in `Generators/Dual Generator/Parameters/`. These are the only files
-you edit; `Dual_Parameters.py` only gathers them. Units are millimetres, degrees and hertz unless a name says otherwise.
+Every setting of the Dual Generator lives in a parameter file in `Generators/Dual Generator/Parameters/`. These are the
+only files you edit; `Dual_Parameters.py` only gathers them. Units are millimetres, degrees and hertz unless a name says
+otherwise.
 
 Every name is the Single Generator's own wherever the meaning is the same, so the
 [Parameter Reference Single Generator](Parameter-Reference-Single-Generator.md) describes it, with its range. The Dual
