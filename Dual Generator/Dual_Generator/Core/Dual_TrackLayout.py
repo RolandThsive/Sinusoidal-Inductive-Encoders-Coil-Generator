@@ -72,6 +72,7 @@ class Layout(types.SimpleNamespace):
         return dict((self.band1 if k == 1 else self.band2)["names"])
 
     def edges(self):
+        """(bore radius, outline radius) of the board, given or placed."""
         return (self.bore, self.outline)
 
     def gap_name(self):
@@ -79,6 +80,7 @@ class Layout(types.SimpleNamespace):
         return "TRACK_GAP_MM" if self.gap_setting is not None else "MIN_CLEARANCE_MM"
 
     def placed(self, k):
+        """True when set k's RX band was placed by the layout rather than given."""
         return (self.band1 if k == 1 else self.band2)["how"] == "placed"
 
     def describe(self):

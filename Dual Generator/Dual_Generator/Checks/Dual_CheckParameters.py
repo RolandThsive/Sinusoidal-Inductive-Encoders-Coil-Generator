@@ -76,6 +76,7 @@ def check_parameters(P):
 
 
 def main():
+    """Check the dual parameter files and print the findings.  Returns the exit code: 1 when there is an error."""
     Colour.setup()
     import Dual_Parameters as P
     r, _layout = check_parameters(P)

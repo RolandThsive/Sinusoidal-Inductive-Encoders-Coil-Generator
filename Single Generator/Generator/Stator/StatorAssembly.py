@@ -101,6 +101,7 @@ class Stator:
                                              + P.OUTER_EDGE_TAIL_MARGIN_MM)
 
     def inner_edge_clear(self):
+        """Distance from the inner-tip vias to the centre hole (mm; negative = they run over its edge)."""
         return self.rx.inner_edge_clear()
 
     # ------------------------------------------------------------- output
@@ -191,6 +192,7 @@ class Stator:
         return f"Fingers: {n_f} {w(self.tab_layer)}, Style: {kind}" if n_f else "Fingers: None"
 
     def summary(self):
+        """The stator's lines for the run's output and for Parameters.txt."""
         P = self.P
         lines = [
             f"Stator: {self.N} loop(s) -> {self.N} electrical period(s) per turn, "

@@ -20,6 +20,7 @@ from Dual_Generator.Checks import Dual_DesignChecks
 
 
 def assemble(P, layout, stator1, stator2):
+    """The dual stator: the two built sets on one board."""
     return DualStator(P, layout, stator1, stator2)
 
 
@@ -37,6 +38,7 @@ class DualStator:
         self.page_mm = page_size(P.BOARD, self.cx, self.cy, self.outline)
 
     def nets(self):
+        """The net names of both sets, set 1 first."""
         return [net for st in self.sets for net in st.nets()]
 
     # ------------------------------------------------------------- output
@@ -84,6 +86,8 @@ class DualStator:
         return title, comments
 
     def summary(self):
+        """The stator's lines for the run's output and for Parameters.txt: the sets, the layout and the gap measured
+        on the built copper."""
         f = lambda v: f"{v:.3f}".rstrip("0").rstrip(".")
         lines = [f"Dual stator: set 1 (inner) {self.sets[0].N} loop(s), set 2 (outer) {self.sets[1].N} loop(s); "
                  f"bore r = {f(self.bore)} mm, outline r = {f(self.outline)} mm"]

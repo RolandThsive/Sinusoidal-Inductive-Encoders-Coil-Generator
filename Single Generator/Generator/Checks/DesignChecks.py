@@ -399,78 +399,84 @@ def check_design(P, stator, rotor=None):
             rep.info(f"KiCad page {w:g} x {h:g} mm (PAGE_SIZE_MM {px:g} x {py:g} grown so that the board stays clear "
                      f"of the drawing frame and the title block)")
 
-    # rotor
     if rotor is not None:
-        for note in rotor.notes:
-            rep.info(note)
-        # the rotor board against the top and left side of its KiCad page (the page grows only right and down)
-        r_rot = max(x for x in (rotor.outline_radius, rotor.r_out + max(0.0, rotor.mask_expansion or 0.0))
-                    if x is not None)
-        if (rotor.cx - r_rot - ew / 2 < margin or rotor.cy - r_rot - ew / 2 < margin) and r_rot > R:
-            size = ("OUTER_EDGE_RADIUS_MM" if rotor.mode != "custom" else "ROTOR_CUSTOM_OUTLINE_RADIUS_MM"
-                    if rotor.outline_radius is not None else "ROTOR_CUSTOM_OUTER_RADIUS_MM")
-            rep.conflict(("CENTER_X_MM", "CENTER_Y_MM", size), f"the rotor board (radius {r_rot:g} mm at {rotor.cx:g}, "
-                         f"{rotor.cy:g}) comes within {margin:g} mm of the top or left edge of the KiCad page (the "
-                         f"drawing frame); in normal mode it is still written, but it crosses the frame (in strict mode "
-                         f"nothing is written). Raise the centre to at least {math.ceil(r_rot + ew / 2 + margin):g}",
-                         level="warning")
-        # a solder-mask opening that reaches the bore or the outline is cut off by the board edge
-        e_mask = getattr(rotor, "mask_expansion", None)
-        if e_mask:
-            auto = rotor.mode == "according_to_stator"
-            if rotor.bore_radius is not None and rotor.r_in - e_mask < rotor.bore_radius + ew / 2.0:
-                fix = ("Raise ROTOR_AUTO_EDGE_CLEARANCE_MM or lower the expansion" if auto else
-                       "Raise ROTOR_CUSTOM_INNER_RADIUS_MM, lower ROTOR_CUSTOM_BORE_RADIUS_MM or lower the expansion")
-                rep.warn(f"the solder-mask opening (ROTOR_SOLDER_MASK_EXPANSION_MM = {e_mask:g}) reaches the "
-                         f"bore edge: the copper is only {max(rotor.r_in - rotor.bore_radius - ew / 2.0, 0.0):.2f} "
-                         f"mm from it, so the board edge cuts the opening. {fix}")
-            if rotor.outline_radius is not None and rotor.r_out + e_mask > rotor.outline_radius - ew / 2.0:
-                fix = ("Lower the expansion" if auto else
-                       "Lower ROTOR_CUSTOM_OUTER_RADIUS_MM, raise ROTOR_CUSTOM_OUTLINE_RADIUS_MM or lower the "
-                       "expansion")
-                rep.warn(f"the solder-mask opening (ROTOR_SOLDER_MASK_EXPANSION_MM = {e_mask:g}) reaches the "
-                         f"outline: the copper is only "
-                         f"{max(rotor.outline_radius - ew / 2.0 - rotor.r_out, 0.0):.2f} mm from it, so the board "
-                         f"edge cuts the opening. {fix}")
-        # the outer polygon vertices sit at r_out / cos(half a chord), outside r_out (RotorBuilder.sector_polygon)
-        if rotor.outline_radius is not None:
-            r_v = rotor.r_out / math.cos(rotor._half_step())
-            if r_v > rotor.outline_radius - ew / 2.0:
-                rep.conflict(("ROTOR_ARC_STEPS_PER_SECTOR", "ROTOR_CUSTOM_OUTER_RADIUS_MM" if rotor.mode == "custom"
-                              else "ROTOR_AUTO_EDGE_CLEARANCE_MM"),
-                             f"the corners of the rotor copper reach r = {r_v:.3f} mm, past the inner side of the "
-                             f"board outline ({rotor.outline_radius - ew / 2.0:.3f} mm): the copper crosses the board "
-                             f"edge. Raise ROTOR_ARC_STEPS_PER_SECTOR (or use \"auto\") or lower the outer copper "
-                             f"radius")
-        if rotor.mode == "according_to_stator":
-            cut = getattr(rotor, "cut_overhang", None)
-            if cut is not None and cut[0] - cut[1] > 0.01:
-                rep.conflict(("ROTOR_AUTO_TX_OVERHANG_MM", "ROTOR_AUTO_EDGE_CLEARANCE_MM", "OUTER_EDGE_RADIUS_MM"),
-                             f"an overhang of {cut[0]:g} mm does not fit: the rotor copper must stay "
-                             f"{P.ROTOR_AUTO_EDGE_CLEARANCE_MM:g} mm inside the board outline, so it ends {cut[1]:+.2f} mm "
-                             f"past the outermost TX turn", level="warning")
-            # an edge that was asked for (ROTOR_AUTO_EXTENSION_INNER_MM / _OUTER_MM, or ROTOR_AUTO_EXTENSION_MM) but had
-            # to be cut back
-            for side, other, cut, why, name in (
-                    ("inner", "ROTOR_AUTO_EDGE_CLEARANCE_MM", getattr(rotor, "cut_in", None),
-                     f"{P.ROTOR_AUTO_EDGE_CLEARANCE_MM:g} mm from the bore", getattr(rotor, "cut_in_name", None)),
-                    ("outer", "ROTOR_AUTO_TX_CLEARANCE_MM", getattr(rotor, "cut_out", None),
-                     f"{getattr(P, 'ROTOR_AUTO_TX_CLEARANCE_MM', '?')} mm inside the TX ring",
-                     getattr(rotor, "cut_out_name", None))):
-                if cut is not None and cut[0] - cut[1] > 0.01:             # (less than 10 um is not worth a warning)
-                    asked, allowed = cut
-                    rep.conflict((name, other), f"an extension of {asked:g} mm does not fit: the copper must stay {why}, "
-                                 f"so at the {side} edge it reaches {allowed:+.2f} mm past the RX band and the rotor "
-                                 f"copper is cut back to that (in normal mode the boards are still written)",
-                                 level="warning")
-            # copper that stops far short of the RX band leaves part of the receiver uncovered
-            gap = float(P.AIR_GAP_MM)
-            for side, ext in (("inner", rotor.ext_in), ("outer", rotor.ext_out)):
-                if ext < -gap:
-                    rep.warn(f"the rotor copper stops {-ext:.2f} mm short of the {side} edge of the RX band (more "
-                             f"than one air gap): part of the receiver is not covered, so the signal drops and "
-                             f"the harmonics grow")
+        _check_rotor_design(P, rotor, R, ew, margin, rep)
     return rep
+
+
+def _check_rotor_design(P, rotor, R, ew, margin, rep):
+    """The rules on the generated rotor (check_design): its notes, its board against the KiCad page, the solder-mask
+    opening and the copper corners against the board edges, and the edges of the automatic rotor that had to be cut
+    back.  R: the stator's outer radius; ew: the edge line width; margin: the room the page frame needs."""
+    for note in rotor.notes:
+        rep.info(note)
+    # the rotor board against the top and left side of its KiCad page (the page grows only right and down)
+    r_rot = max(x for x in (rotor.outline_radius, rotor.r_out + max(0.0, rotor.mask_expansion or 0.0))
+                if x is not None)
+    if (rotor.cx - r_rot - ew / 2 < margin or rotor.cy - r_rot - ew / 2 < margin) and r_rot > R:
+        size = ("OUTER_EDGE_RADIUS_MM" if rotor.mode != "custom" else "ROTOR_CUSTOM_OUTLINE_RADIUS_MM"
+                if rotor.outline_radius is not None else "ROTOR_CUSTOM_OUTER_RADIUS_MM")
+        rep.conflict(("CENTER_X_MM", "CENTER_Y_MM", size), f"the rotor board (radius {r_rot:g} mm at {rotor.cx:g}, "
+                     f"{rotor.cy:g}) comes within {margin:g} mm of the top or left edge of the KiCad page (the "
+                     f"drawing frame); in normal mode it is still written, but it crosses the frame (in strict mode "
+                     f"nothing is written). Raise the centre to at least {math.ceil(r_rot + ew / 2 + margin):g}",
+                     level="warning")
+    # a solder-mask opening that reaches the bore or the outline is cut off by the board edge
+    e_mask = getattr(rotor, "mask_expansion", None)
+    if e_mask:
+        auto = rotor.mode == "according_to_stator"
+        if rotor.bore_radius is not None and rotor.r_in - e_mask < rotor.bore_radius + ew / 2.0:
+            fix = ("Raise ROTOR_AUTO_EDGE_CLEARANCE_MM or lower the expansion" if auto else
+                   "Raise ROTOR_CUSTOM_INNER_RADIUS_MM, lower ROTOR_CUSTOM_BORE_RADIUS_MM or lower the expansion")
+            rep.warn(f"the solder-mask opening (ROTOR_SOLDER_MASK_EXPANSION_MM = {e_mask:g}) reaches the "
+                     f"bore edge: the copper is only {max(rotor.r_in - rotor.bore_radius - ew / 2.0, 0.0):.2f} "
+                     f"mm from it, so the board edge cuts the opening. {fix}")
+        if rotor.outline_radius is not None and rotor.r_out + e_mask > rotor.outline_radius - ew / 2.0:
+            fix = ("Lower the expansion" if auto else
+                   "Lower ROTOR_CUSTOM_OUTER_RADIUS_MM, raise ROTOR_CUSTOM_OUTLINE_RADIUS_MM or lower the "
+                   "expansion")
+            rep.warn(f"the solder-mask opening (ROTOR_SOLDER_MASK_EXPANSION_MM = {e_mask:g}) reaches the "
+                     f"outline: the copper is only "
+                     f"{max(rotor.outline_radius - ew / 2.0 - rotor.r_out, 0.0):.2f} mm from it, so the board "
+                     f"edge cuts the opening. {fix}")
+    # the outer polygon vertices sit at r_out / cos(half a chord), outside r_out (RotorBuilder.sector_polygon)
+    if rotor.outline_radius is not None:
+        r_v = rotor.r_out / math.cos(rotor._half_step())
+        if r_v > rotor.outline_radius - ew / 2.0:
+            rep.conflict(("ROTOR_ARC_STEPS_PER_SECTOR", "ROTOR_CUSTOM_OUTER_RADIUS_MM" if rotor.mode == "custom"
+                          else "ROTOR_AUTO_EDGE_CLEARANCE_MM"),
+                         f"the corners of the rotor copper reach r = {r_v:.3f} mm, past the inner side of the "
+                         f"board outline ({rotor.outline_radius - ew / 2.0:.3f} mm): the copper crosses the board "
+                         f"edge. Raise ROTOR_ARC_STEPS_PER_SECTOR (or use \"auto\") or lower the outer copper "
+                         f"radius")
+    if rotor.mode == "according_to_stator":
+        cut = getattr(rotor, "cut_overhang", None)
+        if cut is not None and cut[0] - cut[1] > 0.01:
+            rep.conflict(("ROTOR_AUTO_TX_OVERHANG_MM", "ROTOR_AUTO_EDGE_CLEARANCE_MM", "OUTER_EDGE_RADIUS_MM"),
+                         f"an overhang of {cut[0]:g} mm does not fit: the rotor copper must stay "
+                         f"{P.ROTOR_AUTO_EDGE_CLEARANCE_MM:g} mm inside the board outline, so it ends {cut[1]:+.2f} mm "
+                         f"past the outermost TX turn", level="warning")
+        # an edge that was asked for (ROTOR_AUTO_EXTENSION_INNER_MM / _OUTER_MM, or ROTOR_AUTO_EXTENSION_MM) but had
+        # to be cut back
+        for side, other, cut, why, name in (
+                ("inner", "ROTOR_AUTO_EDGE_CLEARANCE_MM", getattr(rotor, "cut_in", None),
+                 f"{P.ROTOR_AUTO_EDGE_CLEARANCE_MM:g} mm from the bore", getattr(rotor, "cut_in_name", None)),
+                ("outer", "ROTOR_AUTO_TX_CLEARANCE_MM", getattr(rotor, "cut_out", None),
+                 f"{getattr(P, 'ROTOR_AUTO_TX_CLEARANCE_MM', '?')} mm inside the TX ring",
+                 getattr(rotor, "cut_out_name", None))):
+            if cut is not None and cut[0] - cut[1] > 0.01:             # (less than 10 um is not worth a warning)
+                asked, allowed = cut
+                rep.conflict((name, other), f"an extension of {asked:g} mm does not fit: the copper must stay {why}, "
+                             f"so at the {side} edge it reaches {allowed:+.2f} mm past the RX band and the rotor "
+                             f"copper is cut back to that (in normal mode the boards are still written)",
+                             level="warning")
+        # copper that stops far short of the RX band leaves part of the receiver uncovered
+        gap = float(P.AIR_GAP_MM)
+        for side, ext in (("inner", rotor.ext_in), ("outer", rotor.ext_out)):
+            if ext < -gap:
+                rep.warn(f"the rotor copper stops {-ext:.2f} mm short of the {side} edge of the RX band (more "
+                         f"than one air gap): part of the receiver is not covered, so the signal drops and "
+                         f"the harmonics grow")
 
 
 def classify_generator_output(text):

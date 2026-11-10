@@ -87,6 +87,8 @@ def electrical(Pk, k, stator, rotor):
 
 
 def main(argv=None):
+    """Check the dual parameters, build both sets and the rotor, write the files.  argv: the command line (None =
+    sys.argv).  Returns the exit code."""
     args = RS.parse_args("Check the dual parameters, then generate the dual stator and the rotor disc.", argv)
     want_stator, want_rotor = args.want_stator, args.want_rotor
     total = 6

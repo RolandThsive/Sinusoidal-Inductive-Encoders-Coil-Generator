@@ -351,6 +351,7 @@ class RotorDesign:
         return float(getattr(self.P, "COPPER_CONDUCTIVITY_S_M", DEFAULT_COPPER_CONDUCTIVITY))
 
     def skin_depth_um(self):
+        """The skin depth of the rotor metal at EXCITATION_FREQ_HZ, in micrometres."""
         f = float(self.P.EXCITATION_FREQ_HZ)
         return 1e6 * math.sqrt(1.0 / (math.pi * f * MU0 * self.conductivity()))
 
@@ -395,6 +396,7 @@ class RotorDesign:
         return f"  solder mask: removed over the copper, openings {e:g} mm wider than the copper on {where}"
 
     def summary(self):
+        """The rotor's lines for the run's output and for Parameters.txt."""
         lines = [f"Rotor ({self.mode}): {self.sectors} sector(s), metal fraction {self.duty:g} "
                  f"({self.duty * 360.0 / self.sectors:.2f} deg mechanical each)",
                  f"  copper r = {self.r_in:.2f} ... {self.r_out:.2f} mm on {', '.join(self.layers)}, "

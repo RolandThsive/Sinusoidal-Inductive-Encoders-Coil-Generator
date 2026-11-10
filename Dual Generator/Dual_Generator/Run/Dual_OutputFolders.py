@@ -37,6 +37,7 @@ FOLDER_PATTERN = "DualCoil_<bore radius>_<outline radius>_<set 1 loops>x<set 2 l
 
 
 def folder_name(dual, P):
+    """DualCoil_<bore>_<outline>_<set 1 loops>x<set 2 loops>_<set 1 TX turns>x<set 2 TX turns>."""
     s1, s2 = dual.sets
     return "_".join((FOLDER_PREFIX, folder_number(dual.bore), folder_number(dual.outline), f"{int(s1.N)}x{int(s2.N)}",
                      f"{int(s1.P.TX_TURNS)}x{int(s2.P.TX_TURNS)}"))

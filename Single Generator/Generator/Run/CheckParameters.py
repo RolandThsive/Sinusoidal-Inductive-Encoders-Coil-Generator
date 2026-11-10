@@ -36,6 +36,8 @@ def check_parameters(P):
 
 
 def main():
+    """Check the parameter files and print the findings.  Returns the exit code: 1 when they cannot be loaded or
+    there is an error."""
     Colour.setup()
     try:
         import Parameters as P

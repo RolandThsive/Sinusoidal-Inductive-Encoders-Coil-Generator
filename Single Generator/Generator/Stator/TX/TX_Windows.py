@@ -166,6 +166,7 @@ def tx_windows(tx, g, ga=None):
 
 
 def plen(pts):
+    """The length of the polyline through the points pts."""
     return sum(math.hypot(q[0] - p[0], q[1] - p[1]) for p, q in zip(pts[:-1], pts[1:], strict=True))
 
 
@@ -175,6 +176,7 @@ def side_angle(lam, side, gn, r):
 
 
 def cut_angle(tx, n, lam, side, gn):
+    """Where turn n meets the run-out line of a window side (side_angle at turn n's own radius there)."""
     th = side_angle(lam, side, gn, tx.r_nom(n, lam))
     return side_angle(lam, side, gn, tx.r_nom(n, th))
 

@@ -55,10 +55,12 @@ def command(script, argv=None):
 
 
 def step(n, total, text):
+    """Print the heading of step n of `total`."""
     print(Colour.bold(f"[{n}/{total}] {text}"))
 
 
 def stop(why):
+    """Print the FAILED line (nothing was written).  Returns the exit code, 1."""
     print()
     print(Colour.red(f"FAILED: {why}. Nothing was written."))
     return 1
@@ -216,6 +218,7 @@ def write_files(make_folder, stator, rotor, stator_file, rotor_file, add_silkscr
 
 
 def success(written, folder, all_warn):
+    """Print the SUCCESS line: the files written and the number of warnings.  Returns the exit code, 0."""
     print()
     print(Colour.green(f"SUCCESS: {len(written)} board file(s) + {RECORD_FILE} written to {folder}")
           + (Colour.yellow(f"  ({all_warn} warning(s) above)") if all_warn else ""))

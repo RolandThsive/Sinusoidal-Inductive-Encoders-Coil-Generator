@@ -316,11 +316,13 @@ class Silk:
         return f"(stroke (width {_f(self.s.SILKSCREEN_LINE_WIDTH_MM)}) (type {kind}) {self.colour})"
 
     def line(self, p, q, dashed=False):
+        """A line from p to q, dashed or solid, on every silkscreen layer in use."""
         for lay in self.layers:
             self.items.append(f'  (gr_line (start {_f(p[0])} {_f(p[1])}) (end {_f(q[0])} {_f(q[1])}) '
                               f'{self._stroke("dash" if dashed else "default")} (layer "{lay}"))')
 
     def dot(self, c, radius):
+        """A filled dot of `radius` at c on every silkscreen layer in use."""
         for lay in self.layers:
             self.items.append(f'  (gr_circle (center {_f(c[0])} {_f(c[1])}) (end {_f(c[0] + radius)} {_f(c[1])}) '
                               f'{self._stroke()} (fill solid) (layer "{lay}"))')
@@ -339,6 +341,7 @@ class Silk:
                                   f'(stroke (width {w}) (type default) {self.colour}) (layer "{lay}"))')
 
     def box(self, centre, t, half_len, half_wid):
+        """A dashed box around `centre`: half_len along the unit direction t, half_wid across it."""
         n = np.array([-t[1], t[0]])
         c = [centre + t * half_len + n * half_wid, centre + t * half_len - n * half_wid,
              centre - t * half_len - n * half_wid, centre - t * half_len + n * half_wid]
@@ -391,6 +394,7 @@ class Placer:
         self.vias = [_rect(x, y, d, d) for x, y, d in board.vias]
 
     def mark(self, poly):
+        """Keep the names off the polygon `poly` (a mark already drawn)."""
         self.marks.append([tuple(map(float, c)) for c in poly])
 
     def _on_board(self, rect):
@@ -649,6 +653,8 @@ def _print(res, quiet):
 
 
 def record_lines(res):
+    """The LEAD CUTTING SILKSCREEN SUGGESTION section of Parameters.txt: what was drawn, the warnings, the step's own
+    lines."""
     out = ["LEAD CUTTING SILKSCREEN SUGGESTION", "-" * 34]
     if res.done:
         out.append(f"  {res.marks} suggestion(s) drawn into the stator file: break each RX coil between its two dots "

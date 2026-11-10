@@ -46,6 +46,7 @@ class KiCadBoard:
         self.body = []
 
     def net(self, name):
+        """The number of the net `name`, which joins the board's net list the first time it is asked for."""
         if name not in self.nets:
             self.nets[name] = len(self.nets)
         return self.nets[name]
@@ -61,6 +62,7 @@ class KiCadBoard:
         return "0" if s in ("", "-0") else s
 
     def segment(self, p, q, width, layer, net):
+        """Add a track from p to q on a copper layer, in the net named `net`."""
         f = self._f
         self.body.append(
             f'  (segment (start {f(p[0])} {f(p[1])}) (end {f(q[0])} {f(q[1])}) '
@@ -80,17 +82,20 @@ class KiCadBoard:
             f'(layers "{pair[0]}" "{pair[1]}") (net {self.net(net)}))')
 
     def circle(self, c, radius, layer, width):
+        """Add an unfilled circle of `radius` around c on `layer` (the board outline and the bore)."""
         f = self._f
         self.body.append(
             f'  (gr_circle (center {f(c[0])} {f(c[1])}) (end {f(c[0])} {f(c[1] + radius)}) '
             f'(layer "{layer}") (width {f(width)}) (fill none))')
 
     def polygon(self, points, layer):
+        """Add a filled polygon on `layer` (the rotor copper and its mask openings)."""
         f = self._f
         pts = " ".join(f"(xy {f(x)} {f(y)})" for x, y in points)
         self.body.append(f'  (gr_poly (pts {pts}) (layer "{layer}") (width 0) (fill solid))')
 
     def text(self):
+        """The .kicad_pcb file as text: the header, page, title block, layers and nets, then every item added."""
         out = ["(kicad_pcb (version 20221018) (generator coil_generator)", "",
                f"  (general (thickness {self._f(self.thickness)}))", "",
                f'  (paper "User" {self.page[0]} {self.page[1]})',
@@ -107,6 +112,7 @@ class KiCadBoard:
         return "\n".join(out) + "\n"
 
     def save(self, path):
+        """Write text() to `path`, with LF line endings."""
         with open(path, "w", newline="\n") as fh:
             fh.write(self.text())
 

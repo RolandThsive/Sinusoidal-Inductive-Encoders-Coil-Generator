@@ -28,6 +28,8 @@ class RXBuilder:
         self.P = P
 
     def build(self):
+        """Build the RX coils: the layers and the band, the resolution, the curves and their series junctions, the
+        fingers, then the copper.  Returns self."""
         P = self.P
         self.tx_lay = Layers.layer_plan(P)                 # the finger layer (and the RX layers)
         resolve_layers(self)

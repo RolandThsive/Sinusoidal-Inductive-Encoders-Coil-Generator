@@ -38,6 +38,7 @@ def build_ring(Pk, stator, zero="rx_zero"):
 
 
 def assemble(P, dual_stator, rotor1, rotor2):
+    """The dual rotor: the rotor rings of the two sets on one board."""
     return DualRotor(P, dual_stator, rotor1, rotor2)
 
 
@@ -57,6 +58,7 @@ class DualRotor:
         self.gap = rotor2.r_in - rotor1.r_out
 
     def page_size(self):
+        """The KiCad page (width, height) in mm, grown to hold the outline or the widest ring with its mask opening."""
         B = self.P.BOARD
         r = max(x for x in [self.outline] + [rg.r_out + max(0.0, rg.mask_expansion or 0.0) for rg in self.rings]
                 if x is not None)
@@ -93,6 +95,7 @@ class DualRotor:
         return path
 
     def summary(self):
+        """The rotor's lines for the run's output and for Parameters.txt."""
         lines = [f"Dual rotor ({self.mode}): ring 1 {self.rings[0].sectors} sector(s), ring 2 {self.rings[1].sectors} "
                  f"sector(s); bore r = {self.bore}, outline r = {self.outline}; {self.gap:.2f} mm bare between the rings"]
         if all(getattr(rg, "zero_from", "rx_zero") == "rx_zero" for rg in self.rings):

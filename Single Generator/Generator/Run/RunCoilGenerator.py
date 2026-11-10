@@ -77,6 +77,8 @@ def electrical(P, stator, rotor, n, total):
 
 
 def main(argv=None):
+    """Check the parameters, build the stator and the rotor, write the files.  argv: the command line (None =
+    sys.argv).  Returns the exit code."""
     args = RS.parse_args("Check the parameters, then generate the stator and rotor.", argv)
     want_stator, want_rotor = args.want_stator, args.want_rotor
     total = 6
