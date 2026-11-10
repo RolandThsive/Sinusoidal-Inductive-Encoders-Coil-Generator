@@ -8,12 +8,12 @@ This repository is **open for research use**, and free for non-commercial use. R
 
 | License | Full Text | Covers | Where |
 |---|---|---|---|
-| **PolyForm Noncommercial 1.0.0** | [PolyForm-Noncommercial-1.0.0](docs/licenses/PolyForm-Noncommercial-1.0.0) | The source code: the Single Generator and the Dual Generator with their parameter files and regression tests, the shared files in `Generators/resources/`, and the analyser and optimizer | `Generators/Single Generator/` (`Generator/`, `Parameters/`), `Generators/Dual Generator/` (`Dual_Generator/`, `Parameters/`), `regression/` (the regression tests of both and their test boards) and `Generators/resources/` on `main`; the `analyser_and_optimizer` branch |
+| **PolyForm Noncommercial 1.0.0** | [PolyForm-Noncommercial-1.0.0](docs/licenses/PolyForm-Noncommercial-1.0.0) | The source code: the Single Coil Set Generator and the Dual Coil Set Generator with their parameter files and regression tests, the shared files in `Generators/resources/`, and the analyser and optimizer | `Generators/Single Coil Set Generator/` (`Generator/`, `Parameters/`), `Generators/Dual Coil Set Generator/` (`Dual_Generator/`, `Parameters/`), `regression/` (the regression tests of both and their test boards) and `Generators/resources/` on `main`; the `analyser_and_optimizer` branch |
 | **CC BY-NC-SA 4.0** | [CC-BY-NC-SA-4.0](docs/licenses/CC-BY-NC-SA-4.0) | The pictures and the documentation | `docs/images/` (except the Web UI pictures), `docs/wiki/`, `README.md`, `docs/CONTRIBUTING.md` |
 | **PolyForm Strict 1.0.0** | [PolyForm-Strict-1.0.0](docs/licenses/PolyForm-Strict-1.0.0) | The Web UI and every aspect of it: its code, the workflow that publishes it, every page where the author publishes it, and its design (layout, look and feel, colours, panels, controls, icons, wording, help texts, and pictures and recordings of it) | `WebGUI/` and `.github/workflows/WebGUI-Pages.yml` on the `WebUI` branch, the published Web Tool, `docs/images/webui_*.png`; its own notice is `WebGUI/LICENSE.md` |
 
-The Web UI runs the Single Generator unchanged. The generators, their pictures and their documentation stay under
-their own licenses above, not under the Web UI's.
+The Web UI runs the Single Coil Set Generator unchanged. The generators, their pictures and their documentation stay
+under their own licenses above, not under the Web UI's.
 
 ## What Each License Allows
 
@@ -25,7 +25,7 @@ their own licenses above, not under the Web UI's.
 
 ## Output Of The Generator
 
-Everything the Single Generator, the Dual Generator, the analyser or the Web UI produces is covered by this section: the KiCad files, board
+Everything the Single Coil Set Generator, the Dual Coil Set Generator, the analyser or the Web UI produces is covered by this section: the KiCad files, board
 layouts, Gerber and drill files, parameter records, reports, pictures and any other file made from them, whole or in
 part, and any board manufactured from them. **No output may be used commercially**: not sold, not offered for sale,
 not built into a product or service, not used inside a company or startup for its business, and not manufactured for

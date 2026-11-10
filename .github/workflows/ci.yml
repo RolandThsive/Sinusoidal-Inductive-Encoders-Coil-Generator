@@ -80,10 +80,10 @@ jobs:
       - name: Install requirements.txt from wheels only (a pin without a wheel for this Python fails here)
         run: |
           python -m pip install --only-binary=:all: -r requirements.txt
-      - name: Single Generator --check
-        run: python "Generators/Single Generator/Generator/Run/RunCoilGenerator.py" --check --no-color
-      - name: Dual Generator --check
-        run: python "Generators/Dual Generator/Dual_Generator/Run/Dual_RunCoilGenerator.py" --check --no-color
+      - name: Single Coil Set Generator --check
+        run: python "Generators/Single Coil Set Generator/Generator/Run/RunCoilGenerator.py" --check --no-color
+      - name: Dual Coil Set Generator --check
+        run: python "Generators/Dual Coil Set Generator/Dual_Generator/Run/Dual_RunCoilGenerator.py" --check --no-color
 
   tests:
     name: ${{ matrix.suite }} Generator tests (${{ matrix.os }})
@@ -97,10 +97,10 @@ jobs:
         include:
           - suite: Single
             key: single          # the name run_regression.py takes (macOS has bash 3.2, which cannot lower a case)
-            source: Generators/Single Generator/Generator
+            source: Generators/Single Coil Set Generator/Generator
           - suite: Dual
             key: dual
-            source: Generators/Single Generator/Generator,Generators/Dual Generator/Dual_Generator
+            source: Generators/Single Coil Set Generator/Generator,Generators/Dual Coil Set Generator/Dual_Generator
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -117,7 +117,7 @@ jobs:
         run: |
           import os
           os.makedirs(os.path.join(os.environ["RUNNER_TEMP"], "regression"), exist_ok=True)
-      - name: Run the ${{ matrix.suite }} Generator regression tests
+      - name: Run the ${{ matrix.suite }} Coil Set Generator regression tests
         shell: bash
         env:
           TMPDIR: ${{ runner.temp }}/regression
@@ -145,7 +145,7 @@ jobs:
         if: always()
         shell: bash
         env:
-          NAME: ${{ matrix.suite }} Generator
+          NAME: ${{ matrix.suite }} Coil Set Generator
           SYSTEM: ${{ matrix.os }}
         run: python .github/scripts/step_summary.py "$RUNNER_TEMP/tests.log" "$NAME" "$SYSTEM"
       - name: Keep the boards of a failed run
@@ -179,8 +179,8 @@ jobs:
           python -m pip install --only-binary=:all: -r requirements.txt
       - name: Write a fresh default board with each generator
         run: |
-          python "Generators/Single Generator/Generator/Run/RunCoilGenerator.py" --no-color
-          python "Generators/Dual Generator/Dual_Generator/Run/Dual_RunCoilGenerator.py" --no-color
+          python "Generators/Single Coil Set Generator/Generator/Run/RunCoilGenerator.py" --no-color
+          python "Generators/Dual Coil Set Generator/Dual_Generator/Run/Dual_RunCoilGenerator.py" --no-color
           for g in Single Dual; do
             mkdir -p ".fresh/$g"
             out="Generators/$g Generator/Output"
@@ -193,10 +193,10 @@ jobs:
           docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -e GITHUB_STEP_SUMMARY=/summary.md \
             -v "$PWD:/repo" -v "$GITHUB_STEP_SUMMARY:/summary.md" -w /repo "kicad/kicad:${{ matrix.kicad }}" \
             python3 .github/scripts/kicad_check.py --kicad "${{ matrix.kicad }}" \
-              "Single Generator=regression/SingleGenerator_regression" \
-              "Dual Generator=regression/DualGenerator_regression" \
-              "Single Generator fresh run=.fresh/Single" \
-              "Dual Generator fresh run=.fresh/Dual"
+              "Single Coil Set Generator=regression/SingleCoilSetGenerator_regression" \
+              "Dual Coil Set Generator=regression/DualCoilSetGenerator_regression" \
+              "Single Coil Set Generator fresh run=.fresh/Single" \
+              "Dual Coil Set Generator fresh run=.fresh/Dual"
 
   repo-guard:
     name: Repo guard

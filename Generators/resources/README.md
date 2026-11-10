@@ -11,7 +11,8 @@ Files that more than one generator uses, outside the generator folders.
 - `SilkscreenFont.py`: the stroke font of the silkscreen suggestions (lead names drawn as lines, no KiCad text).
   Capitals, digits and a few signs on a 4 x 6 grid, drawn for this repository; see the docstring for the two
   functions (`layout`, `width`).  Used by the lead-cutting silkscreen step
-  (`Generators/Single Generator/Generator/Stator/LeadCutting_SilkscreenSuggestion.py`), which both generators run.
+  (`Generators/Single Coil Set Generator/Generator/Stator/LeadCutting_SilkscreenSuggestion.py`), which both generators
+  run.
 - `RepresentativeSVGMaker.py`: a picture of a generated board for people: the stator on the left, the rotor on the
   right, layer colours, a title and a legend.  Copper under another layer is made visible (wider stator traces,
   dashed rotor outlines).  Writes `<folder name>_Representative.svg`.
@@ -21,6 +22,6 @@ Files that more than one generator uses, outside the generator folders.
 
   Both read only `Stator.kicad_pcb` and `Rotor.kicad_pcb` (with `KiCadReader.py`), need nothing but Python 3, and
   run on a folder:
-  `python Generators/resources/ActualSVGMaker.py "Generators/Single Generator/Output/<folder>"` from the root of the
-  repository.  The Single and Dual generators call both at the end of every run that writes the two boards; when
-  one is missing or fails, the run prints a warning and the boards are not affected.
+  `python Generators/resources/ActualSVGMaker.py "Generators/Single Coil Set Generator/Output/<folder>"` from the root
+  of the repository.  The Single and Dual Coil Set Generators call both at the end of every run that writes the two
+  boards; when one is missing or fails, the run prints a warning and the boards are not affected.

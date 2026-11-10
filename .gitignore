@@ -12,10 +12,10 @@ coverage.xml
 venv/
 
 # What a run writes: every Output folder keeps only its placeholder file
-Generators/Single Generator/Output/*
-!Generators/Single Generator/Output/Output Folders Show Up Here.txt
-Generators/Dual Generator/Output/*
-!Generators/Dual Generator/Output/Output Folders Show Up Here.txt
+Generators/Single Coil Set Generator/Output/*
+!Generators/Single Coil Set Generator/Output/Output Folders Show Up Here.txt
+Generators/Dual Coil Set Generator/Output/*
+!Generators/Dual Coil Set Generator/Output/Output Folders Show Up Here.txt
 
 # KiCad's own files next to an opened board
 *.kicad_prl

@@ -7,7 +7,7 @@ per run.*
 
 ```text
 Generators/                     The two generators and the files they share
-├── Single Generator/
+├── Single Coil Set Generator/
 │   ├── Parameters/                 Every setting: the only files you edit
 │   │   ├── Board_Parameters.py       Output, generator mode, PCB layers, vias, clearance, board outline, air gap, electrical estimate
 │   │   ├── RX_Parameters.py          Loops, radii, profile, sub-coils, layers, fingers
@@ -37,7 +37,7 @@ Generators/                     The two generators and the files they share
 │           ├── <Folder Name>_Representative.svg   The boards as a picture to look at
 │           └── <Folder Name>_Actual.svg           The copper 1:1 in mm, one Inkscape layer per copper layer
 │
-├── Dual Generator/
+├── Dual Coil Set Generator/
 │   ├── Parameters/                 Every dual setting: the only files you edit
 │   │   ├── Dual_Board_Parameters.py  Output, layers, vias, clearance, edges, gap, TX ends, frequency rules, rotor disc
 │   │   ├── Dual_RX1_Parameters.py    RX and fingers of set 1 (inner); Dual_RX2_Parameters.py for set 2 (outer)
@@ -49,7 +49,7 @@ Generators/                     The two generators and the files they share
 │   ├── Dual_Generator/
 │   │   ├── Run/                      Dual_RunCoilGenerator.py (the program to run), Dual_OutputFolders.py
 │   │   ├── Checks/                   Dual_CheckParameters.py, Dual_ParameterRules.py, Dual_DesignChecks.py
-│   │   ├── Core/                     Dual_SetParameters.py (one Single Generator parameter set per coil set), Dual_TrackLayout.py (the layout)
+│   │   ├── Core/                     Dual_SetParameters.py (one Single Coil Set Generator parameter set per coil set), Dual_TrackLayout.py (the layout)
 │   │   ├── Stator/                   Dual_StatorAssembler.py, Dual_LeadCutting_SilkscreenSuggestion.py
 │   │   └── Rotor/                    Dual_RotorBuilder.py
 │   └── Output/
@@ -73,8 +73,8 @@ regression/                     The regression tests of both generators (see Reg
 ├── boards.py                     Makes a new test board
 ├── RegressionHarness.py          What both suites share
 ├── RegressionTools.py            The parser and measuring code of both suites
-├── SingleGenerator_regression/   tests/ and one folder per test board (Board001-default, Board002-..., ...)
-└── DualGenerator_regression/     The same for the Dual Generator
+├── SingleCoilSetGenerator_regression/   tests/ and one folder per test board (Board001-default, Board002-..., ...)
+└── DualCoilSetGenerator_regression/     The same for the Dual Coil Set Generator
 
 docs/
 ├── CONTRIBUTING.md               How to get involved, and the contributor agreement
@@ -86,14 +86,14 @@ docs/
 └── tools/                        dual_layout_pictures.py: draws the pictures of the Dual Layout page
 ```
 
-The Dual Generator imports the Single Generator's `Generator` package from the `Single Generator` folder next to it in
-`Generators`, so the two folders must stay side by side. It builds every coil, rotor ring and silkscreen mark with the
-Single Generator's own code and shares its run steps and output-folder helpers; it changes nothing in the Single
-Generator and leaves no `__pycache__` there.
+The Dual Coil Set Generator imports the Single Coil Set Generator's `Generator` package from the
+`Single Coil Set Generator` folder next to it in `Generators`, so the two folders must stay side by side. It builds
+every coil, rotor ring and silkscreen mark with the Single Coil Set Generator's own code and shares its run steps and
+output-folder helpers; it changes nothing in the Single Coil Set Generator and leaves no `__pycache__` there.
 Its folder name carries the radii, the loops of both sets and the TX turns of both sets, for example
 `DualCoil_7.25_26.875_1x16_4x4`.
 
-The Single Generator's folder name carries the board radii, the RX loops and sub-coils, the TX turns, the TX wiring and the TX shape, for example `Coil_15_27_1_1_3_Single_SteppedDiagonal`. A run never overwrites anything: if a folder name already exists, `__1`, `__2` and so on are added. `Parameters.txt` lists every value used, marks the parameters that this design does not use, and records the angle the board was turned by to put the TX terminal at 0°. Each board's `.kicad_pro` holds the design rules KiCad checks it against: `MIN_CLEARANCE_MM` and the smallest track, via and drill on the board; see [KiCad Compatibility](KiCad-Compatibility.md). The two SVG pictures are drawn from the written boards at the end of the run; see [Output Pictures](Output-Pictures.md).
+The Single Coil Set Generator's folder name carries the board radii, the RX loops and sub-coils, the TX turns, the TX wiring and the TX shape, for example `Coil_15_27_1_1_3_Single_SteppedDiagonal`. A run never overwrites anything: if a folder name already exists, `__1`, `__2` and so on are added. `Parameters.txt` lists every value used, marks the parameters that this design does not use, and records the angle the board was turned by to put the TX terminal at 0°. Each board's `.kicad_pro` holds the design rules KiCad checks it against: `MIN_CLEARANCE_MM` and the smallest track, via and drill on the board; see [KiCad Compatibility](KiCad-Compatibility.md). The two SVG pictures are drawn from the written boards at the end of the run; see [Output Pictures](Output-Pictures.md).
 
 The analyser and optimizer (`Analyser_And_Optimizer/` and `OptimizerParameters.py`) are not on main. They are under construction on the [`analyser_and_optimizer` branch](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/tree/analyser_and_optimizer).
 
@@ -102,12 +102,12 @@ The analyser and optimizer (`Analyser_And_Optimizer/` and `OptimizerParameters.p
 ```bash
 python -m pip install -r requirements.txt
 
-cd "Generators/Single Generator"
+cd "Generators/Single Coil Set Generator"
 python Generator/Run/RunCoilGenerator.py              # Check, then write Stator + Rotor
 python Generator/Run/RunCoilGenerator.py --check      # Check only, write nothing
 
-cd "../Dual Generator"
-python Dual_Generator/Run/Dual_RunCoilGenerator.py    # The Dual Generator: check, then write Stator + Rotor
+cd "../Dual Coil Set Generator"
+python Dual_Generator/Run/Dual_RunCoilGenerator.py    # The Dual Coil Set Generator: check, then write Stator + Rotor
 ```
 
 The generator runs from any folder; it finds the other folders itself. To treat every warning about the finished boards (clearances, the board edge, the page, the rotor) as an error, set `GENERATOR_MODE = "strict"` in `Board_Parameters.py`.

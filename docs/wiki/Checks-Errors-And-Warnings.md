@@ -2,7 +2,7 @@
 
 Before and after a board is built, the generator checks it. The rules live in `Generator/Checks/`
 (`ParameterRules.py`, `ConflictRules.py` and `DesignChecks.py`). The parameter rules can also be run alone, from the
-`Generators/Single Generator` folder, to check the parameter files without generating anything:
+`Generators/Single Coil Set Generator` folder, to check the parameter files without generating anything:
 
 ```bash
 python Generator/Run/CheckParameters.py
@@ -12,8 +12,8 @@ python Generator/Run/RunCoilGenerator.py --check    # check only, write nothing
 Whether warnings about the finished boards stop the run is set by `GENERATOR_MODE` in `Board_Parameters.py`:
 `"normal"` writes the boards anyway, `"strict"` treats every such warning as an error.
 
-The Dual Generator runs all of these checks on each of its two sets, and adds its own; see
-[24.6 Dual Generator](#246-dual-generator).
+The Dual Coil Set Generator runs all of these checks on each of its two sets, and adds its own; see
+[24.6 Dual Coil Set Generator](#246-dual-coil-set-generator).
 
 ## 24.1 Levels
 
@@ -44,7 +44,7 @@ The explanation says which value to change and, where it can be worked out, the 
 ## 24.2 Two Stages
 
 1. **Parameter rules** (`check_parameters`). They need only the values: types, ranges, and combinations that cannot
-   work. Each parameter has a range (see the [Parameter Reference Single Generator](Parameter-Reference-Single-Generator.md)), and a misspelled or
+   work. Each parameter has a range (see the [Parameter Reference Single Coil Set Generator](Parameter-Reference-Single-Coil-Set-Generator.md)), and a misspelled or
    unknown name is reported as a warning, with a suggestion when a known name is close.
 2. **Finished-geometry rules** (`check_design`). They need the built stator and rotor: the board edge against the
    copper it must contain, via clearances, and the page size.
@@ -102,27 +102,28 @@ range is below the limit, you get an info line that gives the range, not a warni
 | 2 sub-coils at the default band, with 4 loops and fingers (`RX_TABS = "all"` or `"single"`), or with 5 or more loops | A via touches copper of another net, or the vias that join the sub-coils do not fit between the curves. Without fingers (`RX_TABS = "none"`) 4 loops build, with a via clearance warning. Use 1 sub-coil, fewer loops or a wider band. |
 | `RX_TABS = "all"` on a small board when the TX turns go around the fingers (the fingers on a layer with TX turns) and there are several loops (on a board of 15 to 27 mm with a series TX on Top + Inner-1, 4 loops fail at the default 0.6 mm pitch, and a smaller pitch makes it worse) | A TX window under an RX finger would reach the TX terminal; the smaller the pitch, the farther the window reaches. Use `RX_TABS = "single"`, the fingers on a layer without TX turns (`RX_TAB_LAYER`), a parallel TX, fewer `TX_TURNS` or a bigger board. |
 
-## 24.6 Dual Generator
+## 24.6 Dual Coil Set Generator
 
-The Dual Generator's rules live in `Generators/Dual Generator/Dual_Generator/Checks/`: `Dual_ParameterRules.py`, run by
-`Dual_CheckParameters.py` before anything is built, and `Dual_DesignChecks.py`, run on the built copper. The checker on
-its own builds nothing, so it does not measure the gap between the sets or the rotor rings; `--check` and a run do.
-From the `Generators/Dual Generator` folder:
+The Dual Coil Set Generator's rules live in `Generators/Dual Coil Set Generator/Dual_Generator/Checks/`:
+`Dual_ParameterRules.py`, run by `Dual_CheckParameters.py` before anything is built, and `Dual_DesignChecks.py`, run on
+the built copper. The checker on its own builds nothing, so it does not measure the gap between the sets or the rotor
+rings; `--check` and a run do. From the `Generators/Dual Coil Set Generator` folder:
 
 ```bash
 python Dual_Generator/Checks/Dual_CheckParameters.py
 python Dual_Generator/Run/Dual_RunCoilGenerator.py --check    # check only, write nothing
 ```
 
-The run checks in this order: the dual files and the dual rules, the layout, then the Single Generator's own
-parameter checks on each set. After the build: the Single Generator's checks on each set's finished copper, then the
-dual checks on the two sets together and on the two rotor rings. A message about one set names it: its explanation
-line starts with `set 1:` or `set 2:`. `GENERATOR_MODE` in `Dual_Board_Parameters.py` works as on a single board.
+The run checks in this order: the dual files and the dual rules, the layout, then the Single Coil Set Generator's own
+parameter checks on each set. After the build: the Single Coil Set Generator's checks on each set's finished copper,
+then the dual checks on the two sets together and on the two rotor rings. A message about one set names it: its
+explanation line starts with `set 1:` or `set 2:`. `GENERATOR_MODE` in `Dual_Board_Parameters.py` works as on a single
+board.
 
 | Area | What the rules look for |
 |---|---|
 | Files | A name in the wrong dual file (warning: ignored, the message names the file it belongs in); a name that is not a parameter, or one no longer used (warnings); a missing name (error); a set's own via, clearance, AC factor or capacitor series line missing from its file (info: the board's value is used); `OUTPUT_DIR` not a folder or not writable (errors), or not there yet (info: it will be created). |
-| Layout | No RX band and not both board edges, so nothing to size a band from (error naming what to give; see [Dual Layout](Dual-Layout.md)). A band given by half a pair, or by both pairs (error). A board too small for two bands fitted between the edges (error, giving the outer radius it needs). A given edge that leaves a placed band no room (error). A placed RX1 band that would push the bore to zero (error). `DUAL_MODE` in an old file (warning: no longer used). Two sets that run into each other (error, giving the RX2 band start needed), an RX1 band that is not inside the RX2 band (error: set 1 is the inner set; the message says to swap the two sets' files), or a bore with no room inside the RX1 band (error). A given edge is held against its set's band and TX ring by the Single Generator's own edge rules. When a placed band is too narrow for its vias, a hint names the edge to move. |
+| Layout | No RX band and not both board edges, so nothing to size a band from (error naming what to give; see [Dual Layout](Dual-Layout.md)). A band given by half a pair, or by both pairs (error). A board too small for two bands fitted between the edges (error, giving the outer radius it needs). A given edge that leaves a placed band no room (error). A placed RX1 band that would push the bore to zero (error). `DUAL_MODE` in an old file (warning: no longer used). Two sets that run into each other (error, giving the RX2 band start needed), an RX1 band that is not inside the RX2 band (error: set 1 is the inner set; the message says to swap the two sets' files), or a bore with no room inside the RX1 band (error). A given edge is held against its set's band and TX ring by the Single Coil Set Generator's own edge rules. When a placed band is too narrow for its vias, a hint names the edge to move. |
 | Nets | A net name used twice across the two sets (warning: KiCad joins the two coils into one net in its ratsnest and DRC; the copper is not shorted). |
 | Frequencies | `EXCITATION_FREQ_HZ` of the two sets closer than `TX_FREQ_SEPARATION_MIN` (warning), or within `TX_FREQ_RATIO_TOLERANCE` of a small integer ratio (warning). Whenever the separation is met, also an info that two free-running tanks have not been shown to work and must be proven on the first board. |
 | Layers | Set 2 using all four layers, or a 2-layer board, so no layer is free for set 1's leads (warning). |
@@ -139,11 +140,11 @@ ERROR   TX_PITCH_MM conflicts with VIA_DIAMETER_MM and TX_WIRING
 set 1: a pitch of 0.35 mm is too small for the stitching vias of the parallel TX (a turn next to a 0.6 mm via must bend 0.21 mm away and would then touch the turn beyond it). Raise TX_PITCH_MM to at least 0.43 or use smaller vias
 ```
 
-See [Board Features - Dual Generator](Board-Features-Dual-Generator.md#185-checks-on-the-finished-boards) and
-[Quick Guide To Parameters Selections - Dual Generator](Quick-Guide-To-Parameters-Selections-Dual-Generator.md#2111-what-the-checker-says).
+See [Board Features - Dual Coil Set Generator](Board-Features-Dual-Coil-Set-Generator.md#185-checks-on-the-finished-boards)
+and [Quick Guide To Parameters Selections - Dual Coil Set Generator](Quick-Guide-To-Parameters-Selections-Dual-Coil-Set-Generator.md#2111-what-the-checker-says).
 
 [<img align="right" src="https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/logo/Logo_1_V2.png" alt="Sinusoidal Coil Generator logo, click to see it spin" width="72">](https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/logo/Logo_1_V2_rotor_spin_400px.webp)
 
 | Previous | Next |
 |:---|---:|
-| [Parameter Reference Dual Generator](Parameter-Reference-Dual-Generator.md) | [Electrical Estimate](Electrical-Estimate.md) |
+| [Parameter Reference Dual Coil Set Generator](Parameter-Reference-Dual-Coil-Set-Generator.md) | [Electrical Estimate](Electrical-Estimate.md) |

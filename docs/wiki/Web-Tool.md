@@ -2,9 +2,9 @@
 
 Design the stator and rotor boards of a sinusoidal inductive encoder in your browser, see them straight away,
 and download them as KiCad files. No installation and no account: everything runs on your own computer, and
-nothing is sent to a server. The web tool runs the Single Generator unchanged, so the same settings give the same
-boards. It runs the copy on the `WebUI` branch, which is older than `main`: it has no silkscreen suggestion and no blind
-vias.
+nothing is sent to a server. The web tool runs the Single Coil Set Generator unchanged, so the same settings give the
+same boards. It runs the copy on the `WebUI` branch, which is older than `main`: it has no silkscreen suggestion and no
+blind vias.
 
 **[Open The Web Tool](https://ro-h-bots.blogspot.com/p/inductive-encoder-sinusoidal-coil.html)**
 
@@ -143,13 +143,13 @@ The preview tools only change what you see, never the boards.
 
 ## 4.9 What The Web Tool Does Not Include
 
-The web tool makes the boards only. The receiver IC support, the electrical estimate, the optimizer and the analyser of the desktop project are not part of it, and neither are the silkscreen suggestion, blind vias (`VIA_TYPE`) and the Dual Generator.
+The web tool makes the boards only. The receiver IC support, the electrical estimate, the optimizer and the analyser of the desktop project are not part of it, and neither are the silkscreen suggestion, blind vias (`VIA_TYPE`) and the Dual Coil Set Generator.
 
 ## 4.10 How It Runs
 
 The Web Tool is a static site (`WebGUI/` on the `WebUI` branch): `index.html`, `WebGUI.js`, `WebGUI.css`,
 `BoardPreview.js`, `Tooltips.js`, `PyodideWorker.js` and `WebGenerator.py`. There is no server. The browser loads
-Pyodide (Python and numpy compiled to WebAssembly) from the jsDelivr CDN, fetches the generator (`Single Generator/Generator/` and `Single Generator/Parameters/`)
+Pyodide (Python and numpy compiled to WebAssembly) from the jsDelivr CDN, fetches the generator (`Single Coil Set Generator/Generator/` and `Single Coil Set Generator/Parameters/`)
 from the same site, and runs them unchanged in a Web Worker. For the same settings the KiCad output is
 byte-identical to a desktop run of the same generator copy. The generator is never modified for the web.
 

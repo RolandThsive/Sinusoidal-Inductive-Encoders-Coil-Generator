@@ -10,8 +10,8 @@ boards.py  -  looks after the test board folders (BoardNNN-<what it tests>) of t
 new: the first argument is the generator (single or dual), the second what the board tests (the folder becomes
 BoardNNN-<what it tests>, NNN the next free number).  Each NAME=VALUE changes one value, VALUE written as in a
 parameter file (a number, "text", None, True, [list], (tuple)); a dual NAME names its file's module first (BOARD.,
-RX1., TX2., SILK., ...), a Single Generator silkscreen value SILK.  The files are copied from Board001-default, or
-from another board with --from; each changed value is replaced in place, so the comments stay with it.  Then the
+RX1., TX2., SILK., ...), a Single Coil Set Generator silkscreen value SILK.  The files are copied from Board001-default,
+or from another board with --from; each changed value is replaced in place, so the comments stay with it.  Then the
 board is written and its files saved next to its parameter files, its tests run, and the README table written anew.
 A board that does not build or fails its tests is removed again: read what the run printed.
 

@@ -8,9 +8,10 @@
 
 An open, all-in-one coil generator for rotary inductive encoders: set the parameters, get a stator and rotor as KiCad boards, and, once finished, check them with the analyser and optimizer (under construction on the [`analyser_and_optimizer` branch](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/tree/analyser_and_optimizer)).
 
-There are two generators. The **Single Generator** builds one coil set on a stator. The **Dual Generator** builds two
-coil sets on one stator, a coarse absolute track and a fine track, each read by its own IC, and one rotor disc with two
-rings; see [Stator Features - Dual Generator](Stator-Features-Dual-Generator.md).
+There are two generators. The **Single Coil Set Generator** builds one coil set on a stator. The **Dual Coil Set
+Generator** builds two coil sets on one stator, a coarse absolute track and a fine track, each read by its own IC, and
+one rotor disc with two rings; see
+[Stator Features - Dual Coil Set Generator](Stator-Features-Dual-Coil-Set-Generator.md).
 
 The goal is to make 20-bit and higher rotary encoding available to anyone, with nothing more than KiCad and a PCB order, and to bring the price of such encoders down from hundreds or thousands of dollars to tens.
 

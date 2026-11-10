@@ -2,7 +2,7 @@
 step_summary.py  -  one table row per regression run on the CI's run page (GITHUB_STEP_SUMMARY), read from the
 suite's own output:
 
-    python .github/scripts/step_summary.py LOG "Single Generator" ubuntu-latest
+    python .github/scripts/step_summary.py LOG "Single Coil Set Generator" ubuntu-latest
 
 The row gives the system, Python and numpy versions, the number of tests, the time and the result, and the names of
 the tests that failed.  Writes to standard output when GITHUB_STEP_SUMMARY is not set.

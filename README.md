@@ -42,8 +42,8 @@ Inductive position sensors measure angle with nothing more than copper traces on
 | Start | [Getting Started](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Getting-Started), [Web Tool](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Web-Tool), [Examples](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Examples) |
 | Understand it | [Working Principle](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Working-Principle), [RX Profiles](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/RX-Profiles), [TX Profiles](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/TX-Profiles) |
 | Design a board | [Choosing A Rotor And Stator](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Choosing-A-Rotor-And-Stator), [Quick Guide To Parameters Selections](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Quick-Guide-To-Parameters-Selections), [Stator Features](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Stator-Features), [Rotor Features](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Rotor-Features), [Board Features](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Board-Features), [Silkscreen](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Silkscreen) |
-| Design a dual board | [Stator Features](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Stator-Features-Dual-Generator), [Rotor Features](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Rotor-Features-Dual-Generator), [Board Features](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Board-Features-Dual-Generator), [Silkscreen](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Silkscreen-Dual-Generator), [Quick Guide To Parameters Selections](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Quick-Guide-To-Parameters-Selections-Dual-Generator) |
-| Look something up | [Parameter Reference Single Generator](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Parameter-Reference-Single-Generator), [Parameter Reference Dual Generator](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Parameter-Reference-Dual-Generator), [Checks, Errors And Warnings](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Checks-Errors-And-Warnings), [Electrical Estimate](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Electrical-Estimate), [KiCad Compatibility](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/KiCad-Compatibility), [Regression Testing](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Regression-Testing), [Glossary](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Glossary) |
+| Design a dual board | [Stator Features](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Stator-Features-Dual-Coil-Set-Generator), [Rotor Features](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Rotor-Features-Dual-Coil-Set-Generator), [Board Features](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Board-Features-Dual-Coil-Set-Generator), [Silkscreen](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Silkscreen-Dual-Coil-Set-Generator), [Quick Guide To Parameters Selections](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Quick-Guide-To-Parameters-Selections-Dual-Coil-Set-Generator) |
+| Look something up | [Parameter Reference Single Coil Set Generator](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Parameter-Reference-Single-Coil-Set-Generator), [Parameter Reference Dual Coil Set Generator](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Parameter-Reference-Dual-Coil-Set-Generator), [Checks, Errors And Warnings](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Checks-Errors-And-Warnings), [Electrical Estimate](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Electrical-Estimate), [KiCad Compatibility](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/KiCad-Compatibility), [Regression Testing](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Regression-Testing), [Glossary](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Glossary) |
 | See what is next | [Immediate Next Steps](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Immediate-Next-Steps), [Future Upgrades And Planning](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Future-Upgrades-And-Planning), [Suggestive Analysis And Optimization](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Suggestive-Analysis-And-Optimization), [MILESTONES.md](docs/funding/MILESTONES.md) |
 
 ## Quick Start
@@ -51,16 +51,16 @@ Inductive position sensors measure angle with nothing more than copper traces on
 ```bash
 python -m pip install -r requirements.txt
 
-cd "Generators/Single Generator"
+cd "Generators/Single Coil Set Generator"
 python Generator/Run/RunCoilGenerator.py              # Check, then write Stator + Rotor
 python Generator/Run/RunCoilGenerator.py --check      # Check only, write nothing
 python Generator/Run/RunCoilGenerator.py --stator     # Only the stator
 python Generator/Run/RunCoilGenerator.py --rotor      # Only the rotor
 ```
 
-Edit only the files in `Generators/Single Generator/Parameters/`. Each run writes a new folder in
-`Generators/Single Generator/Output/` with `Stator.kicad_pcb`, `Rotor.kicad_pcb` (each with a KiCad project file that
-holds its design rules), `Parameters.txt` and two SVG pictures of the boards
+Edit only the files in `Generators/Single Coil Set Generator/Parameters/`. Each run writes a new folder in
+`Generators/Single Coil Set Generator/Output/` with `Stator.kicad_pcb`, `Rotor.kicad_pcb` (each with a KiCad project
+file that holds its design rules), `Parameters.txt` and two SVG pictures of the boards
 ([Representative and Actual](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Output-Pictures)),
 and never overwrites an earlier one. Prefer a
 browser? Use the [Web Tool](https://ro-h-bots.blogspot.com/p/inductive-encoder-sinusoidal-coil.html). Full
@@ -74,7 +74,8 @@ walk-through: [Getting Started](https://github.com/RolandThsive/Inductive-Encode
 - **Board:** 2 or 4 copper layers; through vias, or blind vias on 4-layer boards.
 - **Checks and estimate:** geometry and parameter checks that name the conflict (`normal` or `strict` mode), TX
   inductance, resistance, tank capacitors and oscillator frequency against your receiver IC's limits.
-- **Dual Generator:** two coil sets on one stator with a two-ring rotor disc (`Generators/Dual Generator/`).
+- **Dual Coil Set Generator:** two coil sets on one stator with a two-ring rotor disc
+  (`Generators/Dual Coil Set Generator/`).
 - **Regression tests:** both generators are tested on every pull request.
 - **Analyser and optimizer:** under construction on the
   [`analyser_and_optimizer` branch](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/tree/analyser_and_optimizer).
@@ -85,9 +86,9 @@ Every parameter and every board size is in the wiki:
 [Rotor](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Rotor-Features) and
 [Board](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Board-Features) features.
 
-![Dual Generator: the stator with its rotor on top, outer set 1 to 16 loops, inner set 1 loop](docs/images/readmeWhatWorks.png)
+![Dual Coil Set Generator: the stator with its rotor on top, outer set 1 to 16 loops, inner set 1 loop](docs/images/readmeWhatWorks.png)
 
-*The Dual Generator: one stator with two coil sets and its rotor on top. The outer set has 1, 2, 4, 8 and 16 loops, the inner set 1 loop.*
+*The Dual Coil Set Generator: one stator with two coil sets and its rotor on top. The outer set has 1, 2, 4, 8 and 16 loops, the inner set 1 loop.*
 
 ## Status And Next Steps
 

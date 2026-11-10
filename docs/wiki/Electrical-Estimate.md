@@ -47,9 +47,9 @@ from the datasheet of your IC and check your revision.
 
 Set both frequency limits to None to skip the frequency check, and `IC_MIN_RP_OHM` to None to skip the resistance
 check. With all three None there are no IC checks. A missing line, or a missing `IC_Parameters.py`, uses the default
-and prints an info line. See the [Parameter Reference Single Generator](Parameter-Reference-Single-Generator.md#225-ic-ic_parameterspy).
+and prints an info line. See the [Parameter Reference Single Coil Set Generator](Parameter-Reference-Single-Coil-Set-Generator.md#225-ic-ic_parameterspy).
 
-## 25.5 Dual Generator
+## 25.5 Dual Coil Set Generator
 
 `Dual_RunCoilGenerator.py` prints the estimate in step 4 for **each set on its own**: each set with its own TX ring, its
 own `EXCITATION_FREQ_HZ` (`Dual_TX1` / `Dual_TX2`), its own rotor ring and its own IC limits (`Dual_IC1_Parameters.py`,

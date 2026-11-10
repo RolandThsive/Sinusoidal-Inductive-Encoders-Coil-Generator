@@ -2,7 +2,8 @@
 run_regression.py  -  runs the regression tests of both generators, or of one (from any folder):
 
     python regression/run_regression.py                      both suites, one after the other
-    python regression/run_regression.py single               the Single Generator's suite only (dual: the Dual's)
+    python regression/run_regression.py single               the Single Coil Set Generator's suite only
+                                                             (dual: the Dual Coil Set Generator's)
     python regression/run_regression.py dual -v              one line per test
     python regression/run_regression.py single -k silkscreen only the tests whose name contains the text (-k may
                                                              be repeated: the tests that contain any of them)
@@ -29,8 +30,8 @@ import time
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-SUITES = {"single": ("Single Generator", os.path.join(HERE, "SingleGenerator_regression", "tests")),
-          "dual": ("Dual Generator", os.path.join(HERE, "DualGenerator_regression", "tests"))}
+SUITES = {"single": ("Single Coil Set Generator", os.path.join(HERE, "SingleCoilSetGenerator_regression", "tests")),
+          "dual": ("Dual Coil Set Generator", os.path.join(HERE, "DualCoilSetGenerator_regression", "tests"))}
 
 
 def main(argv=None):

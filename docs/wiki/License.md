@@ -5,7 +5,7 @@ content, an extra term on everything the tool produces (34.1), and commercial te
 
 | Content | License | What it allows |
 |---|---|---|
-| Generator code (`Generators/Single Generator/` and `Generators/Dual Generator/` with their parameter files, their regression tests and test boards in `regression/`, and `Generators/resources/`, on `main`; the `analyser_and_optimizer` branch) | [PolyForm Noncommercial 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0/) | Use, change and share, for noncommercial purposes |
+| Generator code (`Generators/Single Coil Set Generator/` and `Generators/Dual Coil Set Generator/` with their parameter files, their regression tests and test boards in `regression/`, and `Generators/resources/`, on `main`; the `analyser_and_optimizer` branch) | [PolyForm Noncommercial 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0/) | Use, change and share, for noncommercial purposes |
 | Documentation and images (`docs/images/` except the Web Tool pictures, `docs/wiki/` and this wiki, `README.md`, `docs/CONTRIBUTING.md`) | [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) | Share and adapt with credit, noncommercial, under the same license |
 | Web Tool (`WebGUI/` and `.github/workflows/WebGUI-Pages.yml` on the `WebUI` branch, the published tool, its design, and the `docs/images/webui_*.png` pictures) | [PolyForm Strict 1.0.0](https://polyformproject.org/licenses/strict/1.0.0/) | Noncommercial use only; no changes and no redistribution |
 
@@ -41,8 +41,8 @@ for an overview, the links to the full license texts and the contact details.
 
 **No output of the tool may be used commercially unless you have accepted the commercial terms (34.2) or have the
 author's written permission.** This is an extra term, in addition to the licenses above, and it applies to everything
-the Single Generator, the Dual Generator, the analyser or the Web Tool produces, whether run unchanged or from a
-changed copy, whole or in part:
+the Single Coil Set Generator, the Dual Coil Set Generator, the analyser or the Web Tool produces, whether run unchanged
+or from a changed copy, whole or in part:
 
 - the KiCad board and project files and the board layouts,
 - Gerber, drill and other manufacturing files made from them,
@@ -138,7 +138,7 @@ published statements, listed at the end. It is not legal advice and is not a sta
 - **The format is published.** KiCad documents its file formats openly for developers, including the board format the
   generator writes (the s-expression `.kicad_pcb` format, used by every KiCad version from 6.0). The documentation sets
   no license condition on reading or writing the format.
-- **The generator writes the format from scratch.** Its writer (`Generators/Single Generator/Generator/Core/PCBWriter.py`, which the Dual Generator uses too) builds the text of
+- **The generator writes the format from scratch.** Its writer (`Generators/Single Coil Set Generator/Generator/Core/PCBWriter.py`, which the Dual Coil Set Generator uses too) builds the text of
   the file itself, using only Python's standard library and NumPy. It does not contain, copy or link any KiCad source
   code, does not use KiCad's Python interface, and does not use any KiCad library (symbols, footprints or 3D models).
   Every board is made only of tracks, vias, outlines, polygons and silkscreen lines and circles drawn by the

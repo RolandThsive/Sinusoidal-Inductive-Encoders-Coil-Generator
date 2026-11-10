@@ -2,8 +2,8 @@
 RegressionTools.py  -  what the two regression test suites share: reading a written .kicad_pcb back, measuring it
 independently of the generator, and comparing files with their references.
 
-Used by both suites, regression/SingleGenerator_regression and regression/DualGenerator_regression.  It knows nothing
-about the generators: it only reads what they wrote.  Needs Python 3 and numpy, nothing else.
+Used by both suites, regression/SingleCoilSetGenerator_regression and regression/DualCoilSetGenerator_regression.  It
+knows nothing about the generators: it only reads what they wrote.  Needs Python 3 and numpy, nothing else.
 
     Board          the file parsed: nets, segments, vias, polygons, the Edge.Cuts circles, the silkscreen, the header
     min_clearance  the smallest edge-to-edge distance between copper of different nets (same layer; vias on every

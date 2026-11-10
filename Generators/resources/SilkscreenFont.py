@@ -7,8 +7,8 @@ The glyphs are this repository's own design (drawn for it, no outside font data)
 few signs on a 4 x 6 grid, each a few straight strokes.  Lowercase letters are drawn as capitals.  The file lives
 in `Generators/resources`, next to the generators and not inside one, so that every generator can use it; it is
 under the repository's licence (LICENSE.md).  Used by
-Generators/Dual Generator/Dual_Generator/Stator/Dual_LeadCutting_SilkscreenSuggestion.py and
-Generators/Single Generator/Generator/Stator/LeadCutting_SilkscreenSuggestion.py, which load it by its path.
+Generators/Dual Coil Set Generator/Dual_Generator/Stator/Dual_LeadCutting_SilkscreenSuggestion.py and
+Generators/Single Coil Set Generator/Generator/Stator/LeadCutting_SilkscreenSuggestion.py, which load it by its path.
 
     segments = layout("SIN1_1", x, y, height_mm, anchor="left", mirror=False)
         -> [((x1, y1), (x2, y2)), ...] in board coordinates (KiCad: y grows downwards), the text's vertical middle

@@ -24,8 +24,8 @@ contributions of every kind are welcome, from a measurement on a real board to a
 ## How Can You Get Involved?
 
 1. Read the [README](../README.md) and the [Wiki](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki).
-2. Run a generator from the `Generators/Single Generator` or the `Generators/Dual Generator` folder (see the Quick Start
-   in the README) and look at what it builds.
+2. Run a generator from the `Generators/Single Coil Set Generator` or the `Generators/Dual Coil Set Generator` folder
+   (see the Quick Start in the README) and look at what it builds.
 3. Open an issue on GitHub to report a problem, ask a question or propose a change before starting larger work.
 4. Send a pull request for a fix or improvement. Keep it focused, so that it is easy to review.
 5. For measurements, hardware, funding or commercial use, get in touch by email:
@@ -36,15 +36,16 @@ contributions of every kind are welcome, from a measurement on a real board to a
 - **Be honest about validation.** Say whether a number comes from a model or from a measurement, and keep the
   hardware-validation notice wherever figures are given.
 - **Keep changes small and clear.** One topic per pull request, with a short description of what changed and why.
-- **Check before you send.** Run the checks of the generator you changed (`python Generator/Run/RunCoilGenerator.py
-  --check` from the `Generators/Single Generator` folder, `python Dual_Generator/Run/Dual_RunCoilGenerator.py --check`
-  from the `Generators/Dual Generator` folder) and the regression tests (`python regression/run_regression.py single` or
-  `dual` from the repository root; a change that alters the boards adds a test board, see `regression/README.md`), and
-  the lint (`python -m pip install -r requirements.txt`, then `ruff check .`). Every pull request runs the CI on GitHub:
-  both suites on Ubuntu, Windows and macOS, the install on Python 3.11 to 3.15, the boards in KiCad 7 to 10, the lint
-  and the repository checks (see [Regression Testing](wiki/Regression-Testing.md)).
+- **Check before you send.** Run the checks of the generator you changed
+  (`python Generator/Run/RunCoilGenerator.py --check` from the `Generators/Single Coil Set Generator` folder,
+  `python Dual_Generator/Run/Dual_RunCoilGenerator.py --check` from the `Generators/Dual Coil Set Generator` folder) and
+  the regression tests (`python regression/run_regression.py single` or `dual` from the repository root; a change that
+  alters the boards adds a test board, see `regression/README.md`), and the lint
+  (`python -m pip install -r requirements.txt`, then `ruff check .`). Every pull request runs the CI on GitHub: both
+  suites on Ubuntu, Windows and macOS, the install on Python 3.11 to 3.15, the boards in KiCad 7 to 10, the lint and the
+  repository checks (see [Regression Testing](wiki/Regression-Testing.md)).
 - **Parameters stay in the parameter files.** The only files a user edits are in
-  `Generators/Single Generator/Parameters/` and `Generators/Dual Generator/Parameters/`.
+  `Generators/Single Coil Set Generator/Parameters/` and `Generators/Dual Coil Set Generator/Parameters/`.
 - **Update the documentation with the code.** If a parameter, command or output changes, change the wiki and README to
   match.
 - **Do not include secrets or personal data** in issues, pull requests or measurement files.

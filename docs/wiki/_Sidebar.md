@@ -12,24 +12,24 @@
 - [TX Profiles](TX-Profiles.md)
 - [Choosing A Rotor And Stator](Choosing-A-Rotor-And-Stator.md)
 
-**Design Guide - Single Generator**
+**Design Guide - Single Coil Set Generator**
 - [Stator Features](Stator-Features.md)
 - [Rotor Features](Rotor-Features.md)
 - [Board Features](Board-Features.md)
 - [Silkscreen](Silkscreen.md)
 - [Quick Guide To Parameters Selections](Quick-Guide-To-Parameters-Selections.md)
 
-**Design Guide - Dual Generator**
-- [Stator Features](Stator-Features-Dual-Generator.md)
-- [Rotor Features](Rotor-Features-Dual-Generator.md)
-- [Board Features](Board-Features-Dual-Generator.md)
+**Design Guide - Dual Coil Set Generator**
+- [Stator Features](Stator-Features-Dual-Coil-Set-Generator.md)
+- [Rotor Features](Rotor-Features-Dual-Coil-Set-Generator.md)
+- [Board Features](Board-Features-Dual-Coil-Set-Generator.md)
 - [Dual Layout](Dual-Layout.md)
-- [Silkscreen](Silkscreen-Dual-Generator.md)
-- [Quick Guide To Parameters Selections](Quick-Guide-To-Parameters-Selections-Dual-Generator.md)
+- [Silkscreen](Silkscreen-Dual-Coil-Set-Generator.md)
+- [Quick Guide To Parameters Selections](Quick-Guide-To-Parameters-Selections-Dual-Coil-Set-Generator.md)
 
 **Reference**
-- [Parameter Reference Single Generator](Parameter-Reference-Single-Generator.md)
-- [Parameter Reference Dual Generator](Parameter-Reference-Dual-Generator.md)
+- [Parameter Reference Single Coil Set Generator](Parameter-Reference-Single-Coil-Set-Generator.md)
+- [Parameter Reference Dual Coil Set Generator](Parameter-Reference-Dual-Coil-Set-Generator.md)
 - [Checks, Errors And Warnings](Checks-Errors-And-Warnings.md)
 - [Electrical Estimate](Electrical-Estimate.md)
 - [Suggestive Analysis And Optimization](Suggestive-Analysis-And-Optimization.md)

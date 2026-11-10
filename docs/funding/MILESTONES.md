@@ -5,16 +5,16 @@ stops when every milestone below is done.
 
 | Serial | Milestone | Success factor |
 |---|---|---|
-| ~~1~~ | ~~Making of the single board rotary generator~~ | ~~The single generator is in the repository, runs from the parameter files and writes KiCad files that pass its own checks.~~ |
-| ~~2~~ | ~~Making of the dual board rotary generator~~ | ~~The dual generator is in the repository, runs from the parameter files and writes KiCad files that pass its own checks.~~ |
+| ~~1~~ | ~~Making of the single board rotary generator~~ | ~~The single coil set generator is in the repository, runs from the parameter files and writes KiCad files that pass its own checks.~~ |
+| ~~2~~ | ~~Making of the dual board rotary generator~~ | ~~The dual coil set generator is in the repository, runs from the parameter files and writes KiCad files that pass its own checks.~~ |
 | 3 | Making of the arc board rotary generator | The arc generator is in the repository, runs from the parameter files and writes KiCad files that pass its own checks. |
 | 4 | Making of the linear board generator | The linear generator is in the repository, runs from the parameter files and writes KiCad files that pass its own checks. |
-| 5 | Extensive testing of the single board rotary generator | Boards from the single generator are built and measured, and the results are published with the measured values and the model values side by side. |
-| 6 | Feeding the single test results back into the generator | Every model error found in the measurements is corrected in the single generator, and the correction is recorded. |
-| 7 | Making examples for the single generator | Strictly working single example boards (built and measured) are in the examples section, each with its parameters and results. |
-| 8 | Extensive testing of the dual board rotary generator | Boards from the dual generator are built and measured, and the results are published with the measured values and the model values side by side. |
-| 9 | Feeding the dual test results back into the generator | Every model error found in the measurements is corrected in the dual generator, and the correction is recorded. |
-| 10 | Making examples for the dual generator | Strictly working dual example boards (built and measured) are in the examples section, each with its parameters and results. |
+| 5 | Extensive testing of the single board rotary generator | Boards from the single coil set generator are built and measured, and the results are published with the measured values and the model values side by side. |
+| 6 | Feeding the single test results back into the generator | Every model error found in the measurements is corrected in the single coil set generator, and the correction is recorded. |
+| 7 | Making examples for the single coil set generator | Strictly working single example boards (built and measured) are in the examples section, each with its parameters and results. |
+| 8 | Extensive testing of the dual board rotary generator | Boards from the dual coil set generator are built and measured, and the results are published with the measured values and the model values side by side. |
+| 9 | Feeding the dual test results back into the generator | Every model error found in the measurements is corrected in the dual coil set generator, and the correction is recorded. |
+| 10 | Making examples for the dual coil set generator | Strictly working dual example boards (built and measured) are in the examples section, each with its parameters and results. |
 | 11 | Extensive testing of the arc board rotary generator | Boards from the arc generator are built and measured, and the results are published with the measured values and the model values side by side. |
 | 12 | Feeding the arc test results back into the generator | Every model error found in the measurements is corrected in the arc generator, and the correction is recorded. |
 | 13 | Making examples for the arc generator | Strictly working arc example boards (built and measured) are in the examples section, each with its parameters and results. |

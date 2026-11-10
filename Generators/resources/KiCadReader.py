@@ -25,10 +25,10 @@ the top or bottom layer to an inner one) or buried (between two inner layers): K
 last two, so the layers tell them apart.
 
 Standard library only.  It reads the boards for the lead-cutting silkscreen step of both generators
-(Generators/Single Generator/Generator/Stator/LeadCutting_SilkscreenSuggestion.py, which loads it by its path, as it
-loads the font), for the two picture makers next to this file (RepresentativeSVGMaker.py, ActualSVGMaker.py) and for the
-pictures of the wiki page Dual Layout (docs/tools/dual_layout_pictures.py).  The regression tests keep a reader of
-their own (regression/RegressionTools.py) on purpose, so that the boards are not checked with the code that is being
+(Generators/Single Coil Set Generator/Generator/Stator/LeadCutting_SilkscreenSuggestion.py, which loads it by its path,
+as it loads the font), for the two picture makers next to this file (RepresentativeSVGMaker.py, ActualSVGMaker.py) and
+for the pictures of the wiki page Dual Layout (docs/tools/dual_layout_pictures.py).  The regression tests keep a reader
+of their own (regression/RegressionTools.py) on purpose, so that the boards are not checked with the code that is being
 tested, and a test holds the two readers to the same values on every reference board.
 """
 

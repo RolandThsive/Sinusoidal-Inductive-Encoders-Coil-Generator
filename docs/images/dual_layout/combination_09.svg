@@ -3,9 +3,9 @@
 <rect width="100%" height="100%" fill="#ffffff"/>
 <rect x="24" y="137" width="1352" height="546" fill="#d5dce5" stroke="#c4c4c4" stroke-width="1"/>
 <text x="24" y="48" font-size="24" font-weight="bold" fill="#1a1a1a">Combination 9: RX1 band given</text>
-<text x="24" y="77" font-size="15" fill="#555555">Drawn from the reference board Board089-layout-09-rx1-band (regression/DualGenerator_regression), cut along the radius at 90 deg: the copper is what that cut</text>
-<text x="24" y="98" font-size="15" fill="#555555">meets in its Stator.kicad_pcb. Given: the RX1 band (8.45 ... 11.7 mm, Dual_RX1). Across the board true scale; through the board not to scale, the copper drawn</text>
-<text x="24" y="119" font-size="15" fill="#555555">thicker.</text>
+<text x="24" y="77" font-size="15" fill="#555555">Drawn from the reference board Board089-layout-09-rx1-band (regression/DualCoilSetGenerator_regression), cut along the radius at 90 deg: the copper is what that</text>
+<text x="24" y="98" font-size="15" fill="#555555">cut meets in its Stator.kicad_pcb. Given: the RX1 band (8.45 ... 11.7 mm, Dual_RX1). Across the board true scale; through the board not to scale, the copper</text>
+<text x="24" y="119" font-size="15" fill="#555555">drawn thicker.</text>
 <rect x="766" y="151" width="596" height="30" rx="3" fill="#ffffff" stroke="#bdbdbd" stroke-width="1"/>
 <line x1="778" y1="166" x2="808" y2="166" stroke="#1a1a1a" stroke-width="2"/>
 <text x="816" y="171" font-size="13" fill="#1a1a1a">given in the parameter files</text>
