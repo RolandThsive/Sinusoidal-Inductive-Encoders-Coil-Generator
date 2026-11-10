@@ -1,4 +1,4 @@
-# 22. Parameter Reference Dual Generator
+# 23. Parameter Reference Dual Generator
 
 Every setting of the Dual Generator lives in a parameter file in `Dual Generator/Parameters/`. These are the only files
 you edit; `Dual_Parameters.py` only gathers them. Units are millimetres, degrees and hertz unless a name says otherwise.
@@ -12,7 +12,7 @@ a dual board has, and says where a name differs from the single one.
 Which file holds a name follows the Single Generator's files: a name of its `Board_Parameters.py` is in
 `Dual_Board_Parameters.py`, one of its `RX_Parameters.py` in `Dual_RX1` and `Dual_RX2`, and so on. Nine names are the
 exceptions: `EXCITATION_FREQ_HZ` is in `Dual_TX1` / `Dual_TX2` (each set has its own oscillator), and the eight rotor-disc
-names (22.2.6) are in the board file (one disc carries both rings). The generator makes this table from the Single
+names (23.2.6) are in the board file (one disc carries both rings). The generator makes this table from the Single
 Generator's own, so a parameter the Single Generator gains is a dual parameter at once, in the matching file.
 
 > [!NOTE]
@@ -20,7 +20,7 @@ Generator's own, so a parameter the Single Generator gains is a dual parameter a
 > is ignored with a warning that names the file it belongs in. The silkscreen names are the exception: in another file
 > the warning only says the name is not a parameter of this program, and it is ignored too.
 
-## 22.1 The Files
+## 23.1 The Files
 
 | File | What It Sets |
 |---|---|
@@ -31,9 +31,9 @@ Generator's own, so a parameter the Single Generator gains is a dual parameter a
 | `Dual_IC1_Parameters.py`, `Dual_IC2_Parameters.py` | The IC of each set: the limits the electrical estimate checks that set against, and the set's own capacitor series |
 | `Dual_SilkScreenSuggestion_Parameters.py` | The lead-cutting suggestion on the silkscreen |
 
-## 22.2 Board (`Dual_Board_Parameters.py`)
+## 23.2 Board (`Dual_Board_Parameters.py`)
 
-### 22.2.1 Output
+### 23.2.1 Output
 
 | Name | Default | Meaning |
 |---|---|---|
@@ -43,18 +43,18 @@ Generator's own, so a parameter the Single Generator gains is a dual parameter a
 | `CENTER_X_MM`, `CENTER_Y_MM` | 100, 100 | Sensor axis position on the KiCad page |
 | `PAGE_SIZE_MM` | (150, 150) | Smallest KiCad "User" page size; grown as needed |
 
-### 22.2.2 Stator Board
+### 23.2.2 Stator Board
 
 | Name | Default | Meaning |
 |---|---|---|
 | `PCB_LAYERS` | 4 | 4 (1 = Top, 2 = Inner 1, 3 = Inner 2, 4 = Bottom; each set's RX on `RX_LAYER_A` / `B`, its TX on `TX_LAYER_A` / `B`) or 2 (Top and Bottom: each set's RX rising edges on `RX_RISING_EDGE_LAYER`, its TX layers 1 and 4). Two layers leave no layer free for set 1's leads to cross set 2, which the checker warns about |
-| `VIA_DIAMETER_MM`, `VIA_DRILL_MM` | 0.6, 0.3 | Via size (the Single Generator's example uses 0.8 / 0.4; 0.6 / 0.3 leaves room in the inner set's tight TX ring). A set may have its own (22.3) |
-| `MIN_CLEARANCE_MM` | 0.15 | Copper-to-copper rule. A through via of one set is checked against the other set's copper on every layer. A set may have its own (22.3); between the sets the larger of the two applies |
-| `VIA_TYPE` | `"through"` | `"through"` or `"blind"`. Blind: every via is written as a blind via between the two layers it joins. The checker warns about a pair that skips a layer and about a drill wider than about 0.15 mm; the clearance checks treat every via as a through via. A set may have its own (22.3) |
+| `VIA_DIAMETER_MM`, `VIA_DRILL_MM` | 0.6, 0.3 | Via size (the Single Generator's example uses 0.8 / 0.4; 0.6 / 0.3 leaves room in the inner set's tight TX ring). A set may have its own (23.3) |
+| `MIN_CLEARANCE_MM` | 0.15 | Copper-to-copper rule. A through via of one set is checked against the other set's copper on every layer. A set may have its own (23.3); between the sets the larger of the two applies |
+| `VIA_TYPE` | `"through"` | `"through"` or `"blind"`. Blind: every via is written as a blind via between the two layers it joins. The checker warns about a pair that skips a layer and about a drill wider than about 0.15 mm; the clearance checks treat every via as a through via. A set may have its own (23.3) |
 
-### 22.2.3 Layout: Edges And Gap
+### 23.2.3 Layout: Edges And Gap
 
-Give any of the two RX bands (22.3), the bore, the outline and the gap, each one or not (`None`): the generator places
+Give any of the two RX bands (23.3), the bore, the outline and the gap, each one or not (`None`): the generator places
 what is not given. [Dual Layout](Dual-Layout.md) has the rules and all 32 combinations, each with a picture.
 
 | Name | Default | Range | Meaning |
@@ -69,7 +69,7 @@ what is not given. [Dual Layout](Dual-Layout.md) has the rules and all 32 combin
 | `LAYOUT_TOLERANCE_MM` | 0.05 | 0 to 1 | The rounding allowance: the built copper may differ from the layout formulas by this much before the run warns. When the outline is worked out (or a placed RX2 band runs out to a given one) and ring 2 covers the TX2 turns, it is also the room left between ring 2 and the outline beyond `ROTOR_AUTO_EDGE_CLEARANCE_MM` (half the edge line plus the polygon sag, when that is more). 0 = no allowance |
 | `BAND_SPLIT` | 0.5 | between 0 and 1, both excluded | Read only when no RX band is given (both bands fitted between the edges): set 1's share of the free radial width. 0.5 = equal band widths; a 1x / 16x board is usually near 0.5 |
 
-### 22.2.4 TX Ends And Frequencies
+### 23.2.4 TX Ends And Frequencies
 
 | Name | Default | Range | Meaning |
 |---|---|---|---|
@@ -79,10 +79,10 @@ what is not given. [Dual Layout](Dual-Layout.md) has the rules and all 32 combin
 | `TX_FREQ_RATIO_MAX_ORDER` | 4 | 1 to 100 | A frequency ratio within `TX_FREQ_RATIO_TOLERANCE` of any p:q with p, q up to this is a warning (4 covers 2:1, 3:1, 4:1, 3:2, 4:3). 1 turns the ratio warning off |
 | `TX_FREQ_RATIO_TOLERANCE` | 0.02 | 0 up to 1 (1 excluded) | How close to p:q counts (0.02 = 2 %) |
 
-### 22.2.5 Stack-Up And Electrical Estimate
+### 23.2.5 Stack-Up And Electrical Estimate
 
-These hold for both sets, as on a single board (see 21.1.3 and 21.1.4 of the
-[single reference](Parameter-Reference-Single-Generator.md#2114-electrical-estimate)). `EXCITATION_FREQ_HZ` is not here:
+These hold for both sets, as on a single board (see 22.1.3 and 22.1.4 of the
+[single reference](Parameter-Reference-Single-Generator.md#2214-electrical-estimate)). `EXCITATION_FREQ_HZ` is not here:
 each set has its own, in `Dual_TX1` / `Dual_TX2`. A set may have its own `TX_AC_RESISTANCE_FACTOR` (in `Dual_TX<k>`) and
 `TANK_CAP_SERIES` (in `Dual_IC<k>`).
 
@@ -96,7 +96,7 @@ each set has its own, in `Dual_TX1` / `Dual_TX2`. A set may have its own `TX_AC_
 | `STACKUP_PREPREG_MM` | 0.2 |
 | `TANK_CAP_SERIES` | `"E12"` |
 
-### 22.2.6 Rotor Disc
+### 23.2.6 Rotor Disc
 
 | Name | Default | Range | Meaning |
 |---|---|---|---|
@@ -113,7 +113,7 @@ each set has its own, in `Dual_TX1` / `Dual_TX2`. A set may have its own `TX_AC_
 | `ROTOR_CHORD_TOLERANCE_MM` | 0.001 | ≥ 0.001 | How far the polygon may lie outside the true circle |
 | `ROTOR_SOLDER_MASK_EXPANSION_MM` | −1 | −1, or 0 to 5 | Mask opening over the rotor copper, the same for both rings (−1 = the mask stays over the copper) |
 
-## 22.3 RX (`Dual_RX1_Parameters.py`, `Dual_RX2_Parameters.py`)
+## 23.3 RX (`Dual_RX1_Parameters.py`, `Dual_RX2_Parameters.py`)
 
 The two files have the same names, those of the Single Generator's `RX_Parameters.py`, and at the end the set's own
 vias and clearance.
@@ -134,16 +134,16 @@ vias and clearance.
 | `RX_VIA_ELECTRICAL_DEG` | 90.0 | 90.0 | Electrical angle of the outer-tip via (about 50 to 130) |
 | `RX_TABS` | `"none"` | `"none"` | Bridging fingers: `"none"` (plain bands broken out by hand, the usual dual board), `"all"` or `"single"`. Set 1's fingers push set 2 outwards: the layout places set 2 past them and past the go-around brackets where the TX makes way for them. Set 2's fingers push the outline out |
 | `RX_TAB_LAYER`, `RX_TAB_LENGTH_MM`, `RX_TAB_WIDTH_MM` | `"auto"`, 3.0, 1.0 | `"auto"`, 3.0, 1.0 | The fingers' layer, how far they reach past the band, and the spacing of their legs (as in the Single Generator) |
-| `VIA_DIAMETER_MM`, `VIA_DRILL_MM`, `VIA_TYPE`, `MIN_CLEARANCE_MM` | None | None | This set's own vias and clearance; None = the board's value (22.2.2). The KiCad file holds each via with its own size; between the sets the larger clearance applies |
+| `VIA_DIAMETER_MM`, `VIA_DRILL_MM`, `VIA_TYPE`, `MIN_CLEARANCE_MM` | None | None | This set's own vias and clearance; None = the board's value (23.2.2). The KiCad file holds each via with its own size; between the sets the larger clearance applies |
 
-## 22.4 TX (`Dual_TX1_Parameters.py`, `Dual_TX2_Parameters.py`)
+## 23.4 TX (`Dual_TX1_Parameters.py`, `Dual_TX2_Parameters.py`)
 
 The two files have the same names, those of the Single Generator's `TX_Parameters.py`, with `EXCITATION_FREQ_HZ` and,
 at the end, the set's own `TX_AC_RESISTANCE_FACTOR`.
 
 | Name | Set 1 | Set 2 | Meaning |
 |---|---|---|---|
-| `EXCITATION_FREQ_HZ` | 3.0e6 | 4.3e6 | This set's TX oscillator frequency with the rotor in place. Give the two sets different frequencies (22.2.4) |
+| `EXCITATION_FREQ_HZ` | 3.0e6 | 4.3e6 | This set's TX oscillator frequency with the rotor in place. Give the two sets different frequencies (23.2.4) |
 | `TX_NET` | `"TX_1"` | `"TX_2"` | Net of the TX ring |
 | `TX_WIRING` | `"series"` | `"series"` | `"series"` (2 × `TX_TURNS` turns, joined by one via at the inner end, both ends at the terminal angle one on each layer), `"parallel"` (the same turns on both layers, stitched at the terminal; its inner end comes out on an inner tail that ends one pitch outside the last turn) or `"single"` (`TX_TURNS` turns on `TX_LAYER_A`, the inner end out on a tail on another layer) |
 | `TX_TURNS` | 4 | 4 | Complete turns per TX layer. Every turn of the inner ring pushes set 2 outwards |
@@ -158,9 +158,9 @@ at the end, the set's own `TX_AC_RESISTANCE_FACTOR`.
 | `TX_INSIDE_VIA_DISTANCE_MM` | 0.2 | 0.2 | The via that joins the two TX layers, this far inside the first turn (at most `TX_OFFSET_MM` minus the via radius, half an RX trace and `MIN_CLEARANCE_MM`) |
 | `TX_LAYER_A`, `TX_LAYER_B` | 1, 3 | 1, 3 | The two TX layers; they must differ (on 2 layers: 1 and 4). Both sets may use the same layers |
 | `TX_SERIES_UNDERPASS_LAYER`, `TX_PARALLEL_BREAK_STYLE` | `"auto"`, `"stitched"` | `"auto"`, `"stitched"` | How the TX makes way for this set's fingers, as in the Single Generator; unused without fingers |
-| `TX_AC_RESISTANCE_FACTOR` | None | None | This set's own factor for the electrical estimate; None = the board's (22.2.5) |
+| `TX_AC_RESISTANCE_FACTOR` | None | None | This set's own factor for the electrical estimate; None = the board's (23.2.5) |
 
-## 22.5 Rotor Rings (`Dual_Rotor1_Parameters.py`, `Dual_Rotor2_Parameters.py`)
+## 23.5 Rotor Rings (`Dual_Rotor1_Parameters.py`, `Dual_Rotor2_Parameters.py`)
 
 The two files have the same names, those of the Single Generator's `Rotor_Parameters.py`; the disc itself is set in
 22.2.6. See [Rotor Features - Dual Generator](Rotor-Features-Dual-Generator.md).
@@ -181,22 +181,22 @@ The two files have the same names, those of the Single Generator's `Rotor_Parame
 | `ROTOR_CUSTOM_INNER_RADIUS_MM`, `ROTOR_CUSTOM_OUTER_RADIUS_MM` | 7.77, 11.7 | 17.5, 26.32 | `custom`: the ring's radii (the defaults are what `according_to_stator` computes for the default board) |
 | `ROTOR_CUSTOM_COPPER_LAYERS` | `["F.Cu"]` | `["F.Cu"]` | `custom`: layers carrying the sectors |
 
-## 22.6 IC (`Dual_IC1_Parameters.py`, `Dual_IC2_Parameters.py`)
+## 23.6 IC (`Dual_IC1_Parameters.py`, `Dual_IC2_Parameters.py`)
 
 One file per set, because a dual board has one IC per set (the two may be the same type or different ones). The names
-and ranges are those of the single `IC_Parameters.py` (21.5); both files default to the IPS2550: `IC_NAME` `"IPS2550"`,
+and ranges are those of the single `IC_Parameters.py` (22.5); both files default to the IPS2550: `IC_NAME` `"IPS2550"`,
 `IC_OSC_MIN_MHZ` 2.0, `IC_OSC_MAX_MHZ` 5.6, `IC_MIN_RP_OHM` 250, `IC_SPLIT_TANK_CAPS` True. At the end, `TANK_CAP_SERIES`
-(None = the board's, 22.2.5): the capacitor series the estimate suggests this set's tank capacitor from. They never
+(None = the board's, 23.2.5): the capacitor series the estimate suggests this set's tank capacitor from. They never
 change a board.
 
-## 22.7 Silkscreen Suggestion (`Dual_SilkScreenSuggestion_Parameters.py`)
+## 23.7 Silkscreen Suggestion (`Dual_SilkScreenSuggestion_Parameters.py`)
 
 The same names, defaults and ranges as the single `SilkScreenSuggestion_Parameters.py`
-([21.6](Parameter-Reference-Single-Generator.md#216-silkscreen-suggestion-silkscreensuggestion_parameterspy)), with these
+([22.6](Parameter-Reference-Single-Generator.md#226-silkscreen-suggestion-silkscreensuggestion_parameterspy)), with these
 differences: `SILKSCREEN_BREAK_LAYERS` is `["F.Cu", "In1.Cu"]` (on a 2-layer board, set it to `["F.Cu", "B.Cu"]`, which
 is also what a missing or wrong value falls back to there), and `SILKSCREEN_SEARCH_SPAN_DEG` is measured from each
 set's own terminal angle (`TERMINAL_1_DEG`, `TERMINAL_2_DEG`). The suggested vias keep the room of the larger via and
-clearance of the two sets (a set may have its own, 22.3). The lead names are `SIN1_1`, `SIN1_2`, `COS1_1`, ..., `TX1_1 TOP`, `TX1_2 IN2` for set 1 and the same with 2 for set 2. See
+clearance of the two sets (a set may have its own, 23.3). The lead names are `SIN1_1`, `SIN1_2`, `COS1_1`, ..., `TX1_1 TOP`, `TX1_2 IN2` for set 1 and the same with 2 for set 2. See
 [Silkscreen - Dual Generator](Silkscreen-Dual-Generator.md).
 
 [<img align="right" src="https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/logo/Logo_1_V2.png" alt="Sinusoidal Coil Generator logo, click to see it spin" width="72">](https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/logo/Logo_1_V2_rotor_spin_400px.webp)

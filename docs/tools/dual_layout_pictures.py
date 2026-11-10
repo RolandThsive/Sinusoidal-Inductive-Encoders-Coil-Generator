@@ -567,10 +567,20 @@ def cell(v):
     return "given" if v else "–"
 
 
+def chapter():
+    """The page's chapter number in the wiki, from its title ("# 19. Dual Layout"), so that renumbering the wiki
+    needs no change here."""
+    with open(PAGE, encoding="utf-8") as fh:
+        m = re.match(r"# (\d+)\. ", fh.readline())
+    if not m:
+        raise SystemExit(f"{PAGE} does not start with its chapter number (# NN. Dual Layout)")
+    return int(m.group(1))
+
+
 def heading(n):
-    """The section heading of combination n on the page (chapter 34.3 of the wiki)."""
+    """The section heading of combination n on the page (section 3 of the page's chapter)."""
     words = " ".join(w if w.isupper() or "_" in w else w[0].upper() + w[1:] for w in title_of(n).split())
-    return f"34.3.{n} Combination {n}: {words}"
+    return f"{chapter()}.3.{n} Combination {n}: {words}"
 
 
 def anchor(text):

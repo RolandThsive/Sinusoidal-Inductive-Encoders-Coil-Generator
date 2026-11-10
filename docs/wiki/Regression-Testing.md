@@ -1,4 +1,4 @@
-# 29. Regression Testing
+# 30. Regression Testing
 
 Both generators have a regression test suite that runs the generator the way a user does, with parameter values set in
 memory, and checks what it prints and what it writes. Both suites live in the [`regression`](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/tree/main/regression) folder at the root
@@ -6,7 +6,7 @@ of the repository, each next to its test boards: a test board is a folder with a
 the boards the generator wrote from them. No test run touches the parameter files, the `Output` folders or the
 generators. The suites need what the generators need: Python 3.11 to 3.15 and NumPy (see requirements.txt).
 
-## 29.1 Running The Tests
+## 30.1 Running The Tests
 
 From the root of the repository:
 
@@ -26,7 +26,7 @@ python regression/run_regression.py dual           # the Dual Generator's suite 
 
 The exit code is 0 when every test passed.
 
-## 29.2 The Test Boards
+## 30.2 The Test Boards
 
 ```
 regression/
@@ -78,7 +78,7 @@ tests, is removed again.
 | `python regression/boards.py sync` | After a generator gained or lost a parameter: copies the new name, with its value and comment, into every board folder, and removes a name the generator no longer has |
 | `python regression/boards.py table` | Writes the board table of each suite's README anew |
 
-## 29.3 What Is Tested
+## 30.3 What Is Tested
 
 Each suite has the same files in its `tests` folder:
 
@@ -100,7 +100,7 @@ connectivity of each net, the copper extent of each layer, and the comparison wi
 with the reader the generators' own tools use, `resources/KiCadReader.py`, on purpose: a test in each suite holds the
 two to the same values on every reference board, so each checks the other.
 
-## 29.4 On Every Pull Request (CI)
+## 30.4 On Every Pull Request (CI)
 
 The workflow `.github/workflows/ci.yml` runs on every pull request, after every push to `main` and every night (so a new
 Python, NumPy or runner image that breaks the generators is noticed even while no one is changing them). A new push to a
@@ -137,7 +137,7 @@ so the gain is kept. When KiCad's DRC changes on purpose, the KiCad check is run
 that a Dual Layout picture is drawn from changes on purpose, run `python docs/tools/dual_layout_pictures.py` and commit
 the pictures and the page section it writes.
 
-## 29.5 When A Test Fails
+## 30.5 When A Test Fails
 
 When a test in `test_boards.py` fails, the generator writes something different from what it wrote when the board was
 saved; the test prints the lines that differ. Read them; if the change is intended, run `--update-references` and

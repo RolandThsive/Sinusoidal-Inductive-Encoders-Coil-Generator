@@ -1,4 +1,4 @@
-# 26. Project Output Organization
+# 27. Project Output Organization
 
 ![Output 1: Project Organisation](https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/images/output_1_organisation.png)
 
@@ -87,7 +87,7 @@ The Single Generator's folder name carries the board radii, the RX loops and sub
 
 The analyser and optimizer (`Analyser_And_Optimizer/` and `OptimizerParameters.py`) are not on main. They are under construction on the [`analyser_and_optimizer` branch](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/tree/analyser_and_optimizer).
 
-## 26.1 Quick Start
+## 27.1 Quick Start
 
 ```bash
 python -m pip install -r requirements.txt

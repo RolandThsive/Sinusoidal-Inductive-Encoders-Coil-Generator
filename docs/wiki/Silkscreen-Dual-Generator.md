@@ -1,4 +1,4 @@
-# 19. Silkscreen - Dual Generator
+# 20. Silkscreen - Dual Generator
 
 A dual board has six coils to break out: the SIN and COS coils and the TX ring of each set. None of them has terminals.
 Every RX coil is one closed loop, and the two ends of each series TX ring lie on top of each other one pitch outside its
@@ -12,7 +12,7 @@ marks are drawings on `F.SilkS` and `B.SilkS` that you may follow, move or delet
 own `LeadCutting_SilkscreenSuggestion.py`, run on each set; `Dual_LeadCutting_SilkscreenSuggestion.py` only hands it
 the two sets and the dual settings. The [Silkscreen](Silkscreen.md) page describes how the search works.
 
-## 19.1 What Is Drawn
+## 20.1 What Is Drawn
 
 | Coil | Marks | Lead Names |
 |---|---|---|
@@ -28,7 +28,7 @@ TX ends at 180°, outer set 16 loops with its TX ends at 0°). Top row: the top 
 set 1 and set 2 enlarged. Bottom row: the bottom view, mirrored, with `B.SilkS` and the copper seen through. RX: cut the
 trace between the two dots, one via per dot. TX: extend each end along the dashed line to its dot.*
 
-## 19.2 What Differs From The Single Generator
+## 20.2 What Differs From The Single Generator
 
 - **Two searches, one per set.** Each set's breaks are looked for within `SILKSCREEN_SEARCH_SPAN_DEG` (30°) of that set's
   own terminal angle, `TERMINAL_1_DEG` or `TERMINAL_2_DEG`, where its TX ends are.
@@ -52,11 +52,11 @@ TX2 (TX_2): both ends at (126.1, 100) (r = 26.10 mm, 0.0 deg), Top and In2; exte
 Route set 1's leads out across set 2 on the free Bottom layer (see
 [Board Features - Dual Generator](Board-Features-Dual-Generator.md#182-layers)).
 
-## 19.3 Settings
+## 20.3 Settings
 
 The settings are in `Dual Generator/Parameters/Dual_SilkScreenSuggestion_Parameters.py`. They have the same names, defaults
 and ranges as the Single Generator's (see
-[Parameter Reference Single Generator](Parameter-Reference-Single-Generator.md#216-silkscreen-suggestion-silkscreensuggestion_parameterspy)),
+[Parameter Reference Single Generator](Parameter-Reference-Single-Generator.md#226-silkscreen-suggestion-silkscreensuggestion_parameterspy)),
 except `SILKSCREEN_BREAK_LAYERS` (`["F.Cu", "In1.Cu"]`). `SILKSCREEN_SUGGESTION = False` leaves the stator file
 without silkscreen; every picture on the other Dual Generator pages is made that way. The step never stops a
 generation: a wrong value falls back to its default with a warning.

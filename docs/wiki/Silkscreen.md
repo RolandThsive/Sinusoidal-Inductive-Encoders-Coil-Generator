@@ -58,7 +58,7 @@ TX (TX): both ends at (126.3, 100) (r = 26.30 mm, 0.0 deg), Top and Bottom; exte
 ## 14.3 Settings
 
 The settings are in `Single Generator/Parameters/SilkScreenSuggestion_Parameters.py`; each one is described in the
-[Parameter Reference Single Generator](Parameter-Reference-Single-Generator.md#216-silkscreen-suggestion-silkscreensuggestion_parameterspy).
+[Parameter Reference Single Generator](Parameter-Reference-Single-Generator.md#226-silkscreen-suggestion-silkscreensuggestion_parameterspy).
 The step never stops a generation: a wrong value falls back to its default with a warning, and anything the step cannot
 do (no spot with room, no free place for a name, a missing font) is printed as a warning while the boards are written
 as usual.

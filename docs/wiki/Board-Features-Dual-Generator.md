@@ -106,7 +106,7 @@ On top of the Single Generator's checks for each set, the Dual Generator checks:
 - **The electrical estimate**, for each set against its own IC (`Dual_IC1_Parameters.py`, `Dual_IC2_Parameters.py`). See
   [Electrical Estimate](Electrical-Estimate.md).
 
-Every message is listed in [Checks, Errors And Warnings](Checks-Errors-And-Warnings.md#236-dual-generator).
+Every message is listed in [Checks, Errors And Warnings](Checks-Errors-And-Warnings.md#246-dual-generator).
 
 [<img align="right" src="https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/logo/Logo_1_V2.png" alt="Sinusoidal Coil Generator logo, click to see it spin" width="72">](https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/logo/Logo_1_V2_rotor_spin_400px.webp)
 

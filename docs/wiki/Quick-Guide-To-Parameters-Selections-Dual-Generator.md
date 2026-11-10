@@ -1,4 +1,4 @@
-# 20. Quick Guide To Parameters Selections - Dual Generator
+# 21. Quick Guide To Parameters Selections - Dual Generator
 
 A dual board is two coil sets on one board, so before it is built the generator decides where each sits: the two RX
 bands, the two board edges and the gap between the sets. You give what you know and the generator places the rest;
@@ -8,7 +8,7 @@ with only the named settings changed, silkscreen off; colour shows the copper la
 dark yellow). Each parameter is described in full in the
 [Parameter Reference Dual Generator](Parameter-Reference-Dual-Generator.md).
 
-## 20.1 What You Give
+## 21.1 What You Give
 
 From the centre out the stator is `bore | RX1 band | TX1 ring | gap | RX2 band | TX2 ring | outline`. The TX rings
 always follow from their RX bands (`TX_OFFSET_MM`, `TX_TURNS`, `TX_PITCH_MM`), so five things can be given, each one or
@@ -44,7 +44,7 @@ What to give:
   as well, and the placed band runs out to it.
 - **Everything** when everything is fixed and you only want it built and checked.
 
-### 20.1.1 What The Checker Says
+### 21.1.1 What The Checker Says
 
 A combination with nothing to size a band from is refused with a message that says what to give. For example, with no
 band and only the bore:
@@ -61,7 +61,7 @@ outline that leaves a placed band no room, a placed RX1 band that would push the
 Generator refuses. When a band fitted to an edge comes out too narrow for its vias, a hint names the edge to move. A
 parameter file from before that still has `DUAL_MODE` gets a warning that it is no longer used, and builds as before.
 
-## 20.2 Giving A Band
+## 21.2 Giving A Band
 
 Each set's band is the ring of radii its RX curves weave in, given in its own file (`Dual_RX1_Parameters.py`,
 `Dual_RX2_Parameters.py`) in one of two ways, or not at all:
@@ -70,11 +70,11 @@ Each set's band is the ring of radii its RX curves weave in, given in its own fi
 |---|---|---|
 | Radii pair | `INSIDE_RADIUS_MM`, `OUTSIDE_RADIUS_MM` (with `RX_R_BASE_MM`, `RX_A_MM` = `None`) | From the inside radius to the outside radius |
 | R base and A pair | `RX_R_BASE_MM`, `RX_A_MM` (with `INSIDE_RADIUS_MM`, `OUTSIDE_RADIUS_MM` = `None`) | `RX_R_BASE_MM - RX_A_MM` to `RX_R_BASE_MM + RX_A_MM` |
-| Not given | All four `None` | Placed by the generator (20.1); `Parameters.txt` prints the values it chose |
+| Not given | All four `None` | Placed by the generator (21.1); `Parameters.txt` prints the values it chose |
 
 Each pair goes together: a pair with only one value set is an error, and so is a band given by both pairs at once.
 
-## 20.3 Sharing The Width: `BAND_SPLIT` (No Band Given)
+## 21.3 Sharing The Width: `BAND_SPLIT` (No Band Given)
 
 When no band is given, the free radial width between the edges, after both TX rings and the gap, is shared between the two bands.
 `BAND_SPLIT` is set 1's share, strictly between 0 and 1: 0.5 gives both bands the same width. A 1x / 16x board is
@@ -85,7 +85,7 @@ usually near 0.5; the more loops the fine track has, the more width it should ge
 *Dual Parameters 2. `BAND_SPLIT` = 0.35, 0.5 (the default) and 0.65 with the bore at 7.25 mm, the outline at 30 mm and
 `TRACK_GAP_MM` at 3 mm. The two bands always share 13 mm: 4.55 + 8.45, 6.5 + 6.5 and 8.45 + 4.55 mm.*
 
-## 20.4 The Gap Between The Sets: `TRACK_GAP_MM`
+## 21.4 The Gap Between The Sets: `TRACK_GAP_MM`
 
 `TRACK_GAP_MM` is the copper-free ring between the sets: from the outermost copper of set 1 (its TX1 ring) to the
 innermost copper of set 2 (the RX2 band start minus half an RX trace or a via radius, whichever is larger). When the generator
@@ -104,7 +104,7 @@ keeps the fine track clean is the distance from ring 1 of the rotor to the RX2 b
 room too: `ROTOR_TRACK_GAP_MM` (2 mm) must stay bare between the two rings, so a very small gap between the sets can
 make the rotor the limit.
 
-## 20.5 A Starting Point
+## 21.5 A Starting Point
 
 The defaults are a complete 1x / 16x board on a 53.75 mm disc, built without warnings. Start from them and change one
 thing at a time:
@@ -127,7 +127,7 @@ python Dual_Generator/Checks/Dual_CheckParameters.py
 python Dual_Generator/Run/Dual_RunCoilGenerator.py
 ```
 
-## 20.6 Related Pages
+## 21.6 Related Pages
 
 - [Quick Guide To Parameters Selections](Quick-Guide-To-Parameters-Selections.md): the band, TX and rotor choices of each
   set, which hold for each set of a dual board too, the RX fingers and the TX tail included.

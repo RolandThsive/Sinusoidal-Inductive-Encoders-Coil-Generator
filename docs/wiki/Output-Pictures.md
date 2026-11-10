@@ -1,4 +1,4 @@
-# 27. Output Pictures
+# 28. Output Pictures
 
 Every run that writes both boards also draws two SVG pictures of them into the same output folder, next to
 `Stator.kicad_pcb`, `Rotor.kicad_pcb`, their project files and `Parameters.txt`:
@@ -13,7 +13,7 @@ Python 3, and open in any browser. In both, the stator is on the
 left and the rotor on the right, and the layers have the same colours: Top red, Inner 1 green, Inner 2 yellow,
 Bottom blue.
 
-## 27.1 Representative And Actual
+## 28.1 Representative And Actual
 
 | | Representative | Actual |
 |---|---|---|
@@ -31,7 +31,7 @@ In short: open the Representative picture to see what was built. Use the Actual 
 itself, at its true size. Inkscape shows and hides its layers one by one, so you can, for example, look at Inner 2
 alone.
 
-## 27.2 Single Generator
+## 28.2 Single Generator
 
 The pictures of the default Single Generator board (`Coil_15_27_1_1_3_Single_SteppedDiagonal`: 1 loop, TX 3 turns per
 layer, board radius 15 to 27 mm), as the generator writes them.
@@ -52,7 +52,7 @@ has no background). The copper is at its true width, and the vias are rings with
 Bottom traces wider than they are, the vias as dots, the board filled. Actual: every trace at its width, every via a
 copper ring.*
 
-## 27.3 Dual Generator
+## 28.3 Dual Generator
 
 The pictures of the default Dual Generator board (`DualCoil_7.25_26.875_1x16_4x4`: 1 and 16 loops, TX 4 + 4 turns per
 layer, board radius 7.25 to 26.875 mm), as the generator writes them.
@@ -73,7 +73,7 @@ Inner 2 is hidden under Top and shows only where the TX ends leave the rings.*
 Representative: Inner 2 along every Top TX turn, the vias as dots. Actual: Inner 2 only where it leaves Top, the vias as
 rings.*
 
-## 27.4 When They Are Made
+## 28.4 When They Are Made
 
 - At the end of every Single and Dual run that writes both boards, after `Parameters.txt` and the silkscreen
   suggestion. A run with `--stator` or `--rotor` writes one board and makes no pictures.
@@ -84,7 +84,7 @@ rings.*
 - The [Web Tool](Web-Tool.md) does not make them: its zip holds the boards, `Parameters.txt` and the parameter files.
   Unzip it and run the makers on the run's folder to get them.
 
-## 27.5 Making Them By Hand
+## 28.5 Making Them By Hand
 
 Both makers run on any folder that holds `Stator.kicad_pcb` and `Rotor.kicad_pcb`, or on the two files given stator
 first. From the repository folder:

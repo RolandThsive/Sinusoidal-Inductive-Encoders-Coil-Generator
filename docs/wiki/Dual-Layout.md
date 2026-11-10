@@ -1,11 +1,11 @@
-# 34. Dual Layout
+# 19. Dual Layout
 
 A dual board is two Single Generator boards on one PCB, one inside the other. Before either set is built, the
 generator decides where each sits: the RX band of each set, the bore, the outline and the gap between the sets. There
 is no mode to choose. You give what you know, and the generator places the rest. This page gives the rules, all 32
 combinations of what can be given, and for each one a picture of a board the generator really builds.
 
-## 34.1 How A Dual Board Is Made From Two Single Boards
+## 19.1 How A Dual Board Is Made From Two Single Boards
 
 The Dual Generator does not have its own coil builder. Each set of a dual board is a Single Generator board, built by
 the Single Generator's own code:
@@ -30,7 +30,7 @@ the Single Generator's own code:
 So whatever a Single board can do, each set of a dual board can do. The Dual refuses only what the Single refuses for
 that set, plus what two sets on one board cannot share.
 
-## 34.2 The Four Rules
+## 19.2 The Four Rules
 
 From the centre out, the board is a stack:
 
@@ -67,7 +67,7 @@ layout: RX1 band given, RX2 band placed TRACK_GAP_MM out and as wide as RX1; bor
   set 1 copper reaches r = 18.75 mm; set 2 copper starts at r = 19.25 mm: gap 0.5 mm (TRACK_GAP_MM = 0.5)
 ```
 
-## 34.3 The 32 Combinations
+## 19.3 The 32 Combinations
 
 The table lists every combination. The last column says what the dual parameter files had to say for it before the
 layout modes were removed; a combination marked "refused" could not be built at all. Under the table, each combination
@@ -79,40 +79,40 @@ Black marks what was given, blue what the generator placed or worked out.
 
 | # | RX1 band | RX2 band | Bore | Outline | `TRACK_GAP_MM` | What the generator does | Before |
 |---|---|---|---|---|---|---|---|
-| [1](#3431-combination-1-both-rx-bands-given) | given | given | – | – | – | Both bands are used as given. The bore is the RX1 band start less INNER_EDGE_INSET_MM. The outline is the RX2 band end plus the room the TX2 ring, its tail or fingers, and the margins need. The gap between set 1's outermost copper and set 2's innermost copper is measured, and must be at least MIN_CLEARANCE_MM (TRACK_GAP_MM is None). | DUAL_MODE 2 |
-| [2](#3432-combination-2-both-rx-bands-and-track_gap_mm-given) | given | given | – | – | given | Both bands are used as given. The bore is the RX1 band start less INNER_EDGE_INSET_MM. The outline is the RX2 band end plus the room the TX2 ring, its tail or fingers, and the margins need. The gap between set 1's outermost copper and set 2's innermost copper is measured, and must be at least TRACK_GAP_MM. | refused |
-| [3](#3433-combination-3-both-rx-bands-and-bore-given) | given | given | given | – | – | Both bands are used as given. The bore is used as given; the Single Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 band. The outline is the RX2 band end plus the room the TX2 ring, its tail or fingers, and the margins need. The gap between set 1's outermost copper and set 2's innermost copper is measured, and must be at least MIN_CLEARANCE_MM (TRACK_GAP_MM is None). | refused |
-| [4](#3434-combination-4-both-rx-bands-bore-and-track_gap_mm-given) | given | given | given | – | given | Both bands are used as given. The bore is used as given; the Single Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 band. The outline is the RX2 band end plus the room the TX2 ring, its tail or fingers, and the margins need. The gap between set 1's outermost copper and set 2's innermost copper is measured, and must be at least TRACK_GAP_MM. | refused |
-| [5](#3435-combination-5-both-rx-bands-and-outline-given) | given | given | – | given | – | Both bands are used as given. The bore is the RX1 band start less INNER_EDGE_INSET_MM. The outline is used as given; the Single Generator checks that it leaves room for the TX2 ring, its tail or fingers, and the margins. The gap between set 1's outermost copper and set 2's innermost copper is measured, and must be at least MIN_CLEARANCE_MM (TRACK_GAP_MM is None). | refused |
-| [6](#3436-combination-6-both-rx-bands-outline-and-track_gap_mm-given) | given | given | – | given | given | Both bands are used as given. The bore is the RX1 band start less INNER_EDGE_INSET_MM. The outline is used as given; the Single Generator checks that it leaves room for the TX2 ring, its tail or fingers, and the margins. The gap between set 1's outermost copper and set 2's innermost copper is measured, and must be at least TRACK_GAP_MM. | refused |
-| [7](#3437-combination-7-both-rx-bands-bore-and-outline-given) | given | given | given | given | – | Both bands are used as given. The bore is used as given; the Single Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 band. The outline is used as given; the Single Generator checks that it leaves room for the TX2 ring, its tail or fingers, and the margins. The gap between set 1's outermost copper and set 2's innermost copper is measured, and must be at least MIN_CLEARANCE_MM (TRACK_GAP_MM is None). | DUAL_MODE 4 |
-| [8](#3438-combination-8-both-rx-bands-bore-outline-and-track_gap_mm-given) | given | given | given | given | given | Both bands are used as given. The bore is used as given; the Single Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 band. The outline is used as given; the Single Generator checks that it leaves room for the TX2 ring, its tail or fingers, and the margins. The gap between set 1's outermost copper and set 2's innermost copper is measured, and must be at least TRACK_GAP_MM. | refused |
-| [9](#3439-combination-9-rx1-band-given) | given | – | – | – | – | The RX2 band is placed so that set 2's innermost copper (its inner vias) sits MIN_CLEARANCE_MM (TRACK_GAP_MM is None) out from set 1's outermost copper (its TX ring, tail or fingers), and is as wide as the RX1 band. The bore is the RX1 band start less INNER_EDGE_INSET_MM. The outline is the RX2 band end plus the room the TX2 ring, its tail or fingers, and the margins need. | refused |
-| [10](#34310-combination-10-rx1-band-and-track_gap_mm-given) | given | – | – | – | given | The RX2 band is placed so that set 2's innermost copper (its inner vias) sits TRACK_GAP_MM out from set 1's outermost copper (its TX ring, tail or fingers), and is as wide as the RX1 band. The bore is the RX1 band start less INNER_EDGE_INSET_MM. The outline is the RX2 band end plus the room the TX2 ring, its tail or fingers, and the margins need. | DUAL_MODE 3 |
-| [11](#34311-combination-11-rx1-band-and-bore-given) | given | – | given | – | – | The RX2 band is placed so that set 2's innermost copper (its inner vias) sits MIN_CLEARANCE_MM (TRACK_GAP_MM is None) out from set 1's outermost copper (its TX ring, tail or fingers), and is as wide as the RX1 band. The bore is used as given; the Single Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 band. The outline is the RX2 band end plus the room the TX2 ring, its tail or fingers, and the margins need. | refused |
-| [12](#34312-combination-12-rx1-band-bore-and-track_gap_mm-given) | given | – | given | – | given | The RX2 band is placed so that set 2's innermost copper (its inner vias) sits TRACK_GAP_MM out from set 1's outermost copper (its TX ring, tail or fingers), and is as wide as the RX1 band. The bore is used as given; the Single Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 band. The outline is the RX2 band end plus the room the TX2 ring, its tail or fingers, and the margins need. | refused |
-| [13](#34313-combination-13-rx1-band-and-outline-given) | given | – | – | given | – | The RX2 band is placed so that set 2's innermost copper (its inner vias) sits MIN_CLEARANCE_MM (TRACK_GAP_MM is None) out from set 1's outermost copper (its TX ring, tail or fingers), and runs out to the outline, less the TX2 ring and the margins. The bore is the RX1 band start less INNER_EDGE_INSET_MM. The outline is used as given; the Single Generator checks that it leaves room for the TX2 ring, its tail or fingers, and the margins. | refused |
-| [14](#34314-combination-14-rx1-band-outline-and-track_gap_mm-given) | given | – | – | given | given | The RX2 band is placed so that set 2's innermost copper (its inner vias) sits TRACK_GAP_MM out from set 1's outermost copper (its TX ring, tail or fingers), and runs out to the outline, less the TX2 ring and the margins. The bore is the RX1 band start less INNER_EDGE_INSET_MM. The outline is used as given; the Single Generator checks that it leaves room for the TX2 ring, its tail or fingers, and the margins. | refused |
-| [15](#34315-combination-15-rx1-band-bore-and-outline-given) | given | – | given | given | – | The RX2 band is placed so that set 2's innermost copper (its inner vias) sits MIN_CLEARANCE_MM (TRACK_GAP_MM is None) out from set 1's outermost copper (its TX ring, tail or fingers), and runs out to the outline, less the TX2 ring and the margins. The bore is used as given; the Single Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 band. The outline is used as given; the Single Generator checks that it leaves room for the TX2 ring, its tail or fingers, and the margins. | refused |
-| [16](#34316-combination-16-rx1-band-bore-outline-and-track_gap_mm-given) | given | – | given | given | given | The RX2 band is placed so that set 2's innermost copper (its inner vias) sits TRACK_GAP_MM out from set 1's outermost copper (its TX ring, tail or fingers), and runs out to the outline, less the TX2 ring and the margins. The bore is used as given; the Single Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 band. The outline is used as given; the Single Generator checks that it leaves room for the TX2 ring, its tail or fingers, and the margins. | refused |
-| [17](#34317-combination-17-rx2-band-given) | – | given | – | – | – | The RX1 band is placed so that set 1's outermost copper (its TX ring, tail or fingers) sits MIN_CLEARANCE_MM (TRACK_GAP_MM is None) inside set 2's innermost copper (its inner vias), and is as wide as the RX2 band. The bore is the RX1 band start less INNER_EDGE_INSET_MM. The outline is the RX2 band end plus the room the TX2 ring, its tail or fingers, and the margins need. | refused |
-| [18](#34318-combination-18-rx2-band-and-track_gap_mm-given) | – | given | – | – | given | The RX1 band is placed so that set 1's outermost copper (its TX ring, tail or fingers) sits TRACK_GAP_MM inside set 2's innermost copper (its inner vias), and is as wide as the RX2 band. The bore is the RX1 band start less INNER_EDGE_INSET_MM. The outline is the RX2 band end plus the room the TX2 ring, its tail or fingers, and the margins need. | DUAL_MODE 3 |
-| [19](#34319-combination-19-rx2-band-and-bore-given) | – | given | given | – | – | The RX1 band is placed so that set 1's outermost copper (its TX ring, tail or fingers) sits MIN_CLEARANCE_MM (TRACK_GAP_MM is None) inside set 2's innermost copper (its inner vias), and starts at the bore plus INNER_EDGE_INSET_MM. The bore is used as given; the Single Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 band. The outline is the RX2 band end plus the room the TX2 ring, its tail or fingers, and the margins need. | refused |
-| [20](#34320-combination-20-rx2-band-bore-and-track_gap_mm-given) | – | given | given | – | given | The RX1 band is placed so that set 1's outermost copper (its TX ring, tail or fingers) sits TRACK_GAP_MM inside set 2's innermost copper (its inner vias), and starts at the bore plus INNER_EDGE_INSET_MM. The bore is used as given; the Single Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 band. The outline is the RX2 band end plus the room the TX2 ring, its tail or fingers, and the margins need. | refused |
-| [21](#34321-combination-21-rx2-band-and-outline-given) | – | given | – | given | – | The RX1 band is placed so that set 1's outermost copper (its TX ring, tail or fingers) sits MIN_CLEARANCE_MM (TRACK_GAP_MM is None) inside set 2's innermost copper (its inner vias), and is as wide as the RX2 band. The bore is the RX1 band start less INNER_EDGE_INSET_MM. The outline is used as given; the Single Generator checks that it leaves room for the TX2 ring, its tail or fingers, and the margins. | refused |
-| [22](#34322-combination-22-rx2-band-outline-and-track_gap_mm-given) | – | given | – | given | given | The RX1 band is placed so that set 1's outermost copper (its TX ring, tail or fingers) sits TRACK_GAP_MM inside set 2's innermost copper (its inner vias), and is as wide as the RX2 band. The bore is the RX1 band start less INNER_EDGE_INSET_MM. The outline is used as given; the Single Generator checks that it leaves room for the TX2 ring, its tail or fingers, and the margins. | refused |
-| [23](#34323-combination-23-rx2-band-bore-and-outline-given) | – | given | given | given | – | The RX1 band is placed so that set 1's outermost copper (its TX ring, tail or fingers) sits MIN_CLEARANCE_MM (TRACK_GAP_MM is None) inside set 2's innermost copper (its inner vias), and starts at the bore plus INNER_EDGE_INSET_MM. The bore is used as given; the Single Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 band. The outline is used as given; the Single Generator checks that it leaves room for the TX2 ring, its tail or fingers, and the margins. | refused |
-| [24](#34324-combination-24-rx2-band-bore-outline-and-track_gap_mm-given) | – | given | given | given | given | The RX1 band is placed so that set 1's outermost copper (its TX ring, tail or fingers) sits TRACK_GAP_MM inside set 2's innermost copper (its inner vias), and starts at the bore plus INNER_EDGE_INSET_MM. The bore is used as given; the Single Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 band. The outline is used as given; the Single Generator checks that it leaves room for the TX2 ring, its tail or fingers, and the margins. | refused |
-| [25](#34325-combination-25-nothing-given) | – | – | – | – | – | Refused: no RX band and no board edge, so there is nothing to size the bands from. Give one RX band, or both board edges to fit both bands between them. | refused |
-| [26](#34326-combination-26-track_gap_mm-given) | – | – | – | – | given | Refused: no RX band and no board edge, so there is nothing to size the bands from. Give one RX band, or both board edges to fit both bands between them. TRACK_GAP_MM alone does not help: it is a distance, not a place. | refused |
-| [27](#34327-combination-27-bore-given) | – | – | given | – | – | Refused: no RX band and only the bore, so the room for the two bands has no other end. Give OUTER_EDGE_RADIUS_MM too, and the bands are fitted between the edges, or give one RX band. | refused |
-| [28](#34328-combination-28-bore-and-track_gap_mm-given) | – | – | given | – | given | Refused: no RX band and only the bore, so the room for the two bands has no other end. Give OUTER_EDGE_RADIUS_MM too, and the bands are fitted between the edges, or give one RX band. | refused |
-| [29](#34329-combination-29-outline-given) | – | – | – | given | – | Refused: no RX band and only the outline, so the room for the two bands has no other end. Give INNER_EDGE_RADIUS_MM too, and the bands are fitted between the edges, or give one RX band. | refused |
-| [30](#34330-combination-30-outline-and-track_gap_mm-given) | – | – | – | given | given | Refused: no RX band and only the outline, so the room for the two bands has no other end. Give INNER_EDGE_RADIUS_MM too, and the bands are fitted between the edges, or give one RX band. | refused |
-| [31](#34331-combination-31-bore-and-outline-given) | – | – | given | given | – | Both bands are fitted between the two edges as given: from the bore, INNER_EDGE_INSET_MM, the RX1 band, the TX1 ring, MIN_CLEARANCE_MM (TRACK_GAP_MM is None), set 2's inner vias, the RX2 band, and the TX2 ring with the margins up to the outline. BAND_SPLIT shares what is left between the two bands (0.5: equal widths). | refused |
-| [32](#34332-combination-32-bore-outline-and-track_gap_mm-given) | – | – | given | given | given | Both bands are fitted between the two edges as given: from the bore, INNER_EDGE_INSET_MM, the RX1 band, the TX1 ring, TRACK_GAP_MM, set 2's inner vias, the RX2 band, and the TX2 ring with the margins up to the outline. BAND_SPLIT shares what is left between the two bands (0.5: equal widths). | DUAL_MODE 1 |
+| [1](#1931-combination-1-both-rx-bands-given) | given | given | – | – | – | Both bands are used as given. The bore is the RX1 band start less INNER_EDGE_INSET_MM. The outline is the RX2 band end plus the room the TX2 ring, its tail or fingers, and the margins need. The gap between set 1's outermost copper and set 2's innermost copper is measured, and must be at least MIN_CLEARANCE_MM (TRACK_GAP_MM is None). | DUAL_MODE 2 |
+| [2](#1932-combination-2-both-rx-bands-and-track_gap_mm-given) | given | given | – | – | given | Both bands are used as given. The bore is the RX1 band start less INNER_EDGE_INSET_MM. The outline is the RX2 band end plus the room the TX2 ring, its tail or fingers, and the margins need. The gap between set 1's outermost copper and set 2's innermost copper is measured, and must be at least TRACK_GAP_MM. | refused |
+| [3](#1933-combination-3-both-rx-bands-and-bore-given) | given | given | given | – | – | Both bands are used as given. The bore is used as given; the Single Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 band. The outline is the RX2 band end plus the room the TX2 ring, its tail or fingers, and the margins need. The gap between set 1's outermost copper and set 2's innermost copper is measured, and must be at least MIN_CLEARANCE_MM (TRACK_GAP_MM is None). | refused |
+| [4](#1934-combination-4-both-rx-bands-bore-and-track_gap_mm-given) | given | given | given | – | given | Both bands are used as given. The bore is used as given; the Single Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 band. The outline is the RX2 band end plus the room the TX2 ring, its tail or fingers, and the margins need. The gap between set 1's outermost copper and set 2's innermost copper is measured, and must be at least TRACK_GAP_MM. | refused |
+| [5](#1935-combination-5-both-rx-bands-and-outline-given) | given | given | – | given | – | Both bands are used as given. The bore is the RX1 band start less INNER_EDGE_INSET_MM. The outline is used as given; the Single Generator checks that it leaves room for the TX2 ring, its tail or fingers, and the margins. The gap between set 1's outermost copper and set 2's innermost copper is measured, and must be at least MIN_CLEARANCE_MM (TRACK_GAP_MM is None). | refused |
+| [6](#1936-combination-6-both-rx-bands-outline-and-track_gap_mm-given) | given | given | – | given | given | Both bands are used as given. The bore is the RX1 band start less INNER_EDGE_INSET_MM. The outline is used as given; the Single Generator checks that it leaves room for the TX2 ring, its tail or fingers, and the margins. The gap between set 1's outermost copper and set 2's innermost copper is measured, and must be at least TRACK_GAP_MM. | refused |
+| [7](#1937-combination-7-both-rx-bands-bore-and-outline-given) | given | given | given | given | – | Both bands are used as given. The bore is used as given; the Single Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 band. The outline is used as given; the Single Generator checks that it leaves room for the TX2 ring, its tail or fingers, and the margins. The gap between set 1's outermost copper and set 2's innermost copper is measured, and must be at least MIN_CLEARANCE_MM (TRACK_GAP_MM is None). | DUAL_MODE 4 |
+| [8](#1938-combination-8-both-rx-bands-bore-outline-and-track_gap_mm-given) | given | given | given | given | given | Both bands are used as given. The bore is used as given; the Single Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 band. The outline is used as given; the Single Generator checks that it leaves room for the TX2 ring, its tail or fingers, and the margins. The gap between set 1's outermost copper and set 2's innermost copper is measured, and must be at least TRACK_GAP_MM. | refused |
+| [9](#1939-combination-9-rx1-band-given) | given | – | – | – | – | The RX2 band is placed so that set 2's innermost copper (its inner vias) sits MIN_CLEARANCE_MM (TRACK_GAP_MM is None) out from set 1's outermost copper (its TX ring, tail or fingers), and is as wide as the RX1 band. The bore is the RX1 band start less INNER_EDGE_INSET_MM. The outline is the RX2 band end plus the room the TX2 ring, its tail or fingers, and the margins need. | refused |
+| [10](#19310-combination-10-rx1-band-and-track_gap_mm-given) | given | – | – | – | given | The RX2 band is placed so that set 2's innermost copper (its inner vias) sits TRACK_GAP_MM out from set 1's outermost copper (its TX ring, tail or fingers), and is as wide as the RX1 band. The bore is the RX1 band start less INNER_EDGE_INSET_MM. The outline is the RX2 band end plus the room the TX2 ring, its tail or fingers, and the margins need. | DUAL_MODE 3 |
+| [11](#19311-combination-11-rx1-band-and-bore-given) | given | – | given | – | – | The RX2 band is placed so that set 2's innermost copper (its inner vias) sits MIN_CLEARANCE_MM (TRACK_GAP_MM is None) out from set 1's outermost copper (its TX ring, tail or fingers), and is as wide as the RX1 band. The bore is used as given; the Single Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 band. The outline is the RX2 band end plus the room the TX2 ring, its tail or fingers, and the margins need. | refused |
+| [12](#19312-combination-12-rx1-band-bore-and-track_gap_mm-given) | given | – | given | – | given | The RX2 band is placed so that set 2's innermost copper (its inner vias) sits TRACK_GAP_MM out from set 1's outermost copper (its TX ring, tail or fingers), and is as wide as the RX1 band. The bore is used as given; the Single Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 band. The outline is the RX2 band end plus the room the TX2 ring, its tail or fingers, and the margins need. | refused |
+| [13](#19313-combination-13-rx1-band-and-outline-given) | given | – | – | given | – | The RX2 band is placed so that set 2's innermost copper (its inner vias) sits MIN_CLEARANCE_MM (TRACK_GAP_MM is None) out from set 1's outermost copper (its TX ring, tail or fingers), and runs out to the outline, less the TX2 ring and the margins. The bore is the RX1 band start less INNER_EDGE_INSET_MM. The outline is used as given; the Single Generator checks that it leaves room for the TX2 ring, its tail or fingers, and the margins. | refused |
+| [14](#19314-combination-14-rx1-band-outline-and-track_gap_mm-given) | given | – | – | given | given | The RX2 band is placed so that set 2's innermost copper (its inner vias) sits TRACK_GAP_MM out from set 1's outermost copper (its TX ring, tail or fingers), and runs out to the outline, less the TX2 ring and the margins. The bore is the RX1 band start less INNER_EDGE_INSET_MM. The outline is used as given; the Single Generator checks that it leaves room for the TX2 ring, its tail or fingers, and the margins. | refused |
+| [15](#19315-combination-15-rx1-band-bore-and-outline-given) | given | – | given | given | – | The RX2 band is placed so that set 2's innermost copper (its inner vias) sits MIN_CLEARANCE_MM (TRACK_GAP_MM is None) out from set 1's outermost copper (its TX ring, tail or fingers), and runs out to the outline, less the TX2 ring and the margins. The bore is used as given; the Single Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 band. The outline is used as given; the Single Generator checks that it leaves room for the TX2 ring, its tail or fingers, and the margins. | refused |
+| [16](#19316-combination-16-rx1-band-bore-outline-and-track_gap_mm-given) | given | – | given | given | given | The RX2 band is placed so that set 2's innermost copper (its inner vias) sits TRACK_GAP_MM out from set 1's outermost copper (its TX ring, tail or fingers), and runs out to the outline, less the TX2 ring and the margins. The bore is used as given; the Single Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 band. The outline is used as given; the Single Generator checks that it leaves room for the TX2 ring, its tail or fingers, and the margins. | refused |
+| [17](#19317-combination-17-rx2-band-given) | – | given | – | – | – | The RX1 band is placed so that set 1's outermost copper (its TX ring, tail or fingers) sits MIN_CLEARANCE_MM (TRACK_GAP_MM is None) inside set 2's innermost copper (its inner vias), and is as wide as the RX2 band. The bore is the RX1 band start less INNER_EDGE_INSET_MM. The outline is the RX2 band end plus the room the TX2 ring, its tail or fingers, and the margins need. | refused |
+| [18](#19318-combination-18-rx2-band-and-track_gap_mm-given) | – | given | – | – | given | The RX1 band is placed so that set 1's outermost copper (its TX ring, tail or fingers) sits TRACK_GAP_MM inside set 2's innermost copper (its inner vias), and is as wide as the RX2 band. The bore is the RX1 band start less INNER_EDGE_INSET_MM. The outline is the RX2 band end plus the room the TX2 ring, its tail or fingers, and the margins need. | DUAL_MODE 3 |
+| [19](#19319-combination-19-rx2-band-and-bore-given) | – | given | given | – | – | The RX1 band is placed so that set 1's outermost copper (its TX ring, tail or fingers) sits MIN_CLEARANCE_MM (TRACK_GAP_MM is None) inside set 2's innermost copper (its inner vias), and starts at the bore plus INNER_EDGE_INSET_MM. The bore is used as given; the Single Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 band. The outline is the RX2 band end plus the room the TX2 ring, its tail or fingers, and the margins need. | refused |
+| [20](#19320-combination-20-rx2-band-bore-and-track_gap_mm-given) | – | given | given | – | given | The RX1 band is placed so that set 1's outermost copper (its TX ring, tail or fingers) sits TRACK_GAP_MM inside set 2's innermost copper (its inner vias), and starts at the bore plus INNER_EDGE_INSET_MM. The bore is used as given; the Single Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 band. The outline is the RX2 band end plus the room the TX2 ring, its tail or fingers, and the margins need. | refused |
+| [21](#19321-combination-21-rx2-band-and-outline-given) | – | given | – | given | – | The RX1 band is placed so that set 1's outermost copper (its TX ring, tail or fingers) sits MIN_CLEARANCE_MM (TRACK_GAP_MM is None) inside set 2's innermost copper (its inner vias), and is as wide as the RX2 band. The bore is the RX1 band start less INNER_EDGE_INSET_MM. The outline is used as given; the Single Generator checks that it leaves room for the TX2 ring, its tail or fingers, and the margins. | refused |
+| [22](#19322-combination-22-rx2-band-outline-and-track_gap_mm-given) | – | given | – | given | given | The RX1 band is placed so that set 1's outermost copper (its TX ring, tail or fingers) sits TRACK_GAP_MM inside set 2's innermost copper (its inner vias), and is as wide as the RX2 band. The bore is the RX1 band start less INNER_EDGE_INSET_MM. The outline is used as given; the Single Generator checks that it leaves room for the TX2 ring, its tail or fingers, and the margins. | refused |
+| [23](#19323-combination-23-rx2-band-bore-and-outline-given) | – | given | given | given | – | The RX1 band is placed so that set 1's outermost copper (its TX ring, tail or fingers) sits MIN_CLEARANCE_MM (TRACK_GAP_MM is None) inside set 2's innermost copper (its inner vias), and starts at the bore plus INNER_EDGE_INSET_MM. The bore is used as given; the Single Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 band. The outline is used as given; the Single Generator checks that it leaves room for the TX2 ring, its tail or fingers, and the margins. | refused |
+| [24](#19324-combination-24-rx2-band-bore-outline-and-track_gap_mm-given) | – | given | given | given | given | The RX1 band is placed so that set 1's outermost copper (its TX ring, tail or fingers) sits TRACK_GAP_MM inside set 2's innermost copper (its inner vias), and starts at the bore plus INNER_EDGE_INSET_MM. The bore is used as given; the Single Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 band. The outline is used as given; the Single Generator checks that it leaves room for the TX2 ring, its tail or fingers, and the margins. | refused |
+| [25](#19325-combination-25-nothing-given) | – | – | – | – | – | Refused: no RX band and no board edge, so there is nothing to size the bands from. Give one RX band, or both board edges to fit both bands between them. | refused |
+| [26](#19326-combination-26-track_gap_mm-given) | – | – | – | – | given | Refused: no RX band and no board edge, so there is nothing to size the bands from. Give one RX band, or both board edges to fit both bands between them. TRACK_GAP_MM alone does not help: it is a distance, not a place. | refused |
+| [27](#19327-combination-27-bore-given) | – | – | given | – | – | Refused: no RX band and only the bore, so the room for the two bands has no other end. Give OUTER_EDGE_RADIUS_MM too, and the bands are fitted between the edges, or give one RX band. | refused |
+| [28](#19328-combination-28-bore-and-track_gap_mm-given) | – | – | given | – | given | Refused: no RX band and only the bore, so the room for the two bands has no other end. Give OUTER_EDGE_RADIUS_MM too, and the bands are fitted between the edges, or give one RX band. | refused |
+| [29](#19329-combination-29-outline-given) | – | – | – | given | – | Refused: no RX band and only the outline, so the room for the two bands has no other end. Give INNER_EDGE_RADIUS_MM too, and the bands are fitted between the edges, or give one RX band. | refused |
+| [30](#19330-combination-30-outline-and-track_gap_mm-given) | – | – | – | given | given | Refused: no RX band and only the outline, so the room for the two bands has no other end. Give INNER_EDGE_RADIUS_MM too, and the bands are fitted between the edges, or give one RX band. | refused |
+| [31](#19331-combination-31-bore-and-outline-given) | – | – | given | given | – | Both bands are fitted between the two edges as given: from the bore, INNER_EDGE_INSET_MM, the RX1 band, the TX1 ring, MIN_CLEARANCE_MM (TRACK_GAP_MM is None), set 2's inner vias, the RX2 band, and the TX2 ring with the margins up to the outline. BAND_SPLIT shares what is left between the two bands (0.5: equal widths). | refused |
+| [32](#19332-combination-32-bore-outline-and-track_gap_mm-given) | – | – | given | given | given | Both bands are fitted between the two edges as given: from the bore, INNER_EDGE_INSET_MM, the RX1 band, the TX1 ring, TRACK_GAP_MM, set 2's inner vias, the RX2 band, and the TX2 ring with the margins up to the outline. BAND_SPLIT shares what is left between the two bands (0.5: equal widths). | DUAL_MODE 1 |
 
-### 34.3.1 Combination 1: Both RX Bands Given
+### 19.3.1 Combination 1: Both RX Bands Given
 
 Both bands are used as given. The bore is the RX1 band start less INNER_EDGE_INSET_MM. The outline is the RX2 band end plus the room the TX2 ring, its tail or fingers, and the margins need. The gap between set 1's outermost copper and set 2's innermost copper is measured, and must be at least MIN_CLEARANCE_MM (TRACK_GAP_MM is None).
 
@@ -122,7 +122,7 @@ Both bands are used as given. The bore is the RX1 band start less INNER_EDGE_INS
 |---|---|---|---|---|---|
 | `Board001-default` | 8.45 ... 11.7 mm, given | 18 ... 23.9 mm, given | 7.25 mm, from the band | 26.875 mm, from the band | 3.725 mm (at least MIN_CLEARANCE_MM 0.15) |
 
-### 34.3.2 Combination 2: Both RX Bands And TRACK_GAP_MM Given
+### 19.3.2 Combination 2: Both RX Bands And TRACK_GAP_MM Given
 
 Both bands are used as given. The bore is the RX1 band start less INNER_EDGE_INSET_MM. The outline is the RX2 band end plus the room the TX2 ring, its tail or fingers, and the margins need. The gap between set 1's outermost copper and set 2's innermost copper is measured, and must be at least TRACK_GAP_MM.
 
@@ -132,7 +132,7 @@ Both bands are used as given. The bore is the RX1 band start less INNER_EDGE_INS
 |---|---|---|---|---|---|
 | `Board083-layout-02-both-bands-and-gap` | 8.45 ... 11.7 mm, given | 18 ... 23.9 mm, given | 7.25 mm, from the band | 26.875 mm, from the band | 3.725 mm (at least TRACK_GAP_MM 3) |
 
-### 34.3.3 Combination 3: Both RX Bands And Bore Given
+### 19.3.3 Combination 3: Both RX Bands And Bore Given
 
 Both bands are used as given. The bore is used as given; the Single Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 band. The outline is the RX2 band end plus the room the TX2 ring, its tail or fingers, and the margins need. The gap between set 1's outermost copper and set 2's innermost copper is measured, and must be at least MIN_CLEARANCE_MM (TRACK_GAP_MM is None).
 
@@ -142,7 +142,7 @@ Both bands are used as given. The bore is used as given; the Single Generator ch
 |---|---|---|---|---|---|
 | `Board084-layout-03-both-bands-and-bore` | 8.45 ... 11.7 mm, given | 18 ... 23.9 mm, given | 6 mm, given | 26.875 mm, from the band | 3.725 mm (at least MIN_CLEARANCE_MM 0.15) |
 
-### 34.3.4 Combination 4: Both RX Bands, Bore And TRACK_GAP_MM Given
+### 19.3.4 Combination 4: Both RX Bands, Bore And TRACK_GAP_MM Given
 
 Both bands are used as given. The bore is used as given; the Single Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 band. The outline is the RX2 band end plus the room the TX2 ring, its tail or fingers, and the margins need. The gap between set 1's outermost copper and set 2's innermost copper is measured, and must be at least TRACK_GAP_MM.
 
@@ -152,7 +152,7 @@ Both bands are used as given. The bore is used as given; the Single Generator ch
 |---|---|---|---|---|---|
 | `Board085-layout-04-both-bands-bore-and-gap` | 8.45 ... 11.7 mm, given | 18 ... 23.9 mm, given | 6 mm, given | 26.875 mm, from the band | 3.725 mm (at least TRACK_GAP_MM 3) |
 
-### 34.3.5 Combination 5: Both RX Bands And Outline Given
+### 19.3.5 Combination 5: Both RX Bands And Outline Given
 
 Both bands are used as given. The bore is the RX1 band start less INNER_EDGE_INSET_MM. The outline is used as given; the Single Generator checks that it leaves room for the TX2 ring, its tail or fingers, and the margins. The gap between set 1's outermost copper and set 2's innermost copper is measured, and must be at least MIN_CLEARANCE_MM (TRACK_GAP_MM is None).
 
@@ -162,7 +162,7 @@ Both bands are used as given. The bore is the RX1 band start less INNER_EDGE_INS
 |---|---|---|---|---|---|
 | `Board086-layout-05-both-bands-and-outline` | 8.45 ... 11.7 mm, given | 18 ... 23.9 mm, given | 7.25 mm, from the band | 28 mm, given | 3.725 mm (at least MIN_CLEARANCE_MM 0.15) |
 
-### 34.3.6 Combination 6: Both RX Bands, Outline And TRACK_GAP_MM Given
+### 19.3.6 Combination 6: Both RX Bands, Outline And TRACK_GAP_MM Given
 
 Both bands are used as given. The bore is the RX1 band start less INNER_EDGE_INSET_MM. The outline is used as given; the Single Generator checks that it leaves room for the TX2 ring, its tail or fingers, and the margins. The gap between set 1's outermost copper and set 2's innermost copper is measured, and must be at least TRACK_GAP_MM.
 
@@ -172,7 +172,7 @@ Both bands are used as given. The bore is the RX1 band start less INNER_EDGE_INS
 |---|---|---|---|---|---|
 | `Board087-layout-06-both-bands-outline-and-gap` | 8.45 ... 11.7 mm, given | 18 ... 23.9 mm, given | 7.25 mm, from the band | 28 mm, given | 3.725 mm (at least TRACK_GAP_MM 3) |
 
-### 34.3.7 Combination 7: Both RX Bands, Bore And Outline Given
+### 19.3.7 Combination 7: Both RX Bands, Bore And Outline Given
 
 Both bands are used as given. The bore is used as given; the Single Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 band. The outline is used as given; the Single Generator checks that it leaves room for the TX2 ring, its tail or fingers, and the margins. The gap between set 1's outermost copper and set 2's innermost copper is measured, and must be at least MIN_CLEARANCE_MM (TRACK_GAP_MM is None).
 
@@ -182,7 +182,7 @@ Both bands are used as given. The bore is used as given; the Single Generator ch
 |---|---|---|---|---|---|
 | `Board004-layout-07-all-given` | 9.7 ... 16.05 mm, given | 19.55 ... 25.9 mm, given | 8.5 mm, given | 29.5 mm, given | 0.5 mm (at least MIN_CLEARANCE_MM 0.2) |
 
-### 34.3.8 Combination 8: Both RX Bands, Bore, Outline And TRACK_GAP_MM Given
+### 19.3.8 Combination 8: Both RX Bands, Bore, Outline And TRACK_GAP_MM Given
 
 Both bands are used as given. The bore is used as given; the Single Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 band. The outline is used as given; the Single Generator checks that it leaves room for the TX2 ring, its tail or fingers, and the margins. The gap between set 1's outermost copper and set 2's innermost copper is measured, and must be at least TRACK_GAP_MM.
 
@@ -192,7 +192,7 @@ Both bands are used as given. The bore is used as given; the Single Generator ch
 |---|---|---|---|---|---|
 | `Board088-layout-08-everything-given` | 8.45 ... 11.7 mm, given | 18 ... 23.9 mm, given | 6 mm, given | 28 mm, given | 3.725 mm (at least TRACK_GAP_MM 3) |
 
-### 34.3.9 Combination 9: RX1 Band Given
+### 19.3.9 Combination 9: RX1 Band Given
 
 The RX2 band is placed so that set 2's innermost copper (its inner vias) sits MIN_CLEARANCE_MM (TRACK_GAP_MM is None) out from set 1's outermost copper (its TX ring, tail or fingers), and is as wide as the RX1 band. The bore is the RX1 band start less INNER_EDGE_INSET_MM. The outline is the RX2 band end plus the room the TX2 ring, its tail or fingers, and the margins need.
 
@@ -202,7 +202,7 @@ The RX2 band is placed so that set 2's innermost copper (its inner vias) sits MI
 |---|---|---|---|---|---|
 | `Board089-layout-09-rx1-band` | 8.45 ... 11.7 mm, given | 14.425 ... 17.675 mm, placed | 7.25 mm, from the band | 20.65 mm, from the band | 0.15 mm (at least MIN_CLEARANCE_MM 0.15) |
 
-### 34.3.10 Combination 10: RX1 Band And TRACK_GAP_MM Given
+### 19.3.10 Combination 10: RX1 Band And TRACK_GAP_MM Given
 
 The RX2 band is placed so that set 2's innermost copper (its inner vias) sits TRACK_GAP_MM out from set 1's outermost copper (its TX ring, tail or fingers), and is as wide as the RX1 band. The bore is the RX1 band start less INNER_EDGE_INSET_MM. The outline is the RX2 band end plus the room the TX2 ring, its tail or fingers, and the margins need.
 
@@ -212,7 +212,7 @@ The RX2 band is placed so that set 2's innermost copper (its inner vias) sits TR
 |---|---|---|---|---|---|
 | `Board003-layout-10-rx1-band-and-gap` | 9.7 ... 16.05 mm, given | 19.55 ... 25.9 mm, placed | 8.5 mm, from the band | 29.5 mm, from the band | 0.5 mm (at least TRACK_GAP_MM 0.5) |
 
-### 34.3.11 Combination 11: RX1 Band And Bore Given
+### 19.3.11 Combination 11: RX1 Band And Bore Given
 
 The RX2 band is placed so that set 2's innermost copper (its inner vias) sits MIN_CLEARANCE_MM (TRACK_GAP_MM is None) out from set 1's outermost copper (its TX ring, tail or fingers), and is as wide as the RX1 band. The bore is used as given; the Single Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 band. The outline is the RX2 band end plus the room the TX2 ring, its tail or fingers, and the margins need.
 
@@ -222,7 +222,7 @@ The RX2 band is placed so that set 2's innermost copper (its inner vias) sits MI
 |---|---|---|---|---|---|
 | `Board090-layout-11-rx1-band-and-bore` | 8.45 ... 11.7 mm, given | 14.425 ... 17.675 mm, placed | 6 mm, given | 20.65 mm, from the band | 0.15 mm (at least MIN_CLEARANCE_MM 0.15) |
 
-### 34.3.12 Combination 12: RX1 Band, Bore And TRACK_GAP_MM Given
+### 19.3.12 Combination 12: RX1 Band, Bore And TRACK_GAP_MM Given
 
 The RX2 band is placed so that set 2's innermost copper (its inner vias) sits TRACK_GAP_MM out from set 1's outermost copper (its TX ring, tail or fingers), and is as wide as the RX1 band. The bore is used as given; the Single Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 band. The outline is the RX2 band end plus the room the TX2 ring, its tail or fingers, and the margins need.
 
@@ -232,7 +232,7 @@ The RX2 band is placed so that set 2's innermost copper (its inner vias) sits TR
 |---|---|---|---|---|---|
 | `Board091-layout-12-rx1-band-bore-and-gap` | 8.45 ... 11.7 mm, given | 15.275 ... 18.525 mm, placed | 6 mm, given | 21.5 mm, from the band | 1 mm (at least TRACK_GAP_MM 1) |
 
-### 34.3.13 Combination 13: RX1 Band And Outline Given
+### 19.3.13 Combination 13: RX1 Band And Outline Given
 
 The RX2 band is placed so that set 2's innermost copper (its inner vias) sits MIN_CLEARANCE_MM (TRACK_GAP_MM is None) out from set 1's outermost copper (its TX ring, tail or fingers), and runs out to the outline, less the TX2 ring and the margins. The bore is the RX1 band start less INNER_EDGE_INSET_MM. The outline is used as given; the Single Generator checks that it leaves room for the TX2 ring, its tail or fingers, and the margins.
 
@@ -242,7 +242,7 @@ The RX2 band is placed so that set 2's innermost copper (its inner vias) sits MI
 |---|---|---|---|---|---|
 | `Board092-layout-13-rx1-band-and-outline` | 8.45 ... 11.7 mm, given | 14.425 ... 25.025 mm, placed | 7.25 mm, from the band | 28 mm, given | 0.15 mm (at least MIN_CLEARANCE_MM 0.15) |
 
-### 34.3.14 Combination 14: RX1 Band, Outline And TRACK_GAP_MM Given
+### 19.3.14 Combination 14: RX1 Band, Outline And TRACK_GAP_MM Given
 
 The RX2 band is placed so that set 2's innermost copper (its inner vias) sits TRACK_GAP_MM out from set 1's outermost copper (its TX ring, tail or fingers), and runs out to the outline, less the TX2 ring and the margins. The bore is the RX1 band start less INNER_EDGE_INSET_MM. The outline is used as given; the Single Generator checks that it leaves room for the TX2 ring, its tail or fingers, and the margins.
 
@@ -252,7 +252,7 @@ The RX2 band is placed so that set 2's innermost copper (its inner vias) sits TR
 |---|---|---|---|---|---|
 | `Board093-layout-14-rx1-band-outline-and-gap` | 8.45 ... 11.7 mm, given | 15.275 ... 25.025 mm, placed | 7.25 mm, from the band | 28 mm, given | 1 mm (at least TRACK_GAP_MM 1) |
 
-### 34.3.15 Combination 15: RX1 Band, Bore And Outline Given
+### 19.3.15 Combination 15: RX1 Band, Bore And Outline Given
 
 The RX2 band is placed so that set 2's innermost copper (its inner vias) sits MIN_CLEARANCE_MM (TRACK_GAP_MM is None) out from set 1's outermost copper (its TX ring, tail or fingers), and runs out to the outline, less the TX2 ring and the margins. The bore is used as given; the Single Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 band. The outline is used as given; the Single Generator checks that it leaves room for the TX2 ring, its tail or fingers, and the margins.
 
@@ -262,7 +262,7 @@ The RX2 band is placed so that set 2's innermost copper (its inner vias) sits MI
 |---|---|---|---|---|---|
 | `Board094-layout-15-rx1-band-bore-and-outline` | 8.45 ... 11.7 mm, given | 14.425 ... 25.025 mm, placed | 6 mm, given | 28 mm, given | 0.15 mm (at least MIN_CLEARANCE_MM 0.15) |
 
-### 34.3.16 Combination 16: RX1 Band, Bore, Outline And TRACK_GAP_MM Given
+### 19.3.16 Combination 16: RX1 Band, Bore, Outline And TRACK_GAP_MM Given
 
 The RX2 band is placed so that set 2's innermost copper (its inner vias) sits TRACK_GAP_MM out from set 1's outermost copper (its TX ring, tail or fingers), and runs out to the outline, less the TX2 ring and the margins. The bore is used as given; the Single Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 band. The outline is used as given; the Single Generator checks that it leaves room for the TX2 ring, its tail or fingers, and the margins.
 
@@ -272,7 +272,7 @@ The RX2 band is placed so that set 2's innermost copper (its inner vias) sits TR
 |---|---|---|---|---|---|
 | `Board095-layout-16-rx1-band-bore-outline-and-gap` | 8.45 ... 11.7 mm, given | 15.275 ... 25.025 mm, placed | 6 mm, given | 28 mm, given | 1 mm (at least TRACK_GAP_MM 1) |
 
-### 34.3.17 Combination 17: RX2 Band Given
+### 19.3.17 Combination 17: RX2 Band Given
 
 The RX1 band is placed so that set 1's outermost copper (its TX ring, tail or fingers) sits MIN_CLEARANCE_MM (TRACK_GAP_MM is None) inside set 2's innermost copper (its inner vias), and is as wide as the RX2 band. The bore is the RX1 band start less INNER_EDGE_INSET_MM. The outline is the RX2 band end plus the room the TX2 ring, its tail or fingers, and the margins need.
 
@@ -282,7 +282,7 @@ The RX1 band is placed so that set 1's outermost copper (its TX ring, tail or fi
 |---|---|---|---|---|---|
 | `Board096-layout-17-rx2-band` | 9.375 ... 15.275 mm, placed | 18 ... 23.9 mm, given | 8.175 mm, from the band | 26.875 mm, from the band | 0.15 mm (at least MIN_CLEARANCE_MM 0.15) |
 
-### 34.3.18 Combination 18: RX2 Band And TRACK_GAP_MM Given
+### 19.3.18 Combination 18: RX2 Band And TRACK_GAP_MM Given
 
 The RX1 band is placed so that set 1's outermost copper (its TX ring, tail or fingers) sits TRACK_GAP_MM inside set 2's innermost copper (its inner vias), and is as wide as the RX2 band. The bore is the RX1 band start less INNER_EDGE_INSET_MM. The outline is the RX2 band end plus the room the TX2 ring, its tail or fingers, and the margins need.
 
@@ -292,7 +292,7 @@ The RX1 band is placed so that set 1's outermost copper (its TX ring, tail or fi
 |---|---|---|---|---|---|
 | `Board097-layout-18-rx2-band-and-gap` | 8.525 ... 14.425 mm, placed | 18 ... 23.9 mm, given | 7.325 mm, from the band | 26.875 mm, from the band | 1 mm (at least TRACK_GAP_MM 1) |
 
-### 34.3.19 Combination 19: RX2 Band And Bore Given
+### 19.3.19 Combination 19: RX2 Band And Bore Given
 
 The RX1 band is placed so that set 1's outermost copper (its TX ring, tail or fingers) sits MIN_CLEARANCE_MM (TRACK_GAP_MM is None) inside set 2's innermost copper (its inner vias), and starts at the bore plus INNER_EDGE_INSET_MM. The bore is used as given; the Single Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 band. The outline is the RX2 band end plus the room the TX2 ring, its tail or fingers, and the margins need.
 
@@ -302,7 +302,7 @@ The RX1 band is placed so that set 1's outermost copper (its TX ring, tail or fi
 |---|---|---|---|---|---|
 | `Board098-layout-19-rx2-band-and-bore` | 7.2 ... 15.275 mm, placed | 18 ... 23.9 mm, given | 6 mm, given | 26.875 mm, from the band | 0.15 mm (at least MIN_CLEARANCE_MM 0.15) |
 
-### 34.3.20 Combination 20: RX2 Band, Bore And TRACK_GAP_MM Given
+### 19.3.20 Combination 20: RX2 Band, Bore And TRACK_GAP_MM Given
 
 The RX1 band is placed so that set 1's outermost copper (its TX ring, tail or fingers) sits TRACK_GAP_MM inside set 2's innermost copper (its inner vias), and starts at the bore plus INNER_EDGE_INSET_MM. The bore is used as given; the Single Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 band. The outline is the RX2 band end plus the room the TX2 ring, its tail or fingers, and the margins need.
 
@@ -312,7 +312,7 @@ The RX1 band is placed so that set 1's outermost copper (its TX ring, tail or fi
 |---|---|---|---|---|---|
 | `Board099-layout-20-rx2-band-bore-and-gap` | 7.2 ... 14.425 mm, placed | 18 ... 23.9 mm, given | 6 mm, given | 26.875 mm, from the band | 1 mm (at least TRACK_GAP_MM 1) |
 
-### 34.3.21 Combination 21: RX2 Band And Outline Given
+### 19.3.21 Combination 21: RX2 Band And Outline Given
 
 The RX1 band is placed so that set 1's outermost copper (its TX ring, tail or fingers) sits MIN_CLEARANCE_MM (TRACK_GAP_MM is None) inside set 2's innermost copper (its inner vias), and is as wide as the RX2 band. The bore is the RX1 band start less INNER_EDGE_INSET_MM. The outline is used as given; the Single Generator checks that it leaves room for the TX2 ring, its tail or fingers, and the margins.
 
@@ -322,7 +322,7 @@ The RX1 band is placed so that set 1's outermost copper (its TX ring, tail or fi
 |---|---|---|---|---|---|
 | `Board100-layout-21-rx2-band-and-outline` | 9.375 ... 15.275 mm, placed | 18 ... 23.9 mm, given | 8.175 mm, from the band | 28 mm, given | 0.15 mm (at least MIN_CLEARANCE_MM 0.15) |
 
-### 34.3.22 Combination 22: RX2 Band, Outline And TRACK_GAP_MM Given
+### 19.3.22 Combination 22: RX2 Band, Outline And TRACK_GAP_MM Given
 
 The RX1 band is placed so that set 1's outermost copper (its TX ring, tail or fingers) sits TRACK_GAP_MM inside set 2's innermost copper (its inner vias), and is as wide as the RX2 band. The bore is the RX1 band start less INNER_EDGE_INSET_MM. The outline is used as given; the Single Generator checks that it leaves room for the TX2 ring, its tail or fingers, and the margins.
 
@@ -332,7 +332,7 @@ The RX1 band is placed so that set 1's outermost copper (its TX ring, tail or fi
 |---|---|---|---|---|---|
 | `Board101-layout-22-rx2-band-outline-and-gap` | 8.525 ... 14.425 mm, placed | 18 ... 23.9 mm, given | 7.325 mm, from the band | 28 mm, given | 1 mm (at least TRACK_GAP_MM 1) |
 
-### 34.3.23 Combination 23: RX2 Band, Bore And Outline Given
+### 19.3.23 Combination 23: RX2 Band, Bore And Outline Given
 
 The RX1 band is placed so that set 1's outermost copper (its TX ring, tail or fingers) sits MIN_CLEARANCE_MM (TRACK_GAP_MM is None) inside set 2's innermost copper (its inner vias), and starts at the bore plus INNER_EDGE_INSET_MM. The bore is used as given; the Single Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 band. The outline is used as given; the Single Generator checks that it leaves room for the TX2 ring, its tail or fingers, and the margins.
 
@@ -342,7 +342,7 @@ The RX1 band is placed so that set 1's outermost copper (its TX ring, tail or fi
 |---|---|---|---|---|---|
 | `Board102-layout-23-rx2-band-bore-and-outline` | 7.2 ... 15.275 mm, placed | 18 ... 23.9 mm, given | 6 mm, given | 28 mm, given | 0.15 mm (at least MIN_CLEARANCE_MM 0.15) |
 
-### 34.3.24 Combination 24: RX2 Band, Bore, Outline And TRACK_GAP_MM Given
+### 19.3.24 Combination 24: RX2 Band, Bore, Outline And TRACK_GAP_MM Given
 
 The RX1 band is placed so that set 1's outermost copper (its TX ring, tail or fingers) sits TRACK_GAP_MM inside set 2's innermost copper (its inner vias), and starts at the bore plus INNER_EDGE_INSET_MM. The bore is used as given; the Single Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 band. The outline is used as given; the Single Generator checks that it leaves room for the TX2 ring, its tail or fingers, and the margins.
 
@@ -352,7 +352,7 @@ The RX1 band is placed so that set 1's outermost copper (its TX ring, tail or fi
 |---|---|---|---|---|---|
 | `Board103-layout-24-rx2-band-bore-outline-and-gap` | 7.2 ... 14.425 mm, placed | 18 ... 23.9 mm, given | 6 mm, given | 28 mm, given | 1 mm (at least TRACK_GAP_MM 1) |
 
-### 34.3.25 Combination 25: Nothing Given
+### 19.3.25 Combination 25: Nothing Given
 
 Refused: no RX band and no board edge, so there is nothing to size the bands from. Give one RX band, or both board edges to fit both bands between them.
 
@@ -362,7 +362,7 @@ Refused: no RX band and no board edge, so there is nothing to size the bands fro
 ERROR   no RX band and no board edge is given: there is nothing to size the bands from. Give one RX band (INSIDE_RADIUS_MM / OUTSIDE_RADIUS_MM or RX_R_BASE_MM / RX_A_MM in Dual_RX1 or Dual_RX2_Parameters.py), or both board edges (INNER_EDGE_RADIUS_MM and OUTER_EDGE_RADIUS_MM, Dual_Board_Parameters.py) to fit both bands between them
 ```
 
-### 34.3.26 Combination 26: TRACK_GAP_MM Given
+### 19.3.26 Combination 26: TRACK_GAP_MM Given
 
 Refused: no RX band and no board edge, so there is nothing to size the bands from. Give one RX band, or both board edges to fit both bands between them. TRACK_GAP_MM alone does not help: it is a distance, not a place.
 
@@ -372,7 +372,7 @@ Refused: no RX band and no board edge, so there is nothing to size the bands fro
 ERROR   no RX band and no board edge is given: there is nothing to size the bands from. Give one RX band (INSIDE_RADIUS_MM / OUTSIDE_RADIUS_MM or RX_R_BASE_MM / RX_A_MM in Dual_RX1 or Dual_RX2_Parameters.py), or both board edges (INNER_EDGE_RADIUS_MM and OUTER_EDGE_RADIUS_MM, Dual_Board_Parameters.py) to fit both bands between them
 ```
 
-### 34.3.27 Combination 27: Bore Given
+### 19.3.27 Combination 27: Bore Given
 
 Refused: no RX band and only the bore, so the room for the two bands has no other end. Give OUTER_EDGE_RADIUS_MM too, and the bands are fitted between the edges, or give one RX band.
 
@@ -382,7 +382,7 @@ Refused: no RX band and only the bore, so the room for the two bands has no othe
 ERROR   no RX band is given and of the board edges only the bore: OUTER_EDGE_RADIUS_MM is missing to fit both bands between the edges. Set OUTER_EDGE_RADIUS_MM (Dual_Board_Parameters.py), or give one RX band (INSIDE_RADIUS_MM / OUTSIDE_RADIUS_MM or RX_R_BASE_MM / RX_A_MM in Dual_RX1 or Dual_RX2_Parameters.py)
 ```
 
-### 34.3.28 Combination 28: Bore And TRACK_GAP_MM Given
+### 19.3.28 Combination 28: Bore And TRACK_GAP_MM Given
 
 Refused: no RX band and only the bore, so the room for the two bands has no other end. Give OUTER_EDGE_RADIUS_MM too, and the bands are fitted between the edges, or give one RX band.
 
@@ -392,7 +392,7 @@ Refused: no RX band and only the bore, so the room for the two bands has no othe
 ERROR   no RX band is given and of the board edges only the bore: OUTER_EDGE_RADIUS_MM is missing to fit both bands between the edges. Set OUTER_EDGE_RADIUS_MM (Dual_Board_Parameters.py), or give one RX band (INSIDE_RADIUS_MM / OUTSIDE_RADIUS_MM or RX_R_BASE_MM / RX_A_MM in Dual_RX1 or Dual_RX2_Parameters.py)
 ```
 
-### 34.3.29 Combination 29: Outline Given
+### 19.3.29 Combination 29: Outline Given
 
 Refused: no RX band and only the outline, so the room for the two bands has no other end. Give INNER_EDGE_RADIUS_MM too, and the bands are fitted between the edges, or give one RX band.
 
@@ -402,7 +402,7 @@ Refused: no RX band and only the outline, so the room for the two bands has no o
 ERROR   no RX band is given and of the board edges only the outline: INNER_EDGE_RADIUS_MM is missing to fit both bands between the edges. Set INNER_EDGE_RADIUS_MM (Dual_Board_Parameters.py), or give one RX band (INSIDE_RADIUS_MM / OUTSIDE_RADIUS_MM or RX_R_BASE_MM / RX_A_MM in Dual_RX1 or Dual_RX2_Parameters.py)
 ```
 
-### 34.3.30 Combination 30: Outline And TRACK_GAP_MM Given
+### 19.3.30 Combination 30: Outline And TRACK_GAP_MM Given
 
 Refused: no RX band and only the outline, so the room for the two bands has no other end. Give INNER_EDGE_RADIUS_MM too, and the bands are fitted between the edges, or give one RX band.
 
@@ -412,7 +412,7 @@ Refused: no RX band and only the outline, so the room for the two bands has no o
 ERROR   no RX band is given and of the board edges only the outline: INNER_EDGE_RADIUS_MM is missing to fit both bands between the edges. Set INNER_EDGE_RADIUS_MM (Dual_Board_Parameters.py), or give one RX band (INSIDE_RADIUS_MM / OUTSIDE_RADIUS_MM or RX_R_BASE_MM / RX_A_MM in Dual_RX1 or Dual_RX2_Parameters.py)
 ```
 
-### 34.3.31 Combination 31: Bore And Outline Given
+### 19.3.31 Combination 31: Bore And Outline Given
 
 Both bands are fitted between the two edges as given: from the bore, INNER_EDGE_INSET_MM, the RX1 band, the TX1 ring, MIN_CLEARANCE_MM (TRACK_GAP_MM is None), set 2's inner vias, the RX2 band, and the TX2 ring with the margins up to the outline. BAND_SPLIT shares what is left between the two bands (0.5: equal widths).
 
@@ -422,7 +422,7 @@ Both bands are fitted between the two edges as given: from the bore, INNER_EDGE_
 |---|---|---|---|---|---|
 | `Board104-layout-31-both-edges` | 7.2 ... 14.75 mm, placed | 17.475 ... 25.025 mm, placed | 6 mm, given | 28 mm, given | 0.15 mm (at least MIN_CLEARANCE_MM 0.15) |
 
-### 34.3.32 Combination 32: Bore, Outline And TRACK_GAP_MM Given
+### 19.3.32 Combination 32: Bore, Outline And TRACK_GAP_MM Given
 
 Both bands are fitted between the two edges as given: from the bore, INNER_EDGE_INSET_MM, the RX1 band, the TX1 ring, TRACK_GAP_MM, set 2's inner vias, the RX2 band, and the TX2 ring with the margins up to the outline. BAND_SPLIT shares what is left between the two bands (0.5: equal widths).
 
@@ -434,7 +434,7 @@ Both bands are fitted between the two edges as given: from the bore, INNER_EDGE_
 
 <!-- END: written by docs/tools/dual_layout_pictures.py -->
 
-## 34.4 Files From Before: `DUAL_MODE`
+## 19.4 Files From Before: `DUAL_MODE`
 
 A parameter file written for the layout modes still works. `DUAL_MODE` is no longer read: the checker warns that it is
 no longer used, and the layout follows from what the file gives, which is what the mode needed anyway. Every board of
@@ -449,7 +449,7 @@ the regression suite built with a mode is byte for byte the same board without i
 
 The other 27 combinations used to be refused because no mode matched them.
 
-## 34.5 How The Pictures Are Made
+## 19.5 How The Pictures Are Made
 
 The pictures and the combination sections above are written by `docs/tools/dual_layout_pictures.py` (standard
 library only) from the reference boards in `regression/DualGenerator_regression`: the board named
@@ -458,7 +458,7 @@ boards byte for byte against what the generator builds, so the pictures always s
 `python docs/tools/dual_layout_pictures.py --check`, which fails when a picture or this page is not what the boards
 give; after a change that moves a board, run the script without `--check` and commit what it writes.
 
-## 34.6 Related Pages
+## 19.6 Related Pages
 
 - [Board Features - Dual Generator](Board-Features-Dual-Generator.md): the stack from the centre out, and the checks
   on the finished board.
