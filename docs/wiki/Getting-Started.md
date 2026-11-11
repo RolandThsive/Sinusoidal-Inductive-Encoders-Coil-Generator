@@ -11,14 +11,15 @@ python -m pip install -r requirements.txt
 
 ## 3.2 First Run
 
-1. Open `Single Generator/Parameters/` and look at the files you can edit: `Board_Parameters.py`, `RX_Parameters.py`,
-   `TX_Parameters.py`, `Rotor_Parameters.py`, `IC_Parameters.py` and `SilkScreenSuggestion_Parameters.py`. The
-   [Parameter Reference Single Generator](Parameter-Reference-Single-Generator.md) explains every setting. The defaults
-   already build a board.
-2. Go to the `Single Generator` folder and check the parameters without writing anything:
+1. Open `Generators/Single Coil Set Generator/Parameters/` and look at the files you can edit: `Board_Parameters.py`,
+   `RX_Parameters.py`, `TX_Parameters.py`, `Rotor_Parameters.py`, `IC_Parameters.py` and
+   `SilkScreenSuggestion_Parameters.py`.
+   The [Parameter Reference Single Coil Set Generator](Parameter-Reference-Single-Coil-Set-Generator.md) explains every
+   setting. The defaults already build a board.
+2. Go to the `Generators/Single Coil Set Generator` folder and check the parameters without writing anything:
 
    ```bash
-   cd "Single Generator"
+   cd "Generators/Single Coil Set Generator"
    python Generator/Run/RunCoilGenerator.py --check
    ```
 
@@ -28,7 +29,7 @@ python -m pip install -r requirements.txt
    python Generator/Run/RunCoilGenerator.py
    ```
 
-4. Open `Stator.kicad_pcb` and `Rotor.kicad_pcb` from the new folder in `Single Generator/Output/` with KiCad 7, 8, 9 or 10.
+4. Open `Stator.kicad_pcb` and `Rotor.kicad_pcb` from the new folder in `Generators/Single Coil Set Generator/Output/` with KiCad 7, 8, 9 or 10.
    KiCad reads each board's design rules from the project file next to it (`Stator.kicad_pro`, `Rotor.kicad_pro`). See
    [KiCad Compatibility](KiCad-Compatibility.md).
 
@@ -74,32 +75,32 @@ where the silkscreen suggests or wherever you like.
 > Every model and estimate in this project is unvalidated against hardware. Test boards are ordered and have not
 > been measured yet.
 
-## 3.5 The Dual Generator
+## 3.5 The Dual Coil Set Generator
 
-The Dual Generator builds two coil sets on one stator (a coarse inner set and a fine outer set, each with its own IC)
-and one rotor disc with two rings. It uses the Single Generator's own code, so both folders must stay next to each
-other. Its settings are the files in `Dual Generator/Parameters/` (`Dual_Board_Parameters.py`, `Dual_RX1` / `Dual_RX2`,
-`Dual_TX1` / `Dual_TX2`, `Dual_Rotor1` / `Dual_Rotor2`, `Dual_IC1` / `Dual_IC2` and
-`Dual_SilkScreenSuggestion_Parameters.py`). The defaults build a 1x / 16x board.
+The Dual Coil Set Generator builds two coil sets on one stator (a coarse inner set and a fine outer set, each with its
+own IC) and one rotor disc with two rings. It uses the Single Coil Set Generator's own code, so both folders must stay
+next to each other. Its settings are the files in `Generators/Dual Coil Set Generator/Parameters/`
+(`Dual_Board_Parameters.py`, `Dual_RX1` / `Dual_RX2`, `Dual_TX1` / `Dual_TX2`, `Dual_Rotor1` / `Dual_Rotor2`, `Dual_IC1`
+/ `Dual_IC2` and `Dual_SilkScreenSuggestion_Parameters.py`). The defaults build a 1x / 16x board.
 
 ```bash
-cd "Dual Generator"
+cd "Generators/Dual Coil Set Generator"
 python Dual_Generator/Checks/Dual_CheckParameters.py       # Check the parameters only
 python Dual_Generator/Run/Dual_RunCoilGenerator.py         # Check, then write Stator + Rotor
 python Dual_Generator/Run/Dual_RunCoilGenerator.py --check # Check only, write nothing
 ```
 
-The options `--stator`, `--rotor` and `--no-color` work as for the Single Generator. Each run writes a new
-`DualCoil_...` folder in `Dual Generator/Output/`, with the boards, `Parameters.txt` and the two
+The options `--stator`, `--rotor` and `--no-color` work as for the Single Coil Set Generator. Each run writes a new
+`DualCoil_...` folder in `Generators/Dual Coil Set Generator/Output/`, with the boards, `Parameters.txt` and the two
 [output pictures](Output-Pictures.md). Start with the
-[Quick Guide To Parameters Selections - Dual Generator](Quick-Guide-To-Parameters-Selections-Dual-Generator.md).
+[Quick Guide To Parameters Selections - Dual Coil Set Generator](Quick-Guide-To-Parameters-Selections-Dual-Coil-Set-Generator.md).
 
 ## 3.6 Next
 
 - Pick the loop count for your use: [Choosing A Rotor And Stator](Choosing-A-Rotor-And-Stator.md).
 - Understand the features: [Stator Features](Stator-Features.md), [Rotor Features](Rotor-Features.md),
   [Board Features](Board-Features.md), [Silkscreen](Silkscreen.md), and the same for the
-  [Dual Generator](Stator-Features-Dual-Generator.md).
+  [Dual Coil Set Generator](Stator-Features-Dual-Coil-Set-Generator.md).
 - Check and improve a design (analysis and optimization are under construction): [Suggestive Analysis And Optimization](Suggestive-Analysis-And-Optimization.md).
 
 [<img align="right" src="https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/logo/Logo_1_V2.png" alt="Sinusoidal Coil Generator logo, click to see it spin" width="72">](https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/logo/Logo_1_V2_rotor_spin_400px.webp)

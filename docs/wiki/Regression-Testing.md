@@ -12,8 +12,8 @@ From the root of the repository:
 
 ```bash
 python regression/run_regression.py                # both suites, about 45 minutes
-python regression/run_regression.py single         # the Single Generator's suite only
-python regression/run_regression.py dual           # the Dual Generator's suite only
+python regression/run_regression.py single         # the Single Coil Set Generator's suite only
+python regression/run_regression.py dual           # the Dual Coil Set Generator's suite only
 ```
 
 | Option | Effect |
@@ -34,13 +34,13 @@ regression/
 ├── boards.py                     Makes a new test board; keeps the board folders in step with the generators
 ├── RegressionHarness.py          What both suites share: runs a generator in memory, finds the board folders
 ├── RegressionTools.py            Reads a written .kicad_pcb back and measures it, independently of the generators
-├── SingleGenerator_regression/
+├── SingleCoilSetGenerator_regression/
 │   ├── README.md                 What each test checks, and the table of the boards
 │   ├── tests/                    The test files
 │   ├── Board001-default/          The six parameter files, the two boards and their .kicad_pro, Parameters.txt
 │   ├── Board002-loops-4-subcoils-2/
 │   └── ...
-└── DualGenerator_regression/
+└── DualCoilSetGenerator_regression/
     ├── README.md
     ├── tests/
     ├── Board001-default/          The ten Dual_..._Parameters.py files and the same five written files
@@ -66,8 +66,8 @@ python regression/boards.py new single "spiral-tx-8-turns" TX_SHAPE=spiral TX_TU
 python regression/boards.py new dual "rx2-cosine-r" RX2.RX_PROFILE=cosine_r
 ```
 
-The folder gets the next free number. Each `NAME=VALUE` is written as in a parameter file; a Dual Generator name starts
-with its file (`BOARD.`, `RX1.`, `TX2.`, `ROTOR1.`, `SILK.` and so on). The parameter files are copied from
+The folder gets the next free number. Each `NAME=VALUE` is written as in a parameter file; a Dual Coil Set Generator
+name starts with its file (`BOARD.`, `RX1.`, `TX2.`, `ROTOR1.`, `SILK.` and so on). The parameter files are copied from
 `Board001-default` (or from another board with `--from`), each value is replaced where it stands, then the board is
 written, its files saved, its tests run and the README table written anew. A board that does not build, or fails its
 tests, is removed again.
@@ -82,14 +82,14 @@ tests, is removed again.
 
 Each suite has the same files in its `tests` folder:
 
-| File | Single Generator | Dual Generator |
+| File | Single Coil Set Generator | Dual Coil Set Generator |
 |---|---|---|
-| `test_checker.py` | One value of every kind set wrongly, missing and unknown names, inactive values left alone, the conflicts between values (vias, layers, nets, edges, fingers, rotor), the geometry that stops a run, strict mode. Each case states the return code and the lines the run must print | The 32 combinations of what the layout is given (builds or refused, with the radii it places), the layout's refusals, the names of each dual file, the values a set sets for itself, the dual rules (nets, frequencies, layers, rings), the Single Generator's own checks on each set, strict mode |
+| `test_checker.py` | One value of every kind set wrongly, missing and unknown names, inactive values left alone, the conflicts between values (vias, layers, nets, edges, fingers, rotor), the geometry that stops a run, strict mode. Each case states the return code and the lines the run must print | The 32 combinations of what the layout is given (builds or refused, with the radii it places), the layout's refusals, the names of each dual file, the values a set sets for itself, the dual rules (nets, frequencies, layers, rings), the Single Coil Set Generator's own checks on each set, strict mode |
 | `test_boards.py` | Every board folder written again and compared with the files saved in it (stator, rotor, their project files, record), character for character; the run's output folder must hold exactly these three files and the two [output pictures](Output-Pictures.md); every board folder must set exactly the generator's parameter names, hold nothing else and be in the README table | The same, for the dual boards |
 | `test_invariants.py` | What every written board must obey: the file format, the layer table, the nets, copper inside the edges with the right widths, the clearance between nets, closed RX coils, the TX in one piece with its terminal at 0°, the rotor sectors, the record; the same values written twice are identical | The same for a dual board, each set with its own values (layers, fingers, vias, clearance): six nets, set 1 inside set 2 by the recorded gap, the TX ends at `TERMINAL_1_DEG` / `TERMINAL_2_DEG`, the two rotor rings |
 | `test_silkscreen.py` | The lead-cutting silkscreen: three suggestions on both sides, via sites with room, lettering off the vias and mirrored on the bottom, the settings with their fallbacks, the font, the name placer, a board KiCad saved again, a missing KiCad reader | Six suggestions, names with the set number, breaks near each set's terminal, sides and labels options |
-| `test_cli.py` | The generator started as a script in a fresh Python process, from its folder and from elsewhere, with `--check`, `--help` and a bad option | The same, plus the checker on its own and the promise that a dual run leaves no `__pycache__` in the Single Generator |
-| `test_units.py` | The folder names, the OUTPUT_DIR rule, the KiCad writer, the report and colour classes, the parameter and geometry helpers, the hooks the Dual Generator builds on, and the KiCad reader of `resources/`: every reference board read as the test parser reads it, boards KiCad 7 and 10 saved again (in `tests/kicad_files/`), every via kind, the pictures of a board saved again | The set parameters handed to the Single Generator and the "set k:" findings, the layout combinations, the folder names, the Single's OUTPUT_DIR rule, a guard that the dual files supply every name the Single Generator knows, and the KiCad reader on every dual reference board |
+| `test_cli.py` | The generator started as a script in a fresh Python process, from its folder and from elsewhere, with `--check`, `--help` and a bad option | The same, plus the checker on its own and the promise that a dual run leaves no `__pycache__` in the Single Coil Set Generator |
+| `test_units.py` | The folder names, the OUTPUT_DIR rule, the KiCad writer, the report and colour classes, the parameter and geometry helpers, the hooks the Dual Coil Set Generator builds on, and the KiCad reader of `Generators/resources/`: every reference board read as the test parser reads it, boards KiCad 7 and 10 saved again (in `tests/kicad_files/`), every via kind, the pictures of a board saved again | The set parameters handed to the Single Coil Set Generator and the "set k:" findings, the layout combinations, the folder names, the Single's OUTPUT_DIR rule, a guard that the dual files supply every name the Single Coil Set Generator knows, and the KiCad reader on every dual reference board |
 
 `harness.py` loads the generator, applies the overrides, runs it, and writes each board once per run for all the tests
 that need it.
@@ -97,8 +97,8 @@ that need it.
 The parsing and measuring code both suites share is `regression/RegressionTools.py`. It reads the written `.kicad_pcb`
 back and measures it independently of the generator: the smallest clearance between nets on a cell grid, the
 connectivity of each net, the copper extent of each layer, and the comparison with the saved files. It shares no code
-with the reader the generators' own tools use, `resources/KiCadReader.py`, on purpose: a test in each suite holds the
-two to the same values on every reference board, so each checks the other.
+with the reader the generators' own tools use, `Generators/resources/KiCadReader.py`, on purpose: a test in each suite
+holds the two to the same values on every reference board, so each checks the other.
 
 ## 30.4 On Every Pull Request (CI)
 
@@ -123,7 +123,7 @@ the workflows get a read-only token.
 The same checks run locally:
 
 ```bash
-python -m pip install -r requirements-dev.txt
+python -m pip install -r requirements.txt      # numpy, and the tools of the checks
 ruff check .                                   # the lint (or: pip install pre-commit; pre-commit install)
 python .github/scripts/repo_guard.py           # the repo guard
 python .github/scripts/check_docs.py           # the docs links

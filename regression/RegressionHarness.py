@@ -11,9 +11,9 @@ what is in the generator's own Parameters folder (the values you are designing w
     suite.check(overrides)           run(overrides, ["--check", "--no-color"])
     suite.write(overrides, args)     a full run that writes into a fresh temporary folder (Result.folder)
 
-Overrides: {"NAME": value} for the module whose key is "" (the Single Generator's gathered Parameters), {"KEY.NAME":
-value} for the others (SILK.SILKSCREEN_SIDES, RX2.LOOPS, ...).  DELETE removes the name, as if its line were missing
-from its file.
+Overrides: {"NAME": value} for the module whose key is "" (the Single Coil Set Generator's gathered Parameters),
+{"KEY.NAME": value} for the others (SILK.SILKSCREEN_SIDES, RX2.LOOPS, ...).  DELETE removes the name, as if its line
+were missing from its file.
 
 The board folders.  Each test board is a folder BoardNNN-<what it tests> next to the suite's tests folder, holding a
 complete copy of the generator's parameter files with the board's own values, and the files the generator wrote from
@@ -57,13 +57,13 @@ ONLY_BOARDS = [b.strip() for b in os.environ.get("REGRESSION_BOARDS", "").split(
 
 # the two suites: their folder, the generator's own Parameters folder, and which module each parameter file feeds
 SUITES = {
-    "single": dict(root=os.path.join(HERE, "SingleGenerator_regression"),
-                   parameters=os.path.join(REPO, "Single Generator", "Parameters"),
+    "single": dict(root=os.path.join(HERE, "SingleCoilSetGenerator_regression"),
+                   parameters=os.path.join(REPO, "Generators", "Single Coil Set Generator", "Parameters"),
                    files={"Board_Parameters.py": "", "IC_Parameters.py": "", "RX_Parameters.py": "",
                           "Rotor_Parameters.py": "", "TX_Parameters.py": "",
                           "SilkScreenSuggestion_Parameters.py": "SILK"}),
-    "dual": dict(root=os.path.join(HERE, "DualGenerator_regression"),
-                 parameters=os.path.join(REPO, "Dual Generator", "Parameters"),
+    "dual": dict(root=os.path.join(HERE, "DualCoilSetGenerator_regression"),
+                 parameters=os.path.join(REPO, "Generators", "Dual Coil Set Generator", "Parameters"),
                  files={"Dual_Board_Parameters.py": "BOARD", "Dual_RX1_Parameters.py": "RX1",
                         "Dual_RX2_Parameters.py": "RX2", "Dual_TX1_Parameters.py": "TX1",
                         "Dual_TX2_Parameters.py": "TX2", "Dual_Rotor1_Parameters.py": "ROTOR1",
@@ -161,12 +161,12 @@ class Suite:
     """One generator's regression plumbing.
 
         modules          {key: module}: the parameter modules the generator reads ("" for the gathered module of
-                         the Single Generator, "SILK", "BOARD", "RX1", ...)
+                         the Single Coil Set Generator, "SILK", "BOARD", "RX1", ...)
         files            {parameter file name: key}: which module each of the generator's parameter files feeds
         parameters_dir   the generator's own Parameters folder (the names every board folder must set)
         main             the run script's main(argv)
         output_key       the override that points OUTPUT_DIR somewhere ("OUTPUT_DIR", "BOARD.OUTPUT_DIR")
-        root             the suite's folder (SingleGenerator_regression, DualGenerator_regression)
+        root             the suite's folder (SingleCoilSetGenerator_regression, DualCoilSetGenerator_regression)
         result           the Result class to make
     """
 

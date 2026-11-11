@@ -3,9 +3,9 @@
 <rect width="100%" height="100%" fill="#ffffff"/>
 <rect x="24" y="137" width="1352" height="546" fill="#d5dce5" stroke="#c4c4c4" stroke-width="1"/>
 <text x="24" y="48" font-size="24" font-weight="bold" fill="#1a1a1a">Combination 4: Both RX bands, bore and TRACK_GAP_MM given</text>
-<text x="24" y="77" font-size="15" fill="#555555">Drawn from the reference board Board085-layout-04-both-bands-bore-and-gap (regression/DualGenerator_regression), cut along the radius at 90 deg: the copper is</text>
-<text x="24" y="98" font-size="15" fill="#555555">what that cut meets in its Stator.kicad_pcb. Given: the RX1 band (8.45 ... 11.7 mm, Dual_RX1), the RX2 band (18 ... 23.9 mm, Dual_RX2), the bore (6 mm),</text>
-<text x="24" y="119" font-size="15" fill="#555555">TRACK_GAP_MM (3 mm). Across the board true scale; through the board not to scale, the copper drawn thicker.</text>
+<text x="24" y="77" font-size="15" fill="#555555">Drawn from the reference board Board085-layout-04-both-bands-bore-and-gap (regression/DualCoilSetGenerator_regression), cut along the radius at 90 deg: the</text>
+<text x="24" y="98" font-size="15" fill="#555555">copper is what that cut meets in its Stator.kicad_pcb. Given: the RX1 band (8.45 ... 11.7 mm, Dual_RX1), the RX2 band (18 ... 23.9 mm, Dual_RX2), the bore (6</text>
+<text x="24" y="119" font-size="15" fill="#555555">mm), TRACK_GAP_MM (3 mm). Across the board true scale; through the board not to scale, the copper drawn thicker.</text>
 <rect x="766" y="151" width="596" height="30" rx="3" fill="#ffffff" stroke="#bdbdbd" stroke-width="1"/>
 <line x1="778" y1="166" x2="808" y2="166" stroke="#1a1a1a" stroke-width="2"/>
 <text x="816" y="171" font-size="13" fill="#1a1a1a">given in the parameter files</text>
@@ -140,8 +140,8 @@
 <circle cx="46" cy="159" r="12" fill="#1a1a1a"/>
 <text x="46" y="164" font-size="15" font-weight="bold" text-anchor="middle" fill="#ffffff">1</text>
 <text x="24" y="711" font-size="17" font-weight="bold" fill="#1a1a1a">1  Both RX bands, bore and TRACK_GAP_MM given</text>
-<text x="24" y="736" font-size="15" fill="#555555">Both bands are used as given. The bore is used as given; the Single Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 band. The outline is the</text>
-<text x="24" y="757" font-size="15" fill="#555555">RX2 band end plus the room the TX2 ring, its tail or fingers, and the margins need. The gap between set 1's outermost copper and set 2's innermost copper is</text>
-<text x="24" y="778" font-size="15" fill="#555555">measured, and must be at least TRACK_GAP_MM. Here the RX1 band runs 8.45 ... 11.7 mm and the RX2 band 18 ... 23.9 mm; set 1's copper reaches r = 13.975 mm and</text>
-<text x="24" y="799" font-size="15" fill="#555555">set 2's starts at r = 17.7 mm, 3.725 mm apart; the bore is 6 mm and the outline 26.875 mm.</text>
+<text x="24" y="736" font-size="15" fill="#555555">Both bands are used as given. The bore is used as given; the Single Coil Set Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 band. The</text>
+<text x="24" y="757" font-size="15" fill="#555555">outline is the RX2 band end plus the room the TX2 ring, its tail or fingers, and the margins need. The gap between set 1's outermost copper and set 2's</text>
+<text x="24" y="778" font-size="15" fill="#555555">innermost copper is measured, and must be at least TRACK_GAP_MM. Here the RX1 band runs 8.45 ... 11.7 mm and the RX2 band 18 ... 23.9 mm; set 1's copper reaches</text>
+<text x="24" y="799" font-size="15" fill="#555555">r = 13.975 mm and set 2's starts at r = 17.7 mm, 3.725 mm apart; the bore is 6 mm and the outline 26.875 mm.</text>
 </svg>

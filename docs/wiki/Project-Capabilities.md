@@ -4,7 +4,7 @@
 |---|---|
 | Human Language | English |
 | Programming Language | Pure Python 3 with numpy |
-| Generators | Single Generator: one coil set on a board. Dual Generator: two coil sets (a coarse inner track and a fine outer track, each with its own IC) on one 4-layer board, and one rotor disc with two rings, built with the Single Generator's own code |
+| Generators | Single Coil Set Generator: one coil set on a board. Dual Coil Set Generator: two coil sets (a coarse inner track and a fine outer track, each with its own IC) on one 4-layer board, and one rotor disc with two rings, built with the Single Coil Set Generator's own code |
 | Output | Stator and rotor as `.kicad_pcb` files, a full record of every value used, and two SVG pictures of the boards: a Representative one to look at and an Actual one with the copper 1:1 in mm (see [Output Pictures](Output-Pictures.md)) |
 | RX Loops | 1 to 16 electrical periods per mechanical turn |
 | RX Phases | Four phases only: SIN and COS pairs, each with a positive and a negative half |
@@ -26,11 +26,11 @@
 | Analysis | Under construction on the `analyser_and_optimizer` branch: angle error, signal, harmonics and a tolerance window (air gap, eccentricity, tilt, etching) |
 | Optimization | Under construction on the `analyser_and_optimizer` branch: searches profile, sub-coils, split, rotor metal fraction and rotor outer edge |
 
-Most of these are shown with pictures on the [Stator Features](Stator-Features.md), [Rotor Features](Rotor-Features.md) and [Board Features](Board-Features.md) pages, and for the Dual Generator on [Stator Features - Dual Generator](Stator-Features-Dual-Generator.md) and the pages after it.
+Most of these are shown with pictures on the [Stator Features](Stator-Features.md), [Rotor Features](Rotor-Features.md) and [Board Features](Board-Features.md) pages, and for the Dual Coil Set Generator on [Stator Features - Dual Coil Set Generator](Stator-Features-Dual-Coil-Set-Generator.md) and the pages after it.
 
 ## 5.1 Board Size Range
 
-The table below gives the Single Generator board sizes that build without any error or warning for 1, 4 and 16
+The table below gives the Single Coil Set Generator board sizes that build without any error or warning for 1, 4 and 16
 loops. It was found by running the generator's own checks (parameters, finished boards, rotor and
 electrical estimate) over a grid of board radii in 1 mm steps, up to an outer radius of 40 mm, with
 these settings: 4 layers, series TX on Top + Inner-1 with 3 turns per layer, 0.6 mm pitch, 0.2 mm

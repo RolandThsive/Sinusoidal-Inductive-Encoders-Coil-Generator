@@ -9,7 +9,7 @@ check fails when the total is lower than the baseline (by more than 0.05, for ro
 baseline when the total is higher by half a point or more, so that the gain is kept.  There is no fixed target: the
 number only ever goes up.
 
-Needs coverage (requirements-dev.txt).
+Needs coverage (requirements.txt).
 """
 
 import argparse

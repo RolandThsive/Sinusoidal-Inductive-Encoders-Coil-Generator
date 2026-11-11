@@ -10,7 +10,7 @@ regression/
   boards.py                       makes a new test board, keeps the board folders in step with the generators
   RegressionHarness.py            the plumbing both suites share (runs a generator in memory, reads the boards)
   RegressionTools.py              reads a written .kicad_pcb back and measures it, independently of the generators
-  SingleGenerator_regression/
+  SingleCoilSetGenerator_regression/
     README.md                     what each test checks, and the table of the boards
     tests/                        the test files
     Board001-default/              the generator's defaults
@@ -19,7 +19,7 @@ regression/
       Stator.kicad_pcb  Stator.kicad_pro  Rotor.kicad_pcb  Rotor.kicad_pro  Parameters.txt
     Board002-loops-4-subcoils-2/
     ...
-  DualGenerator_regression/
+  DualCoilSetGenerator_regression/
     README.md
     tests/
     Board001-default/              the ten Dual_..._Parameters.py files, and the five written files
@@ -29,8 +29,8 @@ regression/
 ## Running the tests
 
     python regression/run_regression.py                        both suites (about 45 minutes)
-    python regression/run_regression.py single                 the Single Generator's suite only
-    python regression/run_regression.py dual -v                the Dual Generator's, one line per test
+    python regression/run_regression.py single                 the Single Coil Set Generator's suite only
+    python regression/run_regression.py dual -v                the Dual Coil Set Generator's, one line per test
     python regression/run_regression.py single -k checker      only the tests whose name contains "checker"
     python regression/run_regression.py dual --board Board007   the board tests on Board007 only
     python regression/run_regression.py single --update-references
@@ -73,9 +73,9 @@ that caused it:
     python regression/boards.py new dual "terminals-45-225-blind" BOARD.TERMINAL_1_DEG=45.0 --from Board010
 
 The first argument is the generator, the second what the board tests: the folder becomes `BoardNNN-<what it tests>`,
-with the next free number.  Each `NAME=VALUE` changes one value, written as in a parameter file; a Dual Generator
-name starts with its file (`BOARD.`, `RX1.`, `RX2.`, `TX1.`, `TX2.`, `ROTOR1.`, `ROTOR2.`, `IC1.`, `IC2.`,
-`SILK.`), a Single Generator silkscreen value with `SILK.`.  The parameter files are copied from
+with the next free number.  Each `NAME=VALUE` changes one value, written as in a parameter file; a Dual Coil Set
+Generator name starts with its file (`BOARD.`, `RX1.`, `RX2.`, `TX1.`, `TX2.`, `ROTOR1.`, `ROTOR2.`, `IC1.`, `IC2.`,
+`SILK.`), a Single Coil Set Generator silkscreen value with `SILK.`.  The parameter files are copied from
 `Board001-default` (or from the board named with `--from`) and each value is replaced where it stands, so its comment
 stays with it.  Then the board is written, its files saved, its tests run and the table in the suite's README
 written anew.  A board that does not build, or fails its tests, is removed again; read what the run printed.

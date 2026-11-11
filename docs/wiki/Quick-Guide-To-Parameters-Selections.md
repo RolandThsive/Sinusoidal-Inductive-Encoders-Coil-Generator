@@ -4,7 +4,7 @@ This page shows, with pictures made by the generator itself, the choices you mak
 built: how the RX band is defined, how many TX turns and how long a TX tail, how the TX is wired and
 how it makes way for the RX fingers, and how much of the rotor is metal. Every picture is one run of
 the generator with only the named setting changed, and colour shows the copper layer, not the net (Top red, Inner-1 green, Inner-2 dark yellow, Bottom dark blue). Each parameter is described in full in the
-[Parameter Reference Single Generator](Parameter-Reference-Single-Generator.md).
+[Parameter Reference Single Coil Set Generator](Parameter-Reference-Single-Coil-Set-Generator.md).
 
 ## 15.1 Defining The RX Band
 
@@ -137,10 +137,11 @@ page shows how to search for the best duty for your board.
 
 - [RX Profiles](RX-Profiles.md): the curve that the RX band is filled with.
 - [Stator Features](Stator-Features.md) and [Rotor Features](Rotor-Features.md): every option in detail.
-- [Parameter Reference Single Generator](Parameter-Reference-Single-Generator.md): all parameters, defaults and ranges.
+- [Parameter Reference Single Coil Set Generator](Parameter-Reference-Single-Coil-Set-Generator.md): all parameters,
+  defaults and ranges.
 
 [<img align="right" src="https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/logo/Logo_1_V2.png" alt="Sinusoidal Coil Generator logo, click to see it spin" width="72">](https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/logo/Logo_1_V2_rotor_spin_400px.webp)
 
 | Previous | Next |
 |:---|---:|
-| [Silkscreen](Silkscreen.md) | [Stator Features - Dual Generator](Stator-Features-Dual-Generator.md) |
+| [Silkscreen](Silkscreen.md) | [Stator Features - Dual Coil Set Generator](Stator-Features-Dual-Coil-Set-Generator.md) |

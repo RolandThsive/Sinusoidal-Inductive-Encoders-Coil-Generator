@@ -7,10 +7,10 @@ Every run that writes both boards also draws two SVG pictures of them into the s
   easy to tell apart.
 - `<folder name>_Actual.svg`: the copper of the board as it is, 1:1 in mm, with no text and nothing widened.
 
-Both are drawn by `resources/RepresentativeSVGMaker.py` and `resources/ActualSVGMaker.py`. They read only the two
-`.kicad_pcb` files the run wrote, with the repository's KiCad reader (`resources/KiCadReader.py`), need nothing but
-Python 3, and open in any browser. In both, the stator is on the
-left and the rotor on the right, and the layers have the same colours: Top red, Inner 1 green, Inner 2 yellow,
+Both are drawn by `Generators/resources/RepresentativeSVGMaker.py` and `Generators/resources/ActualSVGMaker.py`. They
+read only the two `.kicad_pcb` files the run wrote, with the repository's KiCad reader
+(`Generators/resources/KiCadReader.py`), need nothing but Python 3, and open in any browser. In both, the stator is on
+the left and the rotor on the right, and the layers have the same colours: Top red, Inner 1 green, Inner 2 yellow,
 Bottom blue.
 
 ## 28.1 Representative And Actual
@@ -31,43 +31,43 @@ In short: open the Representative picture to see what was built. Use the Actual 
 itself, at its true size. Inkscape shows and hides its layers one by one, so you can, for example, look at Inner 2
 alone.
 
-## 28.2 Single Generator
+## 28.2 Single Coil Set Generator
 
-The pictures of the default Single Generator board (`Coil_15_27_1_1_3_Single_SteppedDiagonal`: 1 loop, TX 3 turns per
-layer, board radius 15 to 27 mm), as the generator writes them.
+The pictures of the default Single Coil Set Generator board (`Coil_15_27_1_1_3_Single_SteppedDiagonal`: 1 loop, TX 3
+turns per layer, board radius 15 to 27 mm), as the generator writes them.
 
-![Output Pictures 1: Single Generator, Representative](https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/images/output_pictures_1_single_representative.png)
+![Output Pictures 1: Single Coil Set Generator, Representative](https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/images/output_pictures_1_single_representative.png)
 
 *Output Pictures 1. `Coil_15_27_1_1_3_Single_SteppedDiagonal_Representative.svg`. Bottom is drawn wider than it is, so
 it stays visible where it lies under Top; the line under the legend says so.*
 
-![Output Pictures 2: Single Generator, Actual](https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/images/output_pictures_2_single_actual.png)
+![Output Pictures 2: Single Coil Set Generator, Actual](https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/images/output_pictures_2_single_actual.png)
 
 *Output Pictures 2. `Coil_15_27_1_1_3_Single_SteppedDiagonal_Actual.svg` of the same board, shown on white (the file
 has no background). The copper is at its true width, and the vias are rings with their drill holes.*
 
-![Output Pictures 3: Single Generator, the same area in both pictures](https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/images/output_pictures_3_single_closeup.png)
+![Output Pictures 3: Single Coil Set Generator, the same area in both pictures](https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/images/output_pictures_3_single_closeup.png)
 
 *Output Pictures 3. The same 10 × 10 mm at the upper left of the stator, cut from both files. Representative: the
 Bottom traces wider than they are, the vias as dots, the board filled. Actual: every trace at its width, every via a
 copper ring.*
 
-## 28.3 Dual Generator
+## 28.3 Dual Coil Set Generator
 
-The pictures of the default Dual Generator board (`DualCoil_7.25_26.875_1x16_4x4`: 1 and 16 loops, TX 4 + 4 turns per
-layer, board radius 7.25 to 26.875 mm), as the generator writes them.
+The pictures of the default Dual Coil Set Generator board (`DualCoil_7.25_26.875_1x16_4x4`: 1 and 16 loops, TX 4 + 4
+turns per layer, board radius 7.25 to 26.875 mm), as the generator writes them.
 
-![Output Pictures 4: Dual Generator, Representative](https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/images/output_pictures_4_dual_representative.png)
+![Output Pictures 4: Dual Coil Set Generator, Representative](https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/images/output_pictures_4_dual_representative.png)
 
 *Output Pictures 4. `DualCoil_7.25_26.875_1x16_4x4_Representative.svg`. The TX turns on Inner 2 lie exactly under those
 on Top, so Inner 2 is drawn wider and shows as a yellow edge along each Top turn of both TX rings.*
 
-![Output Pictures 5: Dual Generator, Actual](https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/images/output_pictures_5_dual_actual.png)
+![Output Pictures 5: Dual Coil Set Generator, Actual](https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/images/output_pictures_5_dual_actual.png)
 
 *Output Pictures 5. `DualCoil_7.25_26.875_1x16_4x4_Actual.svg` of the same board, shown on white. At its true width,
 Inner 2 is hidden under Top and shows only where the TX ends leave the rings.*
 
-![Output Pictures 6: Dual Generator, the same area in both pictures](https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/images/output_pictures_6_dual_closeup.png)
+![Output Pictures 6: Dual Coil Set Generator, the same area in both pictures](https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/images/output_pictures_6_dual_closeup.png)
 
 *Output Pictures 6. The same 10 × 10 mm at the outer TX terminal (0°, the right of the stator), cut from both files.
 Representative: Inner 2 along every Top TX turn, the vias as dots. Actual: Inner 2 only where it leaves Top, the vias as
@@ -77,9 +77,9 @@ rings.*
 
 - At the end of every Single and Dual run that writes both boards, after `Parameters.txt` and the silkscreen
   suggestion. A run with `--stator` or `--rotor` writes one board and makes no pictures.
-- A picture that cannot be made (a maker missing from `resources/`, or an error while drawing) is printed as a yellow
-  warning, `WARNING picture not made by <file>: <reason>; the boards are not affected`, and counted in the run's
-  warnings. The boards and `Parameters.txt` are already written, and the run still ends with `SUCCESS`, in either
+- A picture that cannot be made (a maker missing from `Generators/resources/`, or an error while drawing) is printed as
+  a yellow warning, `WARNING picture not made by <file>: <reason>; the boards are not affected`, and counted in the
+  run's warnings. The boards and `Parameters.txt` are already written, and the run still ends with `SUCCESS`, in either
   `GENERATOR_MODE`. See [Checks, Errors And Warnings](Checks-Errors-And-Warnings.md).
 - The [Web Tool](Web-Tool.md) does not make them: its zip holds the boards, `Parameters.txt` and the parameter files.
   Unzip it and run the makers on the run's folder to get them.
@@ -90,13 +90,13 @@ Both makers run on any folder that holds `Stator.kicad_pcb` and `Rotor.kicad_pcb
 first. From the repository folder:
 
 ```bash
-python resources/RepresentativeSVGMaker.py "Single Generator/Output/<folder>"
-python resources/RepresentativeSVGMaker.py "Single Generator/Output/<folder>" --air-gap 1     # Air gap in the title
-python resources/RepresentativeSVGMaker.py "Single Generator/Output/<folder>" --title "My title" --out picture.svg
-python resources/RepresentativeSVGMaker.py Stator.kicad_pcb Rotor.kicad_pcb
+python Generators/resources/RepresentativeSVGMaker.py "Generators/Single Coil Set Generator/Output/<folder>"
+python Generators/resources/RepresentativeSVGMaker.py "Generators/Single Coil Set Generator/Output/<folder>" --air-gap 1     # Air gap in the title
+python Generators/resources/RepresentativeSVGMaker.py "Generators/Single Coil Set Generator/Output/<folder>" --title "My title" --out picture.svg
+python Generators/resources/RepresentativeSVGMaker.py Stator.kicad_pcb Rotor.kicad_pcb
 
-python resources/ActualSVGMaker.py "Dual Generator/Output/<folder>"
-python resources/ActualSVGMaker.py "Dual Generator/Output/<folder>" --out board.svg
+python Generators/resources/ActualSVGMaker.py "Generators/Dual Coil Set Generator/Output/<folder>"
+python Generators/resources/ActualSVGMaker.py "Generators/Dual Coil Set Generator/Output/<folder>" --out board.svg
 ```
 
 Without `--out`, the picture is written into the folder of the stator file under the names above, replacing a

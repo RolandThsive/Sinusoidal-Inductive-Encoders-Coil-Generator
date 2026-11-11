@@ -12,8 +12,8 @@ body:
     attributes:
       label: Which generator?
       options:
-        - Single Generator
-        - Dual Generator
+        - Single Coil Set Generator
+        - Dual Coil Set Generator
     validations:
       required: true
   - type: textarea

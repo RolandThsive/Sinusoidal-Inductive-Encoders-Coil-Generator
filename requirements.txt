@@ -1,6 +1,14 @@
-# Runtime dependencies of both generators.  Install with:  python -m pip install -r requirements.txt
-# Python 3.11 to 3.15.  No single numpy release has wheels for all of them, so each Python gets its own fixed version:
-# numpy 2.4.6 is the last release for Python 3.11, numpy 2.5.4 covers 3.12 to 3.15.  The CI installs these pins on every
-# supported Python, on Linux, Windows and macOS, without building anything from source.
+# Everything this repository needs, in one file.  Install with:  python -m pip install -r requirements.txt
+# Python 3.11 to 3.15.  The CI installs this file on every supported Python, on Linux, Windows and macOS, without
+# building anything from source.
+
+# The generators need only numpy.  No single numpy release has wheels for every supported Python, so each Python gets
+# its own fixed version: numpy 2.4.6 is the last release for Python 3.11, numpy 2.5.4 covers 3.12 to 3.15.
 numpy==2.4.6; python_version < "3.12"
 numpy==2.5.4; python_version >= "3.12"
+
+# The tools of the checks the CI runs: lint, coverage and the security audit.  The generators and the regression
+# suites do not use them (the suites need only the standard library's unittest).
+ruff==0.17.4
+coverage==7.17.2
+pip-audit==2.10.1

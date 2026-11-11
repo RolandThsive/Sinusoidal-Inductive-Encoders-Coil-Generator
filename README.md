@@ -11,8 +11,8 @@ Set the parameters, get a stator and a rotor as KiCad boards, checked and with a
 [![Wiki](https://img.shields.io/badge/Wiki-Read_the_docs-333333?style=for-the-badge&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0xMiA2djE0Ii8%2BPHBhdGggZD0iTTEyIDZDMTAgNC41IDYuNSA0IDMgNC41djE0YzMuNS0uNSA3IDAgOSAxLjUiLz48cGF0aCBkPSJNMTIgNmMyLTEuNTAwIDUuNTAwLTIgOS0xLjUwMHYxNGMtMy41MDAtLjUwMC03IDAtOSAxLjUwMCIvPjwvc3ZnPgo%3D)](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki)
 [![Examples](https://img.shields.io/badge/Examples-Pictures-E95420?style=for-the-badge&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0yIDEyYzIuNTAwLTggNS41MDAtOCA4IDBzNS41MDAgOCA4IDAgMi41MDAtNCA0LTQiLz48L3N2Zz4K)](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Examples)
 
-[![Milestones](https://img.shields.io/badge/Milestones-Roadmap-8957E5?style=for-the-badge&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik01IDIxVjQiLz48cGF0aCBkPSJNNSA0aDEybC0yLjUwMCA0IDIuNTAwIDRINSIvPjwvc3ZnPgo%3D)](MILESTONES.md)
-[![Contributing](https://img.shields.io/badge/Contributing-Get_involved-2EA44F?style=for-the-badge&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxjaXJjbGUgY3g9IjEwIiBjeT0iOCIgcj0iNCIvPjxwYXRoIGQ9Ik0zIDIxYzAtNCAzLTcgNy03czcgMyA3IDciLz48cGF0aCBkPSJNMTkgNHY2Ii8%2BPHBhdGggZD0iTTE2IDdoNiIvPjwvc3ZnPgo%3D)](CONTRIBUTING.md)
+[![Milestones](https://img.shields.io/badge/Milestones-Roadmap-8957E5?style=for-the-badge&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik01IDIxVjQiLz48cGF0aCBkPSJNNSA0aDEybC0yLjUwMCA0IDIuNTAwIDRINSIvPjwvc3ZnPgo%3D)](docs/funding/MILESTONES.md)
+[![Contributing](https://img.shields.io/badge/Contributing-Get_involved-2EA44F?style=for-the-badge&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxjaXJjbGUgY3g9IjEwIiBjeT0iOCIgcj0iNCIvPjxwYXRoIGQ9Ik0zIDIxYzAtNCAzLTcgNy03czcgMyA3IDciLz48cGF0aCBkPSJNMTkgNHY2Ii8%2BPHBhdGggZD0iTTE2IDdoNiIvPjwvc3ZnPgo%3D)](docs/CONTRIBUTING.md)
 [![License](https://img.shields.io/badge/License-Open_for_research-F28C28?style=for-the-badge&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik02IDNoOWw0IDR2MTRINnoiLz48cGF0aCBkPSJNMTUgM3Y0aDQiLz48cGF0aCBkPSJNOSAxMmg3Ii8%2BPHBhdGggZD0iTTkgMTZoNyIvPjwvc3ZnPgo%3D)](LICENSE.md)
 
 ![Python](https://img.shields.io/badge/Python-3.11%20to%203.15-555555)
@@ -42,25 +42,25 @@ Inductive position sensors measure angle with nothing more than copper traces on
 | Start | [Getting Started](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Getting-Started), [Web Tool](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Web-Tool), [Examples](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Examples) |
 | Understand it | [Working Principle](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Working-Principle), [RX Profiles](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/RX-Profiles), [TX Profiles](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/TX-Profiles) |
 | Design a board | [Choosing A Rotor And Stator](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Choosing-A-Rotor-And-Stator), [Quick Guide To Parameters Selections](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Quick-Guide-To-Parameters-Selections), [Stator Features](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Stator-Features), [Rotor Features](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Rotor-Features), [Board Features](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Board-Features), [Silkscreen](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Silkscreen) |
-| Design a dual board | [Stator Features](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Stator-Features-Dual-Generator), [Rotor Features](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Rotor-Features-Dual-Generator), [Board Features](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Board-Features-Dual-Generator), [Silkscreen](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Silkscreen-Dual-Generator), [Quick Guide To Parameters Selections](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Quick-Guide-To-Parameters-Selections-Dual-Generator) |
-| Look something up | [Parameter Reference Single Generator](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Parameter-Reference-Single-Generator), [Parameter Reference Dual Generator](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Parameter-Reference-Dual-Generator), [Checks, Errors And Warnings](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Checks-Errors-And-Warnings), [Electrical Estimate](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Electrical-Estimate), [KiCad Compatibility](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/KiCad-Compatibility), [Regression Testing](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Regression-Testing), [Glossary](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Glossary) |
-| See what is next | [Immediate Next Steps](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Immediate-Next-Steps), [Future Upgrades And Planning](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Future-Upgrades-And-Planning), [Suggestive Analysis And Optimization](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Suggestive-Analysis-And-Optimization), [MILESTONES.md](MILESTONES.md) |
+| Design a dual board | [Stator Features](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Stator-Features-Dual-Coil-Set-Generator), [Rotor Features](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Rotor-Features-Dual-Coil-Set-Generator), [Board Features](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Board-Features-Dual-Coil-Set-Generator), [Silkscreen](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Silkscreen-Dual-Coil-Set-Generator), [Quick Guide To Parameters Selections](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Quick-Guide-To-Parameters-Selections-Dual-Coil-Set-Generator) |
+| Look something up | [Parameter Reference Single Coil Set Generator](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Parameter-Reference-Single-Coil-Set-Generator), [Parameter Reference Dual Coil Set Generator](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Parameter-Reference-Dual-Coil-Set-Generator), [Checks, Errors And Warnings](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Checks-Errors-And-Warnings), [Electrical Estimate](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Electrical-Estimate), [KiCad Compatibility](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/KiCad-Compatibility), [Regression Testing](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Regression-Testing), [Glossary](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Glossary) |
+| See what is next | [Immediate Next Steps](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Immediate-Next-Steps), [Future Upgrades And Planning](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Future-Upgrades-And-Planning), [Suggestive Analysis And Optimization](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Suggestive-Analysis-And-Optimization), [MILESTONES.md](docs/funding/MILESTONES.md) |
 
 ## Quick Start
 
 ```bash
 python -m pip install -r requirements.txt
 
-cd "Single Generator"
+cd "Generators/Single Coil Set Generator"
 python Generator/Run/RunCoilGenerator.py              # Check, then write Stator + Rotor
 python Generator/Run/RunCoilGenerator.py --check      # Check only, write nothing
 python Generator/Run/RunCoilGenerator.py --stator     # Only the stator
 python Generator/Run/RunCoilGenerator.py --rotor      # Only the rotor
 ```
 
-Edit only the files in `Single Generator/Parameters/`. Each run writes a new folder in `Single Generator/Output/`
-with `Stator.kicad_pcb`, `Rotor.kicad_pcb` (each with a KiCad project file that holds its design rules),
-`Parameters.txt` and two SVG pictures of the boards
+Edit only the files in `Generators/Single Coil Set Generator/Parameters/`. Each run writes a new folder in
+`Generators/Single Coil Set Generator/Output/` with `Stator.kicad_pcb`, `Rotor.kicad_pcb` (each with a KiCad project
+file that holds its design rules), `Parameters.txt` and two SVG pictures of the boards
 ([Representative and Actual](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Output-Pictures)),
 and never overwrites an earlier one. Prefer a
 browser? Use the [Web Tool](https://ro-h-bots.blogspot.com/p/inductive-encoder-sinusoidal-coil.html). Full
@@ -74,7 +74,8 @@ walk-through: [Getting Started](https://github.com/RolandThsive/Inductive-Encode
 - **Board:** 2 or 4 copper layers; through vias, or blind vias on 4-layer boards.
 - **Checks and estimate:** geometry and parameter checks that name the conflict (`normal` or `strict` mode), TX
   inductance, resistance, tank capacitors and oscillator frequency against your receiver IC's limits.
-- **Dual Generator:** two coil sets on one stator with a two-ring rotor disc (`Dual Generator/`).
+- **Dual Coil Set Generator:** two coil sets on one stator with a two-ring rotor disc
+  (`Generators/Dual Coil Set Generator/`).
 - **Regression tests:** both generators are tested on every pull request.
 - **Analyser and optimizer:** under construction on the
   [`analyser_and_optimizer` branch](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/tree/analyser_and_optimizer).
@@ -85,9 +86,9 @@ Every parameter and every board size is in the wiki:
 [Rotor](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Rotor-Features) and
 [Board](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/wiki/Board-Features) features.
 
-![Dual Generator: the stator with its rotor on top, outer set 1 to 16 loops, inner set 1 loop](docs/images/readmeWhatWorks.png)
+![Dual Coil Set Generator: the stator with its rotor on top, outer set 1 to 16 loops, inner set 1 loop](docs/images/readmeWhatWorks.png)
 
-*The Dual Generator: one stator with two coil sets and its rotor on top. The outer set has 1, 2, 4, 8 and 16 loops, the inner set 1 loop.*
+*The Dual Coil Set Generator: one stator with two coil sets and its rotor on top. The outer set has 1, 2, 4, 8 and 16 loops, the inner set 1 loop.*
 
 ## Status And Next Steps
 
@@ -100,19 +101,20 @@ Every parameter and every board size is in the wiki:
 ## Contributing
 
 Help with boards, equipment, measurements, code and documentation is welcome. Read
-[CONTRIBUTING.md](CONTRIBUTING.md) to see how to get involved.
+[CONTRIBUTING.md](docs/CONTRIBUTING.md) to see how to get involved.
 
 ## Licensing
 
 This repository is **open for research use** and free for non-commercial use: researchers, students, hobbyists and
-curious engineers are welcome. Three licenses apply: [PolyForm Noncommercial 1.0.0](PolyForm-Noncommercial-1.0.0)
-for the source code, [CC BY-NC-SA 4.0](CC-BY-NC-SA-4.0) for the pictures and documentation, and
-[PolyForm Strict 1.0.0](PolyForm-Strict-1.0.0) for the Web UI. [LICENSE.md](LICENSE.md) says which one applies where
-and what each allows.
+curious engineers are welcome. Three licenses apply:
+[PolyForm Noncommercial 1.0.0](docs/licenses/PolyForm-Noncommercial-1.0.0) for the source code,
+[CC BY-NC-SA 4.0](docs/licenses/CC-BY-NC-SA-4.0) for the pictures and documentation, and
+[PolyForm Strict 1.0.0](docs/licenses/PolyForm-Strict-1.0.0) for the Web UI. [LICENSE.md](LICENSE.md) says which one
+applies where and what each allows.
 
 **Commercial use requires written permission.** Companies and startups are welcome: you pay 0.2% of the net sale
-price of every unit sold and every paid service, reported in the public [LEDGER.md](LEDGER.md). The full terms are in
-[LICENSE.md](LICENSE.md#commercial-use). Approved organisations will be listed here.
+price of every unit sold and every paid service, reported in the public [LEDGER.md](docs/funding/LEDGER.md). The full
+terms are in [LICENSE.md](LICENSE.md#commercial-use). Approved organisations will be listed here.
 
 **Thanks to our approved commercial users:** *None yet.*
 
@@ -128,9 +130,9 @@ price of every unit sold and every paid service, reported in the public [LEDGER.
 > **100% ON RECORD. 100% INVESTED BACK. 100% DISCLOSED.**
 
 Any money accepted from commercial users goes back into this project in full, and all of it is on record. Nothing is
-taken out as profit. Every payment, expense and donation is in the public [LEDGER.md](LEDGER.md), with proof. The fee
-stops when every milestone in [MILESTONES.md](MILESTONES.md) is done, and the license then becomes the same as the GPL,
-truly open source.
+taken out as profit. Every payment, expense and donation is in the public [LEDGER.md](docs/funding/LEDGER.md), with
+proof. The fee stops when every milestone in [MILESTONES.md](docs/funding/MILESTONES.md) is done, and the license then
+becomes the same as the GPL, truly open source.
 
 <details>
 <summary>The full pledge</summary>
@@ -143,7 +145,7 @@ profit.
 - **Leftovers are donated.** Whatever is left over goes to a fund that supports innovation worldwide, chosen
   together by me and the paying company.
 - **100% on record.** Every payment, every expense and every donation is written in the public
-  [LEDGER.md](LEDGER.md) of this repository, with proof.
+  [LEDGER.md](docs/funding/LEDGER.md) of this repository, with proof.
 - **Completely disclosed.** Everyone who can see this repository can see the ledger. Nothing is hidden.
 - **Non-profit, exclusively.** Every fee, investment and contribution is used only for the equipment and services
   used to build this project, and for nothing else. No profit means no profit.

@@ -17,8 +17,8 @@ design rules (Stator.kicad_pro / Rotor.kicad_pro, which the generators write; a 
     checks each board against the rules in its project file, so what it reports breaks the board's own rules.
 
 The board's name in the baseline is its path below the folder it was found in, e.g.
-"Single Generator/Board001-default/Stator.kicad_pcb".  Needs only the standard library (Python 3.9 or newer) and
-kicad-cli.
+"Single Coil Set Generator/Board001-default/Stator.kicad_pcb".  Needs only the standard library (Python 3.9 or newer)
+and kicad-cli.
 """
 
 import argparse
@@ -103,8 +103,8 @@ def main(argv=None):
     ap.add_argument("--kicad", required=True, help='the KiCad version of the image, e.g. "8.0"')
     ap.add_argument("--update", action="store_true", help="write this version's baseline from this run")
     ap.add_argument("--baseline", default=BASELINE)
-    ap.add_argument("folders", nargs="+", help='LABEL=FOLDER, e.g. "Single Generator=regression/'
-                                               'SingleGenerator_regression"')
+    ap.add_argument("folders", nargs="+", help='LABEL=FOLDER, e.g. "Single Coil Set Generator=regression/'
+                                               'SingleCoilSetGenerator_regression"')
     args = ap.parse_args(argv)
     roots = [tuple(f.split("=", 1)) if "=" in f else (os.path.basename(os.path.normpath(f)), f) for f in args.folders]
     for _label, root in roots:

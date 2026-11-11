@@ -1,7 +1,7 @@
 """
 dual_layout_pictures.py  -  the pictures and the combination sections of the wiki page Dual Layout, drawn from the
-reference boards of the regression suite (regression/DualGenerator_regression).  For each of the 32 combinations of
-what the dual layout is given, the picture is a cut along one radius of the reference board for that combination:
+reference boards of the regression suite (regression/DualCoilSetGenerator_regression).  For each of the 32 combinations
+of what the dual layout is given, the picture is a cut along one radius of the reference board for that combination:
 the copper is what the cut meets in the board's Stator.kicad_pcb, the radii and what was given come from its
 record (Parameters.txt).  So every picture shows a board the generator really builds, and the regression tests,
 which hold those boards byte for byte, keep it current.
@@ -12,7 +12,7 @@ which hold those boards byte for byte, keep it current.
                                                          the boards give (CI runs this check)
 
 The reference board of combination n is the board folder named BoardNNN-layout-<n>-..., or Board001-default for
-combination 1.  The boards are read by resources/KiCadReader.py.  Standard library only.
+combination 1.  The boards are read by Generators/resources/KiCadReader.py.  Standard library only.
 """
 
 import argparse
@@ -25,14 +25,14 @@ import sys
 sys.dont_write_bytecode = True
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
-                                "resources"))                                       # KiCadReader.py
+                                "Generators", "resources"))                         # KiCadReader.py
 
 import KiCadReader                                                                  # noqa: E402
 import svgfig as F                                                                  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(os.path.dirname(HERE))
-BOARDS = os.path.join(REPO, "regression", "DualGenerator_regression")
+BOARDS = os.path.join(REPO, "regression", "DualCoilSetGenerator_regression")
 IMAGES = os.path.join(REPO, "docs", "images", "dual_layout")
 PAGE = os.path.join(REPO, "docs", "wiki", "Dual-Layout.md")
 RAW = ("https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/images/"
@@ -103,10 +103,10 @@ def explanation(n):
         missing, have = ("OUTER_EDGE_RADIUS_MM", "the bore") if g["bore"] else ("INNER_EDGE_RADIUS_MM", "the outline")
         return (f"Refused: no RX band and only {have}, so the room for the two bands has no other end. Give "
                 f"{missing} too, and the bands are fitted between the edges, or give one RX band.")
-    bore = ("The bore is used as given; the Single Generator checks that it leaves INNER_EDGE_INSET_MM inside the RX1 "
-            "band." if g["bore"] else "The bore is the RX1 band start less INNER_EDGE_INSET_MM.")
-    outline = ("The outline is used as given; the Single Generator checks that it leaves room for the TX2 ring, its "
-               "tail or fingers, and the margins." if g["outline"] else
+    bore = ("The bore is used as given; the Single Coil Set Generator checks that it leaves INNER_EDGE_INSET_MM inside "
+            "the RX1 band." if g["bore"] else "The bore is the RX1 band start less INNER_EDGE_INSET_MM.")
+    outline = ("The outline is used as given; the Single Coil Set Generator checks that it leaves room for the TX2 "
+               "ring, its tail or fingers, and the margins." if g["outline"] else
                "The outline is the RX2 band end plus the room the TX2 ring, its tail or fingers, and the margins need.")
     if g["band1"] and g["band2"]:
         return (f"Both bands are used as given. {bore} {outline} The gap between set 1's outermost copper and set 2's "
@@ -183,8 +183,8 @@ def read_record(path):
 
 
 def read_stator(path):
-    """The copper of a stator file the generator wrote, read by resources/KiCadReader.py: layers (top to bottom),
-    nets, segments, vias, centre."""
+    """The copper of a stator file the generator wrote, read by Generators/resources/KiCadReader.py: layers (top to
+    bottom), nets, segments, vias, centre."""
     board = KiCadReader.read(path)
     edges = [c for c in board.circles if c.layer == "Edge.Cuts"]
     if not edges:
@@ -423,8 +423,8 @@ def board_picture(n, name, rec, stator):
     if g["gap"]:
         given_words.append(f"TRACK_GAP_MM ({f2(rec['gap_required'])} mm)")
     fig.title(f"Combination {n}: {title_of(n)}",
-              f"Drawn from the reference board {name} (regression/DualGenerator_regression), cut along the radius at "
-              f"{deg} deg: the copper is what that cut meets in its Stator.kicad_pcb. Given: "
+              f"Drawn from the reference board {name} (regression/DualCoilSetGenerator_regression), cut along the "
+              f"radius at {deg} deg: the copper is what that cut meets in its Stator.kicad_pcb. Given: "
               + (", ".join(given_words) if given_words else "nothing") + ". Across the board true scale; through the "
               "board not to scale, the copper drawn thicker.")
     top = fig.y
@@ -552,7 +552,7 @@ def refused_picture(n):
 
 # ------------------------------------------------------------------------------------------------- the page
 def reference_boards():
-    """{combination: board folder name} of the reference boards in regression/DualGenerator_regression."""
+    """{combination: board folder name} of the reference boards in regression/DualCoilSetGenerator_regression."""
     out = {}
     for name in sorted(os.listdir(BOARDS)):
         m = re.match(r"Board\d{3}-layout-(\d+)-", name)

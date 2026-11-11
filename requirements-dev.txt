@@ -1,7 +1,0 @@
-# Tools of the checks the CI runs (lint, coverage, security audit), on top of the runtime dependencies.
-# Install with:  python -m pip install -r requirements-dev.txt
-# The regression suites themselves need nothing beyond requirements.txt: they use the standard library's unittest.
--r requirements.txt
-ruff==0.17.4
-coverage==7.17.2
-pip-audit==2.10.1

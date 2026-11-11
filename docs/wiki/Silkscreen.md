@@ -19,21 +19,21 @@ routed.
 | TX coil | A filled dot at each of the two via sites beside the stacked end, and a dashed line from the end to each site. Extend each end along its dashed line to its dot | `TX_1 TOP`, `TX_2 BOT`: each end with its layer |
 | Option | A dot on every via the generator placed (`SILKSCREEN_DOT_ON_ALL_VIAS = True`) | |
 
-The names are drawn with the repository's own stroke font (`resources/SilkscreenFont.py`: capitals, digits and a few
-signs), not as KiCad text, and each name is placed where it covers no other mark, name or via. The text on `B.SilkS` is
-mirrored, so it reads correctly from the bottom.
+The names are drawn with the repository's own stroke font (`Generators/resources/SilkscreenFont.py`: capitals, digits
+and a few signs), not as KiCad text, and each name is placed where it covers no other mark, name or via. The text on
+`B.SilkS` is mirrored, so it reads correctly from the bottom.
 
-![Silkscreen 1: Lead-Cutting Suggestion On A Single Generator Board](https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/images/silkscreen_single_zoom.png)
+![Silkscreen 1: Lead-Cutting Suggestion On A Single Coil Set Generator Board](https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/images/silkscreen_single_zoom.png)
 
-*Silkscreen 1. The suggestion as written into `Stator.kicad_pcb` on a Single Generator board (RX on Top and Bottom, TX
-on Bottom, its tail end on Top). Top row: the top view with `F.SilkS`, the whole board and the area at the TX terminal enlarged. Bottom row:
+*Silkscreen 1. The suggestion as written into `Stator.kicad_pcb` on a Single Coil Set Generator board (RX on Top and
+Bottom, TX on Bottom, its tail end on Top). Top row: the top view with `F.SilkS`, the whole board and the area at the TX terminal enlarged. Bottom row:
 the bottom view, mirrored, with `B.SilkS` and the copper seen through. RX: cut the trace between the two dots, one via
 per dot. TX: extend each end along the dashed line to its dot.*
 
 ## 14.2 Where The Breaks Go
 
-The step reads the written board (with `resources/KiCadReader.py`) and looks for a spot on each coil where both
-vias have room on every layer:
+The step reads the written board (with `Generators/resources/KiCadReader.py`) and looks for a spot on each coil where
+both vias have room on every layer:
 
 - The break is looked for on the coil's traces within `SILKSCREEN_SEARCH_SPAN_DEG` (30°) of the TX terminal, which the
   generator turns to 0° (the right), so all leads come together at one place.
@@ -57,8 +57,8 @@ TX (TX): both ends at (126.3, 100) (r = 26.30 mm, 0.0 deg), Top and Bottom; exte
 
 ## 14.3 Settings
 
-The settings are in `Single Generator/Parameters/SilkScreenSuggestion_Parameters.py`; each one is described in the
-[Parameter Reference Single Generator](Parameter-Reference-Single-Generator.md#226-silkscreen-suggestion-silkscreensuggestion_parameterspy).
+The settings are in `Generators/Single Coil Set Generator/Parameters/SilkScreenSuggestion_Parameters.py`; each one is
+described in the [Parameter Reference Single Coil Set Generator](Parameter-Reference-Single-Coil-Set-Generator.md#226-silkscreen-suggestion-silkscreensuggestion_parameterspy).
 The step never stops a generation: a wrong value falls back to its default with a warning, and anything the step cannot
 do (no spot with room, no free place for a name, a missing font) is printed as a warning while the boards are written
 as usual.
@@ -76,7 +76,8 @@ raise `SILKSCREEN_TEXT_SIZE_MM` and `SILKSCREEN_TEXT_STROKE_MM` if the marks are
 
 ## 14.4 Related Pages
 
-- [Silkscreen - Dual Generator](Silkscreen-Dual-Generator.md): the same suggestion for both coil sets of a dual board.
+- [Silkscreen - Dual Coil Set Generator](Silkscreen-Dual-Coil-Set-Generator.md): the same suggestion for both coil sets
+  of a dual board.
 - [Board Features](Board-Features.md): what else the generator writes into the board.
 
 [<img align="right" src="https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/logo/Logo_1_V2.png" alt="Sinusoidal Coil Generator logo, click to see it spin" width="72">](https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/logo/Logo_1_V2_rotor_spin_400px.webp)
