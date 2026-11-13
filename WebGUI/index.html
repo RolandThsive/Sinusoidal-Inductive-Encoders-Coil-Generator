@@ -3,23 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!--CSP-->
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Sinusoidal Inductive Encoder Coil Generator</title>
-<meta name="description" content="Configure, preview and download KiCad stator and rotor boards for rotary inductive encoders.">
-<script>
-  // Computers only: decide before anything heavy loads, so phones never download Python.  A phone or tablet is a
-  // device with no mouse or trackpad; the window width does not decide it, since a computer window can be narrow too.
-  (function () {
-    var touchOnly = window.matchMedia("(pointer: coarse)").matches && !window.matchMedia("(any-pointer: fine)").matches;
-    window.COILGEN_PHONE = touchOnly;
-    if (window.COILGEN_PHONE) document.documentElement.className += " phone";
-    if (window.self !== window.top) document.documentElement.className += " embedded";
-  })();
-</script>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Ccircle cx=%2216%22 cy=%2216%22 r=%2213%22 fill=%22none%22 stroke=%22%23a93e33%22 stroke-width=%224%22/%3E%3Ccircle cx=%2216%22 cy=%2216%22 r=%225%22 fill=%22none%22 stroke=%22%232F6FD0%22 stroke-width=%223%22/%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Permanent+Marker&family=Shadows+Into+Light&display=swap" rel="stylesheet">
+<meta name="description" content="Configure, preview and download KiCad stator and rotor boards for rotary inductive encoders, with one or two coil sets.">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="fonts/fonts.css">
 <link rel="stylesheet" href="WebGUI.css">
+<script src="boot.js"></script>
 </head>
 <body>
 
@@ -34,121 +25,164 @@
 <div id="app" class="desktop-only">
   <header id="topbar">
     <h1 class="marker">Sinusoidal Inductive Encoder Coil Generator</h1>
-    <div class="segmented" id="mode-switch" role="tablist" aria-label="Mode">
-      <button role="tab" data-mode="basic" class="on" data-tip="The main settings: board size, loops, sub-coils, TX turns, board layers, TX layout and air gap">Basic</button>
-      <button role="tab" data-mode="advanced" data-tip="Every parameter the web tool shows, grouped as in the parameter files">Advanced</button>
+    <div class="segmented gen-switch" id="gen-switch" role="radiogroup" aria-label="Generator">
+      <button type="button" role="radio" aria-checked="true" data-gen="single" class="on" data-tip-id="gen-single">Single</button>
+      <button type="button" role="radio" aria-checked="false" data-gen="dual" data-tip-id="gen-dual">Dual</button>
+    </div>
+    <div class="segmented" id="mode-switch" role="radiogroup" aria-label="Settings shown">
+      <button type="button" role="radio" aria-checked="true" data-mode="basic" class="on" data-tip-id="mode-basic">Basic</button>
+      <button type="button" role="radio" aria-checked="false" data-mode="advanced" data-tip-id="mode-advanced">Advanced</button>
     </div>
     <div class="top-actions">
-      <a class="glass-btn small" id="btn-help" href="https://github.com/RolandThsive/Sinusoidal-Inductive-Encoders-Coil-Generator/wiki/Quick-Guide-To-Parameters-Selections" target="_blank" rel="noopener" data-tip="Opens the Quick Guide To Parameters Selections on the project wiki: what each setting does and how to choose it">Help / Tutorial</a>
-      <button class="glass-btn small" id="btn-import" data-tip="Load a design: a Parameters.txt from any run (web or desktop) or your own .py parameter files. Every control takes those values.">Import Parameters</button>
-      <button class="glass-btn small" id="btn-export" data-tip="Download the parameter files (Board, RX, TX, Rotor, IC) with these values, ready for RunCoilGenerator.py on a desktop">Export Parameters</button>
-      <button class="glass-btn small" id="btn-share" data-tip="Copy a link that opens the tool with this design. Only the changed values go in the link; nothing is uploaded.">Share Link</button>
-      <input type="file" id="import-file" accept=".txt,.py" multiple hidden>
+      <a class="glass-btn small" id="btn-help" href="https://github.com/RolandThsive/Sinusoidal-Inductive-Encoders-Coil-Generator/wiki/Quick-Guide-To-Parameters-Selections" target="_blank" rel="noopener" data-tip-id="btn-help">Help</a>
+      <button type="button" class="glass-btn small" id="btn-import" data-tip-id="btn-import">Import</button>
+      <button type="button" class="glass-btn small" id="btn-export" data-tip-id="btn-export">Export</button>
+      <button type="button" class="glass-btn small" id="btn-share" data-tip-id="btn-share">Share</button>
+      <input type="file" id="import-file" accept=".txt,.py,.zip" multiple hidden>
     </div>
-    <nav class="standalone-nav">
-      <a class="round-btn" id="nav-back" href="#" data-tip="Back to the previous page" aria-label="Back">
-        <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" /></svg></a>
-      <a class="round-btn" id="nav-home" href="https://ro-h-bots.blogspot.com/" target="_top" data-tip="The blog's home page" aria-label="Home">
-        <svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7M6 9.5V20h4.5v-6h3v6H18V9.5" /></svg></a>
+    <nav class="standalone-nav" aria-label="Site">
+      <a class="round-btn" id="nav-back" href="https://ro-h-bots.blogspot.com/" data-tip-id="nav-back" aria-label="Back">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg></a>
+      <a class="round-btn" id="nav-home" href="https://ro-h-bots.blogspot.com/" target="_top" data-tip-id="nav-home" aria-label="Home">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7M6 9.5V20h4.5v-6h3v6H18V9.5" /></svg></a>
     </nav>
   </header>
 
   <main id="workspace">
     <!-- Controls -->
-    <aside id="controls" class="panel">
-      <div id="basic-panel">
-        <h2 class="pacifico">Controls</h2>
-        <div class="segmented wide" id="basic-tabs" role="tablist"></div>
-        <div id="basic-controls"></div>
+    <aside id="controls" class="panel" aria-label="Settings">
+      <div id="basic-panel" tabindex="-1">
+        <h2 class="pacifico" id="basic-title">Controls</h2>
+        <div class="segmented wide" id="basic-tabs" role="tablist" aria-label="Category"></div>
+        <div class="segmented wide set-switch" id="basic-set" role="radiogroup" aria-label="Coil set" hidden></div>
+        <div id="basic-controls" role="tabpanel"></div>
+        <p id="basic-adv-note" class="hint"></p>
       </div>
-      <div id="advanced-panel" hidden>
-        <h2 class="pacifico">All Parameters</h2>
-        <div class="segmented wide" id="adv-tabs" role="tablist"></div>
-        <div id="adv-note" class="hint"></div>
-        <div id="advanced-controls"></div>
+      <div id="advanced-panel" tabindex="-1" hidden>
+        <h2 class="pacifico" id="adv-title">All Parameters</h2>
+        <div class="find-row">
+          <input type="search" id="find" class="text-input" placeholder="Find a setting" aria-label="Find a setting" autocomplete="off" spellcheck="false" data-tip-id="find">
+          <span id="find-count" class="find-count" role="status"></span>
+        </div>
+        <div class="segmented wide" id="adv-tabs" role="tablist" aria-label="Parameter file"></div>
+        <div class="segmented wide set-switch" id="adv-set" role="radiogroup" aria-label="Coil set" hidden></div>
+        <div id="advanced-controls" role="tabpanel"></div>
       </div>
       <div id="results" class="results"></div>
       <div class="generate-row">
-        <button id="btn-reset" class="reset-btn" data-tip="Go back to the default design: 2 layers, board 30 to 50 mm, 4 loops, 3 TX turns in series on Top and Bottom">Reset</button>
-        <label class="switch-row" data-tip="Generator Mode. Off (normal): a warning about the finished boards (a clearance, the board edge, the page, the rotor) is printed and the boards are written. On (strict): every such warning is an error and nothing is written. Warnings from the parameter check never stop the run. Copper that overlaps another net is always an error.">
+        <label class="switch-row" data-tip-id="strict">
           <span>Strict</span>
-          <span class="switch"><input type="checkbox" id="strict"><span class="knob"></span></span>
+          <span class="switch"><input type="checkbox" id="strict" role="switch"><span class="knob"></span></span>
         </label>
-        <button id="btn-generate" class="primary-btn" disabled data-tip="Run the checks and the generator with these settings (Ctrl+Enter)">Loading Python…</button>
+        <button type="button" id="btn-reset" class="reset-btn" data-tip-id="btn-reset">Reset</button>
+        <button type="button" id="btn-check" class="glass-btn" disabled data-tip-id="btn-check">Check Only</button>
+        <button type="button" id="btn-generate" class="primary-btn" disabled data-tip-id="btn-generate">Loading Python…</button>
       </div>
-      <div id="progress"><div class="bar"></div></div>
+      <div id="progress" role="progressbar" aria-label="Run progress" aria-valuemin="0" aria-valuemax="6" aria-valuenow="0"><div class="bar"></div></div>
     </aside>
 
     <!-- Preview -->
-    <section id="preview" class="panel">
+    <section id="preview" class="panel" aria-label="Preview">
       <div class="preview-head">
-        <div class="segmented" id="view-tabs">
-          <button data-view="stator" data-tip="The generated Stator.kicad_pcb: RX and TX copper, vias and board edge">Stator</button>
-          <button data-view="rotor" data-tip="The generated Rotor.kicad_pcb: the copper target">Rotor</button>
-          <button data-view="overlay" class="on" data-tip="The rotor drawn over the stator; turn it with the Rotor Angle slider">Overlay</button>
+        <div class="segmented" id="view-tabs" role="radiogroup" aria-label="Preview shows">
+          <button type="button" role="radio" aria-checked="false" data-view="stator" data-tip-id="view-stator">Stator</button>
+          <button type="button" role="radio" aria-checked="false" data-view="rotor" data-tip-id="view-rotor">Rotor</button>
+          <button type="button" role="radio" aria-checked="true" data-view="overlay" class="on" data-tip-id="view-overlay">Overlay</button>
+          <button type="button" role="radio" aria-checked="false" data-view="pictures" data-tip-id="view-pictures">Pictures</button>
         </div>
         <div class="layer-toggles" id="layer-toggles"></div>
       </div>
+      <div class="layout-strip" id="layout-strip" hidden></div>
       <div class="canvas-wrap" id="canvas-wrap">
-        <canvas id="board-canvas"></canvas>
-        <div class="canvas-tools">                <!-- Fullscreen, Fit and Origin side by side; Measure under them -->
+        <canvas id="board-canvas" role="img" tabindex="0" aria-label="The generated boards. Arrow keys move the board, plus and minus zoom, 0 fits it."></canvas>
+        <div class="pictures" id="pictures" hidden></div>
+        <div class="canvas-tools" id="canvas-tools">
           <span class="tool-pair">
-            <button class="fs-btn icon-btn" id="btn-fullscreen" aria-label="Fullscreen" data-tip="Show the preview full screen (Esc to leave)"><svg viewBox="0 0 24 24"><path d="M3 8V3h5M16 3h5v5M21 16v5h-5M8 21H3v-5"/></svg></button>
-            <button class="glass-btn small icon-btn" id="btn-fit" aria-label="Fit" data-tip="Fit the board to viewport"><svg viewBox="0 0 24 24"><path d="M8 8h8v8H8zM3 3l4 4M7 4v3H4M21 3l-4 4M17 4v3h3M3 21l4-4M4 17h3v3M21 21l-4-4M20 17h-3v3"/></svg></button>
+            <button type="button" class="fs-btn icon-btn" id="btn-fullscreen" aria-label="Fullscreen" data-tip-id="btn-fullscreen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8V3h5M16 3h5v5M21 16v5h-5M8 21H3v-5"/></svg></button>
+            <button type="button" class="glass-btn small icon-btn" id="btn-fit" aria-label="Fit" data-tip-id="btn-fit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h8v8H8zM3 3l4 4M7 4v3H4M21 3l-4 4M17 4v3h3M3 21l4-4M4 17h3v3M21 21l-4-4M20 17h-3v3"/></svg></button>
             <span id="origin-slot"></span>
           </span>
-          <button class="glass-btn small" id="btn-measure" aria-label="Measure" data-tip="Measure: click two points on the board to get the distance between them. Press S to keep the line and draw another (up to 256), Z to remove the last line or point"><svg class="ruler" viewBox="0 0 108 24"><path d="M2 5v12M106 5v12M3 11H105M3 11l4-3M3 11l4 3M105 11l-4-3M105 11l-4 3"/><path d="M14 11.5v4.5M20.67 11.5v3.5M27.33 11.5v3.5M34 11.5v3.5M40.67 11.5v4.5M47.33 11.5v3.5M54 11.5v3.5M60.67 11.5v3.5M67.33 11.5v4.5M74 11.5v3.5M80.67 11.5v3.5M87.33 11.5v3.5M94 11.5v4.5" stroke-width="1"/><g class="nums"><text x="14" y="23.4">0</text><text x="40.67" y="23.4">1</text><text x="67.33" y="23.4">2</text><text x="94" y="23.4">3</text></g><path class="span" d="M14 2.5H67.33"/><circle class="dot" cx="14" cy="2.5" r="1.6"/><circle class="dot" cx="67.33" cy="2.5" r="1.6"/></svg></button>
+          <button type="button" class="glass-btn small" id="btn-measure" aria-label="Measure" aria-pressed="false" data-tip-id="btn-measure"><svg class="ruler" viewBox="0 0 108 24" aria-hidden="true"><path d="M2 5v12M106 5v12M3 11H105M3 11l4-3M3 11l4 3M105 11l-4-3M105 11l-4 3"/><path d="M14 11.5v4.5M20.67 11.5v3.5M27.33 11.5v3.5M34 11.5v3.5M40.67 11.5v4.5M47.33 11.5v3.5M54 11.5v3.5M60.67 11.5v3.5M67.33 11.5v4.5M74 11.5v3.5M80.67 11.5v3.5M87.33 11.5v3.5M94 11.5v4.5" stroke-width="1"/><g class="nums"><text x="14" y="23.4">0</text><text x="40.67" y="23.4">1</text><text x="67.33" y="23.4">2</text><text x="94" y="23.4">3</text></g><path class="span" d="M14 2.5H67.33"/><circle class="dot" cx="14" cy="2.5" r="1.6"/><circle class="dot" cx="67.33" cy="2.5" r="1.6"/></svg></button>
           <div class="measure-help" id="measure-help" hidden><kbd>S</kbd> Lock line, draw next<br><kbd>Z</kbd> Remove last line || point</div>
         </div>
         <div class="net-toggles" id="net-toggles"></div>
-        <div class="readout" id="readout" data-tip="X and Y under the cursor, from the origin (the board centre): right and up are positive"></div>
-        <div class="rotor-angle" id="rotor-angle-box" data-tip="Turn the rotor over the stator to see how the target sweeps the coils">
-          <span>Rotor Angle</span>
+        <div class="readout" id="readout" data-tip-id="readout"></div>
+        <div class="rotor-angle" id="rotor-angle-box" data-tip-id="rotor-angle">
+          <label for="rotor-angle">Rotor Angle</label>
           <input type="range" id="rotor-angle" min="0" max="360" step="0.5" value="0">
-          <output id="rotor-angle-out">0°</output>
+          <output id="rotor-angle-out" for="rotor-angle">0°</output>
         </div>
       </div>
     </section>
 
     <!-- Checks and download -->
-    <section id="checks" class="panel">
-      <div class="stale-badge" id="stale-badge" hidden>Settings changed: press Generate to update the board</div>
+    <section id="checks" class="panel" aria-label="Checks and download">
+      <div class="stale-badge" id="stale-badge" role="status" hidden></div>
       <div class="checks-head">
         <h2 class="pacifico">Checks</h2>
         <div class="counts" id="counts"></div>
-        <label class="switch-row small" data-tip="Also list the generator's information notes, not only warnings and errors">
+        <label class="switch-row small" data-tip-id="show-info">
           <span>Info</span>
-          <span class="switch"><input type="checkbox" id="show-info"><span class="knob"></span></span>
+          <span class="switch"><input type="checkbox" id="show-info" role="switch"><span class="knob"></span></span>
         </label>
-        <button class="glass-btn small" id="btn-summary" disabled data-tip="The generator's full text summary of the stator and rotor">Summary</button>
+        <button type="button" class="glass-btn small" id="btn-runtext" disabled data-tip-id="btn-runtext">Run Text</button>
         <div class="download-box">
-          <button class="primary-btn" id="btn-download" disabled data-tip="Download this run as one zip">Download Zip</button>
+          <button type="button" class="primary-btn" id="btn-download" disabled data-tip-id="btn-download">Download Zip</button>
           <div class="download-row">
-            <button class="glass-btn small" id="btn-dl-stator" disabled data-tip="Download only the stator board (.kicad_pcb)">Download Stator</button>
-            <button class="glass-btn small" id="btn-dl-rotor" disabled data-tip="Download only the rotor board (.kicad_pcb)">Download Rotor</button>
+            <button type="button" class="glass-btn small" id="btn-dl-stator" disabled data-tip-id="btn-dl-stator">Stator</button>
+            <button type="button" class="glass-btn small" id="btn-dl-rotor" disabled data-tip-id="btn-dl-rotor">Rotor</button>
+            <button type="button" class="glass-btn small" id="btn-files" disabled data-tip-id="btn-files">Files</button>
           </div>
         </div>
       </div>
-      <div class="checks-list" id="checks-list"><p class="hint">Starting Python in your browser. The first visit downloads about 20 MB; later visits are cached.</p></div>
+      <div class="run-card" id="run-card" hidden>
+        <ol class="run-steps" id="run-steps"></ol>
+        <div class="run-now"><span class="spinner" aria-hidden="true"></span><span id="run-line"></span><span id="run-time" class="run-time"></span>
+          <button type="button" class="glass-btn small" id="btn-cancel" data-tip-id="btn-cancel">Cancel</button></div>
+      </div>
+      <div class="checks-list" id="checks-list" tabindex="0" aria-label="Findings of the run"><p class="hint">Starting Python in your browser. The first visit downloads about 20 MB; later visits are cached.</p></div>
     </section>
   </main>
 
   <footer id="foot">
-    Generator: <a href="https://github.com/RolandThsive/Sinusoidal-Inductive-Encoders-Coil-Generator" target="_blank" rel="noopener">Sinusoidal Coil Generator</a>.
-    Soon will be tested with real hardware. Free for non-commercial usage.
+    <span>Generator: <a href="https://github.com/RolandThsive/Sinusoidal-Inductive-Encoders-Coil-Generator" target="_blank" rel="noopener">Sinusoidal Inductive Encoders Coil Generator</a>.
+    Free for non-commercial use.</span>
+    <span>Runs in your browser: nothing is uploaded. <a href="privacy.html" target="_blank" rel="noopener">Privacy</a></span>
+    <a href="licenses.html" target="_blank" rel="noopener">Licences</a>
+    <a id="report-link" href="https://github.com/RolandThsive/Sinusoidal-Inductive-Encoders-Coil-Generator/issues/new" target="_blank" rel="noopener">Report A Problem</a>
+    <span id="build-stamp"></span>
   </footer>
 </div>
 
-<div class="popover" id="popover" hidden></div>
-<dialog id="confirm-dialog" class="confirm"><form method="dialog">
-  <p id="confirm-text">Are you sure to reset the board?</p>
-  <div class="confirm-buttons"><button class="reset-btn" value="yes">Sure</button><button class="glass-btn" value="no" autofocus>No</button></div>
+<div class="popover" id="popover" role="tooltip" hidden></div>
+<dialog id="confirm-dialog" class="confirm" aria-labelledby="confirm-text"><form method="dialog">
+  <p id="confirm-text"></p>
+  <div class="confirm-buttons"><button class="reset-btn" value="yes" id="confirm-yes">Sure</button><button class="glass-btn" value="no" autofocus>No</button></div>
 </form></dialog>
-<dialog id="summary-dialog"><form method="dialog"><pre id="summary-text"></pre><button class="glass-btn">Close</button></form></dialog>
+<dialog id="text-dialog" aria-labelledby="text-title"><form method="dialog">
+  <h2 class="pacifico" id="text-title"></h2>
+  <pre id="text-body" tabindex="0"></pre>
+  <div class="dialog-buttons"><button type="button" class="glass-btn" id="text-copy">Copy</button><button class="glass-btn" value="close">Close</button></div>
+</form></dialog>
+<dialog id="files-dialog" aria-labelledby="files-title"><form method="dialog">
+  <h2 class="pacifico" id="files-title">Files Of This Run</h2>
+  <div id="files-list" class="files-list"></div>
+  <div class="dialog-buttons"><button class="glass-btn" value="close">Close</button></div>
+</form></dialog>
+<dialog id="crash-dialog" class="crash" aria-labelledby="crash-title"><form method="dialog">
+  <h2 class="pacifico" id="crash-title">Something Went Wrong</h2>
+  <p id="crash-text"></p>
+  <pre id="crash-details" tabindex="0"></pre>
+  <div class="dialog-buttons">
+    <button type="button" class="glass-btn" id="crash-copy">Copy Details</button>
+    <a class="glass-btn" id="crash-report" href="#" target="_blank" rel="noopener">Report A Problem</a>
+    <button type="button" class="glass-btn" id="crash-reload">Reload The Page</button>
+    <button class="glass-btn" value="close">Close</button>
+  </div>
+</form></dialog>
 <div class="toast" id="toast" hidden></div>
+<div class="sr-only" id="sr-status" role="status" aria-live="polite"></div>
 
-<script src="BoardPreview.js"></script>
-<script src="Tooltips.js"></script>
-<script src="WebGUI.js"></script>
+<script type="module" src="app/main.js"></script>
 </body>
 </html>

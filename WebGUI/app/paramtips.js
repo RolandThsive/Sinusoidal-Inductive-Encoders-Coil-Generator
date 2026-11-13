@@ -1,9 +1,9 @@
-/* Tooltips.js - the help text shown for each parameter (the "i" next to its name, in Basic and Advanced).
+/* paramtips.js - the help text shown for each parameter (the "i" next to its name, in Basic and Advanced).
 
-   Short, plain texts written for the page; **text** is shown in bold (used for the formulas) and \n starts a new line.  A parameter that is
-   not listed here falls back to the comment next to it in its parameter file. */
+   Short, plain texts written for the page; **text** is shown in bold (used for the formulas) and \n starts a new line.
+   A parameter that is not listed here shows the comment next to it in its parameter file. */
 
-const TOOLTIPS = {
+export const TOOLTIPS = {
   // ---- Board
   PCB_LAYERS: "Copper layers on the stator board: 2 or 4. With 4, you choose which layers the RX and TX coils use. Keep unused layers free of copper under the coils, as a copper plane weakens the signal.",
   VIA_DIAMETER_MM: "Outer diameter of every via's copper ring.",

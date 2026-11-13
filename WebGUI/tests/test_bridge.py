@@ -11,6 +11,7 @@ nothing in the repository is written.  What is proven:
     folder lines aside), with the published values and with changed ones, for Single and for Dual
     a wrong value gets the generator's own message, and a failed run writes nothing
     the bridge leaves the published parameter files as they were
+    exported files and a run's record are read back as the values they were made from; nothing in them is run
 """
 
 import json
@@ -288,6 +289,54 @@ class Runs(unittest.TestCase):
         mine = result["text"].replace(BRIDGE_ROOT, "<root>").split("\n")
         theirs = text.rstrip("\n").replace(DESKTOP_ROOT, "<root>").split("\n")
         self.assertEqual(mine, theirs)
+
+
+class ImportExport(unittest.TestCase):
+    def changed(self, mode):
+        values = defaults(mode)
+        rx = "RX_Parameters.py" if mode == "single" else "Dual_RX2_Parameters.py"
+        values[rx]["LOOPS"] = 5
+        values[rx]["RX_NET_PHASE_0_2"] = 'S"1'
+        return values
+
+    def test_exported_files_come_back_as_the_same_values(self):
+        for mode in ("single", "dual"):
+            values = self.changed(mode)
+            zpath = json.loads(WG.export_zip(mode, json.dumps(values)))["zip"]
+            got = json.loads(WG.read_import(json.dumps([{"name": "Parameter_Files.zip", "path": zpath}])))
+            self.assertEqual(got["mode"], mode)
+            self.assertEqual(got["ignored"], [])
+            for file, names in got["values"].items():
+                for name, value in names.items():
+                    self.assertEqual(value, values[file][name], f"{mode} {file} {name}")
+            rx = "RX_Parameters.py" if mode == "single" else "Dual_RX2_Parameters.py"
+            self.assertEqual(got["values"][rx]["LOOPS"], 5)
+
+    def test_a_runs_record_comes_back_as_its_values(self):
+        values = defaults("single")
+        values["RX_Parameters.py"]["LOOPS"] = 2
+        result = json.loads(WG.run("single", json.dumps(values)))
+        self.assertTrue(result["ok"])
+        with open(os.path.join(result["folder"], "Parameters.txt"), encoding="utf-8") as fh:
+            record = fh.read()
+        got = json.loads(WG.read_import(json.dumps([{"name": "Parameters.txt", "text": record}])))
+        self.assertEqual(got["mode"], "single")
+        self.assertEqual(got["values"]["RX_Parameters.py"]["LOOPS"], 2)
+        for file, names in got["values"].items():
+            for name, value in names.items():
+                self.assertEqual(value, values[file][name], f"{file} {name}")
+
+    def test_a_name_of_another_version_is_reported_not_taken(self):
+        text = "LOOPS = 3\nTX_START_ANGLE_DEG = 10\n"
+        got = json.loads(WG.read_import(json.dumps([{"name": "RX_Parameters.py", "text": text}])))
+        self.assertEqual(got["values"]["RX_Parameters.py"], {"LOOPS": 3})
+        self.assertTrue(any("TX_START_ANGLE_DEG" in what for what in got["ignored"]), got["ignored"])
+
+    def test_text_that_is_not_values_is_never_run(self):
+        text = "LOOPS = __import__('os').getcwd()\nRX_SUBCOILS = 2\n"
+        got = json.loads(WG.read_import(json.dumps([{"name": "RX_Parameters.py", "text": text}])))
+        self.assertNotIn("LOOPS", got["values"].get("RX_Parameters.py", {}))
+        self.assertEqual(got["values"]["RX_Parameters.py"]["RX_SUBCOILS"], 2)
 
 
 class Findings(unittest.TestCase):

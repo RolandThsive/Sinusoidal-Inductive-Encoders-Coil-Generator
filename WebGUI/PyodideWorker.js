@@ -3,6 +3,8 @@
    The page sends {id, cmd, args}; the worker answers {id, ok: true, result} or {id, ok: false, error}.
    While it works it also sends, without an id of their own:
      {type: "progress", text}                  what init is doing
+     {type: "stage", stage: "runtime-js"}      Pyodide's own script has arrived (the page waits 15 s for this before
+                                               it starts again from the site's backup copy)
      {type: "line", id, text, stream}          a line the generator printed during the run `id` ("out" or "err")
 
    The commands (mode is "single" or "dual"; values are {file name: {NAME: value}}):
@@ -11,9 +13,10 @@
      inactive    {mode, values}                ->  {file: [names the generator does not use]}
      check       {mode, values}                ->  {file: {NAME: the generator's message}}
      run         {mode, values, checkOnly}     ->  what the program printed, sorted, and the files it wrote
-                                                  (WebGenerator.run); zipBytes: the zip of its folder
-     readFile    {path}                        ->  {bytes}   a file of the last run (a board, a picture)
+                                                  (WebGenerator.run); zipBytes: the zip of its folder; bytes: {file
+                                                  name: its bytes} of every file in that folder
      exportZip   {mode, values}                ->  {zipBytes}
+     readImport  {items: [{name, text | bytes}]}  ->  {mode, values, ignored, files}   (WebGenerator.read_import)
 
    A run cannot be stopped from outside: to cancel, the page ends this worker and starts a new one.
 
@@ -47,6 +50,7 @@ async function init({ pyodideBase, bundle }) {
   try {
     progress("Loading Python (Pyodide)…");
     const { loadPyodide } = await import(pyodideBase + "pyodide.mjs");   // Pyodide 314 runs in module workers only
+    postMessage({ type: "stage", stage: "runtime-js" });                  // the source answers: the page stops its timer
     pyodide = await loadPyodide({ indexURL: pyodideBase });
     progress("Loading numpy…");
     await pyodide.loadPackage("numpy");
@@ -80,12 +84,6 @@ function call(fn, ...args) {
   return JSON.parse(WG[fn](...args));
 }
 
-// Only the folder of the last run and the two zips can be read: a path from the page is never trusted.
-function readable(path) {
-  return typeof path === "string" && !path.includes("..") &&
-    (/^\/coilgen\/Generators\/(Single|Dual) Coil Set Generator\/Output\/[^/]+\/[^/]+$/.test(path));
-}
-
 onmessage = async (ev) => {
   const { id, cmd, args } = ev.data;
   try {
@@ -101,15 +99,25 @@ onmessage = async (ev) => {
       const onLine = (text, stream) => postMessage({ type: "line", id, text, stream });
       result = call("run", args.mode, JSON.stringify(args.values), !!args.checkOnly, onLine);
       result.seconds = (performance.now() - t0) / 1000;
-      if (result.zip) { result.zipBytes = readFileBuffer(result.zip); transfer.push(result.zipBytes); }
-    } else if (cmd === "readFile") {
-      if (!readable(args.path)) throw new Error("this file cannot be read");
-      result = { bytes: readFileBuffer(args.path) };
-      transfer.push(result.bytes);
+      if (result.zip) {                       // the run wrote files: the page gets them all, so nothing is asked for later
+        result.zipBytes = readFileBuffer(result.zip); transfer.push(result.zipBytes);
+        result.bytes = {};
+        for (const f of result.files) { result.bytes[f.name] = readFileBuffer(f.path); transfer.push(result.bytes[f.name]); }
+      }
     } else if (cmd === "exportZip") {
       const r = call("export_zip", args.mode, JSON.stringify(args.values));
       result = { zipBytes: readFileBuffer(r.zip) };
       transfer.push(result.zipBytes);
+    } else if (cmd === "readImport") {
+      const items = [];
+      args.items.forEach((item, i) => {
+        if (item.bytes) {                       // a zip: Python opens it from the in-memory file system
+          const path = `${ROOT}/import_${i}.zip`;
+          pyodide.FS.writeFile(path, new Uint8Array(item.bytes));
+          items.push({ name: item.name, path });
+        } else items.push({ name: item.name, text: item.text });
+      });
+      result = call("read_import", JSON.stringify(items));
     } else throw new Error("unknown command " + cmd);
     postMessage({ id, ok: true, result }, transfer);
   } catch (e) {

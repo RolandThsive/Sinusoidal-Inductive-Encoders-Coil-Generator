@@ -638,3 +638,143 @@ def export_zip(mode, values_json):
         for fname, text in files.items():
             z.writestr(f"Parameters/{fname}", text)
     return json.dumps({"zip": zpath})
+
+
+# =============================================================================
+# import
+# =============================================================================
+IMPORT_MAX_BYTES = 8 * 1024 * 1024                  # of text, all files of one import together
+IMPORT_MAX_FILES = 64
+_ASSIGN = re.compile(r"([A-Z][A-Z0-9_]*)\s*=\s*(.+)")
+_COPY_HEAD = re.compile(r"#{6,}\s+(\S+\.py)\s+#{6,}")
+_VALUES_HEAD = re.compile(r"\[(\S+\.py)\]")
+
+
+def _literals(text):
+    """{NAME: value} of every line `NAME = literal` of a parameter file or of a record's value list (the literal
+    is the longest start of the rest of the line that Python reads as one: a comment or a note after it is left)."""
+    out = {}
+    for line in text.split("\n"):
+        m = _ASSIGN.fullmatch(line.rstrip())
+        if not m or line[:1] in " \t#":
+            continue
+        name, expr = m.group(1), m.group(2)
+        for cut in range(len(expr), 0, -1):
+            if cut < len(expr) and expr[cut - 1] not in " \t" and expr[cut] not in " \t#":
+                continue                                   # only cut at a space or a comment
+            try:
+                out[name] = _jsonable(ast.literal_eval(expr[:cut].strip()))
+                break
+            except Exception:
+                continue
+    return out
+
+
+def _record_parts(text):
+    """The parameter files inside a Parameters.txt: [(file name, text)].  The verbatim copies ("##### File.py #####")
+    are taken where the record has them, else the value lists ("[File.py]")."""
+    lines = text.split("\n")
+    copies, lists = {}, {}
+    cur, bucket = None, None
+    for line in lines:
+        m = _COPY_HEAD.fullmatch(line.strip())
+        if m:
+            cur, bucket = m.group(1), copies
+            bucket.setdefault(cur, [])
+            continue
+        m = _VALUES_HEAD.fullmatch(line.strip())
+        if m and bucket is not copies:
+            cur, bucket = m.group(1), lists
+            bucket.setdefault(cur, [])
+            continue
+        if cur is not None:
+            bucket[cur].append(line)
+    parts = dict(lists)
+    parts.update(copies)
+    return [(name, "\n".join(body)) for name, body in parts.items()]
+
+
+def read_import(items_json):
+    """The values in the files a visitor gave: Parameters.txt of a run (web or desktop), parameter files (.py), or a
+    zip of either.  items: [{name, text}] or, for a zip, [{name, path}] (a file of the in-memory file system).
+    Returns {mode, values: {file: {NAME: value}}, ignored: [what was not taken, and why], files: [files read]}.
+    The files are only read as text: nothing in them is run."""
+    _paths()
+    items = json.loads(items_json)
+    texts, ignored, total = [], [], 0
+
+    def take(name, data):
+        nonlocal total
+        name = os.path.basename(name.replace("\\", "/"))
+        if not name.lower().endswith((".py", ".txt")):
+            return
+        if len(texts) >= IMPORT_MAX_FILES or total + len(data) > IMPORT_MAX_BYTES:
+            ignored.append(f"{name}: too much to read (limit {IMPORT_MAX_FILES} files, {IMPORT_MAX_BYTES // 1024 // 1024} MB)")
+            return
+        total += len(data)
+        texts.append((name, data if isinstance(data, str) else data.decode("utf-8", "replace")))
+
+    for item in items:
+        if "path" in item:
+            try:
+                with zipfile.ZipFile(item["path"]) as z:
+                    for info in z.infolist():
+                        if info.is_dir() or not info.filename.lower().endswith((".py", ".txt")):
+                            continue
+                        if info.file_size > IMPORT_MAX_BYTES:
+                            ignored.append(f"{os.path.basename(info.filename)}: too large")
+                            continue
+                        with z.open(info) as fh:
+                            take(info.filename, fh.read(IMPORT_MAX_BYTES + 1))
+            except Exception as e:
+                ignored.append(f"{item.get('name', 'the zip')}: cannot be opened ({type(e).__name__})")
+            finally:
+                try:
+                    os.remove(item["path"])
+                except OSError:
+                    pass
+        else:
+            take(item.get("name", ""), item.get("text", ""))
+
+    parts, flat = [], []
+    for name, text in texts:
+        if name.lower().endswith(".py"):
+            parts.append((name, text))
+        else:
+            found = _record_parts(text)
+            parts += found
+            if not found:
+                flat.append((name, text))
+    names = {name for name, _t in parts}
+    mode = "dual" if any(n.startswith("Dual_") for n in names) else "single"
+    layout = {file: {row[0] for row in rows} for file, _l, _g, _k, rows in _layout(mode)}
+    values, files = {}, []
+    for name, text in parts:
+        if name[:-3] == MODES[mode]["aggregator"]:
+            continue
+        if name not in layout:
+            ignored.append(f"{name}: not a parameter file of the {mode} generator")
+            continue
+        files.append(name)
+        for key, value in _literals(text).items():
+            if key in READ_ONLY:
+                continue
+            if key in layout[name]:
+                values.setdefault(name, {})[key] = value
+            else:
+                ignored.append(f"{key} in {name}: not a setting of this version")
+    # a text with values but no file names in it (a hand-made list): the names say where they belong (Single only)
+    if flat and mode == "single":
+        owner = {key: file for file, keys in layout.items() for key in keys}
+        for name, text in flat:
+            got = _literals(text)
+            if got:
+                files.append(name)
+            for key, value in got.items():
+                if key in READ_ONLY:
+                    continue
+                if key in owner:
+                    values.setdefault(owner[key], {})[key] = value
+                else:
+                    ignored.append(f"{key} in {name}: not a setting of this version")
+    return json.dumps({"mode": mode, "values": values, "ignored": list(dict.fromkeys(ignored)), "files": files})

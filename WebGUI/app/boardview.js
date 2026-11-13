@@ -1,15 +1,19 @@
-/* BoardPreview.js - draws the generated KiCad boards on a canvas.
+/* boardview.js - draws the generated KiCad boards on a canvas.
 
-   parseBoard(text) reads the few things the generator writes: nets, segments, vias, gr_circle (the Edge.Cuts
-   circles are drawn) and filled polygons (rotor copper).  BoardView draws them with one colour per copper layer,
-   with zoom, pan, an X / Y readout from the origin and a rotor angle for the overlay.  The canvas is sized by
-   devicePixelRatio so it stays sharp on HiDPI screens.  Hovering a loop set or a layer chip highlights it (the rest
-   is faded); layers, loop sets and vias can be hidden; the vias can be boosted and the origin marker coloured.
-   The two-click measure tool keeps its finished lines with S (at most 256) and removes them with Z. */
+   parseBoard(text) reads the few things the generators write: nets, segments, vias (through and blind, with the
+   two layers they join), gr_circle (the Edge.Cuts circles; the dots of the silkscreen suggestion), gr_line (the
+   silkscreen suggestion: boxes, lines and lettering) and filled polygons (rotor copper).  BoardView draws them with
+   one colour per copper layer, with zoom, pan, an X / Y readout from the origin and a rotor angle for the overlay.
+   The canvas is sized by devicePixelRatio so it stays sharp on HiDPI screens.  Hovering a loop set or a layer chip
+   highlights it (the rest is faded); layers, loop sets, coil sets (Dual), the silkscreen and the vias can be hidden;
+   the vias can be boosted and the origin marker coloured.  The two-click measure tool keeps its finished lines with
+   S (at most 256) and removes them with Z.  Nothing here changes a board: it only draws what the files hold. */
 
 const FADED = 0.18;                                                    // alpha of everything not highlighted
 const LAYER_ORDER = ["B.Cu", "In2.Cu", "In1.Cu", "F.Cu"];              // drawn bottom first
-const LAYER_INFO = {
+const STACK = ["F.Cu", "In1.Cu", "In2.Cu", "B.Cu"];                    // top to bottom: the layers a via passes
+export const SILK_LAYERS = ["F.SilkS", "B.SilkS"];
+export const LAYER_INFO = {
   "F.Cu": { name: "Top", css: "--top" },
   "In1.Cu": { name: "Inner-1", css: "--in1" },
   "In2.Cu": { name: "Inner-2", css: "--in2" },
@@ -20,14 +24,21 @@ function cssVar(name) {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 }
 
-function parseBoard(text) {
-  const board = { segments: {}, vias: [], circles: [], polys: [] };
+// the copper layers a via passes through: from the first to the second layer it joins, in the stack
+export function viaSpan(a, b) {
+  const i = STACK.indexOf(a), j = STACK.indexOf(b);
+  if (i < 0 || j < 0) return STACK.slice();
+  return STACK.slice(Math.min(i, j), Math.max(i, j) + 1);
+}
+
+export function parseBoard(text) {
+  const board = { segments: {}, vias: [], circles: [], polys: [], silk: [], dots: [], nets: [] };
   const num = "(-?[\\d.]+)";
   // net names: (net 3 "SIN_Signal"); segments and vias carry the number, (net 3)
   const nets = {};
   let m;
   const netRe = /^\s*\(net (\d+) "([^"]*)"\)/gm;
-  while ((m = netRe.exec(text))) nets[m[1]] = m[2];
+  while ((m = netRe.exec(text))) { nets[m[1]] = m[2]; if (m[2]) board.nets.push(m[2]); }
   const segRe = new RegExp(`\\(segment \\(start ${num} ${num}\\) \\(end ${num} ${num}\\) \\(width ${num}\\) \\(layer "([^"]+)"\\)(?: \\(net (\\d+)\\))?`, "g");
   while ((m = segRe.exec(text))) {
     const [_, x1, y1, x2, y2, w, layer, n] = m;
@@ -35,13 +46,28 @@ function parseBoard(text) {
     const key = layer + "|" + w + "|" + net;
     (board.segments[key] = board.segments[key] || { layer, width: +w, net, pts: [] }).pts.push(+x1, +y1, +x2, +y2);
   }
-  const viaRe = new RegExp(`\\(via \\(at ${num} ${num}\\) \\(size ${num}\\) \\(drill ${num}\\)[^\\n]*?(?:\\(net (\\d+)\\))?\\)\\s*$`, "gm");
-  while ((m = viaRe.exec(text))) board.vias.push({ x: +m[1], y: +m[2], d: +m[3], drill: +m[4], net: nets[m[5]] ?? "" });
+  const viaRe = new RegExp(`\\(via (blind )?\\(at ${num} ${num}\\) \\(size ${num}\\) \\(drill ${num}\\)(?: \\(layers "([^"]+)" "([^"]+)"\\))?[^\\n]*?(?:\\(net (\\d+)\\))?\\)\\s*$`, "gm");
+  while ((m = viaRe.exec(text))) {
+    board.vias.push({ x: +m[2], y: +m[3], d: +m[4], drill: +m[5], blind: !!m[1],
+      layers: viaSpan(m[6] || "F.Cu", m[7] || "B.Cu"), net: nets[m[8]] ?? "" });
+  }
   const circRe = new RegExp(`\\(gr_circle \\(center ${num} ${num}\\) \\(end ${num} ${num}\\)([^\\n]*)`, "g");
   while ((m = circRe.exec(text))) {
     const cx = +m[1], cy = +m[2], rest = m[5];
     const layer = (/\(layer "([^"]+)"\)/.exec(rest) || [])[1];
-    if (layer) board.circles.push({ cx, cy, r: Math.hypot(+m[3] - cx, +m[4] - cy), layer });
+    if (!layer) continue;
+    const r = Math.hypot(+m[3] - cx, +m[4] - cy);
+    if (SILK_LAYERS.includes(layer)) board.dots.push({ cx, cy, r, layer, solid: /\(fill solid\)/.test(rest) });
+    else board.circles.push({ cx, cy, r, layer });
+  }
+  // the silkscreen suggestion: (gr_line (start x y) (end x y) (stroke (width w) (type dash) ...) (layer "F.SilkS"))
+  const lineRe = new RegExp(`\\(gr_line \\(start ${num} ${num}\\) \\(end ${num} ${num}\\)([^\\n]*)`, "g");
+  while ((m = lineRe.exec(text))) {
+    const rest = m[5];
+    const layer = (/\(layer "([^"]+)"\)/.exec(rest) || [])[1];
+    if (!SILK_LAYERS.includes(layer)) continue;
+    const w = +((/\(width (-?[\d.]+)\)/.exec(rest) || [])[1] || 0.12);
+    board.silk.push({ x1: +m[1], y1: +m[2], x2: +m[3], y2: +m[4], w, dash: /\(type dash\)/.test(rest), layer });
   }
   // filled polygons: (gr_poly (pts (xy ..) ...) ... (layer "F.Cu") ...)
   let i = 0;
@@ -64,7 +90,7 @@ function parseBoard(text) {
 }
 
 /* ------------------------------------------------------------------------------------------------ */
-class BoardView {
+export class BoardView {
   static MAX_LOCKED = 256;          // measured lines the S key can keep
   constructor(canvas, readout) {
     this.canvas = canvas;
@@ -73,9 +99,12 @@ class BoardView {
     this.mode = "overlay";           // stator | rotor | overlay
     this.stator = null; this.rotor = null;
     this.center = [100, 100];
-    this.hidden = new Set();
+    this.hidden = new Set(["B.SilkS"]);   // layers switched off (the bottom silkscreen repeats the top one, mirrored)
     this.netRole = {};               // net name -> "sin" | "cos" | "tx" (from the parameters of the run)
+    this.netSet = {};                // net name -> 1 | 2, the coil set it belongs to (Dual)
     this.hiddenNets = new Set();     // roles switched off with the Sin / Cos / TX Loops buttons
+    this.hiddenSets = new Set();     // coil sets switched off with the Set 1 / Set 2 buttons (Dual)
+    this.highlightSet = null;        // the coil set under the mouse
     this.highlight = null;           // the role under the mouse: drawn thicker, the rest faded
     this.highlightLayer = null;      // the copper layer under the mouse (Top / Inner-1 / Inner-2 / Bottom chips), the same way
     this.showOrigin = true;          // the board centre marker (Origin button); originBoost = hovered, drawn in the accent colour
@@ -97,8 +126,17 @@ class BoardView {
     if (center) this.center = center;
     this.draw();
   }
+  /* no boards: the generator was changed and that one has not run yet */
+  clearBoards() { this.stator = this.rotor = null; this.hasBoard = false; this.clearMeasure(); this.draw(); }
   setMode(mode) { this.mode = mode; this.draw(); }
-  setNetRoles(roles) { this.netRole = roles; this.draw(); }
+  setNetRoles(roles, sets = {}) { this.netRole = roles; this.netSet = sets; this.draw(); }
+  toggleSet(k) { this.hiddenSets.has(k) ? this.hiddenSets.delete(k) : this.hiddenSets.add(k); this.draw(); }
+  setSetHighlight(k) { if (this.highlightSet !== k) { this.highlightSet = k; this.draw(); } }
+  /* true when the board the view shows has silkscreen marks on `layer` (the chips of the others are locked) */
+  hasSilk(layer) {
+    const b = this.mode === "rotor" ? this.rotor : this.stator;
+    return !!b && (b.silk.some((s) => s.layer === layer) || b.dots.some((d) => d.layer === layer));
+  }
   toggleNet(role) { this.hiddenNets.has(role) ? this.hiddenNets.delete(role) : this.hiddenNets.add(role); this.draw(); }
   setHighlight(role) { if (this.highlight !== role) { this.highlight = role; this.draw(); } }
   /* the layers with traces or fills in the board(s) the view shows (the layer chips of the others are locked; the
@@ -187,6 +225,19 @@ class BoardView {
     });
     c.addEventListener("mouseleave", () => (this.readout.textContent = ""));
     c.addEventListener("dblclick", () => this.fit());
+    // the keyboard: arrows move the board, + and - zoom about the middle, 0 fits it
+    c.addEventListener("keydown", (e) => {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      const step = 40 * (window.devicePixelRatio || 1), move = { ArrowLeft: [step, 0], ArrowRight: [-step, 0], ArrowUp: [0, step], ArrowDown: [0, -step] }[e.key];
+      if (move) { this.view.ox += move[0]; this.view.oy += move[1]; }
+      else if (e.key === "+" || e.key === "=" || e.key === "-") {
+        const k = e.key === "-" ? 1 / 1.25 : 1.25, x = c.width / 2, y = c.height / 2;
+        this.view.ox = x - (x - this.view.ox) * k; this.view.oy = y - (y - this.view.oy) * k; this.view.scale *= k;
+      } else if (e.key === "0") { this.fit(); e.preventDefault(); return; }
+      else return;
+      e.preventDefault();
+      this.draw();
+    });
   }
 
   /* ---- drawing ------------------------------------------------------------------------------- */
@@ -227,10 +278,11 @@ class BoardView {
     // highlightLayer) is drawn last, thicker, over the others faded; a set switched off (hiddenNets) is not
     // drawn, nor are its vias.
     const role = (net) => this.netRole[net];
-    const off = (net) => this.hiddenNets.has(role(net));
+    const off = (net) => this.hiddenNets.has(role(net)) || this.hiddenSets.has(this.netSet[net]);
     const hlRole = this.highlight && !this.hiddenNets.has(this.highlight) ? this.highlight : null;
-    const hl = hlRole || hlCu;
-    const lit = (g) => hlRole ? role(g.net) === hlRole : g.layer === hlCu;
+    const hlSet = this.highlightSet && !this.hiddenSets.has(this.highlightSet) ? this.highlightSet : null;
+    const hl = hlRole || hlSet || hlCu;
+    const lit = (g) => hlRole ? role(g.net) === hlRole : hlSet ? this.netSet[g.net] === hlSet : g.layer === hlCu;
     const segs = Object.values(b.segments);
     for (const pass of hl ? ["rest", "hl"] : ["all"]) {
       ctx.globalAlpha = pass === "rest" ? FADED : 1;
@@ -254,7 +306,9 @@ class BoardView {
     const viaFill = cssVar("--via"), viaRim = cssVar("--via-rim");
     for (const v of this.hidden.has("Vias") ? [] : b.vias) {
       if (off(v.net)) continue;
-      ctx.globalAlpha = hlRole ? (role(v.net) === hlRole ? 1 : FADED) : hlCu ? FADED : 1;
+      if (v.layers.every((l) => this.hidden.has(l))) continue;                // a via shows while one of its layers does
+      ctx.globalAlpha = hlRole ? (role(v.net) === hlRole ? 1 : FADED) : hlSet ? (this.netSet[v.net] === hlSet ? 1 : FADED)
+        : hlCu ? (v.layers.includes(hlCu) ? 1 : FADED) : 1;
       const k = this.viaBoost ? Math.max(1, 3 * px / (v.d / 2)) : 1;          // scale up only if smaller than 6 px
       const d = v.d * k, drill = v.drill * k;
       const r = d / 2, rim = (d - drill) / 2 * 0.3;
@@ -266,12 +320,39 @@ class BoardView {
       ctx.beginPath(); ctx.arc(v.x, v.y, drill / 2, 0, 2 * Math.PI); ctx.fill();
     }
     ctx.globalAlpha = 1;
+    this._drawSilk(b, px, hl);
     ctx.strokeStyle = cssVar("--edge");
     for (const c of b.circles) {
       if (c.layer !== "Edge.Cuts") continue;
       ctx.lineWidth = 2.5 * px;                          // the one exception to true scale: always a visible 2.5 px
       ctx.beginPath(); ctx.arc(c.cx, c.cy, c.r, 0, 2 * Math.PI); ctx.stroke();
     }
+  }
+
+  /* the silkscreen suggestion, at its true widths, in one grey (the file's own colour is the ink, usually white).
+     The bottom silkscreen holds the same marks with mirrored lettering; it is off until its chip is switched on. */
+  _drawSilk(b, px, faded) {
+    const ctx = this.ctx;
+    for (const layer of SILK_LAYERS) {
+      if (this.hidden.has(layer)) continue;
+      ctx.globalAlpha = faded ? FADED : 1;
+      ctx.strokeStyle = ctx.fillStyle = cssVar("--silk") || "#6b6b6b";
+      for (const dashed of [false, true]) {
+        ctx.setLineDash(dashed ? [0.35, 0.3] : []);
+        for (const s of b.silk) {
+          if (s.layer !== layer || s.dash !== dashed) continue;
+          ctx.lineWidth = Math.max(s.w, px);
+          ctx.beginPath(); ctx.moveTo(s.x1, s.y1); ctx.lineTo(s.x2, s.y2); ctx.stroke();
+        }
+      }
+      ctx.setLineDash([]);
+      for (const d of b.dots) {
+        if (d.layer !== layer) continue;
+        ctx.beginPath(); ctx.arc(d.cx, d.cy, d.r, 0, 2 * Math.PI);
+        if (d.solid) ctx.fill(); else { ctx.lineWidth = Math.max(0.12, px); ctx.stroke(); }
+      }
+    }
+    ctx.globalAlpha = 1;
   }
 
   _polyPath(pts, angleDeg) {
