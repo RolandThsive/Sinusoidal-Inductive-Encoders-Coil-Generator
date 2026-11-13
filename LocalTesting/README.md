@@ -19,15 +19,15 @@ loading on `file://` pages, so the page has to come from `http://`.
 
 ## How the tester is made
 
-The tester is the repository itself. Nothing is built or copied.
+The tester is the repository itself.
 
-- `serve.py` serves the repository root (the folder above `LocalTesting/`) so that `WebGUI/` and `Single Generator/`
-  (the generator and its parameter files) sit side by side, as they do on GitHub Pages. The page finds the generator at
-  `../Single Generator/` from `WebGUI/`.
+- `serve.py` first makes the site the way GitHub Pages gets it: it runs `WebGUI/tools/build_site.py`, which copies the
+  page and packs the generators' own `.py` files (`Generators/`) into one zip, into `LocalTesting/_site/`. That folder
+  is made new at every start and is never committed. Then it serves that folder.
 - The Start scripts only run `serve.py`.
 - Python for the browser (Pyodide) is loaded from a CDN, as on the live site.
 
-The generator and parameter files are Roland's, unchanged; only the Web GUI (`WebGUI/`) and this folder are ours.
+The generators and their parameter files are Roland's, unchanged; only the Web GUI (`WebGUI/`) and this folder are ours.
 
 ## Keeping it current
 
@@ -35,7 +35,7 @@ This branch is kept equal to the newest Web GUI work:
 
 1. Pull the working branch into it: `git checkout WebUI_LocalTesting && git merge origin/WebUI_modifs`
    (and `origin/main` when the generator changes), then push.
-2. Nothing else: there is no zip to rebuild.
+2. Nothing else: the site is made at every start.
 3. Changes to `LocalTesting/` are made on this branch only; they never go into `WebUI` or `main`.
 
 ## How the screenshots were made
