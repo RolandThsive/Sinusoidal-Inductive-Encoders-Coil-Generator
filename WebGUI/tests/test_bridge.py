@@ -159,6 +159,41 @@ class Values(unittest.TestCase):
                          PR._check_value("PCB_LAYERS", 3, *spec["PCB_LAYERS"])[1])
         self.assertIn('must be "both", "top" or "bottom"', got["SilkScreenSuggestion_Parameters.py"]["SILKSCREEN_SIDES"])
 
+    def test_a_value_the_generator_does_not_use_is_not_checked(self):
+        """As in the program (ParameterRules.load_values): the rotor's own sizes are checked only when ROTOR_MODE is
+        "custom", and what the page shows under a setting is then the error line of a check-only run."""
+        values = defaults("single")
+        values["Rotor_Parameters.py"]["ROTOR_CUSTOM_SECTORS"] = 0
+        self.assertEqual(json.loads(WG.check_values("single", json.dumps(values))), {})
+        run = json.loads(WG.run("single", json.dumps(values), True))
+        self.assertEqual([it for it in run["items"] if it["level"] == "error"], [])
+        values["Rotor_Parameters.py"]["ROTOR_MODE"] = "custom"
+        got = json.loads(WG.check_values("single", json.dumps(values)))
+        self.assertEqual(list(got), ["Rotor_Parameters.py"])
+        self.assertEqual(list(got["Rotor_Parameters.py"]), ["ROTOR_CUSTOM_SECTORS"])
+        run = json.loads(WG.run("single", json.dumps(values), True))
+        said = [it["lines"][0] for it in run["items"] if it["level"] == "error"]
+        self.assertIn(got["Rotor_Parameters.py"]["ROTOR_CUSTOM_SECTORS"] + "   (Rotor_Parameters.py)", said)
+
+    def test_dual_band_and_edge_values_get_the_layouts_words(self):
+        """The Dual Coil Set Generator works out its layout before it checks the sets: a band radius or a board edge
+        that is no number is refused there, in the layout's words.  The page shows those under the setting."""
+        for file, name, value in (("Dual_RX1_Parameters.py", "INSIDE_RADIUS_MM", 0),
+                                  ("Dual_RX2_Parameters.py", "OUTSIDE_RADIUS_MM", "abc"),
+                                  ("Dual_Board_Parameters.py", "OUTER_EDGE_RADIUS_MM", -1)):
+            values = defaults("dual")
+            values[file][name] = value
+            got = json.loads(WG.check_values("dual", json.dumps(values)))
+            self.assertEqual(list(got), [file], name)
+            self.assertEqual(list(got[file]), [name])
+            self.assertIn("must be a number greater than 0, or None", got[file][name])
+            run = json.loads(WG.run("dual", json.dumps(values), True))
+            self.assertIn(got[file][name], [it["lines"][0] for it in run["items"] if it["level"] == "error"], name)
+        # half a pair is a rule between two values: the run names it, nothing stands under one setting
+        values = defaults("dual")
+        values["Dual_RX2_Parameters.py"]["OUTSIDE_RADIUS_MM"] = None
+        self.assertEqual(json.loads(WG.check_values("dual", json.dumps(values))), {})
+
     def test_a_sets_own_board_value_may_be_none(self):
         values = {"Dual_RX1_Parameters.py": {"VIA_TYPE": None, "LOOPS": None}}
         got = json.loads(WG.check_values("dual", json.dumps(values)))
@@ -220,6 +255,22 @@ class Values(unittest.TestCase):
         self.assertEqual(ast.literal_eval(got[0].value), values["TX_Parameters.py"]["TX_NET"])
         self.assertFalse(any(isinstance(n, (ast.Import, ast.ImportFrom, ast.Expr)) and not
                              (isinstance(n, ast.Expr) and isinstance(n.value, ast.Constant)) for n in tree.body))
+
+    def test_a_text_beyond_the_basic_plane_reaches_the_board_as_it_was_typed(self):
+        """A net name with a character beyond U+FFFF (an emoji) is one character in the parameter file, and the run
+        writes it into the board; half a UTF-16 pair, which no file can hold, becomes U+FFFD."""
+        import ast
+        for typed, held in (("\U0001f600 net", "\U0001f600 net"), ("a\ud83db", "a\ufffdb"), ("\u03a9 \u2028", "\u03a9 \u2028")):
+            lit = WG._py_literal(typed)
+            self.assertTrue(lit.isascii())
+            self.assertEqual(ast.literal_eval(lit), held)
+        values = defaults("single")
+        values["RX_Parameters.py"]["RX_NET_PHASE_0_2"] = "\U0001f600 net"
+        run = json.loads(WG.run("single", json.dumps(values)))
+        self.assertTrue(run["ok"], run.get("crash"))
+        stator = next(f for f in run["files"] if f["name"].endswith("Stator.kicad_pcb"))
+        with open(stator["path"], encoding="utf-8") as fh:
+            self.assertIn('"\U0001f600 net"', fh.read())
 
 
 class Runs(unittest.TestCase):
@@ -349,6 +400,36 @@ class ImportExport(unittest.TestCase):
         got = json.loads(WG.read_import(json.dumps([{"name": "RX_Parameters.py", "text": text}])))
         self.assertNotIn("LOOPS", got["values"].get("RX_Parameters.py", {}))
         self.assertEqual(got["values"]["RX_Parameters.py"]["RX_SUBCOILS"], 2)
+
+    def test_a_value_no_setting_can_hold_is_named_not_taken(self):
+        """What a parameter file can say but no setting can hold (1e999, a set, bytes, a list in a list, a very long
+        text) is named and left out, and the rest of the file is read; the answer is always JSON a browser reads."""
+        for bad in ("1e999", "-1e999", "{1, 2}", '{"a": 1}', 'b"x"', "1+2j", "...", "[[1, 2], [3]]", '"' + "x" * 1001 + '"',
+                    str(list(range(17)))):
+            text = f"LOOPS = {bad}\nRX_SUBCOILS = 2\n"
+            out = WG.read_import(json.dumps([{"name": "RX_Parameters.py", "text": text}]))
+            got = json.loads(out, parse_constant=self.fail)             # Infinity and NaN are no JSON a browser reads
+            self.assertEqual(got["values"], {"RX_Parameters.py": {"RX_SUBCOILS": 2}}, bad[:20])
+            self.assertEqual(got["ignored"], ["LOOPS in RX_Parameters.py: not a value a setting can hold"], bad[:20])
+
+    def test_a_file_saved_by_notepad_and_a_line_too_long_to_be_a_setting(self):
+        """A byte order mark before the first line does not hide that line (text and zip).  A line of more than
+        4000 characters is no setting and is not read, however long it is."""
+        import time
+        import zipfile
+        text = "\ufeffLOOPS = 5\r\nRX_SUBCOILS = 2\r\n"
+        want = {"RX_Parameters.py": {"LOOPS": 5, "RX_SUBCOILS": 2}}
+        self.assertEqual(json.loads(WG.read_import(json.dumps([{"name": "RX_Parameters.py", "text": text}])))["values"], want)
+        path = os.path.join(tempfile.gettempdir(), "bridge_bom.zip")
+        with zipfile.ZipFile(path, "w") as z:
+            z.writestr("RX_Parameters.py", text.encode("utf-8"))
+        self.assertEqual(json.loads(WG.read_import(json.dumps([{"name": "x.zip", "path": path}])))["values"], want)
+        self.assertFalse(os.path.exists(path))                       # the zip is removed once it is read
+        start = time.time()
+        text = "LOOPS = " + "1 " * 200000 + "\nRX_SUBCOILS = 2\n"
+        got = json.loads(WG.read_import(json.dumps([{"name": "RX_Parameters.py", "text": text}])))
+        self.assertEqual(got["values"], {"RX_Parameters.py": {"RX_SUBCOILS": 2}})
+        self.assertLess(time.time() - start, 5)
 
 
 class Findings(unittest.TestCase):

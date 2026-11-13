@@ -283,8 +283,16 @@ export function initTips() {
   document.addEventListener("mouseover", (e) => { if (!quiet) over(e); });
   document.addEventListener("mousemove", (e) => { if (quiet) { quiet = false; over(e); } });
   document.documentElement.addEventListener("mouseleave", () => ask(null));
+  // A dialog that closes hands the focus back to the button that opened it, and leaves the mouse resting where it
+  // was: neither opens a box.  (afterDialog: a dialog was open at the last key or click.)
+  let afterDialog = false;
+  const dialogOpen = () => { afterDialog = !!document.querySelector("dialog[open]"); };
+  document.addEventListener("keydown", dialogOpen, true);
+  document.addEventListener("mousedown", dialogOpen, true);
+  document.addEventListener("close", (e) => { if (e.target instanceof HTMLDialogElement) { hide(); quiet = true; } }, true);
   document.addEventListener("focusin", (e) => {
     if (inBox(e.target)) return;
+    if (afterDialog && !e.target.closest("dialog")) { hide(); return; }
     const node = owner(e.target);
     if (node && e.target.matches(":focus-visible")) ask(node, e.target.closest(".info-dot") ? 0 : 200); else hide();
   });

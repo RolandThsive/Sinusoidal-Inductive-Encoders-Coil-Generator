@@ -164,11 +164,29 @@ export class BoardView {
     take(this.stator); take(this.rotor);
     return r || 50;
   }
+  /* Fit: the whole board in the middle of the drawing.  Where a button that lies on the drawing would cover part of
+     it (keepClear() gives their boxes, in canvas pixels), the board takes the largest free circle instead, the one
+     nearest the middle.  The circle it was given stands in data-circle (x, y, radius in CSS pixels). */
   fit() {
-    const W = this.canvas.width, H = this.canvas.height, r = this.extent() * 1.08;
-    this.view.scale = Math.min(W, H) / (2 * r);
-    this.view.ox = W / 2 - this.center[0] * this.view.scale;
-    this.view.oy = H / 2 - this.center[1] * this.view.scale;
+    const W = this.canvas.width, H = this.canvas.height, dpr = window.devicePixelRatio || 1;
+    let r = Math.min(W, H) / 2 / 1.08, cx = W / 2, cy = H / 2;
+    const boxes = this.keepClear ? this.keepClear() : [];
+    const free = (x, y) => Math.min(x, y, W - x, H - y, ...boxes.map((b) => Math.hypot(Math.max(b.l - x, 0, x - b.r), Math.max(b.t - y, 0, y - b.b))));
+    if (boxes.length && free(cx, cy) < r) {
+      const step = Math.max(2, Math.round(Math.min(W, H) / 80)), spots = [];
+      let best = 0;
+      for (let y = step; y < H; y += step) for (let x = step; x < W; x += step) { const f = free(x, y); spots.push([f, x, y]); if (f > best) best = f; }
+      let near = Infinity;
+      for (const [f, x, y] of spots) {
+        const d = Math.hypot(x - W / 2, y - H / 2);
+        if (f >= best * 0.985 && d < near) { near = d; cx = x; cy = y; }
+      }
+      r = Math.min(r, free(cx, cy) / 1.03);
+    }
+    this.view.scale = r / this.extent();
+    this.view.ox = cx - this.center[0] * this.view.scale;
+    this.view.oy = cy - this.center[1] * this.view.scale;
+    this.canvas.dataset.circle = [cx / dpr, cy / dpr, r / dpr].map((x) => x.toFixed(1)).join(" ");
     this.draw();
   }
   resize() {

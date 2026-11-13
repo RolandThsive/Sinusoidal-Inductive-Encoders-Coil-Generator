@@ -210,15 +210,19 @@ export function renderResults() {
   const of = (k) => {
     if (s) return s[k] || {};
     const n = v("LOOPS", k || 1);                              // no run yet, or the settings changed since: Loops gives the range
-    return { range: n ? `${fmt(360 / n)}°` : "" };
+    return { range: typeof n === "number" && n > 0 ? `${fmt(360 / n)}°` : "" };
   };
   const rows = RESULT_ROWS.filter(([, key]) => sets.some((k) => of(k)[key]));
   const board = s && (s[-1] || {}).board;
   if (dual) {
+    // names | room | Set 1 | room | Set 2: the two empty columns share the room, so the three columns of words stand
+    // at equal distances from the panel's left edge to its right edge; the board's line is centred under the two sets
+    const room = () => el("td", { class: "room" });
     const table = el("table", {},
-      el("thead", {}, el("tr", {}, el("td", {}), el("th", { scope: "col" }, "Set 1 · Inner"), el("th", { scope: "col" }, "Set 2 · Outer"))),
-      el("tbody", {}, rows.map(([label, key, tip]) => el("tr", {}, el("th", { scope: "row", ...tipOf(`result-${key}`, tip) }, label), sets.map((k) => el("td", {}, of(k)[key] || "–")))),
-        board ? el("tr", {}, el("th", { scope: "row" }, "Board"), el("td", { colspan: 2 }, board)) : null));
+      el("thead", {}, el("tr", {}, el("td", {}), room(), el("th", { scope: "col" }, "Set 1 · Inner"), room(), el("th", { scope: "col" }, "Set 2 · Outer"))),
+      el("tbody", {}, rows.map(([label, key, tip]) => el("tr", {}, el("th", { scope: "row", ...tipOf(`result-${key}`, tip) }, label),
+        sets.map((k) => [room(), el("td", {}, of(k)[key] || "–")]))),
+        board ? el("tr", {}, el("th", { scope: "row" }, "Board"), room(), el("td", { colspan: 3 }, board)) : null));
     box.append(table);
   } else {
     const list = el("dl", {});

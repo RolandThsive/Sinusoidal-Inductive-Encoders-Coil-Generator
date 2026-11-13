@@ -2,7 +2,6 @@
 
    Nothing here changes a value: a setting keeps the name, the choices and the limits its generator gives it. */
 
-import { fmt } from "./core.js";
 
 export const LAYER_NUM_NAME = { 1: "Top", 2: "Inner-1", 3: "Inner-2", 4: "Bottom" };
 export const LAYER_NUM_CU = { 1: "F.Cu", 2: "In1.Cu", 3: "In2.Cu", 4: "B.Cu" };
@@ -87,6 +86,5 @@ export function showValue(v) {
   if (v === null || v === undefined) return "None";
   if (typeof v === "boolean") return v ? "True" : "False";
   if (Array.isArray(v)) return `(${v.map(showValue).join(", ")})`;
-  if (typeof v === "string") return v;
-  return fmt(v);
+  return String(v);                                           // a number whole, as the file holds it
 }

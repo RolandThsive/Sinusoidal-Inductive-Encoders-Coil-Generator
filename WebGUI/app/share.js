@@ -8,7 +8,7 @@
    Export gives the parameter files as the desktop generator reads them; Import reads those files, the zip, or the
    Parameters.txt record a run writes (WebGenerator.read_import). */
 
-import { state, M, toast, download, copyText, plural } from "./core.js";
+import { state, M, toast, download, copyText, plural, has } from "./core.js";
 import { ask } from "./engine.js";
 import { setValues, isChanged, val } from "./model.js";
 
@@ -62,12 +62,12 @@ export function readHash(hash) {
 export function applyDesign(design) {
   const m = M(), changes = [], unknown = [];
   const take = (file, name, x) => {
-    if (file && m.params[file][name] && !m.params[file][name].readOnly && plain(x)) changes.push([file, name, x]);
+    if (file && has(m.params[file], name) && !m.params[file][name].readOnly && plain(x)) changes.push([file, name, x]);
     else unknown.push(name);
   };
   if (design.legacy) {
     const flat = Object.assign({}, LEGACY_START, design.legacy);
-    for (const [name, x] of Object.entries(flat)) take((m.files.find((f) => name in m.params[f.file]) || {}).file, name, x);
+    for (const [name, x] of Object.entries(flat)) take((m.files.find((f) => has(m.params[f.file], name)) || {}).file, name, x);
   } else {
     for (const [key, values] of Object.entries(design)) {
       const f = m.files.find((x) => short(x.file) === key);
@@ -80,6 +80,7 @@ export function applyDesign(design) {
 }
 
 export async function share() {
+  if (!M().files.length) return;                 // the settings are not read yet: there is no design to link to
   // embedded: the blog page tells us its address (a cross-origin referrer carries only the site)
   const base = window.self !== window.top ? (state.hostPage || document.referrer.split("#")[0] || BLOG_HOME) : location.href.split("#")[0];
   await copyText(designLink(base), "Link copied");
@@ -110,7 +111,7 @@ export async function importFiles(files, switchTo) {
   for (const [file, values] of Object.entries(r.values || {})) for (const [name, x] of Object.entries(values)) changes.push([file, name, x]);
   const ignored = r.ignored || [];
   if (!changes.length) {
-    toast(ignored.length ? `No settings of this version found (ignored: ${ignored.join(", ")})` : "No parameter values found in that file", 6000);
+    toast(ignored.length ? `No values taken. Ignored: ${ignored.join("; ")}` : "No parameter values found in that file", 6000);
     return;
   }
   if (r.mode && r.mode !== state.gen) {
@@ -118,7 +119,7 @@ export async function importFiles(files, switchTo) {
     if (r.mode !== state.gen) { toast(`These are ${r.mode === "dual" ? "Dual" : "Single"} files: wait for the run to end, then import them again`, 6000); return; }
   }
   setValues(changes, "import");
-  // a file of an older version names settings that were removed: say so, so nothing is silently lost
+  // what was not taken is named with its reason (a setting of another version, a value no setting can hold)
   toast(`Loaded ${plural(changes.length, "value")}` + (r.mode === "dual" ? " of a Dual design" : "") +
-    (ignored.length ? `. Ignored (not settings of this version): ${ignored.join(", ")}` : ""), ignored.length ? 7000 : 2600);
+    (ignored.length ? `. Ignored: ${ignored.join("; ")}` : ""), ignored.length ? 7000 : 2600);
 }

@@ -21,12 +21,15 @@ function chip({ off, locked, tip, icon, text, toggle, enter, leave }) {
     "data-focus": `chip|${text}`, onclick: toggle, onkeydown: (e) => chipKey(e, toggle), onmouseenter: enter, onmouseleave: leave, onfocus: enter, onblur: leave }, icon, text);
 }
 function renderLayerToggles() {
-  const box = $("layer-toggles"), focused = document.activeElement && box.contains(document.activeElement) ? document.activeElement.dataset.focus : null;
-  clear(box);
+  // the copper layers and the vias stand beside the view tabs; the two silkscreen sides under them, in the drawing's
+  // top right corner, on the line of the Fullscreen button
+  const copper = $("layer-toggles"), silk = $("silk-toggles"), at = document.activeElement;
+  const focused = at && (copper.contains(at) || silk.contains(at)) ? at.dataset.focus : null;
+  clear(copper); clear(silk);
   const present = view.layersPresent();                     // null before the first board: every chip works
   for (const cu of COPPER) {
     const name = CU_NAME[cu], off = view.hidden.has(cu);
-    box.append(chip({ off, locked: present && !present.has(cu), icon: swatch(LAYER_INFO[cu].css), text: name,
+    copper.append(chip({ off, locked: present && !present.has(cu), icon: swatch(LAYER_INFO[cu].css), text: name,
       tip: present && !present.has(cu) ? tipOf("layer-missing", `This board has no copper on the ${name} layer (${cu})`, { layer: name, cu })
         : off ? tipOf("layer-off", `Show the ${name} copper (${cu})`, { layer: name, cu })
           : tipOf("layer", `Hover to highlight the ${name} copper (${cu}), click to hide it (the preview only)`, { layer: name, cu }),
@@ -35,7 +38,7 @@ function renderLayerToggles() {
   }
   // vias: hide / show like a layer; hovering makes tiny vias big enough to see (preview only)
   const viasOff = view.hidden.has("Vias");
-  box.append(chip({ off: viasOff, icon: el("span", { class: "via-icon" }), text: "Vias",
+  copper.append(chip({ off: viasOff, icon: el("span", { class: "via-icon" }), text: "Vias",
     tip: viasOff ? tipOf("vias-off", "Show the vias")
       : tipOf("vias", "Show or hide the vias. Hover to enlarge small vias to at least 6 px (the preview only, the boards are unchanged)"),
     toggle: () => { view.setViaBoost(false); view.toggleLayer("Vias"); renderLayerToggles(); },
@@ -43,13 +46,13 @@ function renderLayerToggles() {
   // the silkscreen suggestion: where to cut the traces and place the lead vias (drawn on the board's silkscreen)
   for (const layer of SILK_LAYERS) {
     const side = layer === "F.SilkS" ? "Top" : "Bottom", off = view.hidden.has(layer), none = view.hasBoard && !view.hasSilk(layer);
-    box.append(chip({ off, locked: none, icon: swatch("--silk"), text: `Silk ${side}`,
+    silk.append(chip({ off, locked: none, icon: swatch("--silk"), text: `Silk ${side}`,
       tip: none ? tipOf("silk-missing", `This board has no silkscreen marks on its ${side.toLowerCase()} side (${layer})`, { side: side.toLowerCase(), cu: layer })
         : off ? tipOf("silk-off", `Show the silkscreen suggestion on the ${side.toLowerCase()} side (${layer})`, { side: side.toLowerCase(), cu: layer })
           : tipOf("silk", `Hide the silkscreen suggestion on the ${side.toLowerCase()} side (${layer}; the preview only)`, { side: side.toLowerCase(), cu: layer }),
       toggle: () => { view.toggleLayer(layer); renderLayerToggles(); } }));
   }
-  if (focused) { const again = [...box.querySelectorAll("[data-focus]")].find((n) => n.dataset.focus === focused); if (again) again.focus(); }
+  if (focused) { const again = [...copper.querySelectorAll("[data-focus]"), ...silk.querySelectorAll("[data-focus]")].find((n) => n.dataset.focus === focused); if (again) again.focus(); }
 }
 
 /* ---- Sin / Cos / TX Loops, Set 1 / Set 2 (top right) and Origin (beside Fit) -------------------- */
@@ -126,7 +129,7 @@ function pickView(mode) {
   markChoices($("view-tabs"), (b) => b.dataset.view === mode);
   $("board-canvas").hidden = pictures;
   $("pictures").hidden = !pictures;
-  for (const id of ["canvas-tools", "readout", "layer-toggles"]) $(id).hidden = pictures;
+  for (const id of ["canvas-tools", "readout", "layer-toggles", "silk-toggles"]) $(id).hidden = pictures;
   $("rotor-angle-box").hidden = mode !== "overlay";
   if (pictures) renderPictures();
   else view.setMode(mode);
@@ -159,6 +162,12 @@ export function showBoards(fit = true) {
 
 export function initPreview() {
   view = new BoardView($("board-canvas"), $("readout"));     // opens on Overlay
+  // the buttons that lie on the drawing, as boxes in the canvas's own pixels: Fit keeps the board clear of them
+  view.keepClear = () => {
+    const c = $("board-canvas").getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+    return ["canvas-tools", "silk-toggles", "net-toggles", "rotor-angle-box", "readout"].map((id) => $(id).getBoundingClientRect()).filter((b) => b.width && b.height)
+      .map((b) => ({ l: (b.left - c.left) * dpr, t: (b.top - c.top) * dpr, r: (b.right - c.left) * dpr, b: (b.bottom - c.top) * dpr }));
+  };
   wireChoices($("view-tabs"), (b) => pickView(b.dataset.view));
   markChoices($("view-tabs"), (b) => b.dataset.view === shows);
   renderLayerToggles();

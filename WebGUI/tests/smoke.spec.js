@@ -47,7 +47,7 @@ test("Dual: the switch makes the Dual generator's first board, and the zip downl
   const results = page.locator("#results");
   await expect(results.locator("thead th")).toHaveText(["Set 1 · Inner", "Set 2 · Outer"]);
   await expect(results.locator("tbody th")).toHaveText(["Range", "R", "L", "C", "f", "Board"]);
-  await expect(results.locator("tbody tr").first().locator("td")).toHaveText(["360°", "22.5°"]);
+  await expect(results.locator("tbody tr").first().locator("td:not(.room)")).toHaveText(["360°", "22.5°"]);
   await expect(results).not.toContainText(/IPS|RX Band|TX Ring|with the rotor/);
   await expect(page.locator("#btn-files")).toHaveText("All Files");
   const zip = await app.download("#btn-download");

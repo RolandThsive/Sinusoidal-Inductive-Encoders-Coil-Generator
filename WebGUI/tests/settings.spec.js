@@ -1,6 +1,7 @@
 /* settings: the page lists what the parameter files hold, and a setting behaves the same in Basic and in Advanced. */
 import fs from "node:fs";
 import path from "node:path";
+import { unzip } from "./zip.mjs";
 import { test, expect, REPO } from "./frame.js";
 
 /* The names a parameter file assigns at the start of a line, read from the file itself. */
@@ -99,6 +100,53 @@ test("a value the generator refuses is named under its setting, in the generator
   await expect(app.findings("error")).toHaveCount(0);
   await expect(page.locator("#results")).toContainText("180°");
   await expect(page.locator("#btn-download")).toBeEnabled();
+});
+
+test("a number box: a decimal comma is a decimal point; what is not a number changes nothing and is named", async ({ app, page }) => {
+  await app.open();
+  await app.mode("advanced");
+  for (const [typed, shown] of [["1,25", "1.25"], [" 1.5 ", "1.5"], ["2e0", "2"], ["+0.75", "0.75"], [".5", "0.5"]]) {
+    await app.type("AIR_GAP_MM", typed);
+    expect(await app.value("AIR_GAP_MM"), typed).toBe(shown);
+  }
+  for (const typed of ["abc", "1,5 mm", "1.2.3", "1,234.5", "--1", "1e", "0x10", "9".repeat(400)]) {
+    await app.type("AIR_GAP_MM", typed);
+    expect(await app.value("AIR_GAP_MM"), typed).toBe("0.5");                         // not read as its first digits
+    await expect(app.toast()).toContainText("is not a number: the value stays 0.5");
+  }
+  await app.type("AIR_GAP_MM", "");                                                   // an emptied box: the value comes back
+  expect(await app.value("AIR_GAP_MM")).toBe("0.5");
+  await app.tab("RX");
+  await app.type("LOOPS", "2.6");                                                     // a whole number is asked for
+  expect(await app.value("LOOPS")).toBe("3");
+  await app.mode("basic");
+  await app.tab("Board");
+  const gap = app.field("AIR_GAP_MM").locator("input[type=text]");
+  await gap.fill("0,8"); await gap.press("Tab"); await app.settled();
+  await expect(gap).toHaveValue("0.8");
+  await gap.fill("0.8mm"); await gap.press("Tab"); await app.settled();
+  await expect(gap).toHaveValue("0.8");
+  await expect(app.toast()).toContainText("is not a number");
+});
+
+test("a box shows its number whole: what stands in the box is what the generator gets", async ({ app, page }) => {
+  await app.open();
+  await app.mode("advanced");
+  await app.type("AIR_GAP_MM", "1.23456");
+  expect(await app.value("AIR_GAP_MM")).toBe("1.23456");                              // not 1.235
+  await app.type("PCB_THICKNESS_MM", "1.2345678");                                    // Advanced steps in millionths
+  expect(await app.value("PCB_THICKNESS_MM")).toBe("1.234568");
+  const files = unzip((await app.download("#btn-export")).bytes);
+  const board = Object.entries(files).find(([n]) => n.endsWith("Board_Parameters.py"))[1].toString("utf8");
+  expect(board).toMatch(/^AIR_GAP_MM\s*=\s*1\.23456\b/m);
+  expect(board).toMatch(/^PCB_THICKNESS_MM\s*=\s*1\.234568\b/m);
+  await app.mode("basic");
+  const gap = app.field("AIR_GAP_MM").locator("input[type=text]");
+  await expect(gap).toHaveValue("1.23456");
+  expect(await gap.evaluate((e) => e.scrollWidth <= e.clientWidth)).toBe(true);        // and the box is wide enough for it
+  await app.field("AIR_GAP_MM").locator("button", { hasText: "+" }).click();           // Basic steps in thousandths
+  await app.settled();
+  await expect(gap).toHaveValue("1.236");
 });
 
 test("None: the switch of Board Inner Radius hands the value to the generator, in both views", async ({ app, page }) => {

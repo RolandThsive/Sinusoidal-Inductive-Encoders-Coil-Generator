@@ -216,7 +216,11 @@ def _py_literal(value, kind=None):
     if value is None or isinstance(value, bool):
         return repr(value)
     if isinstance(value, str):
-        return json.dumps(value)                        # ASCII, double quotes, a valid Python literal
+        # ASCII between double quotes.  A character beyond U+FFFF is written as \UXXXXXXXX (json.dumps would write the
+        # two halves of its UTF-16 pair, which Python reads as two characters no file can hold); half a pair on its
+        # own, which only a damaged text carries, becomes U+FFFD.
+        value = value.encode("utf-16", "surrogatepass").decode("utf-16", "replace")
+        return "".join(json.dumps(ch)[1:-1] if ord(ch) <= 0xFFFF else "\\U%08x" % ord(ch) for ch in value).join('""')
     if isinstance(value, float):
         if value != value or value in (float("inf"), float("-inf")):
             raise ValueError(f"{value!r} is not a number a parameter file can hold")
@@ -437,19 +441,54 @@ def inactive(mode, values_json):
     return json.dumps(out)
 
 
+def _dual_layout_values(values, out):
+    """The Dual Coil Set Generator works its layout out before it checks the sets, so a band radius or a board edge
+    that is no number gets the layout's own words (Dual_TrackLayout.resolve: BoardLayout.given_band for the four
+    band values of each RX file, _num for the two edges).  Adds them to `out`; returns the names it has judged."""
+    from Generator.Core import BoardLayout
+    from Generator.Core.Conflict import ParameterConflict
+    from Dual_Generator.Core import Dual_SetParameters as SP
+    from Dual_Generator.Core import Dual_TrackLayout as TL
+    for k in (1, 2):
+        file = TL.RX_FILES[k]
+        mine = values.get(file) or {}
+        try:
+            BoardLayout.given_band(mine.get, f"RX{k} band", file)
+        except ParameterConflict as e:
+            if len(e.names) == 1 and e.names[0] in mine:      # one value on its own; a pair is a rule of the run
+                out.setdefault(file, {})[e.names[0]] = e.message
+        except Exception:
+            pass
+    board = values.get(SP.BOARD_FILE) or {}
+    for name in SP.EDGE_NAMES:
+        if board.get(name) is not None:
+            try:
+                TL._num(name, board[name], SP.BOARD_FILE)
+            except ParameterConflict as e:
+                out.setdefault(SP.BOARD_FILE, {})[name] = e.message
+    return tuple(SP.BAND_NAMES) + tuple(SP.EDGE_NAMES)
+
+
 def check_values(mode, values_json):
     """{file: {NAME: the generator's own message}} for every value that is wrong on its own: the type and range
     check of ParameterRules._check_value (the dual-only values with Dual_ParameterRules.DUAL_SPEC) and the
-    silkscreen step's Settings._check.  The rules between values are the program's (run with check only)."""
+    silkscreen step's Settings._check.  A setting the generator does not use with these values is not checked, as
+    in the program (ParameterRules.load_values).  Dual: the band radii and the board edges get the layout's words
+    (_dual_layout_values).  The rules between values are the program's (run with check only)."""
     _paths()
     from Generator.Checks import ParameterRules as PR
     values = json.loads(values_json)
     out = {}
     silk = None
+    try:
+        unused = json.loads(inactive(mode, values_json))        # the generator does not check what it does not use
+    except Exception:                                           # values too incomplete to tell: every value is checked
+        unused = {}
+    layout_names = _dual_layout_values(values, out) if mode == "dual" else ()
     for file, _label, _group, _k, rows in _layout(mode):
         mine = values.get(file) or {}
         for name, kind, o, _active, flags in rows:
-            if name not in mine:
+            if name not in mine or name in unused.get(file, ()) or (name in layout_names and not flags.get("override")):
                 continue
             value = mine[name]
             if kind == "pair" and isinstance(value, list):
@@ -652,17 +691,30 @@ def export_zip(mode, values_json):
 # =============================================================================
 IMPORT_MAX_BYTES = 8 * 1024 * 1024                  # of text, all files of one import together
 IMPORT_MAX_FILES = 64
+IMPORT_MAX_LINE = 4000                              # characters; the files' own lines are far shorter
+IMPORT_MAX_TEXT = 1000                              # characters of one text value
 _ASSIGN = re.compile(r"([A-Z][A-Z0-9_]*)\s*=\s*(.+)")
 _COPY_HEAD = re.compile(r"#{6,}\s+(\S+\.py)\s+#{6,}")
 _VALUES_HEAD = re.compile(r"\[(\S+\.py)\]")
 
 
-def _literals(text):
+def _holdable(x):
+    """A value a setting can hold and the page can carry: None, a truth value, a finite number, a text, or a list of
+    up to 16 numbers and texts (as a link's values, app/share.js)."""
+    one = lambda v, n: (isinstance(v, str) and len(v) <= n) or (isinstance(v, (int, float)) and v == v
+                                                              and v not in (float("inf"), float("-inf")))
+    return x is None or one(x, IMPORT_MAX_TEXT) or (isinstance(x, list) and len(x) <= 16
+                                                    and all(not isinstance(v, bool) and one(v, 200) for v in x))
+
+
+def _literals(text, refused=None):
     """{NAME: value} of every line `NAME = literal` of a parameter file or of a record's value list (the literal
-    is the longest start of the rest of the line that Python reads as one: a comment or a note after it is left)."""
+    is the longest start of the rest of the line that Python reads as one: a comment or a note after it is left).
+    A literal no setting can hold (a set, bytes, 1e999, a list in a list ...) is not taken: its name goes to
+    `refused`.  A line longer than IMPORT_MAX_LINE holds no setting and is not read."""
     out = {}
-    for line in text.split("\n"):
-        m = _ASSIGN.fullmatch(line.rstrip())
+    for line in text.lstrip("\ufeff").split("\n"):
+        m = _ASSIGN.fullmatch(line.rstrip()) if len(line) <= IMPORT_MAX_LINE else None
         if not m or line[:1] in " \t#":
             continue
         name, expr = m.group(1), m.group(2)
@@ -670,10 +722,14 @@ def _literals(text):
             if cut < len(expr) and expr[cut - 1] not in " \t" and expr[cut] not in " \t#":
                 continue                                   # only cut at a space or a comment
             try:
-                out[name] = _jsonable(ast.literal_eval(expr[:cut].strip()))
-                break
+                value = _jsonable(ast.literal_eval(expr[:cut].strip()))
             except Exception:
                 continue
+            if _holdable(value):
+                out[name] = value
+            elif refused is not None:
+                refused.append(name)
+            break
     return out
 
 
@@ -719,7 +775,7 @@ def read_import(items_json):
             ignored.append(f"{name}: too much to read (limit {IMPORT_MAX_FILES} files, {IMPORT_MAX_BYTES // 1024 // 1024} MB)")
             return
         total += len(data)
-        texts.append((name, data if isinstance(data, str) else data.decode("utf-8", "replace")))
+        texts.append((name, (data if isinstance(data, str) else data.decode("utf-8", "replace")).lstrip("\ufeff")))
 
     for item in items:
         if "path" in item:
@@ -765,7 +821,10 @@ def read_import(items_json):
             ignored.append(f"{name}: not a parameter file of the {mode} generator")
             continue
         files.append(name)
-        for key, value in _literals(text).items():
+        refused = []
+        got = _literals(text, refused)
+        ignored += [f"{key} in {name}: not a value a setting can hold" for key in refused if key in layout[name]]
+        for key, value in got.items():
             if key in READ_ONLY:
                 continue
             if key in layout[name]:
@@ -776,7 +835,9 @@ def read_import(items_json):
     if flat and mode == "single":
         owner = {key: file for file, keys in layout.items() for key in keys}
         for name, text in flat:
-            got = _literals(text)
+            refused = []
+            got = _literals(text, refused)
+            ignored += [f"{key} in {name}: not a value a setting can hold" for key in refused if key in owner]
             if got:
                 files.append(name)
             for key, value in got.items():

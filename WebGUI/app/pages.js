@@ -57,9 +57,10 @@ function drawSetSwitch(box, cat) {
 
 /* ---- Basic ---------------------------------------------------------------------------------------- */
 function noteFor(name) {
-  if (name === "LOOPS") { const n = v("LOOPS"); return `Range: ${fmt(n ? 360 / n : 360)}°`; }
-  if (name === "RX_SUBCOILS") return v("RX_SUBCOILS") > 1 ? `Split: ${fmt(v("RX_SUBCOIL_SPLIT_ELEC_DEG"))}° el` : "";
-  if (name === "TX_TURNS") return `Total: ${String(v("TX_WIRING")).toLowerCase() === "series" ? v("TX_TURNS") * 2 : v("TX_TURNS")}`;
+  const number = (x) => typeof x === "number" && Number.isFinite(x);     // a file can hand a text where a number belongs: no note then
+  if (name === "LOOPS") { const n = v("LOOPS"); return number(n) ? `Range: ${fmt(n > 0 ? 360 / n : 360)}°` : ""; }
+  if (name === "RX_SUBCOILS") return number(v("RX_SUBCOILS")) && v("RX_SUBCOILS") > 1 && number(v("RX_SUBCOIL_SPLIT_ELEC_DEG")) ? `Split: ${fmt(v("RX_SUBCOIL_SPLIT_ELEC_DEG"))}° el` : "";
+  if (name === "TX_TURNS") return number(v("TX_TURNS")) ? `Total: ${String(v("TX_WIRING")).toLowerCase() === "series" ? v("TX_TURNS") * 2 : v("TX_TURNS")}` : "";
   if (name === "RX_BAND") {                                    // which of the three ways the band is given (BandLayout.py)
     if (BAND_RADII.every((n) => v(n) !== null)) return "From the radii";
     if (BAND_CENTRE.every((n) => v(n) !== null)) return "From R Base and A";
@@ -247,6 +248,7 @@ export function setView(view, animate = true) {
   const show = () => {
     $("basic-panel").hidden = state.view !== "basic";
     $("advanced-panel").hidden = state.view !== "advanced";
+    showTitle();
     render();
   };
   $("app").classList.toggle("advanced", view === "advanced");
@@ -312,7 +314,11 @@ export function initPages() {
 /* the generator was changed (Single | Dual): show its settings, where the visitor left them */
 export function showGenerator() {
   $("find").value = M().find;
-  $("basic-title").textContent = hasSets() ? "Controls · Dual" : "Controls";
-  $("adv-title").textContent = hasSets() ? "All Parameters · Dual" : "All Parameters";
+  showTitle();
   render();
+}
+/* the panel's title: what it lists (Basic: the controls, Advanced: every parameter) and, for Dual, the generator */
+function showTitle() {
+  $("controls-title").textContent = (state.view === "advanced" ? "All Parameters" : "Controls") + (hasSets() ? " · Dual" : "");
+  $("app").classList.toggle("dual", hasSets());            // the page keeps a little more height for the two sets' results
 }

@@ -34,10 +34,6 @@
         <button type="button" role="option" tabindex="-1" aria-selected="false" aria-disabled="true" disabled>Linear</button>
       </div>
     </div>
-    <div class="segmented" id="mode-switch" role="radiogroup" aria-label="Settings shown">
-      <button type="button" role="radio" aria-checked="true" data-mode="basic" class="on" data-tip-id="mode-basic">Basic</button>
-      <button type="button" role="radio" aria-checked="false" data-mode="advanced" data-tip-id="mode-advanced">Advanced</button>
-    </div>
     <div class="top-actions">
       <a class="glass-btn small" id="btn-help" href="https://github.com/RolandThsive/Sinusoidal-Inductive-Encoders-Coil-Generator/wiki/Quick-Guide-To-Parameters-Selections" target="_blank" rel="noopener" data-tip-id="btn-help">Help</a>
       <button type="button" class="glass-btn small" id="btn-import" data-tip-id="btn-import">Import</button>
@@ -56,15 +52,20 @@
   <main id="workspace">
     <!-- Controls -->
     <aside id="controls" class="panel" aria-label="Settings">
+      <div class="controls-head">
+        <h2 class="pacifico" id="controls-title">Controls</h2>
+        <div class="segmented" id="mode-switch" role="radiogroup" aria-label="Settings shown">
+          <button type="button" role="radio" aria-checked="true" data-mode="basic" class="on" data-tip-id="mode-basic">Basic</button>
+          <button type="button" role="radio" aria-checked="false" data-mode="advanced" data-tip-id="mode-advanced">Advanced</button>
+        </div>
+      </div>
       <div id="basic-panel" tabindex="-1">
-        <h2 class="pacifico" id="basic-title">Controls</h2>
         <div class="segmented wide" id="basic-tabs" role="tablist" aria-label="Category"></div>
         <div class="segmented wide set-switch" id="basic-set" role="radiogroup" aria-label="Coil set" hidden></div>
         <div id="basic-controls" role="tabpanel"></div>
         <p id="basic-adv-note" class="hint"></p>
       </div>
       <div id="advanced-panel" tabindex="-1" hidden>
-        <h2 class="pacifico" id="adv-title">All Parameters</h2>
         <div class="find-row">
           <input type="search" id="find" class="text-input" placeholder="Find a setting" aria-label="Find a setting" autocomplete="off" spellcheck="false" data-tip-id="find">
           <span id="find-count" class="find-count" role="status"></span>
@@ -115,6 +116,7 @@
           <button type="button" class="glass-btn small" id="btn-measure" aria-label="Measure" aria-pressed="false" data-tip-id="btn-measure"><svg class="ruler" viewBox="0 0 108 24" aria-hidden="true"><path d="M2 5v12M106 5v12M3 11H105M3 11l4-3M3 11l4 3M105 11l-4-3M105 11l-4 3"/><path d="M14 11.5v4.5M20.67 11.5v3.5M27.33 11.5v3.5M34 11.5v3.5M40.67 11.5v4.5M47.33 11.5v3.5M54 11.5v3.5M60.67 11.5v3.5M67.33 11.5v4.5M74 11.5v3.5M80.67 11.5v3.5M87.33 11.5v3.5M94 11.5v4.5" stroke-width="1"/><g class="nums"><text x="14" y="23.4">0</text><text x="40.67" y="23.4">1</text><text x="67.33" y="23.4">2</text><text x="94" y="23.4">3</text></g><path class="span" d="M14 2.5H67.33"/><circle class="dot" cx="14" cy="2.5" r="1.6"/><circle class="dot" cx="67.33" cy="2.5" r="1.6"/></svg></button>
           <div class="measure-help" id="measure-help" hidden><kbd>S</kbd> Lock line, draw next<br><kbd>Z</kbd> Remove last line || point</div>
         </div>
+        <div class="silk-toggles" id="silk-toggles"></div>
         <div class="net-toggles" id="net-toggles"></div>
         <div class="readout" id="readout" data-tip-id="readout"></div>
         <div class="rotor-angle" id="rotor-angle-box" data-tip-id="rotor-angle">

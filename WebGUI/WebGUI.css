@@ -86,7 +86,11 @@ html.phone .desktop-only { display: none !important; }
 #phone-message h1 { font-size: 30px; margin-bottom: 18px; }
 
 /* ---- page frame -------------------------------------------------------- */
-#app { display: grid; grid-template-rows: auto 1fr auto; height: 100vh; padding: 0 16px 6px; gap: 10px; }
+/* the page fills the window.  In a window too low for the settings panel (its title, tabs, a list of two or three
+   settings, the results and the buttons) and for a drawing of 250 px, the page keeps the height they need and
+   scrolls: 680 px, and 720 px for Dual with its second line of tabs and its taller results */
+#app { display: grid; grid-template-rows: auto 1fr auto; height: max(100vh, 680px); padding: 0 16px 6px; gap: 10px; }
+#app.dual { height: max(100vh, 720px); }
 #topbar { position: relative; display: flex; align-items: center; gap: 18px; padding: 12px 0 0; min-height: 56px; }
 /* room for the blog's Home / Back buttons: BloggerPage.html's #coilgen-nav is 16 px from the right edge and holds two
    38 px buttons with an 8 px gap (100 px), plus 12 px of space */
@@ -124,7 +128,12 @@ html.embedded .standalone-nav { display: none; }
   .panel { background: rgba(255, 255, 255, 0.85); }
 }
 .panel h2 { font-size: 22px; line-height: 1.2; }
-#controls h2 { margin-bottom: 10px; }                    /* room between the title and the tabs under it */
+/* The panel's title row stays in place while the settings under it scroll: the title at the left, Basic | Advanced at
+   the right (it chooses what the panel lists).  The 4 px at the right is the room the lists keep beside their
+   scrollbar, so the switch ends on the right edge of the tabs under it. */
+.controls-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 4px 10px 0; flex: none; }
+#mode-switch { flex: none; }
+#mode-switch button { padding: 4px 10px; font-size: 13px; }
 
 /* ---- buttons (the Animations dropdown button) ---------------------------- */
 .glass-btn {
@@ -225,16 +234,21 @@ html.embedded .standalone-nav { display: none; }
 @supports not selector(::-webkit-scrollbar) {
   #basic-panel, #advanced-panel { scrollbar-color: #b4b4b4 rgba(0, 0, 0, 0.06); }
 }
-#advanced-panel h2 { margin-bottom: 10px; }
 .field { padding: 9px 0; border-bottom: 1px dashed var(--divider); }
 .field:last-child { border-bottom: 0; }
 .field-head { display: flex; align-items: baseline; gap: 6px; margin-bottom: 6px; }
+/* Advanced: the name in the file stands at the right of the setting's name; where the two do not fit on one line the
+   file name goes to a line of its own, so the setting's name is never broken */
+#advanced-panel .field-head { flex-wrap: wrap; row-gap: 1px; }
+.field-side { display: inline-flex; align-items: baseline; gap: 6px; margin-left: auto; }
 .field-label { font-weight: 600; font-size: 13.5px; }
 .field-label .unit { font-weight: normal; color: var(--text-3); }
 /* a field with help text shows the help cursor on its label */
 .field-head[data-help] .field-label { cursor: help; }
 .field-note { color: var(--text-3); font-size: 12px; margin-left: auto; text-align: right; }
 .none-switch { margin-left: auto; }                         /* the None switch of a Basic number field, at the right of its name */
+/* with a switch in the row the row is centred: on the text's baseline the name would stand on the switch's lower edge */
+.field-head:has(> .none-switch) { align-items: center; }
 .group-title.with-note { display: flex; align-items: baseline; }
 .group-title .field-note { text-transform: none; letter-spacing: 0; font-weight: normal; }   /* a note beside a heading reads as normal text */
 .info-dot {
@@ -342,18 +356,33 @@ button.group-title.collapsed .chevron { transform: rotate(-90deg); }
 .mono-name { font-family: var(--mono); font-size: 10.5px; color: var(--text-3); }
 
 /* results under the controls */
-.results { font-size: 12.5px; color: var(--text-2); border-top: 1px dashed var(--divider); padding: 8px 2px 4px; margin-top: 6px; line-height: 1.6; }
+/* The results, the buttons and the progress line end 4 px before the panel's edge, on the right edge of the tabs and
+   cards above them (the room the lists keep beside their scrollbar) */
+.results, .generate-row, #progress { margin-right: 4px; }
+.results { font-size: 12.5px; color: var(--text-2); border-top: 1px dashed var(--divider); padding: 8px 0 4px; margin-top: 6px; line-height: 1.6; }
+/* Dual: the row names at the panel's left edge, then one column per coil set.  The three columns are as wide as their
+   words and stand at equal distances: the names start on the left edge, Set 2 ends on the right edge, and the two
+   empty columns between them (.room) share what is left.  Each value is centred under its set's name; the board's
+   line is centred under the two sets. */
 .results table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
-.results th, .results td { text-align: left; padding: 1px 12px 1px 0; vertical-align: baseline; }
-.results tbody th, .results dt { font-weight: 600; color: var(--text); white-space: nowrap; width: 1%; }
+.results th, .results td { width: 1px; text-align: center; padding: 1px 0; vertical-align: baseline; white-space: nowrap; }
+.results td.room { width: 50%; }
+.results tbody th { text-align: left; }
+.results tbody th, .results dt { font-weight: 600; color: var(--text); white-space: nowrap; }
 .results thead th { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 600; padding-bottom: 3px; }
-.results dl { display: grid; grid-template-columns: auto 1fr auto 1fr; gap: 1px 12px; margin: 0; font-variant-numeric: tabular-nums; }
+/* Single: two pairs of name and value on a line.  The first pair starts on the panel's left edge, the second ends on
+   its right edge (its widest value), with the free room between the pairs. */
+.results dl { display: grid; grid-template-columns: auto auto 1fr auto auto; gap: 1px 12px; margin: 0; font-variant-numeric: tabular-nums; }
+.results dt:nth-of-type(odd) { grid-column: 1; }
+.results dd:nth-of-type(odd) { grid-column: 2; }
+.results dt:nth-of-type(even) { grid-column: 4; }
+.results dd:nth-of-type(even) { grid-column: 5; }
 .results dd { margin: 0; }
 /* Strict and Reset on one row, Generate full width under them (Reset and Generate the same height) */
 .generate-row { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 8px 10px; padding-top: 6px; }
 .generate-row .switch-row { grid-column: 1; grid-row: 1; }
 .generate-row .reset-btn { grid-column: 2; grid-row: 1; width: 100%; }
-.generate-row #btn-check { grid-column: 1; grid-row: 2; }
+.generate-row #btn-check { grid-column: 1; grid-row: 2; align-self: stretch; }   /* as high as Generate beside it */
 .generate-row .primary-btn { grid-column: 2; grid-row: 2; }
 .reset-btn {                                     /* the blog's yellow: --warning-edge border, cream fill */
   font: inherit; font-size: 15px; font-weight: 600; color: var(--text);
@@ -374,9 +403,23 @@ button.group-title.collapsed .chevron { transform: rotate(-90deg); }
 @keyframes controls-in { from { opacity: 0; transform: translateX(14px) scale(0.985); } to { opacity: 1; transform: none; } }
 
 /* ---- preview ------------------------------------------------------------------- */
-#preview { display: flex; flex-direction: column; padding: 10px 12px 6px; }
-.preview-head { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-.layer-toggles { display: flex; gap: 6px; margin-left: auto; flex-wrap: wrap; }
+#preview { display: flex; flex-direction: column; padding: 10px 14px 6px; container: preview / inline-size; }   /* 14 px at the sides, as the Checks panel under it */
+/* The head: the view tabs at the left, the copper layers and the vias at the right, on one line.  It is set in by the
+   10 px the buttons inside the drawing keep from its edge, so the tabs stand over the Fullscreen button and the chips
+   end over the silkscreen chips and the Sin / Cos / TX buttons. */
+.preview-head { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 14px; row-gap: 6px; align-items: center; padding: 0 10px; }
+#view-tabs { justify-self: start; }
+.layer-toggles { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 6px; min-width: 0; }
+/* a preview too narrow for the tabs and the copper chips on one line: the chips go under the tabs */
+@container preview (max-width: 733px) {
+  .preview-head { grid-template-columns: minmax(0, 1fr); }
+}
+/* The two silkscreen sides: the line under the copper chips, in the drawing's top right corner.  As tall as the
+   Fullscreen / Fit / Origin row at the left, so the two rows are one line; the Sin / Cos / TX buttons start under it
+   as the ruler starts under the icons. */
+.silk-toggles { position: absolute; top: 10px; right: 10px; height: 32px; display: flex; align-items: center; gap: 6px; z-index: 2; }
+.silk-toggles .layer-chip { background: rgba(255, 255, 255, 0.85); box-shadow: var(--shadow-btn); }
+.silk-toggles .layer-chip.off { background: rgba(255, 255, 255, 0.6); box-shadow: none; }
 .layer-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; padding: 4px 10px; border-radius: 14px;
   background: var(--glass); border: 1px solid rgba(0, 0, 0, 0.08); cursor: pointer; transition: all var(--ease); user-select: none; }
 .layer-chip .sw { width: 12px; height: 12px; border-radius: 3px; }
@@ -394,7 +437,7 @@ button.group-title.collapsed .chevron { transform: rotate(-90deg); }
 .via-icon { width: 12px; height: 12px; border-radius: 50%;
   background: radial-gradient(circle, #f4f1ea 0 2px, var(--via-rim) 2px 2.6px, var(--via) 2.6px); background-origin: border-box; border: 1px solid var(--via-rim); }
 /* Sin / Cos / TX Loops, top right of the preview (under the layer chips) */
-.net-toggles { position: absolute; top: 10px; right: 10px; display: flex; flex-direction: column; align-items: stretch; gap: 6px; z-index: 2; }
+.net-toggles { position: absolute; top: 50px; right: 10px; display: flex; flex-direction: column; align-items: stretch; gap: 6px; z-index: 2; }
 .net-btn { display: inline-flex; align-items: center; gap: 6px; font: inherit; font-size: 12.5px; color: var(--text); cursor: pointer;
   padding: 5px 11px; border-radius: 14px; border: 1px solid rgba(0, 0, 0, 0.08); background: rgba(255, 255, 255, 0.85);
   box-shadow: var(--shadow-btn); transition: all var(--ease); }
@@ -408,6 +451,9 @@ button.group-title.collapsed .chevron { transform: rotate(-90deg); }
 .canvas-wrap canvas.dragging { cursor: grabbing; }
 .canvas-wrap canvas.measuring { cursor: crosshair; }
 .canvas-wrap:fullscreen { background: #fff; border-radius: 0; }
+/* full screen shows the drawing alone: no layer chips, so no silkscreen chips either, and the coil buttons move up */
+.canvas-wrap:fullscreen .silk-toggles { display: none; }
+.canvas-wrap:fullscreen .net-toggles { top: 10px; }
 /* the Fullscreen button: icon only, so its size and padding come from .canvas-tools .icon-btn below */
 .fs-btn { border: 0; border-radius: 6px;
   cursor: pointer; background: rgba(0, 0, 0, 0.65); color: #fff; font-size: 14px; line-height: 1.2; font-family: Arial, Helvetica, sans-serif; }
@@ -439,14 +485,14 @@ button.group-title.collapsed .chevron { transform: rotate(-90deg); }
   border-bottom-width: 2px; border-radius: 4px; background: #fff; font: 600 11px/16px var(--ui-font); text-align: center; }
 .canvas-tools .icon-btn:hover { color: var(--accent); }
 .canvas-tools .on { border-color: var(--accent); color: var(--accent); background: var(--cream); }
-.readout { position: absolute; left: 12px; bottom: 10px; font-size: 12px; color: var(--text-2); font-variant-numeric: tabular-nums;
+.readout { position: absolute; left: 10px; bottom: 10px; font-size: 12px; color: var(--text-2); font-variant-numeric: tabular-nums;
   background: rgba(255, 255, 255, 0.7); padding: 2px 8px; border-radius: 6px; pointer-events: none; }
 .readout:empty { display: none; }
 .stale-badge { position: absolute; top: 28px; left: 50%; transform: translate(-50%, -50%); white-space: nowrap; z-index: 3;
   background: rgba(255, 255, 255, 0.92);
   border: 1px solid var(--accent); color: var(--accent); font-size: 12.5px; padding: 4px 12px; border-radius: 14px; box-shadow: var(--shadow-btn); }
 .stale-badge.two-line { white-space: normal; width: max-content; max-width: 150px; text-align: center; line-height: 1.25; padding: 4px 10px; }
-.rotor-angle { position: absolute; right: 12px; bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 12.5px;
+.rotor-angle { position: absolute; right: 10px; bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 12.5px;
   background: rgba(255, 255, 255, 0.8); padding: 4px 10px; border-radius: 10px; box-shadow: var(--shadow-btn); width: 300px; }
 .rotor-angle output { width: 44px; text-align: right; font-variant-numeric: tabular-nums; }
 
@@ -566,6 +612,7 @@ dialog pre { font-family: var(--mono); font-size: 12px; white-space: pre-wrap; m
 .find-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
 .find-row .text-input { flex: 1; min-width: 0; }
 .find-count { font-size: 12px; color: var(--text-2); white-space: nowrap; }
+.find-count:empty { display: none; }                      /* no count, no gap: the box ends on the tabs' right edge */
 .auto-row.wrap { flex-wrap: wrap; row-gap: 6px; }
 .text-input.short { width: 96px; }
 .colour-input { width: 38px; height: 30px; padding: 2px; border: 1px solid rgba(0, 0, 0, 0.2); border-radius: 8px; background: #fff; cursor: pointer; }
@@ -632,7 +679,6 @@ input[type=color]:focus-visible, canvas:focus-visible, pre:focus-visible, .check
   #topbar h1 { font-size: 16px; }
   #topbar { gap: 8px; }
   .top-actions .glass-btn { padding-left: 8px; padding-right: 8px; font-size: 12.5px; }
-  #mode-switch button { padding-left: 12px; padding-right: 12px; }
 }
 @media (max-width: 1070px) {
   #topbar h1 { font-size: 14px; }
@@ -641,7 +687,6 @@ input[type=color]:focus-visible, canvas:focus-visible, pre:focus-visible, .check
 }
 @media (max-width: 1100px) {                       /* portrait monitors (1080 px): four buttons plus the nav have to fit */
   #topbar h1 { font-size: 12.5px; }
-  #mode-switch button { padding-left: 10px; padding-right: 10px; }
   .top-actions .glass-btn { padding-left: 6px; padding-right: 6px; font-size: 12px; }
 }
 
@@ -650,12 +695,53 @@ input[type=color]:focus-visible, canvas:focus-visible, pre:focus-visible, .check
   #workspace { grid-template-rows: minmax(0, 1fr) 380px; }
 }
 
-/* a narrow checks panel (Advanced on a portrait monitor): the counts move to a second line, beside the
-   board buttons.  280 px is a little more than the 276 px the list reserves for the download box and the gap */
-@container (max-width: 760px) {
+/* a checks panel too narrow for one line (its own width, so Basic and Advanced each get what fits): the counts move
+   to a second line, beside the board buttons.  280 px is a little more than the 276 px the list reserves for the
+   download box and the gap.  1010 px: the title, the longest counts line, Info, Run Text and the download box */
+@container (max-width: 1010px) {
   .checks-head { flex-wrap: wrap; row-gap: 6px; }
   .checks-head > .counts { order: 10; flex: 0 0 calc(100% - 280px); display: block; white-space: normal; line-height: 1.45; min-height: 0; padding-top: 6px; }
   .checks-head > .pacifico { margin-right: auto; }
+}
+/* narrower still (Advanced in a 1024 px window): the title line, the counts, then the four download buttons in one
+   line, and the list under them at the panel's full width */
+@container (max-width: 560px) {
+  .checks-head > .counts { flex-basis: 100%; padding-top: 0; }
+  .download-box { order: 20; width: 100%; display: flex; gap: 6px; }
+  .download-box .primary-btn { width: auto; flex: 1.4 1 0; padding-left: 8px; padding-right: 8px; white-space: nowrap; }
+  .download-row { position: static; flex: 3 1 0; }
+  .checks-list { margin-right: 0; }
+}
+
+/* ---- small windows: a browser zoomed to 200 % ... 400 % ------------------------------------------------- */
+/* A window narrower than 1000 px: one column (the settings, the drawing, the checks), each as wide as the window,
+   and the page scrolls down.  Nothing needs scrolling sideways, down to 320 px. */
+@media (max-width: 999px) {
+  #app, #app.dual { height: auto; min-height: 100vh; padding: 0 8px 6px; }
+  #topbar { flex-wrap: wrap; gap: 6px 8px; padding-top: 8px; min-height: 0; }
+  html.embedded #topbar { padding-right: 0; }
+  #topbar h1 { white-space: normal; font-size: 15px; flex: 1 1 100%; top: 0; }
+  .top-actions { margin-left: 0; flex-wrap: wrap; gap: 5px; }
+  #workspace, #app.advanced #workspace { display: flex; flex-direction: column; }
+  #controls { height: 700px; flex: none; }
+  #preview { height: 470px; flex: none; }
+  #checks { min-height: 230px; flex: none; }
+  .checks-list { max-height: 320px; }
+  .controls-head { flex-wrap: wrap; row-gap: 6px; }
+  .segmented.wide button { padding-left: 2px; padding-right: 2px; }
+  .auto-row { flex-wrap: wrap; row-gap: 6px; }
+  #view-tabs button { padding-left: 8px; padding-right: 8px; }
+  .layer-toggles { justify-content: flex-start; }
+  /* the buttons on the drawing: the tools and the silkscreen chips down the left side, the coil buttons down the right */
+  .silk-toggles { top: 96px; left: 10px; right: auto; height: auto; flex-direction: column; align-items: flex-start; }
+  .net-toggles { top: 10px; }
+  .rotor-angle { max-width: calc(100% - 20px); }
+  .rotor-angle input[type=range] { min-width: 0; flex: 1 1 60px; }
+}
+/* the Checks panel of a 320 px window: Download Zip on a line of its own, the three files under it */
+@container (max-width: 400px) {
+  .download-box { flex-wrap: wrap; }
+  .download-box .primary-btn { flex: 1 1 100%; }
 }
 
 /* people who ask for less motion get none: this wins over every transition and animation above */

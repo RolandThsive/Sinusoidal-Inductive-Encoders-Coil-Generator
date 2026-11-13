@@ -17,7 +17,7 @@ async function openTip(page, target) {
   await closeTip(page);
   await target.scrollIntoViewIfNeeded();
   await page.waitForTimeout(150);                            // the scroll itself closes a box
-  await target.hover();
+  await target.hover({ timeout: 15000 });                    // a control that cannot be reached is named at once, not after the test's six minutes
   const pop = page.locator("#popover");
   await expect(pop).toBeVisible();
   return pop;
@@ -268,4 +268,22 @@ test("axe finds nothing with a tip open", async ({ app, page }) => {
     found.push(...r.violations.filter((v) => !(v.id === "label-content-name-mismatch" && v.nodes.every((x) => x.target.join(" ") === "#btn-measure"))).map((v) => `${v.id} (${v.impact}) ${v.help} -> ${v.nodes.slice(0, 3).map((x) => x.target.join(" ")).join(" | ")}`));
   }
   expect(found).toEqual([]);
+});
+
+test("a dialog that closes opens no tip: not for the focus it hands back, not for the mouse resting on the button", async ({ app, page }) => {
+  await app.open();
+  const pop = page.locator("#popover");
+  await page.click("#btn-runtext");
+  await expect(page.locator("#text-dialog")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.locator("#text-dialog")).toBeHidden();
+  await page.waitForTimeout(800);                            // longer than a tip waits
+  await expect(pop).toBeHidden();
+  const box = await page.locator("#btn-runtext").boundingBox();
+  await page.mouse.move(box.x + box.width / 2 + 2, box.y + box.height / 2);   // the mouse moves on the button: now its tip opens
+  await expect(pop).toBeVisible();
+  await closeTip(page);
+  await page.focus("#btn-share");
+  await page.keyboard.press("Tab");                          // and the keyboard opens tips as before
+  await expect(pop).toBeVisible();
 });

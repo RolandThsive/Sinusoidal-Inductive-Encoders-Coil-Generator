@@ -35,6 +35,16 @@ export function tipOf(id, text, args) {
 export function same(a, b) { return JSON.stringify(a) === JSON.stringify(b); }
 export function clone(x) { return JSON.parse(JSON.stringify(x)); }
 export function fmt(x) { return typeof x === "number" ? String(Math.round(x * 1000) / 1000) : String(x); }
+/* a value as its box shows it: the whole number, as the generator gets it (fmt is for worked-out numbers) */
+export const boxText = (x) => (Array.isArray(x) ? `(${x.join(", ")})` : String(x));
+/* a name of the object itself, not one every object has ("constructor", "__proto__"): names can come from a link */
+export const has = (obj, name) => Object.prototype.hasOwnProperty.call(obj, name);
+/* The number a typed text stands for: digits with a decimal point or one decimal comma, a sign and an exponent
+   allowed ("0,25", "-1.5", "3.5e6").  NaN for anything else: "1,5 mm", "1.2.3" and "abc" are not read as their start. */
+export function typedNumber(text) {
+  const t = String(text).replace(/\s+/g, "");
+  return /^[-+]?(\d+([.,]\d*)?|[.,]\d+)(e[-+]?\d+)?$/i.test(t) ? Number(t.replace(",", ".")) : NaN;
+}
 export function plural(n, word) { return `${n} ${word}${n === 1 ? "" : "s"}`; }
 
 /* ---- state ------------------------------------------------------------------------------------- */

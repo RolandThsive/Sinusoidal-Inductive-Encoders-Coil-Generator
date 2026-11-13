@@ -17,7 +17,7 @@ export default defineConfig({
   expect: { timeout: 20000 },
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: 0,
+  retries: process.env.CI ? 1 : 0,                    // a runner's browser now and then crashes under Pyodide: one more try there; a test that passes only then is listed as flaky
   workers: process.env.CI ? 2 : undefined,
   reporter: process.env.CI ? [["github"], ["list"], ["html", { open: "never", outputFolder: "playwright-report" }]] : [["list"]],
   webServer: { command: "node tests/serve.mjs", port: PORT, reuseExistingServer: !process.env.CI, timeout: 180000 },

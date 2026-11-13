@@ -48,12 +48,16 @@ test("the open menu, the dialogs, the pictures and full screen", async ({ app, p
   await app.open();
   const found = [];
   await page.click("#gen-btn");
+  await expect(page.locator("#gen-list")).toHaveCSS("opacity", "1");   // the menu has faded in: half way its text is too faint
   found.push(...await failures(page, "generator menu"));
   await page.keyboard.press("Escape");
   await page.click("#btn-runtext");
   await expect(page.locator("#text-dialog")).toBeVisible();
   found.push(...await failures(page, "run text"));
   await page.keyboard.press("Escape");
+  await expect(page.locator("#text-dialog")).toBeHidden();
+  await page.waitForTimeout(700);                                     // longer than a tip waits: the closed dialog opens none over the buttons
+  await expect(page.locator("#popover")).toBeHidden();
   await page.click("#btn-files");
   found.push(...await failures(page, "all files"));
   await page.keyboard.press("Escape");
