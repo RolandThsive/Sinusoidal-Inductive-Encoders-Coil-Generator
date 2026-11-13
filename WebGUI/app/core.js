@@ -49,6 +49,15 @@ function modeState() {
     basicTab: "Board", advTab: "Board", set: 1, find: "",
   };
 }
+/* What the page is doing, as <html data-state>: "loading" until the first board is made, then "busy" while anything
+   is under way (a run, a switch of generator, an import, the generator's checks of typed values) and "ready" when
+   the page has settled; "failed" when Python did not start.  The style sheet and the tests read it. */
+let phase = "loading", jobs = 0;
+function showState() { document.documentElement.dataset.state = phase === "ready" && jobs > 0 ? "busy" : phase; }
+export function setPhase(p) { phase = p; showState(); }
+export function job(n) { jobs = Math.max(0, jobs + n); showState(); }
+export async function during(fn) { job(1); try { return await fn(); } finally { job(-1); } }
+
 export const state = {
   gen: "single",                  // which generator: "single" or "dual"
   view: "basic",                  // which settings are shown: "basic" or "advanced"
@@ -132,6 +141,46 @@ export function wireChoices(box, pick) {
     if (again.isConnected) again.focus();
   });
 }
+/* Close every open menu (but `keep`).  A click anywhere else on the page closes them all. */
+export function closeMenus(keep) {
+  document.querySelectorAll(".dropdown.open").forEach((d) => {
+    if (d === keep) return;
+    d.classList.remove("open");
+    d.querySelector(".dropdown-btn").setAttribute("aria-expanded", "false");
+  });
+}
+document.addEventListener("click", () => closeMenus());
+
+/* A menu that is written in the page: a .dropdown with its button and a listbox of option buttons.  pick(option) is
+   called for a choice; options that are disabled are shown greyed out and cannot be reached. */
+export function wireMenu(dd, pick) {
+  const btn = dd.querySelector(".dropdown-btn"), list = dd.querySelector('[role="listbox"]');
+  const items = () => [...list.querySelectorAll('[role="option"]:not(:disabled)')];
+  function open(on, focusItem) {
+    closeMenus(dd);
+    dd.classList.toggle("open", on);
+    btn.setAttribute("aria-expanded", String(on));
+    if (on && focusItem) (items().find((i) => i.classList.contains("on")) || items()[0]).focus();
+  }
+  btn.addEventListener("click", (e) => { e.stopPropagation(); open(!dd.classList.contains("open"), e.detail === 0); });
+  btn.addEventListener("keydown", (e) => { if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); open(true, true); } });
+  list.addEventListener("click", (e) => {
+    e.stopPropagation();                                       // a greyed-out line leaves the menu open
+    const o = e.target.closest('[role="option"]');
+    if (!o || o.disabled) return;
+    open(false); btn.focus(); pick(o);
+  });
+  list.addEventListener("keydown", (e) => {
+    const all = items(), i = all.indexOf(document.activeElement);
+    if (e.key === "ArrowDown") { e.preventDefault(); all[(i + 1) % all.length].focus(); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); all[(i - 1 + all.length) % all.length].focus(); }
+    else if (e.key === "Home") { e.preventDefault(); all[0].focus(); }
+    else if (e.key === "End") { e.preventDefault(); all[all.length - 1].focus(); }
+    else if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); open(false); btn.focus(); }
+    else if (e.key === "Tab") open(false);
+  });
+}
+
 /* Mark which choice of a row is on: the class, the ARIA state and the one tab stop. */
 export function markChoices(box, isOn) {
   const tabs = box.getAttribute("role") === "tablist";

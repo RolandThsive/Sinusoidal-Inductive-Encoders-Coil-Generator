@@ -133,8 +133,7 @@ function pickView(mode) {
 
 /* Show the boards of the chosen generator's last good run (none yet: an empty preview). */
 export function showBoards(fit = true) {
-  const m = M(), g = m.good, strip = $("layout-strip");
-  strip.hidden = true;
+  const m = M(), g = m.good;
   if (!g) view.clearBoards();
   else {
     const text = (name) => (name && g.bytes[name] ? new TextDecoder().decode(g.bytes[name]) : null);
@@ -148,9 +147,6 @@ export function showBoards(fit = true) {
     }
     view.setBoards(text(g.stator), text(g.rotor), [b.CENTER_X_MM ?? 100, b.CENTER_Y_MM ?? 100]);
     view.setNetRoles(roles, sets);
-    // Dual: where the two coil sets ended up, in the generator's words
-    const line = hasSets() && /^\s*on the built copper: (.*)$/m.exec(g.text);
-    if (line) { strip.textContent = `On the built copper: ${line[1]}`; strip.hidden = false; }
   }
   if (shows === "pictures") renderPictures();
   renderLayerToggles();

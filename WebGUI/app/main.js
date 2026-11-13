@@ -8,7 +8,7 @@
    The order of a visit: Python is loaded (the CDN first, this site's own copy if the CDN does not answer), the
    chosen generator's tables are read, a design from the link is put on them, and the generator runs once. */
 
-import { $, state, M, toast, confirmBox, copyText, closeOnOutsideClick, wireChoices, markChoices, el, clear } from "./core.js";
+import { $, state, M, toast, confirmBox, copyText, closeOnOutsideClick, wireMenu, closeMenus, el, clear, setPhase, during } from "./core.js";
 import { configure, start } from "./engine.js";
 import { loadMode, onChange, where, val, setOne, resetAll, refreshChecks } from "./model.js";
 import { initPages, showGenerator } from "./pages.js";
@@ -37,12 +37,19 @@ function pythonSources() {
 }
 
 function progressText(text) {
-  if (!state.ready) $("btn-generate").textContent = text.replace("…", "") + "…";
-  clear($("checks-list")).append(el("p", { class: "hint" }, text));
+  if (state.ready) return;
+  $("btn-generate").textContent = text.replace("…", "") + "…";
+  // the box on the preview, the one a run uses: what is being loaded
+  $("run-title").textContent = "Loading";
+  $("run-line").textContent = text;
+  $("btn-cancel").hidden = true;
+  $("run-card").hidden = false;
 }
 function fatal(text, details) {
   $("progress").classList.remove("busy");
   $("btn-generate").textContent = "Python Did Not Start";
+  $("run-card").hidden = true;
+  setPhase("failed");
   clear($("checks-list")).append(el("div", { class: "check error" }, el("span", { class: "lvl" }, "ERROR"), el("span", { class: "stage" }, "Start"), el("span", { class: "msg" }, text)));
   showCrash(text, details);
 }
@@ -53,32 +60,41 @@ function syncStrict() { $("strict").checked = String(val(strictFile(), "GENERATO
 
 /* everything the page shows of the chosen generator */
 function showAll() {
-  markChoices($("gen-switch"), (b) => b.dataset.gen === state.gen);
+  for (const o of $("gen-list").children) {
+    const on = o.dataset.gen === state.gen;
+    o.classList.toggle("on", on);
+    o.setAttribute("aria-selected", String(on));
+    if (on) $("gen-now").textContent = o.textContent;
+  }
   syncStrict();
   showGenerator();
   showRun();
   showBoards();
 }
-async function switchGen(gen, run = true) {
-  if (gen === state.gen || state.busy || !state.ready) return;
-  try { await loadMode(gen); }
-  catch (e) { showCrash(`The ${gen} generator's settings could not be read.`, String(e.message || e)); return; }
-  state.gen = gen;
-  showAll();
-  await refreshChecks();
-  if (run && !M().result) generate();                // its first board, as the page does for Single when it opens
+function switchGen(gen, run = true) {
+  if (gen === state.gen || state.busy || !state.ready) return Promise.resolve();
+  return during(async () => {
+    try { await loadMode(gen); }
+    catch (e) { showCrash(`The ${gen} generator's settings could not be read.`, String(e.message || e)); return; }
+    state.gen = gen;
+    showAll();
+    await refreshChecks();
+    if (run && !M().result) await generate();        // its first board, as the page does for Single when it opens
+  });
 }
 
 function wire() {
-  wireChoices($("gen-switch"), (b) => switchGen(b.dataset.gen));
+  wireMenu($("gen-switch"), (o) => switchGen(o.dataset.gen));
   $("btn-share").addEventListener("click", share);
   $("btn-export").addEventListener("click", exportFiles);
   $("btn-import").addEventListener("click", () => $("import-file").click());
   $("import-file").addEventListener("change", async (e) => {
     const files = [...e.target.files];
     e.target.value = "";
-    await importFiles(files, (gen) => switchGen(gen, false));
-    if (state.ready && !state.busy && !M().result) generate();          // a generator that has not run yet shows the imported design
+    await during(async () => {
+      await importFiles(files, (gen) => switchGen(gen, false));
+      if (state.ready && !state.busy && !M().result) await generate();  // a generator that has not run yet shows the imported design
+    });
   });
   $("btn-reset").addEventListener("click", async () => {
     if (!state.ready || !(await confirmBox("Are you sure to reset the board?"))) return;
@@ -113,7 +129,7 @@ async function main() {
   initPages();
   initPreview();
   initRun({ onGood: (gen) => { if (gen === state.gen) showBoards(); },
-    onBusy: (on) => document.querySelectorAll("#gen-switch button").forEach((b) => (b.disabled = on)) });
+    onBusy: (on) => { $("gen-btn").disabled = on; if (on) closeMenus(); } });
   wire();
   $("progress").classList.add("busy");
   await readBuild();
@@ -146,6 +162,7 @@ async function main() {
   showAll();
   await refreshChecks();
   await generate();
+  setPhase("ready");
 }
 
 window.addEventListener("message", (e) => {

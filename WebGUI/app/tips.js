@@ -14,6 +14,7 @@ import { TOOLTIPS } from "./paramtips.js";
 import { showValue } from "./labels.js";
 
 const TIPS = {
+  "gen-menu": "Which generator the page runs. Your settings of each generator are kept when you switch. Arc and Linear are not available.",
   "gen-single": "The Single Coil Set Generator: one sine and cosine RX pair with one TX coil. Your settings of each generator are kept when you switch.",
   "gen-dual": "The Dual Coil Set Generator: two coil sets on one board, an inner and an outer one, each with its own rotor ring (a coarse and a fine track). Your settings of each generator are kept when you switch.",
   "mode-basic": "The main settings of each category, with sliders",
@@ -77,11 +78,21 @@ function show(node) {
   shownFor = node;
   if (!node.hasAttribute("aria-describedby")) node.setAttribute("aria-describedby", "popover");
   const r = node.getBoundingClientRect(), h = pop.offsetHeight, w = pop.offsetWidth;
+  const list = node.closest(".dropdown-content");
+  if (list) {                                              // a line of an open menu: beside the menu, never over its lines
+    const m = list.getBoundingClientRect(), right = m.right + 8;
+    pop.style.top = `${Math.max(6, Math.min(r.top, window.innerHeight - h - 6))}px`;
+    pop.style.left = `${right + w < window.innerWidth - 6 ? right : Math.max(6, m.left - w - 8)}px`;
+    return;
+  }
   const below = r.bottom + 8, above = r.top - h - 8;
   pop.style.top = `${below + h < window.innerHeight - 6 || above < 6 ? Math.max(6, Math.min(below, window.innerHeight - h - 6)) : above}px`;
   pop.style.left = `${Math.max(6, Math.min(window.innerWidth - w - 6, r.left))}px`;
 }
-const owner = (t) => (t && t.closest ? t.closest("[data-tip], [data-tip-id], [data-help]") : null);
+function owner(t) {
+  const node = t && t.closest ? t.closest("[data-tip], [data-tip-id], [data-help]") : null;
+  return node && node.classList.contains("dropdown-btn") && node.closest(".dropdown.open") ? null : node;   // not under an open menu
+}
 
 export function initTips() {
   let pending = null;

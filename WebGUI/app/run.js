@@ -4,7 +4,7 @@
    printed last and the seconds, and afterwards its findings in its own words.  A run cannot be stopped from outside,
    so Cancel ends the Python worker and starts a new one. */
 
-import { $, el, clear, state, M, fmt, plural, same, clone, toast, say, textBox, download } from "./core.js";
+import { $, el, clear, state, M, fmt, plural, same, clone, toast, say, textBox, download, job } from "./core.js";
 import { ask, cancel as cancelEngine } from "./engine.js";
 import { onChange, scheduleChecks, where, v, hasSets } from "./model.js";
 import { reveal, canReveal } from "./pages.js";
@@ -28,9 +28,11 @@ function setBusy(on, word) {
 }
 function openRunCard(gen, checkOnly) {
   clear($("run-steps"));
+  $("run-title").textContent = checkOnly ? "Checking" : "Generating";
   $("run-line").textContent = checkOnly ? "Checking the settings…" : "Starting the generator…";
   $("run-card").hidden = false;
-  $("checks-list").hidden = true;
+  clear($("checks-list")).append(el("p", { class: "hint" }, "The generator is running. Its findings appear here when it is done."));
+  $("btn-cancel").hidden = false;
   $("btn-cancel").disabled = false;
   $("progress").setAttribute("aria-valuenow", "0");
   runStart = performance.now();
@@ -42,7 +44,6 @@ function openRunCard(gen, checkOnly) {
 function closeRunCard() {
   clearInterval(ticker); ticker = null;
   $("run-card").hidden = true;
-  $("checks-list").hidden = false;
 }
 /* a line the generator printed: a new step ("[2/6] Building the stator"), or the latest news of the step */
 function onLine(text) {
@@ -64,6 +65,7 @@ export async function generate(checkOnly = false) {
   const gen = state.gen, m = state.modes[gen], sent = clone(m.values);
   setBusy(true, checkOnly ? "Checking…" : "Generating…");
   openRunCard(gen, checkOnly);
+  job(1);
   try {
     const r = await ask("run", { mode: gen, values: sent, checkOnly }, onLine);
     m.result = r;
@@ -88,11 +90,13 @@ export async function generate(checkOnly = false) {
       if (gen === state.gen) showRun();
       scheduleChecks(0);
     }
+    job(-1);
   }
 }
 export async function cancelRun() {
   if (!state.busy || cancelling) return;
   cancelling = true;
+  job(1);
   $("btn-cancel").disabled = true;
   $("run-line").textContent = "Cancelling: Python is starting again…";
   clearInterval(ticker);
@@ -109,6 +113,7 @@ export async function cancelRun() {
     setBusy(false, state.ready ? "Generate" : "Python Did Not Start");
     showRun();
     scheduleChecks(0);
+    job(-1);
   }
 }
 
@@ -162,7 +167,19 @@ export function renderChecks() {
 }
 
 /* ---- the numbers under the controls ------------------------------------------------------------- */
-/* Read from the generator's own summary of the last good run; before a run only the range, which follows Loops. */
+/* Read from the generator's own summary of the last good run; before a run only the range, which follows Loops.
+   The generator's line "TX L 2.87 uH (2.46 with the rotor), R 2.15 ohm DC, tank 2 x 2.29 nF for 3 MHz; ..." is
+   shown as R, L, C and f with their unit signs. */
+const UNIT = { uH: "µH", nH: "nH", mH: "mH", uF: "µF" };
+function electrical(text, into) {
+  let m;
+  if ((m = /\bR ([\d.]+) ohm/.exec(text))) into.R = `${m[1]} Ω`;
+  if ((m = /\bTX L ([\d.]+) (\w+)/.exec(text))) into.L = `${m[1]} ${UNIT[m[2]] || m[2]}`;
+  if ((m = /\btank (?:(\d+) x )?([\d.]+) (\w+) for ([\d.]+) (\w+)/.exec(text))) {
+    into.C = `${m[1] ? m[1] + " × " : ""}${m[2]} ${UNIT[m[3]] || m[3]}`;
+    into.f = `${m[4]} ${m[5]}`;
+  }
+}
 function summaryRows(text) {
   const sets = {};
   let k = 0;
@@ -171,27 +188,41 @@ function summaryRows(text) {
     let m;
     if ((m = /^Set (\d) /.exec(line))) k = +m[1];
     else if (/^(Dual rotor|Rotor|Ring \d)/.test(line)) k = -1;                  // the rotor's part of the summary
-    else if ((m = /^Electrical(?: of set (\d).*?)? \(estimate, step 4\): (.*)$/.exec(line))) of(m[1] ? +m[1] : 0).electrical = m[2];
-    else if (k >= 0 && (m = /unique range ([\d.]+) deg/.exec(line))) of(k).range = `${m[1]}° per period`;
-    else if (k >= 0 && (m = /^\s+RX band r = ([\d.]+) \.\.\. ([\d.]+) mm, profile/.exec(line))) of(k).band = `${m[1]} to ${m[2]} mm`;
-    else if (k >= 0 && (m = /^\s+TX ring r = ([\d.]+) \.\.\. ([\d.]+) mm/.exec(line))) of(k).ring = `${m[1]} to ${m[2]} mm`;
+    else if ((m = /^Electrical(?: of set (\d).*?)? \(estimate, step 4\): (.*)$/.exec(line))) electrical(m[2], of(m[1] ? +m[1] : 0));
+    else if (k >= 0 && (m = /unique range ([\d.]+) deg/.exec(line))) of(k).range = `${m[1]}°`;
     else if (k >= 0 && (m = /^\s+board edge: bore r = ([\d.]+) mm, outer r = ([\d.]+) mm/.exec(line))) of(-1).board = `${m[1]} to ${m[2]} mm`;
   }
   return sets;
 }
+const RESULT_ROWS = [
+  ["Range", "range", "The unique angle range: one electrical period of the RX pattern"],
+  ["R", "R", "Resistance of the TX coil at DC (the generator's estimate)"],
+  ["L", "L", "Inductance of the TX coil without the rotor (the generator's estimate)"],
+  ["C", "C", "The tank capacitors for the TX frequency below (the generator's estimate)"],
+  ["f", "f", "The TX frequency the tank capacitors are sized for"],
+];
 export function renderResults() {
   const m = M(), box = clear($("results"));
-  const row = (label, text) => { if (text) box.append(el("div", {}, el("b", {}, `${label}: `), text)); };
-  const sets = hasSets() ? [1, 2] : [0];
-  if (m.good && !m.stale) {
-    const s = summaryRows(m.good.text);
-    row("Board", (s[-1] || {}).board);
-    for (const k of sets) {
-      const x = s[k] || {}, pre = k ? `Set ${k} ` : "";
-      row(`${pre}Range`, x.range); row(`${pre}RX Band`, x.band); row(`${pre}TX Ring`, x.ring); row(`${pre}Electrical`, x.electrical);
-    }
+  const dual = hasSets(), sets = dual ? [1, 2] : [0];
+  const s = m.good && !m.stale ? summaryRows(m.good.text) : null;
+  const of = (k) => {
+    if (s) return s[k] || {};
+    const n = v("LOOPS", k || 1);                              // no run yet, or the settings changed since: Loops gives the range
+    return { range: n ? `${fmt(360 / n)}°` : "" };
+  };
+  const rows = RESULT_ROWS.filter(([, key]) => sets.some((k) => of(k)[key]));
+  const board = s && (s[-1] || {}).board;
+  if (dual) {
+    const table = el("table", {},
+      el("thead", {}, el("tr", {}, el("td", {}), el("th", { scope: "col" }, "Set 1 · Inner"), el("th", { scope: "col" }, "Set 2 · Outer"))),
+      el("tbody", {}, rows.map(([label, key, tip]) => el("tr", {}, el("th", { scope: "row", "data-tip": tip }, label), sets.map((k) => el("td", {}, of(k)[key] || "–")))),
+        board ? el("tr", {}, el("th", { scope: "row" }, "Board"), el("td", { colspan: 2 }, board)) : null));
+    box.append(table);
   } else {
-    for (const k of sets) { const n = v("LOOPS", k || 1); row(k ? `Set ${k} Range` : "Range", n ? `${fmt(360 / n)}° per period` : ""); }
+    const list = el("dl", {});
+    for (const [label, key, tip] of rows) list.append(el("dt", { "data-tip": tip }, label), el("dd", {}, of(0)[key]));
+    if (board) list.append(el("dt", {}, "Board"), el("dd", {}, board));
+    box.append(list);
   }
 }
 

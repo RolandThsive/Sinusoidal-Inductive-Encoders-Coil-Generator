@@ -1,0 +1,5 @@
+# What the tests of the web tool write (npm install, the built site, Playwright's reports)
+node_modules/
+tests/.site/
+test-results/
+playwright-report/

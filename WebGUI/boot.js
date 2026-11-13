@@ -12,6 +12,7 @@
   var phone = window.matchMedia("(pointer: coarse)").matches && !window.matchMedia("(any-pointer: fine)").matches;
   var embedded = window.self !== window.top;
   if (phone) root.classList.add("phone");
+  root.setAttribute("data-state", phone ? "phone" : "loading");     // app/core.js keeps it: loading, busy, ready, failed
   if (embedded) root.classList.add("embedded");
   var early = [];
   window.COILGEN = { phone: phone, embedded: embedded, errors: early, onError: null };

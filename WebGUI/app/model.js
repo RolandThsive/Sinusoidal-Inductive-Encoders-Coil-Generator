@@ -8,7 +8,7 @@
    A category ("Board", "RX", "TX", "Rotor", "IC", "Silk") is what a tab shows.  Single has one file per category;
    Dual has one board file, one silkscreen file and, for RX, TX, Rotor and IC, one file per coil set. */
 
-import { state, M, same, clone } from "./core.js";
+import { state, M, same, clone, job } from "./core.js";
 import { ask } from "./engine.js";
 
 export const CATS = ["Board", "RX", "TX", "Rotor", "IC", "Silk"];
@@ -146,8 +146,12 @@ export function resetAll() {
 let checkTimer = null, checkListeners = [];
 export function onChecked(fn) { checkListeners.push(fn); }
 export function scheduleChecks(delay = 150) {
+  if (checkTimer === null) job(1);                           // the page has not settled until the checks are back
   clearTimeout(checkTimer);
-  checkTimer = setTimeout(refreshChecks, delay);
+  checkTimer = setTimeout(async () => {
+    checkTimer = null;
+    try { await refreshChecks(); } finally { job(-1); }
+  }, delay);
 }
 export async function refreshChecks() {
   if (!state.ready || state.busy) return;
