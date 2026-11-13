@@ -1,50 +1,35 @@
-/* PyodideWorker.js - runs the Python generator in a background thread, so the page never freezes.
+/* PyodideWorker.js - runs the two generators in a background thread, so the page never freezes.
 
-   The page sends {id, cmd, args}; the worker answers {id, ok, result} or {id, ok: false, error},
-   and sends {type: "progress", text} while it loads.  The commands:
-     init      {pyodideBase, codeBase}  ->  {description, seconds}
-     inactive  {values}                 ->  [names of the parameters the generator ignores]
-     generate  {values}                 ->  {ok, items, name, files, summaries, rx, edges, center, seconds, zipBytes}
-                                            (on a failed run: ok false, items and failed; no zipBytes)
-     exportZip {values}                 ->  {zipBytes}
-     readValues {text}                  ->  {name: value}
+   The page sends {id, cmd, args}; the worker answers {id, ok: true, result} or {id, ok: false, error}.
+   While it works it also sends, without an id of their own:
+     {type: "progress", text}                  what init is doing
+     {type: "line", id, text, stream}          a line the generator printed during the run `id` ("out" or "err")
 
-   On start ("init") it loads Pyodide and numpy, then fetches the generator's own .py files from the
-   repository (codeBase: the repository root as served by GitHub Pages) into its in-memory file system. */
+   The commands (mode is "single" or "dual"; values are {file name: {NAME: value}}):
+     init        {pyodideBase, bundle}         ->  {seconds, python, numpy}
+     describe    {mode}                        ->  {mode, files: [{file, label, group, set, parameters: [...]}]}
+     inactive    {mode, values}                ->  {file: [names the generator does not use]}
+     check       {mode, values}                ->  {file: {NAME: the generator's message}}
+     run         {mode, values, checkOnly}     ->  what the program printed, sorted, and the files it wrote
+                                                  (WebGenerator.run); zipBytes: the zip of its folder
+     readFile    {path}                        ->  {bytes}   a file of the last run (a board, a picture)
+     exportZip   {mode, values}                ->  {zipBytes}
+
+   A run cannot be stopped from outside: to cancel, the page ends this worker and starts a new one.
+
+   On "init" the worker loads Pyodide and numpy from pyodideBase, then one zip (bundle) that the site's build made
+   from the repository: the generators' own .py files at their own paths and WebGenerator.py.  It is unpacked into
+   the in-memory file system at ROOT. */
 
 let pyodide = null;
+let WG = null;
 const ROOT = "/coilgen";
-// The generator is a package ("Single Generator/Generator"); GitHub Pages cannot list a folder, so the files are named
-// here.  Not fetched: RunCoilGenerator.py (the desktop program) and TX_Electrics.py (the electrical estimate is not
-// made on the web).  Each name is a path inside "Single Generator".
-const GENERATOR_FILES = [
-  "__init__.py",
-  "Checks/__init__.py", "Checks/ConflictRules.py", "Checks/DesignChecks.py", "Checks/ParameterRules.py",
-  "Core/__init__.py", "Core/BoardLayout.py", "Core/Conflict.py", "Core/Copper.py", "Core/Geometry.py",
-  "Core/KiCadWriter.py", "Core/Layers.py",
-  "Rotor/__init__.py", "Rotor/RotorBuilder.py",
-  "Run/__init__.py", "Run/CheckParameters.py", "Run/OutputFolders.py",
-  "Stator/__init__.py", "Stator/StatorAssembly.py",
-  "Stator/RX/__init__.py", "Stator/RX/RX_Builder.py", "Stator/RX/RX_Coils.py", "Stator/RX/RX_Fingers.py",
-  "Stator/RX/RX_Profiles.py",
-  "Stator/TX/__init__.py", "Stator/TX/TX_Builder.py", "Stator/TX/TX_Shapes.py", "Stator/TX/TX_Terminal.py",
-  "Stator/TX/TX_Windows.py", "Stator/TX/TX_Wiring.py",
-];
-const PARAMETER_FILES = ["Board_Parameters.py", "RX_Parameters.py", "TX_Parameters.py", "Rotor_Parameters.py", "IC_Parameters.py",
-  "Parameters.py"];
-const SOURCE = "Single Generator/";            // the generator's folder in the repository
-// [file in the repository, file in the browser's in-memory file system]
-const FETCH = [
-  ...GENERATOR_FILES.map((f) => [`${SOURCE}Generator/${f}`, `Generator/${f}`]),
-  ...PARAMETER_FILES.map((f) => [`${SOURCE}Parameters/${f}`, `Parameters_Default/${f}`]),
-  ["WebGUI/WebGenerator.py", "WebGUI/WebGenerator.py"],
-];
 
 let step = "";                                   // what init is doing now, named in the message if it fails
 function progress(text) { step = text; postMessage({ type: "progress", text }); }
 
 // A dropped connection is tried again (twice) before it is reported, and the report names the file.
-async function fetchText(url) {
+async function fetchBytes(url) {
   for (let tries = 1; ; tries++) {
     let r;
     try { r = await fetch(url, { cache: "no-cache" }); }
@@ -53,11 +38,11 @@ async function fetchText(url) {
       throw new Error(`${url} could not be downloaded (${e.message})`);
     }
     if (!r.ok) throw new Error(`${url}: HTTP ${r.status}`);
-    return r.text();
+    return r.arrayBuffer();
   }
 }
 
-async function init({ pyodideBase, codeBase }) {
+async function init({ pyodideBase, bundle }) {
   const t0 = performance.now();
   try {
     progress("Loading Python (Pyodide)…");
@@ -65,26 +50,22 @@ async function init({ pyodideBase, codeBase }) {
     pyodide = await loadPyodide({ indexURL: pyodideBase });
     progress("Loading numpy…");
     await pyodide.loadPackage("numpy");
-    progress("Fetching the generator from the repository…");
-    const jobs = [];
-    for (const [from, to] of FETCH) {
-      const dir = to.slice(0, to.lastIndexOf("/"));
-      pyodide.FS.mkdirTree(`${ROOT}/${dir}`);
-      const url = new URL(from, codeBase).href;
-      jobs.push(fetchText(url).then((t) => pyodide.FS.writeFile(`${ROOT}/${to}`, t)));
-    }
-    await Promise.all(jobs);
+    progress("Loading the generators…");
+    const zip = await fetchBytes(bundle);
+    pyodide.FS.mkdirTree(ROOT);
+    pyodide.unpackArchive(zip, "zip", { extractDir: ROOT });
+    progress("Starting the generators…");
     pyodide.runPython(`
 import sys
 sys.path.insert(0, "${ROOT}/WebGUI")
 import WebGenerator as WG
 WG.ROOT = "${ROOT}"
 `);
-    progress("Reading the parameters…");
-    const description = JSON.parse(pyodide.runPython("WG.describe()"));
-    return { description, seconds: (performance.now() - t0) / 1000 };
+    WG = pyodide.globals.get("WG");
+    const versions = pyodide.runPython("import sys, numpy; [sys.version.split()[0], numpy.__version__]").toJs();
+    return { seconds: (performance.now() - t0) / 1000, python: versions[0], numpy: versions[1] };
   } catch (e) {
-    const early = /^Loading/.test(step) ? ` from ${pyodideBase}` : "";
+    const early = /^Loading (Python|numpy)/.test(step) ? ` from ${pyodideBase}` : "";
     throw new Error(`${e && e.message || e} [${step.replace("…", "")}${early}]`);
   }
 }
@@ -96,30 +77,40 @@ function readFileBuffer(path) {
 }
 
 function call(fn, ...args) {
-  const f = pyodide.globals.get("WG")[fn];
-  const out = f(...args);
-  return JSON.parse(out);
+  return JSON.parse(WG[fn](...args));
+}
+
+// Only the folder of the last run and the two zips can be read: a path from the page is never trusted.
+function readable(path) {
+  return typeof path === "string" && !path.includes("..") &&
+    (/^\/coilgen\/Generators\/(Single|Dual) Coil Set Generator\/Output\/[^/]+\/[^/]+$/.test(path));
 }
 
 onmessage = async (ev) => {
   const { id, cmd, args } = ev.data;
   try {
     let result;
+    const transfer = [];
     if (cmd === "init") result = await init(args);
-    else if (cmd === "inactive") result = call("inactive", JSON.stringify(args.values));
-    else if (cmd === "generate") {
+    else if (!WG) throw new Error("the generators are not loaded yet");
+    else if (cmd === "describe") result = call("describe", args.mode);
+    else if (cmd === "inactive") result = call("inactive", args.mode, JSON.stringify(args.values));
+    else if (cmd === "check") result = call("check_values", args.mode, JSON.stringify(args.values));
+    else if (cmd === "run") {
       const t0 = performance.now();
-      result = call("generate", JSON.stringify(args.values));
+      const onLine = (text, stream) => postMessage({ type: "line", id, text, stream });
+      result = call("run", args.mode, JSON.stringify(args.values), !!args.checkOnly, onLine);
       result.seconds = (performance.now() - t0) / 1000;
-      if (result.ok) {
-        result.zipBytes = readFileBuffer(result.zip);
-      }
+      if (result.zip) { result.zipBytes = readFileBuffer(result.zip); transfer.push(result.zipBytes); }
+    } else if (cmd === "readFile") {
+      if (!readable(args.path)) throw new Error("this file cannot be read");
+      result = { bytes: readFileBuffer(args.path) };
+      transfer.push(result.bytes);
     } else if (cmd === "exportZip") {
-      const r = call("export_zip", JSON.stringify(args.values));
+      const r = call("export_zip", args.mode, JSON.stringify(args.values));
       result = { zipBytes: readFileBuffer(r.zip) };
-    } else if (cmd === "readValues") result = call("read_values", args.text);
-    else throw new Error("unknown command " + cmd);
-    const transfer = result && result.zipBytes ? [result.zipBytes] : [];
+      transfer.push(result.zipBytes);
+    } else throw new Error("unknown command " + cmd);
     postMessage({ id, ok: true, result }, transfer);
   } catch (e) {
     postMessage({ id, ok: false, error: String(e && e.message || e) });
