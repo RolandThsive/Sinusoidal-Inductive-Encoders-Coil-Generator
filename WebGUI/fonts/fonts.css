@@ -1,0 +1,11 @@
+/* fonts.css - the three fonts of Roland's blog, served by this site itself (no request goes to a font service).
+
+   Latin letters only, WOFF2, taken unchanged from the Fontsource packages (version 5.3.0) of the Google Fonts
+   originals.  Their licences are beside them (*-LICENSE.txt) and listed in licenses.html:
+     Permanent Marker   Apache License 2.0     Copyright (c) 2010 by Font Diner, Inc.
+     Pacifico           SIL Open Font License  Copyright 2018 The Pacifico Project Authors
+     Shadows Into Light SIL Open Font License  Copyright (c) 2010, Kimberly Geswein
+   font-display: swap shows the text at once in the system font and changes it when the font has arrived. */
+@font-face { font-family: "Permanent Marker"; font-style: normal; font-weight: 400; font-display: swap; src: url("PermanentMarker.woff2") format("woff2"); }
+@font-face { font-family: "Pacifico"; font-style: normal; font-weight: 400; font-display: swap; src: url("Pacifico.woff2") format("woff2"); }
+@font-face { font-family: "Shadows Into Light"; font-style: normal; font-weight: 400; font-display: swap; src: url("ShadowsIntoLight.woff2") format("woff2"); }

@@ -1,0 +1,7 @@
+# The CI's lint, run locally before each commit:  pip install pre-commit  then  pre-commit install
+# (ruff's settings are in ruff.toml).
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: c0f278f1254ccc8fb09676bcdb8d847e7db493e5 # v0.17.4
+    hooks:
+      - id: ruff-check

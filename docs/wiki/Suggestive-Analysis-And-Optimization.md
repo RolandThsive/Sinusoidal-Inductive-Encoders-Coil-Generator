@@ -1,4 +1,4 @@
-# 18. Suggestive Analysis And Optimization
+# 26. Suggestive Analysis And Optimization
 
 > [!NOTE]
 > **Under construction.** The analyser and optimizer are not part of the main branch. They live on the [`analyser_and_optimizer` branch](https://github.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/tree/analyser_and_optimizer) and are still being built, so what is described here may change.
@@ -32,6 +32,8 @@ over the outermost TX turn:
 
 *Analysis 1. The starting design, the optimizer's suggestion, and their angle error over one turn at
 the nominal air gap. Model results only.*
+
+[<img align="right" src="https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/logo/Logo_1_V2.png" alt="Sinusoidal Coil Generator logo, click to see it spin" width="72">](https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/logo/Logo_1_V2_rotor_spin_400px.webp)
 
 | Previous | Next |
 |:---|---:|
