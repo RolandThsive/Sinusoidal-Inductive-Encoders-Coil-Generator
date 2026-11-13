@@ -8,7 +8,7 @@
    Dual has two coil sets: the tabs are the same categories, and a Set 1 | Set 2 switch says whose RX, TX, Rotor and IC
    settings are shown. */
 
-import { $, el, clear, state, M, fmt, plural, wireChoices, markChoices } from "./core.js";
+import { $, el, clear, state, M, fmt, plural, wireChoices, markChoices, job } from "./core.js";
 import { CATS, onChange, onChecked, hasSets, fileOf, catHasSets, where, v, isChanged, changedIn, BAND_RADII, BAND_CENTRE } from "./model.js";
 import { groupTitle, labelOf, ROTOR_MODE_GROUPS } from "./labels.js";
 import { numberField, segmentedField, boolField, txLayoutField, advancedField } from "./fields.js";
@@ -237,7 +237,7 @@ export function markFields() {
 }
 
 /* ---- Basic | Advanced ---------------------------------------------------------------------------- */
-let viewTimer = null;
+let viewTimer = null, fading = false;
 export function setView(view, animate = true) {
   if (view === state.view) return;
   state.view = view;
@@ -257,12 +257,14 @@ export function setView(view, animate = true) {
   ctr.classList.remove("enter");
   ctr.classList.add("leave");
   clearTimeout(viewTimer);
+  if (!fading) { fading = true; job(1); }                  // the page is "busy" until the new controls have faded in
   viewTimer = setTimeout(() => {
     adv.style.removeProperty("width");
     show();
     ctr.classList.remove("leave");
     void ctr.offsetWidth;                                  // restart the fade-in
     ctr.classList.add("enter");
+    viewTimer = setTimeout(() => { fading = false; job(-1); }, 400);
   }, 180);
 }
 

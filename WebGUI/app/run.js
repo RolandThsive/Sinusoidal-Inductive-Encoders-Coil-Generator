@@ -31,6 +31,7 @@ function openRunCard(gen, checkOnly) {
   $("run-title").textContent = checkOnly ? "Checking" : "Generating";
   $("run-line").textContent = checkOnly ? "Checking the settings…" : "Starting the generator…";
   $("run-card").hidden = false;
+  $("checks-list").removeAttribute("role");
   clear($("checks-list")).append(el("p", { class: "hint" }, "The generator is running. Its findings appear here when it is done."));
   $("btn-cancel").hidden = false;
   $("btn-cancel").disabled = false;
@@ -163,6 +164,7 @@ export function renderChecks() {
       el("span", { class: "msg" }, "The generator stopped with an error of its own. ",
         el("button", { type: "button", class: "param-link", onclick: () => showCrash("The generator stopped with an error of its own.", r.crash) }, "Show the details"))));
   }
+  if (shown.length || r.crash) list.setAttribute("role", "list"); else list.removeAttribute("role");   // a list only while it holds findings
   if (!shown.length && !r.crash) list.append(el("p", { class: "hint" }, r.ok ? (ni ? "Nothing to report. Turn on Info to see the generator's notes." : "Nothing to report.") : "See Run Text for what the generator printed."));
 }
 

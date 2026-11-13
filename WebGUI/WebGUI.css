@@ -13,7 +13,7 @@
   --cream: rgba(248, 236, 198, 0.4);       /* dropdown hover background (#f8ecc6); --warning-bg and the Reset hover use the same cream at 0.6 and 0.75 */
   --text: #333;
   --text-2: #555555;
-  --text-3: #888;
+  --text-3: #6a6a6a;                       /* the lightest text: 4.5:1 and more on every background of the page */
   --selected: #000000;                     /* selected slide */
   --glass: rgba(255, 255, 255, 0.3);       /* dropdown button background */
   --glass-edge: rgba(255, 255, 255, 0.2);
@@ -331,7 +331,10 @@ button.group-title:hover { color: var(--accent); }
 .chevron { width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 5px solid currentColor;
   transition: transform 0.25s ease; }
 button.group-title.collapsed .chevron { transform: rotate(-90deg); }
-.field.inactive { opacity: 0.45; }
+/* a setting the generator does not use now: lighter, but still readable (it can still be changed) */
+.field.inactive .field-label, .field.inactive input[type=text], .field.inactive .segmented button, .field.inactive .dropdown-btn,
+.field.inactive .switch-row { color: var(--text-3); }
+.field.inactive .stepper button, .field.inactive input[type=range], .field.inactive .switch { opacity: 0.55; }
 .field.inactive .field-note::after { content: " (not used now)"; }
 .field.changed .field-label::before { content: "●"; color: var(--accent); font-size: 9px; margin-right: 5px; vertical-align: 2px; }
 .reset-one { border: 0; background: none; color: var(--text-3); cursor: pointer; font-size: 12px; padding: 0 2px; }
@@ -377,7 +380,9 @@ button.group-title.collapsed .chevron { transform: rotate(-90deg); }
 .layer-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; padding: 4px 10px; border-radius: 14px;
   background: var(--glass); border: 1px solid rgba(0, 0, 0, 0.08); cursor: pointer; transition: all var(--ease); user-select: none; }
 .layer-chip .sw { width: 12px; height: 12px; border-radius: 3px; }
-.layer-chip.off { opacity: 0.4; }
+/* switched off: the swatch fades and the name is struck through; the name itself stays readable (it is still a button) */
+.layer-chip.off { color: var(--text-3); text-decoration: line-through; background: rgba(255, 255, 255, 0.12); }
+.layer-chip.off .sw, .layer-chip.off .via-icon { opacity: 0.35; }
 .layer-chip:hover { background: var(--cream); }
 /* no copper on that layer: faded and struck through corner to corner, unlike a chip switched off (only faded) */
 .layer-chip.locked, .layer-chip.locked:hover { position: relative; cursor: not-allowed; background: var(--glass); color: rgba(0, 0, 0, 0.3); }
@@ -395,8 +400,8 @@ button.group-title.collapsed .chevron { transform: rotate(-90deg); }
   box-shadow: var(--shadow-btn); transition: all var(--ease); }
 .net-btn svg { width: 18px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; }
 .net-btn:hover { background: var(--cream); color: var(--accent); border-color: var(--accent); }
-.net-btn.off { opacity: 0.45; }
-.net-btn.off:hover { opacity: 0.8; }
+.net-btn.off { color: var(--text-3); text-decoration: line-through; background: rgba(255, 255, 255, 0.6); box-shadow: none; }
+.net-btn.off svg { opacity: 0.4; }
 .canvas-wrap { position: relative; flex: 1; min-height: 0; margin-top: 8px; border-radius: 8px; overflow: hidden;
   background: rgba(255, 255, 255, 0.5); }
 .canvas-wrap canvas { width: 100%; height: 100%; display: block; cursor: grab; }
@@ -422,7 +427,10 @@ button.group-title.collapsed .chevron { transform: rotate(-90deg); }
 #btn-measure .nums { font: bold 7.5px Arial, Helvetica, sans-serif; fill: currentColor; stroke: none; text-anchor: middle; }
 #btn-measure .span { stroke: var(--accent); stroke-width: 1.6; }
 #btn-measure .dot { fill: var(--accent); stroke: none; }
-.canvas-tools .icon-btn.off { opacity: 0.45; }
+/* an icon switched off: grey, with a stroke through it (the icon itself stays visible: it is still a button) */
+.canvas-tools .icon-btn.off { color: var(--text-3); position: relative; box-shadow: none; }
+.canvas-tools .icon-btn.off .origin-dot { fill: currentColor; }
+.canvas-tools .icon-btn.off::after { content: ""; position: absolute; left: 20%; right: 20%; top: calc(50% - 1px); border-top: 2px solid currentColor; transform: rotate(-45deg); }
 /* while measuring: the S / Z keys, under the Measure button; out of the flow, so its width cannot widen the
    tool column (and with it the ruler) */
 .measure-help { position: absolute; top: calc(100% + 8px); left: 0; padding: 6px 9px; border-radius: 8px; background: rgba(255, 255, 255, 0.92); border: 1px solid var(--glass-edge);

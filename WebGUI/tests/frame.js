@@ -37,7 +37,7 @@ class App {
     await this.page.click(`#gen-list [data-gen="${gen}"]`);
     await this.settled();
   }
-  async mode(mode) { await this.page.click(`#mode-switch [data-mode="${mode}"]`); }
+  async mode(mode) { await this.page.click(`#mode-switch [data-mode="${mode}"]`); await this.settled(); }
   async tab(key, set) {
     const view = await this.page.evaluate(() => (document.getElementById("advanced-panel").hidden ? "basic" : "adv"));
     await this.page.click(`#${view}-tabs [data-key="${key}"]`);

@@ -64,9 +64,11 @@ function segmented({ view, file, name, options, value, focus = "seg", pick }) {
 function dropdown({ view, file, name, options, value, pick }) {
   const dd = el("div", { class: "dropdown" });
   const menu = el("div", { class: "dropdown-content", role: "listbox", ...labelled(view, file, name) });
+  const names = labelled(view, file, name), valueId = `${idOf(view, file, name)}-value`;
+  // the button is named by the setting's label and by the choice it shows ("TX Shape Stepped Diagonal")
   const btn = el("button", { type: "button", class: "dropdown-btn", "aria-haspopup": "listbox", "aria-expanded": "false",
-    "data-focus": key(file, name, "menu"), ...labelled(view, file, name) },
-    el("span", {}, choiceText(name, value)), el("span", { class: "arrow", "aria-hidden": "true" }, "▾"));
+    "data-focus": key(file, name, "menu"), ...names, "aria-labelledby": `${names["aria-labelledby"]} ${valueId}` },
+    el("span", { id: valueId }, choiceText(name, value)), el("span", { class: "arrow", "aria-hidden": "true" }, "▾"));
   const items = options.map((o) => el("button", { type: "button", role: "option", tabindex: -1, class: same(o, value) ? "on" : "",
     "aria-selected": String(same(o, value)), onclick: () => { open(false); pick(o); } }, choiceText(name, o)));
   menu.append(...items);
