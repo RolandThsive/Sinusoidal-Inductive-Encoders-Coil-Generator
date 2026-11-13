@@ -726,6 +726,8 @@ def read_import(items_json):
                             continue
                         with z.open(info) as fh:
                             take(info.filename, fh.read(IMPORT_MAX_BYTES + 1))
+            except zipfile.BadZipFile:
+                ignored.append(f"{item.get('name', 'the zip')}: not a zip file")
             except Exception as e:
                 ignored.append(f"{item.get('name', 'the zip')}: cannot be opened ({type(e).__name__})")
             finally:

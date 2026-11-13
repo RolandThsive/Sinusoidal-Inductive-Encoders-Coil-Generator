@@ -54,6 +54,15 @@ class App {
     await box.press("Tab");
     await this.settled();
   }
+  /* The text a setting's box shows (Advanced). */
+  value(name) { return this.field(name).locator("input[type=text]").first().inputValue(); }
+  /* Reset: every setting back to its published value (answers the question the page asks). */
+  async reset() {
+    await this.page.click("#btn-reset");
+    await this.page.click("#confirm-yes");
+    await expect(this.toast()).toHaveText("Back to the starting design");
+    await this.settled();
+  }
   async generate() { await this.page.click("#btn-generate"); await this.settled(); }
   async checkOnly() { await this.page.click("#btn-check"); await this.settled(); }
   counts() { return this.page.locator("#counts").innerText(); }
