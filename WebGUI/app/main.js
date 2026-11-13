@@ -31,7 +31,9 @@ function pythonSources() {
     const url = new URL(asked, location.href);
     if (url.origin === location.origin) return [url.href];
   }
-  return [PYODIDE_CDN, PYODIDE_OWN];
+  // the site's own copy is the second source, when the build put one there (version.json says so)
+  const backup = state.build && state.build.pyodide && state.build.pyodide.backup;
+  return backup ? [PYODIDE_CDN, PYODIDE_OWN] : [PYODIDE_CDN];
 }
 
 function progressText(text) {
