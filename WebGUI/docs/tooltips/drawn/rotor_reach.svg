@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 380" width="680" height="380" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" role="img" aria-label="The rotor copper over the RX band and the TX turns, cut along a radius">
+<rect width="680" height="380" fill="#fbfaf8"/>
+<rect x="14" y="96" width="312" height="26" rx="3" fill="#e7e1d8" stroke="none" stroke-width="1.5"/>
+<rect x="27.7" y="122" width="228.2" height="14" rx="0" fill="#B87333" stroke="none" stroke-width="1.5"/>
+<rect x="14" y="236" width="312" height="26" rx="3" fill="#e7e1d8" stroke="none" stroke-width="1.5"/>
+<rect x="45.2" y="222" width="135.2" height="14" rx="0" fill="#D03B2F" stroke="none" stroke-width="1.5" opacity="0.85"/>
+<rect x="206.4" y="222" width="5.2" height="14" rx="0" fill="#2F6FD0" stroke="none" stroke-width="1.5"/>
+<rect x="222" y="222" width="5.2" height="14" rx="0" fill="#2F6FD0" stroke="none" stroke-width="1.5"/>
+<rect x="237.6" y="222" width="5.2" height="14" rx="0" fill="#2F6FD0" stroke="none" stroke-width="1.5"/>
+<text x="112.8" y="292" font-size="20" font-weight="500" text-anchor="middle" fill="#555555">RX band</text>
+<text x="224.6" y="292" font-size="20" font-weight="500" text-anchor="middle" fill="#555555">TX</text>
+<text x="318" y="116" font-size="20" font-weight="500" text-anchor="end" fill="#555555">Rotor</text>
+<text x="318" y="256" font-size="20" font-weight="500" text-anchor="end" fill="#555555">Stator</text>
+<line x1="45.2" y1="140" x2="45.2" y2="218" stroke="#a93e33" stroke-width="1.5" stroke-linecap="butt" stroke-dasharray="4 4"/>
+<line x1="27.7" y1="140" x2="27.7" y2="218" stroke="#a93e33" stroke-width="1.5" stroke-linecap="butt" stroke-dasharray="4 4"/>
+<line x1="27.7" y1="178" x2="45.2" y2="178" stroke="#a93e33" stroke-width="2" stroke-linecap="butt"/>
+<path d="M39.8 175.4L45.2 178L39.8 180.6" fill="none" stroke="#a93e33" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M33.1 180.6L27.7 178L33.1 175.4" fill="none" stroke="#a93e33" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="55.2" y="185" font-size="20" font-weight="700" text-anchor="start" fill="#a93e33">Extension</text>
+<rect x="354" y="96" width="312" height="26" rx="3" fill="#e7e1d8" stroke="none" stroke-width="1.5"/>
+<rect x="367.7" y="122" width="176.1" height="14" rx="0" fill="#B87333" stroke="none" stroke-width="1.5"/>
+<rect x="354" y="236" width="312" height="26" rx="3" fill="#e7e1d8" stroke="none" stroke-width="1.5"/>
+<rect x="385.2" y="222" width="135.2" height="14" rx="0" fill="#D03B2F" stroke="none" stroke-width="1.5" opacity="0.85"/>
+<rect x="546.4" y="222" width="5.2" height="14" rx="0" fill="#2F6FD0" stroke="none" stroke-width="1.5"/>
+<rect x="562" y="222" width="5.2" height="14" rx="0" fill="#2F6FD0" stroke="none" stroke-width="1.5"/>
+<rect x="577.6" y="222" width="5.2" height="14" rx="0" fill="#2F6FD0" stroke="none" stroke-width="1.5"/>
+<text x="452.8" y="292" font-size="20" font-weight="500" text-anchor="middle" fill="#555555">RX band</text>
+<text x="564.6" y="292" font-size="20" font-weight="500" text-anchor="middle" fill="#555555">TX</text>
+<text x="658" y="116" font-size="20" font-weight="500" text-anchor="end" fill="#555555">Rotor</text>
+<text x="658" y="256" font-size="20" font-weight="500" text-anchor="end" fill="#555555">Stator</text>
+<line x1="385.2" y1="140" x2="385.2" y2="218" stroke="#a93e33" stroke-width="1.5" stroke-linecap="butt" stroke-dasharray="4 4"/>
+<line x1="367.7" y1="140" x2="367.7" y2="218" stroke="#a93e33" stroke-width="1.5" stroke-linecap="butt" stroke-dasharray="4 4"/>
+<line x1="367.7" y1="178" x2="385.2" y2="178" stroke="#a93e33" stroke-width="2" stroke-linecap="butt"/>
+<path d="M379.8 175.4L385.2 178L379.8 180.6" fill="none" stroke="#a93e33" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M373.1 180.6L367.7 178L373.1 175.4" fill="none" stroke="#a93e33" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<line x1="520.4" y1="140" x2="520.4" y2="218" stroke="#a93e33" stroke-width="1.5" stroke-linecap="butt" stroke-dasharray="4 4"/>
+<line x1="543.8" y1="140" x2="543.8" y2="218" stroke="#a93e33" stroke-width="1.5" stroke-linecap="butt" stroke-dasharray="4 4"/>
+<line x1="520.4" y1="178" x2="543.8" y2="178" stroke="#a93e33" stroke-width="2" stroke-linecap="butt"/>
+<path d="M538.4 175.4L543.8 178L538.4 180.6" fill="none" stroke="#a93e33" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M525.8 180.6L520.4 178L525.8 175.4" fill="none" stroke="#a93e33" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="170" y="40" font-size="22" font-weight="700" text-anchor="middle" fill="#333333">True</text>
+<text x="510" y="40" font-size="22" font-weight="700" text-anchor="middle" fill="#333333">False</text>
+<text x="170" y="336" font-size="20" font-weight="500" text-anchor="middle" fill="#555555">copper over the TX turns</text>
+<text x="510" y="336" font-size="20" font-weight="500" text-anchor="middle" fill="#555555">copper ends inside the TX ring</text>
+<text x="340" y="368" font-size="20" font-weight="500" text-anchor="middle" fill="#6a6a6a">drawn thicker than true scale</text>
+</svg>

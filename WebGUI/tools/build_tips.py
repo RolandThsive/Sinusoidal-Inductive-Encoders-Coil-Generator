@@ -62,22 +62,18 @@ def problems():
             if pic and not os.path.isfile(os.path.join(PICTURES, pic.get("file", ""))):
                 out.append(f"{where}: its picture {pic.get('file')} is not in docs/tooltips/pictures")
             if pic and not pic.get("caption"):
-                out.append(f"{where}: its picture has no caption")
+                out.append(f"{where}: its picture has no caption (it is also the text for screen readers)")
+            if pic and not (isinstance(pic.get("width"), int) and isinstance(pic.get("height"), int)):
+                out.append(f"{where}: its picture has no width and height (the box keeps its place while the picture loads)")
     return out
 
 
-def text(with_pictures=True):
-    """tips.json as text: one tip per line.  with_pictures=False leaves out the pictures that are not drawn yet."""
-    def one(tip):
-        tip = dict(tip)
-        pic = tip.get("picture")
-        if pic and not (with_pictures and os.path.isfile(os.path.join(PICTURES, pic.get("file", "")))):
-            del tip["picture"]
-        return tip
+def text():
+    """tips.json as text: one tip per line."""
     lines = ["{"]
     for group, source in (("params", words.PARAMS), ("controls", words.CONTROLS), ("presets", words.PRESETS)):
         lines.append(f'"{group}": {{')
-        rows = [f"{json.dumps(name)}: {_line(one(tip))}" for name, tip in source.items()]
+        rows = [f"{json.dumps(name)}: {_line(tip)}" for name, tip in source.items()]
         lines.append(",\n".join(rows))
         lines.append("},")
     lines.append(f'"presetFoot": {_line(words.PRESET_FOOT)},')
@@ -99,9 +95,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description="Writes WebGUI/tips.json from tips_words.py.")
     ap.add_argument("--check", action="store_true", help="only compare tips.json with what would be written")
     args = ap.parse_args(argv)
-    found = problems()
-    wrong = [p for p in found if "is not in docs/tooltips/pictures" not in p]
-    waiting = [p for p in found if "is not in docs/tooltips/pictures" in p]
+    wrong = problems()
     for p in wrong:
         print(f"build_tips: {p}")
     if wrong:
@@ -115,8 +109,9 @@ def main(argv=None):
     with open(OUT, "w", encoding="utf-8", newline="\n") as fh:
         fh.write(new)
     n = len(words.PARAMS) + len(words.CONTROLS) + len(words.PRESETS)
-    print(f"tips.json: {n} tips ({len(words.PARAMS)} settings, {len(words.CONTROLS)} controls, {len(words.PRESETS)} cards)"
-          + (f"; {len(waiting)} pictures are not drawn yet and are left out" if waiting else ""))
+    pictures = {tip["picture"]["file"] for tip in words.PARAMS.values() if tip.get("picture")}
+    print(f"tips.json: {n} tips ({len(words.PARAMS)} settings, {len(words.CONTROLS)} controls, {len(words.PRESETS)} cards), "
+          f"{len(pictures)} pictures")
     return 0
 
 

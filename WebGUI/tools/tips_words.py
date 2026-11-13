@@ -11,7 +11,8 @@ the file and group (the small line on top), the name as on the page with its uni
     facts     [[label, value], ...]: typical values, sizes, the meaning of a special number
     formula   [line, ...]: shown in the mono font
     note      the one caveat worth knowing
-    picture   {file, caption}: a file of WebGUI/docs/tooltips/pictures
+    picture   {file, caption, width, height}: a file of WebGUI/docs/tooltips/pictures (drawn by tip_pictures.py), and
+              the size it has in the box: half its size in pixels
 
 The words are the generators' own: each tip shortens and orders the comment of its setting in the parameter file
 (and the text the page showed before); nothing is claimed that the file does not say.
@@ -91,32 +92,32 @@ PARAMS = {
         "lead": "Sine periods per full turn.",
         "facts": [["Unique range", "360° / Loops"]],
         "note": "1 gives a true 0 to 360° reading; more loops give finer resolution. The rotor gets the same number of metal sectors.",
-        "picture": {"file": "loops.webp", "caption": "1 loop and 4 loops on the same band"}},
+        "picture": {"file": "loops.webp", "caption": "1 loop and 4 loops on the same band", "width": 340, "height": 190}},
     "INSIDE_RADIUS_MM": {
         "lead": "Inner radius of the RX band, R_in.",
         "choices": {"number": "Set together with RX Outside Radius.",
                     "None": "From R Base and Swing A: R_in = R_base − A. If those are None too, from the board: R_in = R_hole + Inset."},
         "note": "Locked while R Base and Swing A have numbers.",
-        "picture": {"file": "band.webp", "caption": "The RX band between R_in and R_out, with R_base and the swing A"}},
+        "picture": {"file": "band.webp", "caption": "The RX band between R_in and R_out, with R_base and the swing A", "width": 340, "height": 190}},
     "OUTSIDE_RADIUS_MM": {
         "lead": "Outer radius of the RX band, R_out.",
         "choices": {"number": "Set together with RX Inside Radius.",
                     "None": "From R Base and Swing A: R_out = R_base + A. If those are None too, from the board: R_out = R_edge − Room."},
         "note": "Locked while R Base and Swing A have numbers. Room is explained at Board Outer Radius.",
-        "picture": {"file": "band.webp", "caption": "The RX band between R_in and R_out, with R_base and the swing A"}},
+        "picture": {"file": "band.webp", "caption": "The RX band between R_in and R_out, with R_base and the swing A", "width": 340, "height": 190}},
     "RX_R_BASE_MM": {
         "lead": "Centre radius of the RX band, R_base.",
         "choices": {"number": "Set together with Swing A: R_in = R_base − A and R_out = R_base + A.",
                     "None": "The band comes from the RX radii, or from the board edges if those are None too."},
         "note": "Locked while the RX radii have numbers.",
-        "picture": {"file": "band.webp", "caption": "The RX band between R_in and R_out, with R_base and the swing A"}},
+        "picture": {"file": "band.webp", "caption": "The RX band between R_in and R_out, with R_base and the swing A", "width": 340, "height": 190}},
     "RX_A_MM": {
         "lead": "Swing A: half the width of the RX band.",
         "formula": ["A = (R_out − R_in) / 2"],
         "choices": {"number": "Set together with R Base.",
                     "None": "The band comes from the RX radii, or from the board edges if those are None too."},
         "note": "Locked while the RX radii have numbers.",
-        "picture": {"file": "band.webp", "caption": "The RX band between R_in and R_out, with R_base and the swing A"}},
+        "picture": {"file": "band.webp", "caption": "The RX band between R_in and R_out, with R_base and the swing A", "width": 340, "height": 190}},
     "RX_TRACE_WIDTH_MM": {"lead": "Trace width of the RX coils."},
     "RX_NET_PHASE_0_2": {"lead": "KiCad net name of the sine coil."},
     "RX_NET_PHASE_1_3": {"lead": "KiCad net name of the cosine coil."},
@@ -125,7 +126,7 @@ PARAMS = {
         "choices": {"equal_area": "r² = (R_in² + R_out²) / 2 + (R_out² − R_in²) / 2 · sin φ",
                     "cosine_r": "r = R_base + A · sin φ. The shape of the Renesas IPS2200 reference."},
         "note": "φ is the electrical angle.",
-        "picture": {"file": "profile.webp", "caption": "Equal Area and Cosine R on the same band"}},
+        "picture": {"file": "profile.webp", "caption": "Equal Area and Cosine R on the same, wide band", "width": 340, "height": 190}},
     "STEPS_PER_LOOP": {
         "lead": "Points per loop of the RX curves.",
         "choices": {"auto": "The fewest that keep the chord error within RX Chord Tolerance: a multiple of 8, up to 1024.",
@@ -135,7 +136,7 @@ PARAMS = {
         "lead": "Splits each RX coil into copies, shifted by the split angle.",
         "choices": {"1": "One coil, not split.", "2": "Two copies of each coil.", "3": "Three copies of each coil."},
         "note": "More sub-coils give more signal and cancel some harmonics, but need more room for the vias.",
-        "picture": {"file": "subcoils.webp", "caption": "One coil, and the same coil split in two"}},
+        "picture": {"file": "subcoils.webp", "caption": "One coil, and the same coil split in two", "width": 340, "height": 190}},
     "RX_SUBCOIL_SPLIT_ELEC_DEG": {
         "lead": "Electrical angle between the sub-coils.",
         "facts": [["45°", "the roomiest"], ["60°", "removes the 3rd harmonic"], ["36°", "removes the 5th harmonic"]],
@@ -159,7 +160,7 @@ PARAMS = {
         "choices": {"all": "A finger at every lobe tip.",
                     "single": "Two fixed fingers: the sin+ tip of loop 1 and the cos+ tip after it.",
                     "none": "No fingers."},
-        "picture": {"file": "fingers.webp", "caption": "All, Single and None"}},
+        "picture": {"file": "fingers.webp", "caption": "All, Single and None on a 4-loop board", "width": 340, "height": 170}},
     "RX_TAB_LENGTH_MM": {
         "lead": "How far each finger reaches beyond the RX band.",
         "note": "Exactly this: it is never lengthened. If it is too short to clear the TX turns, the check names the "
@@ -188,7 +189,7 @@ PARAMS = {
         "choices": {"stepped_diagonal": "Circles joined by short straight steps.",
                     "stepped_arc": "Circles joined by arcs centred on the terminal via, as on the Renesas reference boards.",
                     "spiral": "One smooth spiral with an even gap. Better when the pitch is tight."},
-        "picture": {"file": "tx_shape.webp", "caption": "Stepped Diagonal, Stepped Arc and Spiral at the TX terminal"}},
+        "picture": {"file": "tx_shape.webp", "caption": "Stepped Diagonal, Stepped Arc and Spiral at the TX terminal", "width": 340, "height": 190}},
     "TX_INSIDE_VIA_DISTANCE_MM": {
         "lead": "Moves the TX terminal via this far towards the centre, so it clears the next turn.",
         "facts": [["0", "the via sits on the trace ends"]],
@@ -209,7 +210,7 @@ PARAMS = {
                     "parallel": "The same turns on both layers, stitched through vias around the terminal. Put Layer A on Top."},
         "note": "Parallel gives about 6 % more signal than Top alone (still to be verified), and a Q about 1.3 to 1.8 "
                 "times higher in the electrical estimate.",
-        "picture": {"file": "tx_wiring.webp", "caption": "Single, Series and Parallel, seen in section"}},
+        "picture": {"file": "tx_wiring.webp", "caption": "Single, Series and Parallel: how Layer A and Layer B are joined", "width": 340, "height": 150}},
     "TX_LAYER_A": {"lead": "The first layer carrying the TX turns."},
     "TX_LAYER_B": {"lead": "The second layer carrying the TX turns.",
                    "note": "Only used when TX Wiring is Series or Parallel."},
@@ -234,7 +235,7 @@ PARAMS = {
     "ROTOR_AUTO_EXTENSION_MM": {
         "lead": "How far the rotor copper reaches past the RX band, on both sides.",
         "choices": {"None": "Equal to the air gap.", "number": "That far. A negative value stops short of the band."},
-        "picture": {"file": "rotor_reach.webp", "caption": "The rotor copper over the RX band and the TX turns, in section"}},
+        "picture": {"file": "rotor_reach.webp", "caption": "The rotor copper over the RX band and the TX turns, cut along a radius", "width": 340, "height": 190}},
     "ROTOR_AUTO_EXTENSION_INNER_MM": {
         "lead": "How far the rotor copper reaches past the RX band at the inner edge only.",
         "choices": {"None": "The value of Extension is used."}},
@@ -249,7 +250,7 @@ PARAMS = {
         "lead": "Whether the rotor copper runs over the TX turns.",
         "choices": {"True": "The copper runs over the TX turns, as in the Renesas designs: about 5 to 8 % more signal.",
                     "False": "The copper ends inside the TX ring."},
-        "picture": {"file": "rotor_reach.webp", "caption": "The rotor copper over the RX band and the TX turns, in section"}},
+        "picture": {"file": "rotor_reach.webp", "caption": "The rotor copper over the RX band and the TX turns, cut along a radius", "width": 340, "height": 190}},
     "ROTOR_AUTO_TX_OVERHANG_MM": {
         "lead": "How far the rotor copper runs past the outermost TX turn.",
         "facts": [["Negative", "the copper ends on top of the turns"]],
@@ -336,7 +337,7 @@ PARAMS = {
     "SILKSCREEN_BREAK_VIA_GAP_MM": {
         "lead": "Distance between the two vias of an RX break, centre to centre along the trace.",
         "note": "The trace between them is what you cut. At least the via diameter plus the minimum clearance.",
-        "picture": {"file": "break.webp", "caption": "An RX break: two via sites, the dashed box, and the trace to cut"}},
+        "picture": {"file": "break.webp", "caption": "An RX break: two via sites, the dashed box, and the trace to cut", "width": 340, "height": 190}},
     "SILKSCREEN_SEARCH_SPAN_DEG": {
         "lead": "The break is looked for on the coil within this many degrees of the TX terminal.",
         "note": "The TX ends are there, so all leads come together. Larger gives more candidates, further from the TX ends."},
@@ -359,13 +360,13 @@ PARAMS = {
                     "None": "The same, with the minimum clearance in its place."},
         "note": "It is measured from the outermost copper of set 1 to the innermost copper of set 2. The gap is for "
                 "copper clearance and solder mask: it is not what isolates the two sets.",
-        "picture": {"file": "dual_layout.webp", "caption": "Set 1, the gap and set 2 along the radius"}},
+        "picture": {"file": "dual_layout.webp", "caption": "Set 1, the gap and set 2 along the radius", "width": 340, "height": 150}},
     "BAND_SPLIT": {
         "lead": "Set 1's share of the free radial width.",
         "facts": [["0.5", "equal RX band widths"], ["1x / 16x board", "usually near 0.5"],
                   ["1x / 32x board", "near 0.35: the fine track gets the width"]],
         "note": "Read only when no RX band is given.",
-        "picture": {"file": "dual_layout.webp", "caption": "Set 1, the gap and set 2 along the radius"}},
+        "picture": {"file": "dual_layout.webp", "caption": "Set 1, the gap and set 2 along the radius", "width": 340, "height": 150}},
     "LAYOUT_TOLERANCE_MM": {
         "lead": "How far the built copper may differ from the layout formulas before the run warns.",
         "facts": [["0.05", "enough for every board tried"], ["0", "no allowance"]],

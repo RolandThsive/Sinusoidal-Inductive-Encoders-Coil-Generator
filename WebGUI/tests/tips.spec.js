@@ -111,6 +111,26 @@ test("a setting's tip shows its name, unit, the marked file value, the value in 
   await expect(pop.locator(".tip-foot a")).toHaveAttribute("href", /\/wiki\/Parameter-Reference-Dual-Coil-Set-Generator$/);
 });
 
+test("every picture a tip names is a file of the site, and it loads when its tip opens", async ({ app, page }) => {
+  const named = Object.entries(TIPS.params).filter(([, t]) => t.picture);
+  for (const [name, t] of named) {
+    expect(fs.existsSync(path.join(REPO, "WebGUI", "docs", "tooltips", "pictures", t.picture.file)), `${name}: ${t.picture.file}`).toBe(true);
+    expect(fs.existsSync(path.join(REPO, "WebGUI", "docs", "tooltips", "drawn", t.picture.file.replace(/\.webp$/, ".svg"))), `${name}: the drawing of ${t.picture.file}`).toBe(true);
+    expect(t.picture.caption.length, `${name}: a caption`).toBeGreaterThan(8);
+  }
+  test.skip(!TIPS.params.LOOPS.picture, "no tip names a picture yet");
+  await app.open();
+  await app.tab("RX");
+  expect(await page.locator("#popover img").count(), "no picture is fetched before a tip opens").toBe(0);
+  const pop = await openTip(page, app.field("LOOPS").locator(".info-dot"));
+  const img = pop.locator(".tip-picture img");
+  await expect(img).toHaveAttribute("alt", TIPS.params.LOOPS.picture.caption);
+  await expect(img).toHaveAttribute("width", String(TIPS.params.LOOPS.picture.width));
+  await expect.poll(() => img.evaluate((i) => i.complete && i.naturalWidth)).toBe(2 * TIPS.params.LOOPS.picture.width);
+  await expect(pop.locator(".tip-picture figcaption")).toHaveText(TIPS.params.LOOPS.picture.caption);
+  await insideWindow(page, pop, "LOOPS with its picture");
+});
+
 test("every tip of the first page is filled in: no place left open, inside the window, in the new layout", async ({ app, page }) => {
   await app.open();
   const owners = page.locator("[data-tip-id]:visible:not(:disabled), .info-dot[data-help]:visible");

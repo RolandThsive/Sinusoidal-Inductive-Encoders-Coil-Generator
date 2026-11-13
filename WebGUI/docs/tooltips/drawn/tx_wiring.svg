@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 300" width="680" height="300" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" role="img" aria-label="Single, Series and Parallel: how Layer A and Layer B are joined">
+<rect width="680" height="300" fill="#fbfaf8"/>
+<rect x="34" y="127" width="182" height="54" rx="4" fill="#e7e1d8" stroke="none" stroke-width="1.5"/>
+<line x1="48" y1="118" x2="202" y2="118" stroke="#D03B2F" stroke-width="14" stroke-linecap="round"/>
+<line x1="48" y1="190" x2="202" y2="190" stroke="#c9c4bd" stroke-width="3" stroke-linecap="butt" stroke-dasharray="7 7"/>
+<circle cx="48" cy="118" r="9" fill="#ffffff" stroke="#333333" stroke-width="3"/>
+<circle cx="202" cy="118" r="9" fill="#ffffff" stroke="#333333" stroke-width="3"/>
+<text x="14" y="125" font-size="20" font-weight="700" text-anchor="middle" fill="#D03B2F">A</text>
+<text x="14" y="197" font-size="20" font-weight="700" text-anchor="middle" fill="#8a8f98">B</text>
+<rect x="256" y="127" width="182" height="54" rx="4" fill="#e7e1d8" stroke="none" stroke-width="1.5"/>
+<line x1="270" y1="118" x2="424" y2="118" stroke="#D03B2F" stroke-width="14" stroke-linecap="round"/>
+<line x1="270" y1="190" x2="424" y2="190" stroke="#2F6FD0" stroke-width="14" stroke-linecap="round"/>
+<rect x="418" y="118" width="12" height="72" rx="3" fill="#FFC400" stroke="#A87A00" stroke-width="1.5"/>
+<circle cx="270" cy="118" r="9" fill="#ffffff" stroke="#333333" stroke-width="3"/>
+<circle cx="270" cy="190" r="9" fill="#ffffff" stroke="#333333" stroke-width="3"/>
+<text x="236" y="125" font-size="20" font-weight="700" text-anchor="middle" fill="#D03B2F">A</text>
+<text x="236" y="197" font-size="20" font-weight="700" text-anchor="middle" fill="#2F6FD0">B</text>
+<rect x="478" y="127" width="182" height="54" rx="4" fill="#e7e1d8" stroke="none" stroke-width="1.5"/>
+<line x1="492" y1="118" x2="646" y2="118" stroke="#D03B2F" stroke-width="14" stroke-linecap="round"/>
+<line x1="492" y1="190" x2="646" y2="190" stroke="#2F6FD0" stroke-width="14" stroke-linecap="round"/>
+<rect x="486" y="118" width="12" height="72" rx="3" fill="#FFC400" stroke="#A87A00" stroke-width="1.5"/>
+<rect x="640" y="118" width="12" height="72" rx="3" fill="#FFC400" stroke="#A87A00" stroke-width="1.5"/>
+<circle cx="492" cy="118" r="9" fill="#ffffff" stroke="#333333" stroke-width="3"/>
+<circle cx="646" cy="118" r="9" fill="#ffffff" stroke="#333333" stroke-width="3"/>
+<text x="458" y="125" font-size="20" font-weight="700" text-anchor="middle" fill="#D03B2F">A</text>
+<text x="458" y="197" font-size="20" font-weight="700" text-anchor="middle" fill="#2F6FD0">B</text>
+<text x="118" y="62" font-size="22" font-weight="700" text-anchor="middle" fill="#333333">Single</text>
+<text x="340" y="62" font-size="22" font-weight="700" text-anchor="middle" fill="#333333">Series</text>
+<text x="562" y="62" font-size="22" font-weight="700" text-anchor="middle" fill="#333333">Parallel</text>
+<text x="118" y="246" font-size="20" font-weight="500" text-anchor="middle" fill="#555555">turns on Layer A</text>
+<text x="340" y="246" font-size="20" font-weight="500" text-anchor="middle" fill="#555555">twice the turns</text>
+<text x="562" y="246" font-size="20" font-weight="500" text-anchor="middle" fill="#555555">same turns, both layers</text>
+<circle cx="196" cy="274" r="7" fill="#ffffff" stroke="#333333" stroke-width="2.5"/>
+<text x="210" y="281" font-size="20" font-weight="500" text-anchor="start" fill="#555555">the two ends</text>
+<rect x="376" y="264" width="10" height="20" rx="3" fill="#FFC400" stroke="#A87A00" stroke-width="1.5"/>
+<text x="396" y="281" font-size="20" font-weight="500" text-anchor="start" fill="#555555">via</text>
+</svg>

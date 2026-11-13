@@ -400,7 +400,7 @@ class Tips(unittest.TestCase):
         self.assertEqual(sorted(set(wrong)), [])
 
     def test_the_words_have_no_fault_and_tips_json_is_the_file_they_give(self):
-        self.assertEqual([p for p in build_tips.problems() if "is not in docs/tooltips/pictures" not in p], [])
+        self.assertEqual(build_tips.problems(), [])
         self.assertTrue(build_tips.up_to_date(), "run WebGUI/tools/build_tips.py")
         with open(build_tips.OUT, encoding="utf-8") as fh:
             lines = fh.read().splitlines()

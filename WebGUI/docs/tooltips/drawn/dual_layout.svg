@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 300" width="680" height="300" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" role="img" aria-label="Set 1, the gap and set 2 along the radius">
+<rect width="680" height="300" fill="#fbfaf8"/>
+<rect x="38.4" y="116" width="603.1" height="86" rx="4" fill="#e7e1d8" stroke="none" stroke-width="1.5"/>
+<rect x="75.3" y="128" width="99.9" height="62" rx="3" fill="#5d6470" stroke="none" stroke-width="1.5"/>
+<text x="125.3" y="167" font-size="21" font-weight="700" text-anchor="middle" fill="#ffffff">RX 1</text>
+<rect x="191.3" y="128" width="53.8" height="62" rx="3" fill="#9aa0aa" stroke="none" stroke-width="1.5"/>
+<text x="218.2" y="167" font-size="21" font-weight="700" text-anchor="middle" fill="#ffffff">TX 1</text>
+<rect x="368.8" y="128" width="181.3" height="62" rx="3" fill="#5d6470" stroke="none" stroke-width="1.5"/>
+<text x="459.5" y="167" font-size="21" font-weight="700" text-anchor="middle" fill="#ffffff">RX 2</text>
+<rect x="566.3" y="128" width="53.8" height="62" rx="3" fill="#9aa0aa" stroke="none" stroke-width="1.5"/>
+<text x="593.2" y="167" font-size="21" font-weight="700" text-anchor="middle" fill="#ffffff">TX 2</text>
+<path d="M73 106v-10H245.1v10" fill="none" stroke="#333333" stroke-width="2"/>
+<text x="159.1" y="82" font-size="22" font-weight="700" text-anchor="middle" fill="#333333">Set 1</text>
+<path d="M366.5 106v-10H620v10" fill="none" stroke="#333333" stroke-width="2"/>
+<text x="493.3" y="82" font-size="22" font-weight="700" text-anchor="middle" fill="#333333">Set 2</text>
+<line x1="245.1" y1="124" x2="245.1" y2="224" stroke="#a93e33" stroke-width="1.5" stroke-linecap="butt" stroke-dasharray="4 4"/>
+<line x1="366.5" y1="124" x2="366.5" y2="224" stroke="#a93e33" stroke-width="1.5" stroke-linecap="butt" stroke-dasharray="4 4"/>
+<line x1="247.1" y1="216" x2="364.5" y2="216" stroke="#a93e33" stroke-width="2.5" stroke-linecap="butt"/>
+<path d="M357.3 212.5L364.5 216L357.3 219.5" fill="none" stroke="#a93e33" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M254.3 219.5L247.1 216L254.3 212.5" fill="none" stroke="#a93e33" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="305.8" y="248" font-size="22" font-weight="700" text-anchor="middle" fill="#a93e33">Track Gap</text>
+<text x="38.4" y="286" font-size="20" font-weight="500" text-anchor="start" fill="#555555">hole</text>
+<text x="641.6" y="286" font-size="20" font-weight="500" text-anchor="end" fill="#555555">board edge</text>
+<text x="305.8" y="286" font-size="20" font-weight="500" text-anchor="middle" fill="#6a6a6a">radius</text>
+<line x1="349.8" y1="279" x2="389.8" y2="279" stroke="#6a6a6a" stroke-width="1.8" stroke-linecap="butt"/>
+<path d="M384.4 276.4L389.8 279L384.4 281.6" fill="none" stroke="#6a6a6a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

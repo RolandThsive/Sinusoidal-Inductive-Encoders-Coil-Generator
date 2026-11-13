@@ -175,7 +175,7 @@ def main(argv=None):
         if f'"{pyodide["cdn"]}"' not in fh.read():
             print(f"WebGUI/app/main.js does not name the CDN folder of vendor.json ({pyodide['cdn']}): nothing is built.")
             return 1
-    wrong = [p for p in build_tips.problems() if "is not in docs/tooltips/pictures" not in p]
+    wrong = build_tips.problems()                               # a tip that names a missing picture is one of them
     if wrong or not build_tips.up_to_date():
         print("\n".join(wrong) if wrong else "WebGUI/tips.json is not the one tools/tips_words.py gives (run tools/build_tips.py): nothing is built.")
         return 1
