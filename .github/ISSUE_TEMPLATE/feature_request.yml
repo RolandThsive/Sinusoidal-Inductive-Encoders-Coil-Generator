@@ -1,0 +1,15 @@
+name: Feature request
+description: A new option, a new coil shape, a better model or a better picture.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What would you like the generator to do?
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why, and for what board?
+      description: The encoder or board it is for, and anything you measured or read that supports it.

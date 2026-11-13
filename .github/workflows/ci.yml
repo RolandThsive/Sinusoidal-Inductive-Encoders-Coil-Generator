@@ -1,0 +1,241 @@
+# The checks of every pull request, of every push to main, and of a nightly run (which catches a new Python, numpy or
+# runner image breaking the generators while no one is changing them).  A newer push to a pull request cancels the run
+# still going for it.  The wiki page Regression-Testing.md describes each check and how to run it locally.
+#
+#   Lint            ruff (ruff.toml) on the Python code; actionlint on these workflow files
+#   Install         requirements.txt installs from wheels alone on every supported Python (3.11 to 3.15) and system,
+#                   and both generators pass their --check there
+#   Tests           both regression suites on Python 3.15, on Ubuntu, Windows and macOS; on Ubuntu under coverage,
+#                   which may not drop below .github/coverage-baseline.json.  A failed run keeps its boards as an
+#                   artifact for 14 days
+#   KiCad           every reference board and a fresh default board opened by KiCad 7, 8, 9 and 10; KiCad's DRC
+#                   (8 and newer) compared with .github/kicad-drc-baseline.json
+#   Repo guard      no bytecode, Output files, files over 5 MB or session details in the repository, the commit
+#                   messages or the pull request text
+#   Docs            every relative link of the Markdown files resolves; every wiki page is in the sidebar; the
+#                   pictures of the wiki page Dual Layout are what the reference boards give
+#
+# Every action is pinned to a full commit hash (Dependabot keeps them current), the token is read-only and is not
+# kept in the checkout.
+
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "23 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  PYTHON_VERSION: "3.15"
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+  PYTHONDONTWRITEBYTECODE: "1"
+  PYTHONUNBUFFERED: "1"
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Install ruff (the version in requirements.txt)
+        run: |
+          python -m pip install --only-binary=:all: "$(grep -E '^ruff==' requirements.txt)"
+      - name: ruff
+        run: ruff check --output-format=github .
+      - name: actionlint
+        run: docker run --rm -v "$PWD:/repo" --workdir /repo rhysd/actionlint:1.7.12 -color
+
+  install:
+    name: Install (${{ matrix.os }}, Python ${{ matrix.python }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python: ["3.11", "3.12", "3.13", "3.14", "3.15"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install requirements.txt from wheels only (a pin without a wheel for this Python fails here)
+        run: |
+          python -m pip install --only-binary=:all: -r requirements.txt
+      - name: Single Coil Set Generator --check
+        run: python "Generators/Single Coil Set Generator/Generator/Run/RunCoilGenerator.py" --check --no-color
+      - name: Dual Coil Set Generator --check
+        run: python "Generators/Dual Coil Set Generator/Dual_Generator/Run/Dual_RunCoilGenerator.py" --check --no-color
+
+  tests:
+    name: ${{ matrix.suite }} Generator tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [Single, Dual]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - suite: Single
+            key: single          # the name run_regression.py takes (macOS has bash 3.2, which cannot lower a case)
+            source: Generators/Single Coil Set Generator/Generator
+          - suite: Dual
+            key: dual
+            source: Generators/Single Coil Set Generator/Generator,Generators/Dual Coil Set Generator/Dual_Generator
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Install requirements.txt (numpy and coverage)
+        shell: bash
+        run: |
+          python -m pip install --only-binary=:all: -r requirements.txt
+      - name: Make the folder the suite writes into (kept as the artifact when a test fails)
+        shell: python
+        run: |
+          import os
+          os.makedirs(os.path.join(os.environ["RUNNER_TEMP"], "regression"), exist_ok=True)
+      - name: Run the ${{ matrix.suite }} Coil Set Generator regression tests
+        shell: bash
+        env:
+          TMPDIR: ${{ runner.temp }}/regression
+          TEMP: ${{ runner.temp }}/regression
+          TMP: ${{ runner.temp }}/regression
+          REGRESSION_KEEP_OUTPUT: "1"
+          SUITE: ${{ matrix.key }}
+          SOURCE: ${{ matrix.source }}
+        run: |
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            python -m coverage run --rcfile=.coveragerc --source="$SOURCE" regression/run_regression.py "$SUITE" -v \
+              2>&1 | tee "$RUNNER_TEMP/tests.log"
+          else
+            python regression/run_regression.py "$SUITE" -v 2>&1 | tee "$RUNNER_TEMP/tests.log"
+          fi
+      - name: Coverage may not drop
+        if: runner.os == 'Linux'
+        shell: bash
+        env:
+          SUITE: ${{ matrix.key }}
+        run: |
+          python -m coverage report --rcfile=.coveragerc
+          python .github/scripts/coverage_ratchet.py "$SUITE"
+      - name: Run summary
+        if: always()
+        shell: bash
+        env:
+          NAME: ${{ matrix.suite }} Coil Set Generator
+          SYSTEM: ${{ matrix.os }}
+        run: python .github/scripts/step_summary.py "$RUNNER_TEMP/tests.log" "$NAME" "$SYSTEM"
+      - name: Keep the boards of a failed run
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: regression-output-${{ matrix.suite }}-${{ matrix.os }}
+          path: |
+            ${{ runner.temp }}/regression
+            ${{ runner.temp }}/tests.log
+          retention-days: 14
+          if-no-files-found: ignore
+
+  kicad:
+    name: KiCad ${{ matrix.kicad }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        kicad: ["7.0", "8.0", "9.0", "10.0"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Install requirements.txt
+        run: |
+          python -m pip install --only-binary=:all: -r requirements.txt
+      - name: Write a fresh default board with each generator
+        run: |
+          python "Generators/Single Coil Set Generator/Generator/Run/RunCoilGenerator.py" --no-color
+          python "Generators/Dual Coil Set Generator/Dual_Generator/Run/Dual_RunCoilGenerator.py" --no-color
+          for g in Single Dual; do
+            mkdir -p ".fresh/$g"
+            out="Generators/$g Coil Set Generator/Output"
+            cp "$out/"*/Stator.kicad_* "$out/"*/Rotor.kicad_* ".fresh/$g/"
+          done
+      - name: Pull KiCad ${{ matrix.kicad }}
+        run: docker pull --quiet "kicad/kicad:${{ matrix.kicad }}"
+      - name: Load every board, and compare KiCad's DRC with the baseline
+        run: |
+          docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -e GITHUB_STEP_SUMMARY=/summary.md \
+            -v "$PWD:/repo" -v "$GITHUB_STEP_SUMMARY:/summary.md" -w /repo "kicad/kicad:${{ matrix.kicad }}" \
+            python3 .github/scripts/kicad_check.py --kicad "${{ matrix.kicad }}" \
+              "Single Coil Set Generator=regression/SingleCoilSetGenerator_regression" \
+              "Dual Coil Set Generator=regression/DualCoilSetGenerator_regression" \
+              "Single Coil Set Generator fresh run=.fresh/Single" \
+              "Dual Coil Set Generator fresh run=.fresh/Dual"
+
+  repo-guard:
+    name: Repo guard
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Files, commit messages and pull request text
+        env:
+          PR_TEXT: |
+            ${{ github.event.pull_request.title }}
+            ${{ github.event.pull_request.body }}
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          if [ -n "$BASE" ] && [ "$BASE" != "0000000000000000000000000000000000000000" ]; then
+            python .github/scripts/repo_guard.py --commits "$BASE..$HEAD"
+          else
+            python .github/scripts/repo_guard.py
+          fi
+
+  docs:
+    name: Docs
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Relative links and the wiki sidebar
+        run: python .github/scripts/check_docs.py
+      - name: The Dual Layout pictures match the reference boards
+        run: python docs/tools/dual_layout_pictures.py --check

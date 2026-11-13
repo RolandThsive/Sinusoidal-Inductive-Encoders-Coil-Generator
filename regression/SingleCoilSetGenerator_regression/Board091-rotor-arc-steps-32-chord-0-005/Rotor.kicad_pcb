@@ -1,0 +1,38 @@
+(kicad_pcb (version 20221018) (generator coil_generator)
+
+  (general (thickness 1.6))
+
+  (paper "User" 200.0 200.0)
+  (title_block (title "Rotor 1 sector") (comment 1 "Generator: RotorBuilder.py (metal target for the stator)") (comment 2 "Copper: Sectors: 1, Metal Fraction: 0.5, Radius: 15.53 ... 24.3 mm, Layer: Top") (comment 3 "Radius-Outer: 27 mm, Radius-Inner: 15 mm"))
+
+  (layers
+    (0 "F.Cu" signal)
+    (31 "B.Cu" signal)
+    (32 "B.Adhes" user "B.Adhesive")
+    (33 "F.Adhes" user "F.Adhesive")
+    (34 "B.Paste" user)
+    (35 "F.Paste" user)
+    (36 "B.SilkS" user "B.Silkscreen")
+    (37 "F.SilkS" user "F.Silkscreen")
+    (38 "B.Mask" user "B.Mask")
+    (39 "F.Mask" user "F.Mask")
+    (40 "Dwgs.User" user "User.Drawings")
+    (41 "Cmts.User" user "User.Comments")
+    (42 "Eco1.User" user "User.Eco1")
+    (43 "Eco2.User" user "User.Eco2")
+    (44 "Edge.Cuts" user)
+    (45 "Margin" user)
+    (46 "B.CrtYd" user "B.Courtyard")
+    (47 "F.CrtYd" user "F.Courtyard")
+    (48 "B.Fab" user)
+    (49 "F.Fab" user)
+  )
+
+  (setup (pad_to_mask_clearance 0))
+
+  (net 0 "")
+
+  (gr_poly (pts (xy 124.329306 100) (xy 124.212153 102.384689) (xy 123.861825 104.746412) (xy 123.281694 107.062425) (xy 122.477348 109.310422) (xy 121.456532 111.468755) (xy 120.229078 113.516638) (xy 118.806808 115.434348) (xy 117.203417 117.203417) (xy 115.434348 118.806808) (xy 113.516638 120.229078) (xy 111.468755 121.456532) (xy 109.310422 122.477348) (xy 107.062425 123.281694) (xy 104.746412 123.861825) (xy 102.384689 124.212153) (xy 100 124.329306) (xy 97.615311 124.212153) (xy 95.253588 123.861825) (xy 92.937575 123.281694) (xy 90.689578 122.477348) (xy 88.531245 121.456532) (xy 86.483362 120.229078) (xy 84.565652 118.806808) (xy 82.796583 117.203417) (xy 81.193192 115.434348) (xy 79.770922 113.516638) (xy 78.543468 111.468755) (xy 77.522652 109.310422) (xy 76.718306 107.062425) (xy 76.138175 104.746412) (xy 75.787847 102.384689) (xy 75.670694 100) (xy 84.456277 100) (xy 84.531124 101.523551) (xy 84.754945 103.03243) (xy 85.125584 104.512105) (xy 85.639472 105.948325) (xy 86.29166 107.32726) (xy 87.075867 108.63563) (xy 87.98454 109.860834) (xy 89.008928 110.991072) (xy 90.139166 112.01546) (xy 91.36437 112.924133) (xy 92.67274 113.70834) (xy 94.051675 114.360528) (xy 95.487895 114.874416) (xy 96.96757 115.245055) (xy 98.476449 115.468876) (xy 100 115.543723) (xy 101.523551 115.468876) (xy 103.03243 115.245055) (xy 104.512105 114.874416) (xy 105.948325 114.360528) (xy 107.32726 113.70834) (xy 108.63563 112.924133) (xy 109.860834 112.01546) (xy 110.991072 110.991072) (xy 112.01546 109.860834) (xy 112.924133 108.63563) (xy 113.70834 107.32726) (xy 114.360528 105.948325) (xy 114.874416 104.512105) (xy 115.245055 103.03243) (xy 115.468876 101.523551) (xy 115.543723 100)) (layer "F.Cu") (width 0) (fill solid))
+  (gr_circle (center 100 100) (end 100 115) (layer "Edge.Cuts") (width 0.05) (fill none))
+  (gr_circle (center 100 100) (end 100 127) (layer "Edge.Cuts") (width 0.05) (fill none))
+)
