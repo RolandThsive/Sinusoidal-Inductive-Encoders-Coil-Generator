@@ -1,5 +1,5 @@
 /* security: the page's policy, where Python may come from, and what happens when the CDN fails. */
-import { test, expect } from "./frame.js";
+import { test, expect, UNREACHED } from "./frame.js";
 import { CDN } from "./site.mjs";
 
 test("the page carries the policy the build wrote, and a full visit breaks none of it", async ({ app, page }) => {
@@ -37,7 +37,7 @@ test("a link cannot point the page at another copy of Python", async ({ app, pag
 
 test("the CDN refuses the connection: Python comes from the site's own copy", async ({ app, page, cdn, problems }) => {
   cdn.mode = "blocked";
-  problems.allow(/Failed to load resource|net::ERR_|NetworkError|could not be loaded|Load failed|Loading module from|error loading dynamically imported module/i);
+  problems.allow(UNREACHED);
   await app.open();
   await expect(page.locator("#build-stamp")).toContainText("this site's own copy");
   await expect(app.findings("error")).toHaveCount(0);
@@ -57,7 +57,7 @@ test("the CDN never answers: after 15 s Python comes from the site's own copy", 
 test("the CDN sends a numpy that is not the one Pyodide names: it is refused, the site's own copy is used", async ({ app, page, cdn, problems }) => {
   const wheel = Object.keys((await import("./site.mjs")).LOCK.files).find((n) => n.endsWith(".whl"));
   cdn.change[wheel] = (bytes) => { const b = Buffer.from(bytes); b[b.length - 40] ^= 0xff; return b; };
-  problems.allow(/integrity|digest|sha-?256|Failed to load|Failed to fetch|numpy/i);
+  problems.allow(/integrity|digest|sha-?256|numpy/i, UNREACHED);
   await app.open();
   await expect(page.locator("#build-stamp")).toContainText("this site's own copy");
   await expect(page.locator("#btn-download")).toBeEnabled();
@@ -66,7 +66,7 @@ test("the CDN sends a numpy that is not the one Pyodide names: it is refused, th
 test("no source of Python answers: the page says so and offers a report", async ({ app, page, cdn, context, problems }) => {
   cdn.mode = "blocked";
   await context.route("**/vendor/pyodide/**", (route) => route.abort("connectionrefused"));
-  problems.allow(/Failed to load resource|net::ERR_|NetworkError|could not be loaded|Load failed|Loading module from|error loading dynamically imported module/i);
+  problems.allow(UNREACHED);
   await app.open("", { settle: false });
   await expect(page.locator("#crash-dialog")).toBeVisible({ timeout: 60000 });
   await expect(page.locator("#crash-text")).toContainText("Python could not be loaded");

@@ -13,7 +13,7 @@ export default defineConfig({
   testDir: "tests",
   testMatch: "*.spec.js",
   outputDir: "test-results",
-  timeout: 240000,                                   // a Dual board alone takes about 30 s in a browser
+  timeout: 360000,                                   // a Dual board test: about 45 s in Chromium, up to 3 minutes in Firefox on a CI runner
   expect: { timeout: 20000 },
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
