@@ -11,7 +11,7 @@ the file and group (the small line on top), the name as on the page with its uni
     facts     [[label, value], ...]: typical values, sizes, the meaning of a special number
     formula   [line, ...]: shown in the mono font
     note      the one caveat worth knowing
-    picture   a file of docs/tooltips/pictures, with its caption
+    picture   {file, caption}: a file of WebGUI/docs/tooltips/pictures
 
 The words are the generators' own: each tip shortens and orders the comment of its setting in the parameter file
 (and the text the page showed before); nothing is claimed that the file does not say.
@@ -448,7 +448,7 @@ CONTROLS = {
     "btn-generate": {"lead": "Run the generator with these settings.", "keys": ["Ctrl", "Enter"]},
     "view-stator": {"lead": "The stator board alone."},
     "view-rotor": {"lead": "The rotor board alone."},
-    "view-overlay": {"lead": "The rotor's copper drawn over the stator, at the Rotor Angle below."},
+    "view-overlay": {"lead": "The rotor's copper drawn over the stator, at the angle of the Rotor Angle slider."},
     "view-pictures": {"lead": "The two pictures the generator draws of the board."},
     "btn-fullscreen": {"lead": "Show the preview full screen.", "keys": ["Esc"], "keysNote": "leaves it"},
     "btn-fullscreen-on": {"lead": "Leave full screen.", "keys": ["Esc"]},
@@ -485,15 +485,14 @@ CONTROLS = {
     "silk-missing": {"lead": "This board has no silkscreen marks on its {side} side ({cu})."},
     "net": {"lead": "Hover to highlight {what}, click to hide it.", "note": "The preview only."},
     "net-off": {"lead": "Show {what}."},
-    "tab": {"lead": "{what} of {file}.",
-            "facts": [["Settings", "{count}"], ["Basic shows", "{basic}"], ["Changed", "{changed}"]]},
+    "tab": {"lead": "{what} of {file}.", "facts": [["Changed", "{changed}"]]},
     "set": {"lead": "The {cat} settings of coil set {set}, the {which} one."},
     "rotor-fold": {"lead": "Show or hide the {kind} rotor settings.", "note": "Used when Rotor Mode is {mode}."},
-    "none": {"lead": "{line}"},                              # the None line of the setting's own tip
+    "none": {"lead": "{line}"},                              # the None or Auto line of the setting's own tip
     "none-locked": {"lead": "Locked: the RX band is set by {pair}.", "note": "Set those to None first to use this pair."},
     "result-range": {"lead": "The unique angle range: one electrical period of the RX pattern."},
     "result-R": {"lead": "Resistance of the TX coil at DC.", "note": "The generator's estimate."},
     "result-L": {"lead": "Inductance of the TX coil without the rotor.", "note": "The generator's estimate."},
-    "result-C": {"lead": "The tank capacitors for the TX frequency below.", "note": "The generator's estimate."},
+    "result-C": {"lead": "The tank capacitors for the TX frequency f.", "note": "The generator's estimate."},
     "result-f": {"lead": "The TX frequency the tank capacitors are sized for."},
 }

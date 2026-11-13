@@ -24,6 +24,13 @@ function fill(e, attrs, kids) {
   return e;
 }
 export function clear(node) { node.replaceChildren(); return node; }
+/* The attributes of a help box whose words change with the page (app/tips.js): its id in tips.json, the values it
+   shows, and the plain text that is shown when tips.json has no such tip. */
+export function tipOf(id, text, args) {
+  const a = { "data-tip-id": id, "data-tip": text || null };
+  if (args) a["data-tip-args"] = JSON.stringify(args);
+  return a;
+}
 
 export function same(a, b) { return JSON.stringify(a) === JSON.stringify(b); }
 export function clone(x) { return JSON.parse(JSON.stringify(x)); }

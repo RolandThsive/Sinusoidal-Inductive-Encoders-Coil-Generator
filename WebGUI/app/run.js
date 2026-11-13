@@ -4,7 +4,7 @@
    printed last and the seconds, and afterwards its findings in its own words.  A run cannot be stopped from outside,
    so Cancel ends the Python worker and starts a new one. */
 
-import { $, el, clear, state, M, fmt, plural, same, clone, toast, say, textBox, download, job } from "./core.js";
+import { $, el, clear, state, M, fmt, plural, same, clone, toast, say, textBox, download, job, tipOf } from "./core.js";
 import { ask, cancel as cancelEngine } from "./engine.js";
 import { onChange, scheduleChecks, where, v, hasSets } from "./model.js";
 import { reveal, canReveal } from "./pages.js";
@@ -130,7 +130,7 @@ function message(item) {
     for (const part of line.split(/\b([A-Z][A-Z0-9_]{2,})\b/)) {
       const file = names.has(part) ? where(part, set) : null;
       if (file && canReveal(file, part)) {
-        box.append(el("button", { type: "button", class: "param-link", "data-tip": "Show this setting", onclick: () => reveal(file, part) }, part));
+        box.append(el("button", { type: "button", class: "param-link", ...tipOf("param-link", "Show this setting"), onclick: () => reveal(file, part) }, part));
       } else if (part) box.append(part);
     }
   });
@@ -217,12 +217,12 @@ export function renderResults() {
   if (dual) {
     const table = el("table", {},
       el("thead", {}, el("tr", {}, el("td", {}), el("th", { scope: "col" }, "Set 1 · Inner"), el("th", { scope: "col" }, "Set 2 · Outer"))),
-      el("tbody", {}, rows.map(([label, key, tip]) => el("tr", {}, el("th", { scope: "row", "data-tip": tip }, label), sets.map((k) => el("td", {}, of(k)[key] || "–")))),
+      el("tbody", {}, rows.map(([label, key, tip]) => el("tr", {}, el("th", { scope: "row", ...tipOf(`result-${key}`, tip) }, label), sets.map((k) => el("td", {}, of(k)[key] || "–")))),
         board ? el("tr", {}, el("th", { scope: "row" }, "Board"), el("td", { colspan: 2 }, board)) : null));
     box.append(table);
   } else {
     const list = el("dl", {});
-    for (const [label, key, tip] of rows) list.append(el("dt", { "data-tip": tip }, label), el("dd", {}, of(0)[key]));
+    for (const [label, key, tip] of rows) list.append(el("dt", tipOf(`result-${key}`, tip), label), el("dd", {}, of(0)[key]));
     if (board) list.append(el("dt", {}, "Board"), el("dd", {}, board));
     box.append(list);
   }
@@ -241,9 +241,13 @@ export function updateStale() {
     b.disabled = !(ready && good[part]);
     b.dataset.tip = m.stale ? "The settings changed: press Generate first"
       : `Download only the ${part} board of this run (${good ? good.name + "_" : ""}${BOARD_FILE[part]}.kicad_pcb), ready to open in KiCad`;
+    b.dataset.tipId = m.stale ? "btn-download-stale" : `btn-dl-${part}`;
+    b.dataset.tipArgs = JSON.stringify({ name: good ? good.name : null });
   }
   $("btn-download").disabled = !ready;
   $("btn-download").dataset.tip = m.stale ? "The settings changed: press Generate first" : ZIP_TIP + (good ? `\nThis run: ${good.name}.zip` : "");
+  $("btn-download").dataset.tipId = m.stale ? "btn-download-stale" : "btn-download";
+  $("btn-download").dataset.tipArgs = JSON.stringify({ name: good ? good.name : null });
   $("btn-files").disabled = !ready;
 }
 /* The notice sits in the Checks header, centred between the run name (the counts) and the Info switch.  It is one

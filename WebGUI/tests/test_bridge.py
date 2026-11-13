@@ -12,6 +12,7 @@ nothing in the repository is written.  What is proven:
     a wrong value gets the generator's own message, and a failed run writes nothing
     the bridge leaves the published parameter files as they were
     exported files and a run's record are read back as the values they were made from; nothing in them is run
+    every setting the page shows has its words for the help box, and tips.json is the file those words give
 """
 
 import json
@@ -25,7 +26,10 @@ import unittest
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(os.path.dirname(HERE))
 sys.path.insert(0, os.path.join(REPO, "WebGUI"))
+sys.path.insert(0, os.path.join(REPO, "WebGUI", "tools"))
 import WebGenerator as WG  # noqa: E402
+import build_tips  # noqa: E402
+import tips_words  # noqa: E402
 
 IGNORE = shutil.ignore_patterns("__pycache__", "Coil_*", "DualCoil_*")
 SCRIPT = {mode: os.path.join("Generators", info["folder"], *info["script"].split("/"))
@@ -367,6 +371,42 @@ class Findings(unittest.TestCase):
         self.assertEqual(got["items"][0]["names"], ["TX_TURNS", "OUTSIDE_RADIUS_MM"])
         self.assertEqual(got["items"][1]["files"], ["RX_Parameters.py"])
         self.assertEqual(got["failed"], "1 parameter error(s). Nothing was written.")
+
+
+class Tips(unittest.TestCase):
+    """The words of the help boxes (tools/tips_words.py, tips.json) against the generators' own tables."""
+
+    def shown(self):
+        out = {}
+        for mode in ("single", "dual"):
+            for f in json.loads(WG.describe(mode))["files"]:
+                for p in f["parameters"]:
+                    if not p["readOnly"] and p["name"] != "GENERATOR_MODE":
+                        out.setdefault(p["name"], []).append(p)
+        return out
+
+    def test_every_setting_the_page_shows_has_its_words_and_no_other(self):
+        shown = self.shown()
+        self.assertEqual(sorted(set(shown) - set(tips_words.PARAMS)), [], "settings without words")
+        self.assertEqual(sorted(set(tips_words.PARAMS) - set(shown)), [], "words for settings the page does not show")
+
+    def test_a_choice_with_words_is_a_choice_the_generator_takes(self):
+        wrong = []
+        for name, variants in self.shown().items():
+            for p in variants:
+                values = (p.get("options") or {}).get("values") or ([True, False] if p["kind"] == "bool" else [])
+                allowed = {str(v).lower() for v in values if v is not None} | {"none", "auto", "number"}
+                wrong += [f"{name}: {key}" for key in tips_words.PARAMS[name].get("choices", {}) if key.lower() not in allowed]
+        self.assertEqual(sorted(set(wrong)), [])
+
+    def test_the_words_have_no_fault_and_tips_json_is_the_file_they_give(self):
+        self.assertEqual([p for p in build_tips.problems() if "is not in docs/tooltips/pictures" not in p], [])
+        self.assertTrue(build_tips.up_to_date(), "run WebGUI/tools/build_tips.py")
+        with open(build_tips.OUT, encoding="utf-8") as fh:
+            lines = fh.read().splitlines()
+        tips = json.loads("\n".join(lines))
+        self.assertEqual(len([ln for ln in lines if ln.startswith('"') and ": {" in ln and not ln.endswith("{")]),
+                         len(tips["params"]) + len(tips["controls"]) + len(tips["presets"]), "one tip per line")
 
 
 if __name__ == "__main__":

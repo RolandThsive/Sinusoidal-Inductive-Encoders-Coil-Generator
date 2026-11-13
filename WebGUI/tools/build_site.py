@@ -10,6 +10,7 @@ build_site.py  -  makes the folder that GitHub Pages serves.
     site/WebGUI/vendor/pyodide/         the site's own backup copy of Pyodide, each file checked against its SHA-256
                                         (vendor_lock.py): downloaded with --fetch-vendor, or taken from a folder with
                                         --vendor; without either the site has no backup and the page knows it
+    site/WebGUI/docs/tooltips/pictures/ the pictures of the help boxes (the only part of docs/ that is served)
     site/WebGUI/version.json            the commit, the date, the SHA-256 of generators.zip, and where Pyodide comes from
 
 The security policy of every page is written here: the <!--CSP--> line of an .html file becomes its
@@ -18,6 +19,7 @@ text pages: no script at all).
 
 Nothing of the repository is changed.  The zip is the same byte for byte for the same files (sorted names, one fixed
 date), so its hash only changes when a generator file does.  Tests, tools, documents and this script are not copied.
+Nothing is built while tips.json is not the file tools/tips_words.py gives, or while its words have a fault.
 Needs only Python 3.
 """
 
@@ -32,10 +34,14 @@ import sys
 import zipfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import build_tips  # noqa: E402
 import vendor_lock  # noqa: E402
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 WEB = os.path.join(REPO, "WebGUI")
+# the pictures of the help boxes: kept with the documents, served at the same path beside the page
+PICTURES_AT = os.path.join("docs", "tooltips", "pictures")
+PICTURES = os.path.join(WEB, PICTURES_AT)
 # folders of WebGUI/ that are not part of the page
 NOT_SERVED_DIRS = {"tests", "tools", "docs", "node_modules", "__pycache__", "test-results", "playwright-report"}
 # files of WebGUI/ that are not part of the page (WebGenerator.py travels inside the zip)
@@ -148,6 +154,15 @@ def commit_of(repo):
         return "unknown"
 
 
+def copy_pictures(dest):
+    """Copy the pictures of the help boxes (docs/ is otherwise not served).  Returns their number."""
+    names = sorted(f for f in os.listdir(PICTURES) if f.lower().endswith(".webp")) if os.path.isdir(PICTURES) else []
+    for f in names:
+        os.makedirs(os.path.join(dest, PICTURES_AT), exist_ok=True)
+        shutil.copyfile(os.path.join(PICTURES, f), os.path.join(dest, PICTURES_AT, f))
+    return len(names)
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Make the folder that GitHub Pages serves.")
     ap.add_argument("--out", default=os.path.join(REPO, "site"), help="the folder to make (emptied first)")
@@ -160,6 +175,10 @@ def main(argv=None):
         if f'"{pyodide["cdn"]}"' not in fh.read():
             print(f"WebGUI/app/main.js does not name the CDN folder of vendor.json ({pyodide['cdn']}): nothing is built.")
             return 1
+    wrong = [p for p in build_tips.problems() if "is not in docs/tooltips/pictures" not in p]
+    if wrong or not build_tips.up_to_date():
+        print("\n".join(wrong) if wrong else "WebGUI/tips.json is not the one tools/tips_words.py gives (run tools/build_tips.py): nothing is built.")
+        return 1
     out = os.path.abspath(args.out)
     if os.path.exists(out):
         if not os.path.isfile(os.path.join(out, ".built-by-build_site")):
@@ -176,7 +195,7 @@ def main(argv=None):
         fh.write("")
     with open(os.path.join(out, "index.html"), "w", encoding="utf-8", newline="\n") as fh:
         fh.write(REDIRECT)
-    copied = copy_page(page)
+    copied = copy_page(page) + copy_pictures(page)
     sha, count = write_bundle(os.path.join(page, "py", "generators.zip"))
     backup = False
     try:

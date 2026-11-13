@@ -5,7 +5,7 @@
    take the keyboard carries data-focus, a name that stays the same when the page is drawn again, so the keyboard stays
    where it was. */
 
-import { el, svg, same, fmt, M, wireChoices, markChoices, closeMenus } from "./core.js";
+import { el, svg, same, fmt, M, wireChoices, markChoices, closeMenus, tipOf } from "./core.js";
 import { val, startVal, where, setValues, setOne, bandLock, numberFor } from "./model.js";
 import { labelOf, choiceText, stepOf, LAYER_NUM_CU, CU_NAME, COPPER } from "./labels.js";
 import { LAYER_INFO } from "./boardview.js";
@@ -18,6 +18,12 @@ const NONE_TIPS = {
   RX_R_BASE_MM: "None: the RX band is given by its inside and outside radius, or fitted to the board edges. R Base and A go together",
   RX_A_MM: "None: the RX band is given by its inside and outside radius, or fitted to the board edges. R Base and A go together",
 };
+
+/* The help box of a None or Auto switch: that line of the setting's own help; of a locked one, why it is locked. */
+function switchTip(name, choice, lock) {
+  if (lock) return tipOf("none-locked", lock, { pair: (/set by (.+?)\. /.exec(lock) || [])[1] });
+  return tipOf("none", choice === "None" ? NONE_TIPS[name] : null, { setting: name, choice });
+}
 
 const key = (file, name, part) => `${file}|${name}|${part}`;
 const idOf = (view, file, name) => `${view}-${file.replace(/_Parameters\.py$/, "")}-${name}`;
@@ -43,12 +49,12 @@ export function fieldBox(view, file, name, head, body, cls = "") {
 const labelled = (view, file, name) => ({ "aria-labelledby": `${idOf(view, file, name)}-label`, "aria-describedby": `${idOf(view, file, name)}-error` });
 
 /* a switch with a word beside it */
-function switchRow({ on, word, focus, cls = "", disabled = false, tip = null, label = null, change }) {
+function switchRow({ on, word, focus, cls = "", disabled = false, tip = null, label = null, change }) {   // tip: tipOf(...)
   const cb = el("input", { type: "checkbox", role: "switch", "data-focus": focus, disabled, "aria-label": label });
   cb.checked = !!on;
   const text = el("span", {}, typeof word === "function" ? word(cb.checked) : word);
   cb.addEventListener("change", () => { if (typeof word === "function") text.textContent = word(cb.checked); change(cb.checked); });
-  return el("label", { class: `switch-row ${cls}`.trim(), "data-tip": tip }, el("span", { class: "switch" }, cb, el("span", { class: "knob" })), text);
+  return el("label", { class: `switch-row ${cls}`.trim(), ...(tip || {}) }, el("span", { class: "switch" }, cb, el("span", { class: "knob" })), text);
 }
 
 /* a row of choices of which one is on */
@@ -99,7 +105,7 @@ function dropdown({ view, file, name, options, value, pick }) {
 function noneSwitch(file, name, on) {
   const lock = bandLock(file, name);
   return switchRow({ on, word: lock ? "None · Locked" : "None", focus: key(file, name, "none"), cls: "small none-switch" + (lock ? " locked" : ""),
-    disabled: !!lock, tip: lock || NONE_TIPS[name], label: `${labelOf(name).text}: None`,
+    disabled: !!lock, tip: switchTip(name, "None", lock), label: `${labelOf(name).text}: None`,
     change: (checked) => {
       if (checked) M().lastNumbers[file][name] = val(file, name);
       setOne(file, name, checked ? null : numberFor(file, name), "basic-none");
@@ -202,7 +208,9 @@ function presetCard(p, v, selected, i, set) {
     if (tx.includes(n)) for (let j = 0; j < 3; j++) pic.append(svg("rect", { x: 64 + j * 10, y: y - 2.2, width: 7, height: 4.4, rx: 1, class: "card-tx", style: colour }));
   });
   return el("button", { type: "button", class: "slide" + (selected ? " selected" : ""), role: "radio", "aria-checked": String(selected),
-    "data-tip": `${p.name}: ${p.note}`, "data-key": i, "data-focus": key(`set${set}`, "TX_LAYOUT", p.id) },
+    ...tipOf(`preset:${p.id}`, `${p.name}: ${p.note}`, { name: p.name, layers: p.layers, sets: Object.entries(p.set).map(([k, x]) =>
+      [labelOf(k).text, choiceText(k, x) + (k === "TX_LAYER_B" && p.set.TX_WIRING === "single" ? " (not used by a one-layer TX)" : "")]) }),
+    "data-key": i, "data-focus": key(`set${set}`, "TX_LAYOUT", p.id) },
     pic, el("span", { class: "slide-name" }, p.name));
 }
 /* The cards of the board's layer count, for one coil set; view: "b" (Basic) or "a" (Advanced). */
@@ -299,7 +307,7 @@ export function advancedWidget(p) {
     const back = isAuto ? (none ? numberFor(file, name) : (m.lastNumbers[file][name] ?? fallback)) : v;
     return el("div", { class: "auto-row" },
       switchRow({ on: isAuto, word: lock ? `${word} · Locked` : word, focus: key(file, name, "auto"), cls: lock ? "locked" : "", disabled: !!lock,
-        tip: lock || (none ? NONE_TIPS[name] : null), label: `${labelOf(name).text}: ${word}`,
+        tip: switchTip(name, none ? "None" : "auto", lock), label: `${labelOf(name).text}: ${word}`,
         change: (on) => { if (on) { m.lastNumbers[file][name] = typeof v === "number" ? v : back; set(none ? null : "auto"); } else set(back); } }),
       stepper({ file, name, value: isAuto ? null : v, step: stepOf(p), integer: k === "steps" || k === "auto_or_int", disabled: isAuto, commit: set }));
   }
@@ -334,7 +342,7 @@ export function advancedField(p) {
   const lab = labelOf(p.name);
   const head = fieldHead("a", p.file, p.name, lab.text, lab.unit,
     el("span", { class: "field-note" }, el("span", { class: "mono-name" }, p.name)),
-    el("button", { type: "button", class: "reset-one", "aria-label": `${lab.text}: back to the starting value`, "data-tip": "Back to the starting value",
+    el("button", { type: "button", class: "reset-one", "aria-label": `${lab.text}: back to the starting value`, ...tipOf("reset-one", "Back to the starting value"),
       "data-focus": key(p.file, p.name, "reset"), onclick: () => setOne(p.file, p.name, startVal(p.file, p.name), "advanced") }, "↺"));
   return fieldBox("a", p.file, p.name, head, advancedWidget(p));
 }

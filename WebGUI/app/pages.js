@@ -8,11 +8,11 @@
    Dual has two coil sets: the tabs are the same categories, and a Set 1 | Set 2 switch says whose RX, TX, Rotor and IC
    settings are shown. */
 
-import { $, el, clear, state, M, fmt, plural, wireChoices, markChoices, job } from "./core.js";
+import { $, el, clear, state, M, fmt, plural, wireChoices, markChoices, job, tipOf } from "./core.js";
 import { CATS, onChange, onChecked, hasSets, fileOf, catHasSets, where, v, isChanged, changedIn, BAND_RADII, BAND_CENTRE } from "./model.js";
-import { groupTitle, labelOf, ROTOR_MODE_GROUPS } from "./labels.js";
+import { groupTitle, labelOf, choiceText, ROTOR_MODE_GROUPS } from "./labels.js";
 import { numberField, segmentedField, boolField, txLayoutField, advancedField } from "./fields.js";
-import { TOOLTIPS } from "./paramtips.js";
+import { tipWords } from "./tips.js";
 
 const BASIC_CATS = ["Board", "RX", "TX", "Rotor"];
 // every setting Basic can change (Advanced lists all of them, these included); the others are counted in the note
@@ -35,7 +35,8 @@ function drawTabs(box, cats, current, panel, what) {
   for (const cat of cats) {
     const n = m.files.filter((f) => f.cat === cat).reduce((a, f) => a + f.parameters.filter((p) => listed(p) && isChanged(f.file, p.name)).length, 0);
     box.append(el("button", { type: "button", role: "tab", "data-key": cat, "aria-controls": panel,
-      "data-tip": `${what} of ${TAB_WORDS[cat]}` + (n ? ` (${plural(n, "setting")} changed)` : "") },
+      ...tipOf("tab", `${what} of ${TAB_WORDS[cat]}` + (n ? ` (${plural(n, "setting")} changed)` : ""),
+        { what, file: TAB_WORDS[cat], changed: n ? plural(n, "setting") : null }) },
       cat, n ? el("span", { class: "tab-dot", "aria-label": `${plural(n, "setting")} changed` }) : null));
   }
   markChoices(box, (b) => b.dataset.key === current);
@@ -48,7 +49,7 @@ function drawSetSwitch(box, cat) {
   for (const k of [1, 2]) {
     const n = changedIn(fileOf(cat, k));
     box.append(el("button", { type: "button", role: "radio", "data-key": k,
-      "data-tip": `The ${cat} settings of coil set ${k} (the ${k === 1 ? "inner" : "outer"} one)` },
+      ...tipOf("set", `The ${cat} settings of coil set ${k} (the ${k === 1 ? "inner" : "outer"} one)`, { cat, set: k, which: k === 1 ? "inner" : "outer" }) },
       SET_WORDS[k], n ? el("span", { class: "tab-dot", "aria-label": `${plural(n, "setting")} changed` }) : null));
   }
   markChoices(box, (b) => +b.dataset.key === M().set);
@@ -141,7 +142,8 @@ function groupBlock(box, title, params, foldable, withCards) {
   if (foldable) {
     box.append(el("button", { type: "button", class: "group-title foldable" + (folded ? " collapsed" : ""), "data-group": title, "aria-expanded": String(!folded),
       "data-focus": `group|${title}`,
-      "data-tip": `Show or hide the ${title.startsWith("Custom") ? "custom" : "automatic"} rotor settings (used when Rotor Mode is ${ROTOR_MODE_GROUPS[title]})`,
+      ...tipOf("rotor-fold", `Show or hide the ${title.startsWith("Custom") ? "custom" : "automatic"} rotor settings (used when Rotor Mode is ${ROTOR_MODE_GROUPS[title]})`,
+        { kind: title.startsWith("Custom") ? "custom" : "automatic", mode: choiceText("ROTOR_MODE", ROTOR_MODE_GROUPS[title]) }),
       onclick: () => { if (m.folded.has(title)) m.folded.delete(title); else m.folded.add(title); applyFolds(); } },
       el("span", { class: "chevron", "aria-hidden": "true" }), title));
   } else box.append(el("div", { class: "group-title" }, title));
@@ -167,7 +169,7 @@ function applyFolds() {
 /* what a setting is found by: its Python name, its label, its group and its help text */
 function haystack(f, p) {
   const l = labelOf(p.name);
-  return `${p.name} ${p.name.replace(/_/g, " ")} ${l.text} ${groupTitle(p.heading, f.cat)} ${TOOLTIPS[p.name] || p.help || ""}`.toLowerCase();
+  return `${p.name} ${p.name.replace(/_/g, " ")} ${l.text} ${groupTitle(p.heading, f.cat)} ${tipWords(p)}`.toLowerCase();
 }
 function renderFound(box, words) {
   const m = M();
