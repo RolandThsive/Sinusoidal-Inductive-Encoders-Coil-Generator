@@ -124,6 +124,7 @@ html.embedded .standalone-nav { display: none; }
   .panel { background: rgba(255, 255, 255, 0.85); }
 }
 .panel h2 { font-size: 22px; line-height: 1.2; }
+#controls h2 { margin-bottom: 10px; }                    /* room between the title and the tabs under it */
 
 /* ---- buttons (the Animations dropdown button) ---------------------------- */
 .glass-btn {
@@ -224,7 +225,7 @@ html.embedded .standalone-nav { display: none; }
 @supports not selector(::-webkit-scrollbar) {
   #basic-panel, #advanced-panel { scrollbar-color: #b4b4b4 rgba(0, 0, 0, 0.06); }
 }
-#advanced-panel h2 { margin-bottom: 8px; }
+#advanced-panel h2 { margin-bottom: 10px; }
 .field { padding: 9px 0; border-bottom: 1px dashed var(--divider); }
 .field:last-child { border-bottom: 0; }
 .field-head { display: flex; align-items: baseline; gap: 6px; margin-bottom: 6px; }
@@ -339,7 +340,12 @@ button.group-title.collapsed .chevron { transform: rotate(-90deg); }
 
 /* results under the controls */
 .results { font-size: 12.5px; color: var(--text-2); border-top: 1px dashed var(--divider); padding: 8px 2px 4px; margin-top: 6px; line-height: 1.6; }
-.results b { color: var(--text); font-weight: 600; }
+.results table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.results th, .results td { text-align: left; padding: 1px 12px 1px 0; vertical-align: baseline; }
+.results tbody th, .results dt { font-weight: 600; color: var(--text); white-space: nowrap; width: 1%; }
+.results thead th { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 600; padding-bottom: 3px; }
+.results dl { display: grid; grid-template-columns: auto 1fr auto 1fr; gap: 1px 12px; margin: 0; font-variant-numeric: tabular-nums; }
+.results dd { margin: 0; }
 /* Strict and Reset on one row, Generate full width under them (Reset and Generate the same height) */
 .generate-row { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 8px 10px; padding-top: 6px; }
 .generate-row .switch-row { grid-column: 1; grid-row: 1; }
@@ -514,9 +520,10 @@ dialog pre { font-family: var(--mono); font-size: 12px; white-space: pre-wrap; m
 
 /* ---- the two generators, coil sets, find ------------------------------------------ */
 /* Single | Dual, beside the title: the page's first choice, so it wears the accent */
-.gen-switch { border: 1px solid rgba(169, 62, 51, 0.35); }
-.gen-switch button { font-weight: 600; padding: 5px 16px; }
-.gen-switch button.on { background: var(--accent); color: #fff; }
+.gen-menu { flex: none; width: 122px; }
+.gen-menu .dropdown-btn .arrow { font-size: 15px; }
+.gen-menu .dropdown-btn { font-weight: 600; color: var(--accent); border-color: rgba(169, 62, 51, 0.35); padding: 5px 12px 5px 14px; }
+.gen-menu .dropdown-content button:disabled { color: var(--text-2); opacity: 0.5; cursor: default; background: none; font-weight: normal; }
 .segmented button:disabled { cursor: default; opacity: 0.5; }
 .set-switch { margin-top: 6px; }
 .tab-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-left: 5px; vertical-align: 2px; }
@@ -534,17 +541,24 @@ dialog pre { font-family: var(--mono); font-size: 12px; white-space: pre-wrap; m
 @keyframes field-flash { 0%, 35% { background: rgba(248, 236, 198, 0.95); } 100% { background: transparent; } }
 
 /* ---- the run card -------------------------------------------------------------------- */
-.run-card { margin: 8px 276px 0 0; }
-.run-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 6px; font-size: 12px; }
-.run-steps li { padding: 2px 9px; border-radius: 10px; background: rgba(0, 0, 0, 0.05); color: var(--text-2); max-width: 100%;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* a box in the middle of the preview: what is loading, or the steps of the run, the time and Cancel */
+.run-card { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 20; width: min(430px, calc(100% - 32px));
+  max-height: calc(100% - 24px); overflow: auto; padding: 16px 18px;
+  background: rgba(255, 255, 255, 0.94); border: 1px solid var(--glass-edge); border-radius: var(--radius); box-shadow: var(--shadow-menu);
+  backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); }
+.run-head { display: flex; align-items: center; gap: 10px; }
+.run-title { flex: 1; font-size: 16px; font-weight: 600; }
+.run-time { font-size: 12.5px; white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--text-2); }
+.run-steps { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 3px; font-size: 13px; line-height: 1.35; }
+.run-steps:empty { display: none; }
+.run-steps li { padding: 3px 9px 3px 28px; border-radius: 8px; color: var(--text-2); position: relative; }
 .run-steps li.done { color: #2E7D32; }
-.run-steps li.done::before { content: "✓ "; }
+.run-steps li.done::before { content: "✓"; position: absolute; left: 10px; }
 .run-steps li.now { background: var(--warning-bg); color: var(--text); font-weight: 600; }
-.run-now { display: flex; align-items: center; gap: 10px; margin-top: 8px; font-family: var(--mono); font-size: 11.5px; color: var(--text-2); }
-#run-line { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.run-time { font-family: var(--ui-font); font-size: 12.5px; white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--text); }
-.run-now .glass-btn { font-family: var(--ui-font); flex: none; }
+.run-steps li.now::before { content: "›"; position: absolute; left: 11px; }
+.run-line { margin: 8px 0 0; min-height: 16px; font-family: var(--mono); font-size: 11.5px; line-height: 1.4; color: var(--text-2);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.run-card #btn-cancel { display: block; margin: 10px 0 0 auto; }
 .spinner { width: 14px; height: 14px; flex: none; border-radius: 50%; border: 2px solid rgba(0, 0, 0, 0.15); border-top-color: var(--accent); animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 /* a setting named in a finding leads to that setting */
@@ -554,7 +568,6 @@ dialog pre { font-family: var(--mono); font-size: 12px; white-space: pre-wrap; m
 /* ---- preview: pictures, layout line -------------------------------------------------- */
 .layer-chip:focus-visible, .net-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .origin-dot { fill: currentColor; stroke: none; }
-.layout-strip { margin-top: 6px; font-size: 12px; color: var(--text-2); font-family: var(--mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pictures { position: absolute; inset: 0; overflow: auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; padding: 12px; align-content: start; background: #fff; }
 .pictures .hint { grid-column: 1 / -1; text-align: center; margin-top: 40px; }
 .picture { margin: 0; }

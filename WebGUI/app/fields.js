@@ -5,7 +5,7 @@
    take the keyboard carries data-focus, a name that stays the same when the page is drawn again, so the keyboard stays
    where it was. */
 
-import { el, svg, same, fmt, M, wireChoices, markChoices } from "./core.js";
+import { el, svg, same, fmt, M, wireChoices, markChoices, closeMenus } from "./core.js";
 import { val, startVal, where, setValues, setOne, bandLock, numberFor } from "./model.js";
 import { labelOf, choiceText, stepOf, LAYER_NUM_CU, CU_NAME, COPPER } from "./labels.js";
 import { LAYER_INFO } from "./boardview.js";
@@ -71,7 +71,7 @@ function dropdown({ view, file, name, options, value, pick }) {
     "aria-selected": String(same(o, value)), onclick: () => { open(false); pick(o); } }, choiceText(name, o)));
   menu.append(...items);
   function open(on, focusItem) {
-    document.querySelectorAll(".dropdown.open").forEach((d) => { if (d !== dd) { d.classList.remove("open"); d.firstChild.setAttribute("aria-expanded", "false"); } });
+    closeMenus(dd);
     dd.classList.toggle("open", on);
     btn.setAttribute("aria-expanded", String(on));
     if (on && focusItem) (items.find((i) => i.classList.contains("on")) || items[0]).focus();
@@ -90,8 +90,6 @@ function dropdown({ view, file, name, options, value, pick }) {
   dd.append(btn, menu);
   return dd;
 }
-document.addEventListener("click", () => document.querySelectorAll(".dropdown.open").forEach((d) => {
-  d.classList.remove("open"); d.firstChild.setAttribute("aria-expanded", "false"); }));
 
 /* ---- Basic -------------------------------------------------------------------------------------- */
 /* Basic's fields change a value with from = "basic": the page then leaves the Basic controls as they are (a slider

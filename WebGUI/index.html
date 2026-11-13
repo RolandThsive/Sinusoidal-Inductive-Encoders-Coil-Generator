@@ -25,9 +25,14 @@
 <div id="app" class="desktop-only">
   <header id="topbar">
     <h1 class="marker">Sinusoidal Inductive Encoder Coil Generator</h1>
-    <div class="segmented gen-switch" id="gen-switch" role="radiogroup" aria-label="Generator">
-      <button type="button" role="radio" aria-checked="true" data-gen="single" class="on" data-tip-id="gen-single">Single</button>
-      <button type="button" role="radio" aria-checked="false" data-gen="dual" data-tip-id="gen-dual">Dual</button>
+    <div class="dropdown gen-menu" id="gen-switch">
+      <button type="button" class="dropdown-btn" id="gen-btn" aria-haspopup="listbox" aria-expanded="false" data-tip-id="gen-menu"><span><span class="sr-only">Generator: </span><span id="gen-now">Single</span></span><span class="arrow" aria-hidden="true">▾</span></button>
+      <div class="dropdown-content" id="gen-list" role="listbox" aria-label="Generator">
+        <button type="button" role="option" tabindex="-1" aria-selected="true" data-gen="single" class="on" data-tip-id="gen-single">Single</button>
+        <button type="button" role="option" tabindex="-1" aria-selected="false" data-gen="dual" data-tip-id="gen-dual">Dual</button>
+        <button type="button" role="option" tabindex="-1" aria-selected="false" aria-disabled="true" disabled>Arc</button>
+        <button type="button" role="option" tabindex="-1" aria-selected="false" aria-disabled="true" disabled>Linear</button>
+      </div>
     </div>
     <div class="segmented" id="mode-switch" role="radiogroup" aria-label="Settings shown">
       <button type="button" role="radio" aria-checked="true" data-mode="basic" class="on" data-tip-id="mode-basic">Basic</button>
@@ -92,10 +97,15 @@
         </div>
         <div class="layer-toggles" id="layer-toggles"></div>
       </div>
-      <div class="layout-strip" id="layout-strip" hidden></div>
       <div class="canvas-wrap" id="canvas-wrap">
         <canvas id="board-canvas" role="img" tabindex="0" aria-label="The generated boards. Arrow keys move the board, plus and minus zoom, 0 fits it."></canvas>
         <div class="pictures" id="pictures" hidden></div>
+        <div class="run-card" id="run-card" role="group" aria-labelledby="run-title" hidden>
+          <div class="run-head"><span class="spinner" aria-hidden="true"></span><span class="run-title" id="run-title">Generating</span><span id="run-time" class="run-time"></span></div>
+          <ol class="run-steps" id="run-steps"></ol>
+          <p id="run-line" class="run-line"></p>
+          <button type="button" class="glass-btn small" id="btn-cancel" data-tip-id="btn-cancel">Cancel</button>
+        </div>
         <div class="canvas-tools" id="canvas-tools">
           <span class="tool-pair">
             <button type="button" class="fs-btn icon-btn" id="btn-fullscreen" aria-label="Fullscreen" data-tip-id="btn-fullscreen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8V3h5M16 3h5v5M21 16v5h-5M8 21H3v-5"/></svg></button>
@@ -131,14 +141,9 @@
           <div class="download-row">
             <button type="button" class="glass-btn small" id="btn-dl-stator" disabled data-tip-id="btn-dl-stator">Stator</button>
             <button type="button" class="glass-btn small" id="btn-dl-rotor" disabled data-tip-id="btn-dl-rotor">Rotor</button>
-            <button type="button" class="glass-btn small" id="btn-files" disabled data-tip-id="btn-files">Files</button>
+            <button type="button" class="glass-btn small" id="btn-files" disabled data-tip-id="btn-files">All Files</button>
           </div>
         </div>
-      </div>
-      <div class="run-card" id="run-card" hidden>
-        <ol class="run-steps" id="run-steps"></ol>
-        <div class="run-now"><span class="spinner" aria-hidden="true"></span><span id="run-line"></span><span id="run-time" class="run-time"></span>
-          <button type="button" class="glass-btn small" id="btn-cancel" data-tip-id="btn-cancel">Cancel</button></div>
       </div>
       <div class="checks-list" id="checks-list" tabindex="0" aria-label="Findings of the run"><p class="hint">Starting Python in your browser. The first visit downloads about 20 MB; later visits are cached.</p></div>
     </section>

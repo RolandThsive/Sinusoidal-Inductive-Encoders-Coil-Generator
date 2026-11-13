@@ -1,0 +1,15 @@
+{
+  "name": "coil-generator-web-tool-tests",
+  "private": true,
+  "description": "The browser tests of the web tool (Playwright). The page itself needs nothing from npm.",
+  "type": "module",
+  "scripts": {
+    "test": "playwright test",
+    "test:chromium": "playwright test --project=chromium",
+    "serve": "node tests/serve.mjs"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
+    "@playwright/test": "1.65.0"
+  }
+}
