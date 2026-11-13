@@ -373,6 +373,13 @@ def describe(mode):
                                 "help": helps.get(name, ""), "heading": heads.get(name, "General"),
                                 "inFile": hasattr(module, name) if module is not None else False,
                                 "readOnly": name in READ_ONLY}, **flags))
+        # In the order of the parameter file itself, as the desktop user reads it.  A setting the file does not
+        # hold (a set's own value of a board setting) stays behind the setting the rules name before it.
+        spots, place, last = _assignments(src), {}, (0, 0)
+        for i, p in enumerate(params):
+            last = (spots[p["name"]][0], 0) if p["name"] in spots else (last[0], last[1] + 1)
+            place[p["name"]] = last + (i,)
+        params.sort(key=lambda p: place[p["name"]])
         files.append({"file": file, "label": label, "group": group, "set": k, "parameters": params})
     return json.dumps({"mode": mode, "files": files})
 

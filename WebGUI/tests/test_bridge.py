@@ -104,20 +104,28 @@ def without_moment(data):
 
 
 class Describe(unittest.TestCase):
+    def test_settings_come_in_the_order_of_their_parameter_file(self):
+        for mode in ("single", "dual"):
+            for f in json.loads(WG.describe(mode))["files"]:
+                lines = WG._assignments(WG._published_files(mode).get(f["file"], ""))
+                held = [p["name"] for p in f["parameters"] if p["name"] in lines]
+                self.assertEqual(held, sorted(held, key=lambda n: lines[n][0]), f["file"])
+                self.assertTrue(held, f["file"])
+
     def test_single_is_the_generators_table(self):
         from Generator.Checks import ParameterRules as PR
         d = json.loads(WG.describe("single"))
         shown = [(f["file"], p["name"], p["kind"]) for f in d["files"] for p in f["parameters"] if not p.get("silk")]
-        self.assertEqual(shown, [(file, name, kind) for file, name, kind, _o, _a in PR.SPEC])
+        self.assertEqual(sorted(shown), sorted((file, name, kind) for file, name, kind, _o, _a in PR.SPEC))
         silk = [p["name"] for f in d["files"] for p in f["parameters"] if p.get("silk")]
-        self.assertEqual(silk, list(WG._silk_defaults("single")))
+        self.assertEqual(sorted(silk), sorted(WG._silk_defaults("single")))
 
     def test_dual_is_the_generators_table(self):
         d = json.loads(WG.describe("dual"))
         from Dual_Generator.Core import Dual_SetParameters as SP
         shown = {f["file"]: tuple(p["name"] for p in f["parameters"]) for f in d["files"]
                  if f["file"] != WG.MODES["dual"]["silk_file"]}
-        self.assertEqual(shown, dict(SP.NAMES_BY_FILE))
+        self.assertEqual({f: sorted(n) for f, n in shown.items()}, {f: sorted(n) for f, n in dict(SP.NAMES_BY_FILE).items()})
         for f in d["files"]:
             for p in f["parameters"]:
                 self.assertEqual(bool(p.get("override")), f["set"] != 0 and p["name"] in SP.OVERRIDES, p["name"])
