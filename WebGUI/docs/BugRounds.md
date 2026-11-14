@@ -107,6 +107,8 @@ the fixes, in 2 on Firefox and 6 on WebKit; the third in 2 on Firefox; the fourt
 | An opened group, and the column after a scrollbar came, measured while WebKit was still moving them | WebKit | The layout tests wait for the page's transitions to end. The column no longer slides when a scrollbar comes, and an opening group is cut until its growing has ended, however long that takes |
 | The "Cancelled" message was gone before a slow browser had its new Python | Firefox, once | The test reads the message at once |
 
+The fifth run passed in all three browsers, with no test that passed only on its second try.
+
 Since this round Chromium keeps its scrollbars in every test (`playwright.config.js`), and a click or a hover that
 cannot be done is named after 30 seconds.
 
