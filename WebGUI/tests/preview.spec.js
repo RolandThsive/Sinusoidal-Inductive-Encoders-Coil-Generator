@@ -118,6 +118,9 @@ test("layers, vias and coils: a click hides and shows, the mouse and the keyboar
   await expect(chip(page, "Top")).toBeFocused();
   await page.keyboard.press("Space");
   expect((await view(page)).hidden).not.toContain("F.Cu");
+  // Esc puts away the help box the focus opened: in WebKit it lies over the silkscreen chips
+  await page.keyboard.press("Escape");
+  await expect(page.locator("#popover")).toBeHidden();
   // the silkscreen: its bottom side starts hidden, as it repeats the top side mirrored
   await expect(chip(page, "Silk Top")).toHaveAttribute("aria-checked", "true");
   await expect(chip(page, "Silk Bottom")).toHaveAttribute("aria-checked", "false");

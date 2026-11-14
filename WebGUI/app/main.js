@@ -101,11 +101,16 @@ function switchGen(gen, run = true) {
    the list's cards, with the scrollbar alone to the right of them, and the cards keep their width. */
 function watchScrollbar() {
   const lists = [$("basic-panel"), $("advanced-panel")];
+  let bar = -1, asked = false;
   const set = () => {
+    asked = false;
     const list = lists.find((l) => !l.hidden && l.offsetWidth);
-    if (list) document.documentElement.style.setProperty("--bar", `${list.offsetWidth - list.clientWidth}px`);
+    const w = list ? list.offsetWidth - list.clientWidth : bar;
+    if (w !== bar) { bar = w; document.documentElement.style.setProperty("--bar", `${w}px`); }
   };
-  const watch = new ResizeObserver(set);
+  // in the next frame, not inside the observer: a column made wider there would be seen again in the same frame
+  // (Safari then reports "ResizeObserver loop completed with undelivered notifications")
+  const watch = new ResizeObserver(() => { if (!asked) { asked = true; requestAnimationFrame(set); } });
   lists.forEach((l) => watch.observe(l));
   set();
 }

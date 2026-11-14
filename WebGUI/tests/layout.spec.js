@@ -195,10 +195,14 @@ for (const gen of ["single", "dual"]) {
       await app.mode(mode);
       for (const [w, h] of [[640, 512], [360, 640], [320, 256]]) {
         await page.setViewportSize({ width: w, height: h });
-        await page.waitForTimeout(700);
-        const sideways = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-        if (sideways > 0) wrong.push(`${mode} at ${w} x ${h}: the page is ${sideways} px wider than the window`);
-        wrong.push(...(await page.evaluate(audit)).map((x) => `${mode} at ${w} x ${h}: ${x}`));
+        // measured again for up to 4 s while something is wrong: a slow browser may still be laying out the new size
+        let found = [];
+        for (let i = 0; i < 9 && (i === 0 || found.length); i++) {
+          await page.waitForTimeout(i === 0 ? 700 : 400);
+          const sideways = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+          found = [...(sideways > 0 ? [`the page is ${sideways} px wider than the window`] : []), ...(await page.evaluate(audit))];
+        }
+        wrong.push(...found.map((x) => `${mode} at ${w} x ${h}: ${x}`));
       }
       await page.setViewportSize({ width: 1440, height: 900 });
       await page.waitForTimeout(400);
