@@ -204,7 +204,8 @@ function fill(pop, node) {
 
 /* ---- where the box goes ----------------------------------------------------------------------- */
 /* Below the control, else above, else beside it; else on the larger side, cut to the room there (it scrolls inside);
-   only when no side has room, over the control (Esc shows the control again). */
+   only when no side has room, over the control (Esc shows the control again).  A menu's button and the lines of its
+   list have their box beside the menu, never where its list opens or stands (bug round 27). */
 function place(pop, node) {
   pop.style.removeProperty("max-height");
   const W = document.documentElement.clientWidth, H = document.documentElement.clientHeight, G = 8, E = 6;
@@ -212,11 +213,13 @@ function place(pop, node) {
   const x = (left) => Math.max(E, Math.min(W - w - E, left)), y = (top) => Math.max(E, Math.min(H - h - E, top));
   let left = x(r.left), top;
   const list = node.closest(".dropdown-content");
-  if (list) {                                                // a line of an open menu: beside the menu, never over its lines
-    const m = list.getBoundingClientRect();
-    top = y(r.top);
-    left = m.right + G + w <= W - E ? m.right + G : Math.max(E, m.left - w - G);
-  } else if (r.bottom + G + h <= H - E) top = r.bottom + G;
+  const menu = list || (node.classList.contains("dropdown-btn") && node.parentElement.querySelector(".dropdown-content"));
+  const m = menu && { left: Math.min(r.left, menu.getBoundingClientRect().left), right: Math.max(r.right, menu.getBoundingClientRect().right),
+    bottom: r.bottom + menu.scrollHeight + G };               // the menu with its list, open or not: the list opens under the button
+  if (m && m.right + G + w <= W - E) { left = m.right + G; top = y(r.top); }
+  else if (m && m.left - G - w >= E) { left = m.left - G - w; top = y(r.top); }
+  else if (m && m.bottom + G + h <= H - E) { left = x(r.left); top = m.bottom + G; }   // no room beside it: under the open list
+  else if (r.bottom + G + h <= H - E) top = r.bottom + G;
   else if (r.top - G - h >= E) top = r.top - G - h;
   else if (h <= H - 2 * E && r.right + G + w <= W - E) { left = r.right + G; top = y(r.top); }
   else if (h <= H - 2 * E && r.left - G - w >= E) { left = r.left - G - w; top = y(r.top); }
@@ -307,6 +310,7 @@ export function initTips() {
   document.addEventListener("mousedown", (e) => { if (!inBox(e.target)) { hide(); quiet = true; } });
   document.addEventListener("scroll", (e) => { if (!inBox(e.target)) hide(); }, true);   // a scroll inside the box keeps it
   window.addEventListener("resize", hide);
+  document.addEventListener("menuopen", hide);              // a menu that opens is never under a help box
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && (shownFor || pending)) { hide(); return; }
     const pop = $("popover");                                // Alt + an arrow scrolls a box that is taller than its room

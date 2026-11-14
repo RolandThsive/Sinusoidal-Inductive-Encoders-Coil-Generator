@@ -59,6 +59,7 @@ test("every control the page shows has its tip in tips.json, and tips.json holds
     if (gen === "dual") await app.generator("dual");
     await app.mode("basic");
     await everyTab(page, "basic", seen);
+    await page.evaluate(() => { document.querySelector('[data-view="pictures"]').hidden = false; });   // put away on the page, its code still tested
     for (const v of ["stator", "rotor", "pictures", "overlay"]) {           // the views of the preview, with their chips
       await page.click(`#preview [data-view="${v}"]`);
       (await asked(page)).ids.forEach((id) => seen.ids.add(id));
@@ -330,4 +331,29 @@ test("a dialog that closes opens no tip: not for the focus it hands back, not fo
   await page.focus("#btn-share");
   await page.keyboard.press("Tab");                          // and the keyboard opens tips as before
   await expect(pop).toBeVisible();
+});
+
+test("the generator menu's help boxes never lie over the menu: not its button, not its list, open or about to open", async ({ app, page }) => {
+  await app.open();
+  // how much of the box lies over the button and its list (the list measured where it opens, also while closed)
+  const covered = () => page.evaluate(() => {
+    const p = document.getElementById("popover");
+    if (p.hidden) return null;
+    const a = p.getBoundingClientRect();
+    return ["gen-btn", "gen-list"].filter((id) => { const b = document.getElementById(id).getBoundingClientRect();
+      return a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom; });
+  });
+  for (const [width, height] of [[1440, 900], [1080, 1920], [800, 600]]) {
+    await page.setViewportSize({ width, height });
+    await openTip(page, page.locator("#gen-btn"));
+    expect(await covered(), `${width} x ${height}: the button's box`).toEqual([]);
+    await page.locator("#gen-btn").evaluate((b) => b.click());   // the menu opens under a box that is open: the box goes
+    await expect(page.locator("#gen-switch")).toHaveClass(/open/);
+    await expect(page.locator("#popover")).toBeHidden();
+    await page.locator('#gen-list [role="option"]', { hasText: "Dual" }).hover();
+    await expect(page.locator("#popover")).toBeVisible();
+    expect(await covered(), `${width} x ${height}: the box of the line Dual`).toEqual([]);
+    await page.keyboard.press("Escape");
+    await page.mouse.move(3, 3);
+  }
 });

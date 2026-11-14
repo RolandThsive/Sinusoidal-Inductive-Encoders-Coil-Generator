@@ -222,6 +222,7 @@ export function wireMenu(dd, pick) {
     closeMenus(dd);
     dd.classList.toggle("open", on);
     btn.setAttribute("aria-expanded", String(on));
+    if (on) document.dispatchEvent(new Event("menuopen"));     // a help box that is open puts itself away
     if (on && focusItem) (items().find((i) => i.classList.contains("on")) || items()[0]).focus();
   }
   btn.addEventListener("click", (e) => { e.stopPropagation(); open(!dd.classList.contains("open"), e.detail === 0); });

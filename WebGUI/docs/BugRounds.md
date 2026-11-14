@@ -37,7 +37,7 @@ file was written.
 | 24 | Security | The ASVS list point by point (`ASVS-L1.md`), no violation of the policy in any test, the link lock, hostile names and contents | Nothing new |
 | 25 | Performance | First view, cold and warm load, run times, memory after 20 runs | Nothing; the numbers are under "Round 25" below |
 | 26 | Earlier bugs | What versions V1 to V18 of the old page fixed, tried on the new one | Nothing |
-| 27 | The owner's trial of the live page | The help boxes and the Pictures view, as the owner used them after the release | F40, F41; Pictures put away for now |
+| 27 | The owner's trial of the live page | The help boxes and the Pictures view, as the owner used them after the release | F40 to F43; Pictures put away for now, the title put away in a portrait window |
 
 ## The faults, each with its test
 
@@ -84,6 +84,8 @@ file was written.
 | F39 | 22 | In a window 320 px wide, with the window's and the list's scrollbars taking their room, the page was 4 px wider than the window and scrolled sideways (Dual), and a setting's None switch stood past the edge (Single) | Under 1000 px the slider of a number shrinks further, a None switch goes under the setting's name, and the results stand closer | `layout.spec.js` "… in a 640, a 360 and a 320 px window: one column, nothing scrolls sideways, nothing is broken or cut" |
 | F40 | 27 | The grey line beside a help box's note touched the note's text: the box's own rule that clears the room of its paragraphs outweighed the note's 8 px | That rule no longer outweighs any rule of a part of the box (`:where`) | `tips.spec.js` "a setting's tip shows its name …": the note keeps 8 px from its line |
 | F41 | 27 | Pictures: the two pictures of a run stood at different heights with their captions on different lines (the Representative picture is taller), and in a portrait window they stood side by side, small | The two pictures share one row and stand in its middle, the captions share one line; in a portrait window they stand one above the other | `preview.spec.js` "Overlay turns the rotor; Pictures shows …" |
+| F42 | 27 | In the drawing's top right corner the silkscreen chips stood 26 px under the copper chips and the Sin / Cos / TX buttons only 12 px under the silkscreen, so the silkscreen read as part of the coil buttons | The two gaps are swapped: the silkscreen stands 13 px under the copper chips, the coil buttons 26 px under it | Measured by hand at three window sizes; `layout.spec.js` still finds nothing over anything |
+| F43 | 27 | The help box of the generator menu opened under its button, where the menu's list opens: opening the menu, the box lay over its lines | A menu's button and its lines have their box beside the menu; a menu that opens puts any open box away | `tips.spec.js` "the generator menu's help boxes never lie over the menu …", at three window sizes |
 
 The four faults the owner reported while round 13 was being prepared (the search box out of line, the two button
 rows of the Dual preview broken, the results of the two sets not in columns, the silkscreen buttons) were fixed the

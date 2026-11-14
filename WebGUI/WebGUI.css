@@ -420,10 +420,10 @@ button.group-title.collapsed .chevron { transform: rotate(-90deg); }
 @container preview (max-width: 733px) {
   .preview-head { grid-template-columns: minmax(0, 1fr); }
 }
-/* The two silkscreen sides: the line under the copper chips, in the drawing's top right corner.  As tall as the
-   Fullscreen / Fit / Origin row at the left, so the two rows are one line; the Sin / Cos / TX buttons start under it
-   as the ruler starts under the icons. */
-.silk-toggles { position: absolute; top: 10px; right: 10px; height: 32px; display: flex; align-items: center; gap: 6px; z-index: 2; }
+/* The two silkscreen sides: the line under the copper chips, in the drawing's top right corner.  It stands close
+   under the copper chips (13 px between them), and the Sin / Cos / TX buttons stand further under it (26 px), so
+   the silkscreen reads as part of the layers and the coil buttons as their own group (bug round 27). */
+.silk-toggles { position: absolute; top: 1px; right: 10px; display: flex; align-items: center; gap: 6px; z-index: 2; }
 .silk-toggles .layer-chip { background: rgba(255, 255, 255, 0.85); box-shadow: var(--shadow-btn); }
 .silk-toggles .layer-chip.off { background: rgba(255, 255, 255, 0.6); box-shadow: none; }
 .layer-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; padding: 4px 10px; border-radius: 14px;
@@ -443,7 +443,7 @@ button.group-title.collapsed .chevron { transform: rotate(-90deg); }
 .via-icon { width: 12px; height: 12px; border-radius: 50%;
   background: radial-gradient(circle, #f4f1ea 0 2px, var(--via-rim) 2px 2.6px, var(--via) 2.6px); background-origin: border-box; border: 1px solid var(--via-rim); }
 /* Sin / Cos / TX Loops, top right of the preview (under the layer chips) */
-.net-toggles { position: absolute; top: 50px; right: 10px; display: flex; flex-direction: column; align-items: stretch; gap: 6px; z-index: 2; }
+.net-toggles { position: absolute; top: 52px; right: 10px; display: flex; flex-direction: column; align-items: stretch; gap: 6px; z-index: 2; }
 .net-btn { display: inline-flex; align-items: center; gap: 6px; font: inherit; font-size: 12.5px; color: var(--text); cursor: pointer;
   padding: 5px 11px; border-radius: 14px; border: 1px solid rgba(0, 0, 0, 0.08); background: rgba(255, 255, 255, 0.85);
   box-shadow: var(--shadow-btn); transition: all var(--ease); }
