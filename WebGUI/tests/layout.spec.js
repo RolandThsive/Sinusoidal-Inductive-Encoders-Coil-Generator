@@ -35,6 +35,9 @@ const PANEL = { title: "#controls-title", mode: "#mode-switch", find: "#find", t
 const PREVIEW = { tabs: "#view-tabs", copper: "#layer-toggles", silk: "#silk-toggles", canvas: "#canvas-wrap", icons: "#canvas-tools .tool-pair",
   tools: "#canvas-tools", measure: "#btn-measure", nets: "#net-toggles", angle: "#rotor-angle-box", checks: "#checks h2", zip: "#btn-download", files: "#btn-files" };
 
+/* Until every transition of the page has ended: a slow browser may still be growing a group or moving a column. */
+const moved = (page) => page.evaluate(() => Promise.all(document.getAnimations().filter((a) => a instanceof CSSTransition).map((a) => a.finished.catch(() => {}))));
+
 for (const [w, h] of SIZES) {
   for (const gen of ["single", "dual"]) {
     test(`${gen} at ${w} x ${h}: the blocks of the settings panel and of the preview stand on common lines`, async ({ app, page }) => {
@@ -44,6 +47,7 @@ for (const [w, h] of SIZES) {
       for (const mode of ["basic", "advanced"]) {
         if (mode === "advanced") await app.mode("advanced");
         await page.waitForTimeout(700);                      // the panel has its new width
+        await moved(page);
         const p = await boxes(page, PANEL), v = await boxes(page, PREVIEW);
         const say = (list) => wrong.push(...list.map((x) => `${mode}: ${x}`));
         say(off(p, "l", ["title", "find", "tabs", "set", "card", "field", "results", "strict", "check"]));
@@ -80,6 +84,7 @@ for (const [w, h] of SIZES) {
             if (s) await page.click(`#${view}-set [data-key="${s}"]`);
             for (const fold of await page.locator(".group-title.foldable.collapsed:visible").all()) await fold.click();
             await page.waitForTimeout(450);                  // an opened group has its full height
+            await moved(page);
             await expect(page.locator(".group-card.opening")).toHaveCount(0);
             for (const end of [0, 1]) {
               await page.evaluate((end) => { const l = document.querySelector("#controls :is(#basic-panel, #advanced-panel):not([hidden])"); l.scrollTop = end * l.scrollHeight; }, end);
@@ -93,6 +98,10 @@ for (const [w, h] of SIZES) {
           say((await page.evaluate(audit)).map((x) => `view ${v}: ${x}`));
         }
       }
+      if (wrong.length) wrong.push(await page.evaluate(() => {   // to read a failure by: the scrollbar the page measured, and the list's own
+        const l = document.querySelector("#controls :is(#basic-panel, #advanced-panel):not([hidden])");
+        return `(--bar ${getComputedStyle(document.documentElement).getPropertyValue("--bar")}, the list's scrollbar ${l.offsetWidth - l.clientWidth} px)`;
+      }));
       expect([...new Set(wrong)]).toEqual([]);
     });
   }

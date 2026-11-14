@@ -90,7 +90,7 @@ same way and are held by `layout.spec.js`.
 
 Only Chromium is on the computer the page was written on; Firefox and WebKit run in CI ("Web Tool Tests"). The
 first run of the whole suite there failed in 1 test on Chromium, 6 on Firefox and 9 on WebKit; the second, after
-the fixes, in 2 on Firefox and 6 on WebKit. What they were:
+the fixes, in 2 on Firefox and 6 on WebKit; the third in 2 on Firefox; the fourth in 1 on WebKit. What they were:
 
 | What the run showed | Where | What it was |
 |---|---|---|
@@ -100,10 +100,12 @@ the fixes, in 2 on Firefox and 6 on WebKit. What they were:
 | No word from a Python that was ended | WebKit | WebKit hands an ended worker's error to nobody, so F36 cannot happen there; the test takes both |
 | Shift + Tab from the page itself went to the text box used last | Firefox | The browser's way; the test starts at the last stop and goes back from there |
 | "Skipping unsupported feature name clipboard-write", "downloadable font: glyf: Glyph bbox was incorrect" | Firefox | Notes of the browser, on the frame of the blog page and on a font; the tests let them through by name |
-| The page crashed while the accessibility check read it with the help box of Generate or of Share open, opened by the mouse resting on the button | Firefox on the CI machine only, every time | Not found. The three boxes are checked opened by the keyboard, each on a page of its own |
+| The page crashed while the accessibility check read it with the help box of Generate or of Share open | Firefox on the CI machine only, every time | Tried rule by rule: only axe's rules `hidden-content` and `label` end the page, and only with one of those two boxes open. Firefox leaves the two rules out of that test; the page without a box is read with every rule |
 | "ResizeObserver loop completed with undelivered notifications" | WebKit, Dual | The measuring of F38 widened the column inside the observer, which then saw it again; it now measures in the next frame. The page had already passed this notice over |
 | The help box the keyboard opened on the Top chip lay over the silkscreen chips the test clicked next | WebKit | The test puts the box away with Esc, as a visitor would |
 | A measure of a small window taken while WebKit was still laying out the new size | WebKit, once | The small-window test measures again for up to 4 s while something is wrong |
+| An opened group, and the column after a scrollbar came, measured while WebKit was still moving them | WebKit | The layout tests wait for the page's transitions to end. The column no longer slides when a scrollbar comes, and an opening group is cut until its growing has ended, however long that takes |
+| The "Cancelled" message was gone before a slow browser had its new Python | Firefox, once | The test reads the message at once |
 
 Since this round Chromium keeps its scrollbars in every test (`playwright.config.js`), and a click or a hover that
 cannot be done is named after 30 seconds.

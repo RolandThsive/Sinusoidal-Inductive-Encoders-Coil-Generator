@@ -291,8 +291,9 @@ test("a box taller than its room, opened with the keyboard: it names its keys, a
 });
 
 /* One box a test, each on a page of its own, opened by the keyboard's focus with the mouse resting away.  Firefox on
-   the CI runners ends the page ("Page crashed") while axe goes through the whole page with the box of Generate or of
-   Share open, every time; there axe reads the box and its control only. */
+   the CI runners ends the page ("Page crashed") when axe's rules hidden-content or label go through it with the box of
+   Generate or of Share open, every time, and not with the box of a setting (found rule by rule, round 22).  Firefox
+   leaves those two out here; the page without a box is read with every rule in a11y.spec.js. */
 for (const [name, where] of [["a setting", (app) => app.field("INNER_EDGE_RADIUS_MM").locator(".info-dot")], ["Generate", (app, page) => page.locator("#btn-generate")],
   ["Share", (app, page) => page.locator("#btn-share")]]) {
   test(`axe finds nothing with a tip open: ${name}`, async ({ app, page, browserName }) => {
@@ -303,9 +304,8 @@ for (const [name, where] of [["a setting", (app) => app.field("INNER_EDGE_RADIUS
     await page.keyboard.press("Shift+Tab"); await page.keyboard.press("Tab");
     await expect(target).toBeFocused();
     await expect(page.locator("#popover")).toBeVisible();
-    let builder = new AxeBuilder({ page }).withTags(TAGS).disableRules(["label-title-only"]);
-    if (browserName === "firefox") builder = builder.include("#popover").include(await target.evaluate((t) => (t.id ? `#${t.id}` : `.field[data-name="${t.closest(".field").dataset.name}"]`)));
-    const r = await builder.analyze();
+    const off = ["label-title-only", ...(browserName === "firefox" ? ["hidden-content", "label"] : [])];
+    const r = await new AxeBuilder({ page }).withTags(TAGS).disableRules(off).analyze();
     await expect(page.locator("#popover"), "the box is still open after axe").toBeVisible();
     expect(r.violations.filter((v) => !(v.id === "label-content-name-mismatch" && v.nodes.every((x) => x.target.join(" ") === "#btn-measure")))
       .map((v) => `${v.id} (${v.impact}) ${v.help} -> ${v.nodes.slice(0, 3).map((x) => x.target.join(" ")).join(" | ")}`)).toEqual([]);

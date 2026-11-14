@@ -106,7 +106,14 @@ function watchScrollbar() {
     asked = false;
     const list = lists.find((l) => !l.hidden && l.offsetWidth);
     const w = list ? list.offsetWidth - list.clientWidth : bar;
-    if (w !== bar) { bar = w; document.documentElement.style.setProperty("--bar", `${w}px`); }
+    if (w === bar) return;
+    // at once: the column does not slide by a scrollbar's width as it does from Basic to Advanced
+    const ws = $("workspace");
+    ws.style.transition = "none";
+    bar = w;
+    document.documentElement.style.setProperty("--bar", `${w}px`);
+    void ws.offsetWidth;
+    ws.style.removeProperty("transition");
   };
   // in the next frame, not inside the observer: a column made wider there would be seen again in the same frame
   // (Safari then reports "ResizeObserver loop completed with undelivered notifications")
