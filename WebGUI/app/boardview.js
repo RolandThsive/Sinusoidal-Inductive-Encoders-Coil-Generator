@@ -206,9 +206,12 @@ export class BoardView {
   _wire() {
     const c = this.canvas;
     let drag = null;
+    // where the mouse is on the drawing, in CSS pixels.  Not offsetX / offsetY: a browser rounds those to whole
+    // pixels, which is half a pixel off where the drawing starts between two pixels.
+    const at = (e) => { const r = c.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
     c.addEventListener("wheel", (e) => {
       e.preventDefault();
-      const dpr = window.devicePixelRatio || 1, x = e.offsetX * dpr, y = e.offsetY * dpr;
+      const dpr = window.devicePixelRatio || 1, [mx, my] = at(e), x = mx * dpr, y = my * dpr;
       const k = Math.exp(-e.deltaY * 0.0015);
       this.view.ox = x - (x - this.view.ox) * k;
       this.view.oy = y - (y - this.view.oy) * k;
@@ -218,7 +221,7 @@ export class BoardView {
     c.addEventListener("mousedown", (e) => {
       if (this.measure) {
         this.mKey = null;                                    // the mouse measures now: the keys' cross goes
-        this._measurePoint(this.toBoard(e.offsetX, e.offsetY));
+        this._measurePoint(this.toBoard(...at(e)));
         return;
       }
       drag = { x: e.clientX, y: e.clientY, ox: this.view.ox, oy: this.view.oy };
@@ -234,7 +237,7 @@ export class BoardView {
     });
     window.addEventListener("mouseup", () => { drag = null; c.classList.remove("dragging"); });
     c.addEventListener("mousemove", (e) => {
-      this._readoutAt(this.toBoard(e.offsetX, e.offsetY));
+      this._readoutAt(this.toBoard(...at(e)));
     });
     c.addEventListener("mouseleave", () => (this.readout.textContent = ""));
     c.addEventListener("dblclick", () => this.fit());

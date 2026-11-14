@@ -80,6 +80,7 @@ for (const [w, h] of SIZES) {
             if (s) await page.click(`#${view}-set [data-key="${s}"]`);
             for (const fold of await page.locator(".group-title.foldable.collapsed:visible").all()) await fold.click();
             await page.waitForTimeout(450);                  // an opened group has its full height
+            await expect(page.locator(".group-card.opening")).toHaveCount(0);
             for (const end of [0, 1]) {
               await page.evaluate((end) => { const l = document.querySelector("#controls :is(#basic-panel, #advanced-panel):not([hidden])"); l.scrollTop = end * l.scrollHeight; }, end);
               say((await page.evaluate(audit)).map((x) => `${k}${s ? " set " + s : ""}: ${x}`));
@@ -179,7 +180,29 @@ test("a group that opens does not lie over the block under it while it grows", a
     await page.waitForTimeout(40);
   }
   expect([...new Set(wrong)]).toEqual([]);
-  await page.waitForTimeout(500);
-  expect(await page.locator(".group-card.opening").count(), "the cut ends with the opening").toBe(0);
+  await expect(page.locator(".group-card.opening"), "the cut ends with the opening").toHaveCount(0);
+  await page.waitForTimeout(100);
   expect(await page.evaluate(audit)).toEqual([]);
 });
+
+/* The smallest windows, with the scrollbars a visitor's browser shows: the window's own takes 15 px of the width and
+   the list's 12 px more (a 1280 px screen at 400 % zoom is 320 px wide). */
+for (const gen of ["single", "dual"]) {
+  test(`${gen} in a 640, a 360 and a 320 px window: one column, nothing scrolls sideways, nothing is broken or cut`, async ({ app, page }) => {
+    await app.open(gen === "dual" ? "#dual=" : "");
+    const wrong = [];
+    for (const mode of ["basic", "advanced"]) {
+      await app.mode(mode);
+      for (const [w, h] of [[640, 512], [360, 640], [320, 256]]) {
+        await page.setViewportSize({ width: w, height: h });
+        await page.waitForTimeout(700);
+        const sideways = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+        if (sideways > 0) wrong.push(`${mode} at ${w} x ${h}: the page is ${sideways} px wider than the window`);
+        wrong.push(...(await page.evaluate(audit)).map((x) => `${mode} at ${w} x ${h}: ${x}`));
+      }
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await page.waitForTimeout(400);
+    }
+    expect(wrong).toEqual([]);
+  });
+}

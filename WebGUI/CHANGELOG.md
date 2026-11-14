@@ -53,7 +53,7 @@ The page was written again from the start. It now runs the desktop program itsel
 
 ### Fixed
 
-The bug rounds before the release found and fixed 36 faults of the new page. They are listed, each with its
+The bug rounds before the release found and fixed 39 faults of the new page. They are listed, each with its
 test, in [docs/BugRounds.md](docs/BugRounds.md).
 
 ### Removed

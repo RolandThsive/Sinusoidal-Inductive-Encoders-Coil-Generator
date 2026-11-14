@@ -32,7 +32,7 @@ file was written.
 | 19 | The preview | Zoom about the mouse, moving, Fit, every layer, coil and set button, the silkscreen, the rotor angle, Measure with its 256 lines, Pictures, full screen, very small and very large boards | F30, F32 |
 | 20 | Downloads | The zip against the folder of a desktop run; one board alone; every file of All Files | Nothing |
 | 21 | Extremes | The longest names, the most loops, the smallest and the largest board, two and four layers | Nothing: the generator's checker answers each |
-| 22 | Browsers | The whole suite on Chromium, Firefox and WebKit | See "Round 22" below |
+| 22 | Browsers | The whole suite on Chromium, Firefox and WebKit, in CI | F37, F38, F39; the rest is under "Round 22" below |
 | 23 | The blog page | The tool in the frame of `BloggerPage.html` on another site: its size, Share, a link through the blog, the security policy inside the frame, a phone | F29, F31 |
 | 24 | Security | The ASVS list point by point (`ASVS-L1.md`), no violation of the policy in any test, the link lock, hostile names and contents | Nothing new |
 | 25 | Performance | First view, cold and warm load, run times, memory after 20 runs | Nothing; the numbers are under "Round 25" below |
@@ -75,13 +75,34 @@ file was written.
 | F31 | 23 | Inside the blog's frame the browser refused the `autofocus` of the No button of Sure / No and wrote an error in its console on every visit | The page gives No the focus itself when the question opens | `embed.spec.js` (nothing in the console), `keyboard.spec.js` (the question starts on No) |
 | F32 | 19 | A `Parameters.txt` that holds its value lists but not the copies of the parameter files (the reference boards of `regression/` are kept that way) gave "No parameter values found" | The value lists are read | `test_bridge.py` `test_a_record_without_its_copies_comes_back_from_its_value_lists` |
 | F33 | 17 | A help box taller than its room (at 200 % zoom, the boxes with a picture) scrolls inside: with the mouse wheel only | Alt + ↓ and Alt + ↑ scroll it, and a box opened with the keyboard says so | `tips.spec.js` "a box taller than its room, opened with the keyboard …" |
-| F34 | 13 | A folded group of Advanced (Automatic Rotor, Custom Rotor) that opens showed all its settings at once, over the group under it, for the third of a second its card takes to grow | The settings are cut to the card while it grows | `layout.spec.js` "a group that opens does not lie over the block under it while it grows" |
+| F34 | 13 | A folded group of Advanced (Automatic Rotor, Custom Rotor) that opens showed all its settings at once, over the group under it, for the third of a second its card takes to grow | The settings are cut to the card until it has grown | `layout.spec.js` "a group that opens does not lie over the block under it while it grows" |
 | F35 | 15 | A menu opened with the mouse (the generator menu, a setting's menu) did not close with Esc, and stayed open when Tab took the focus on | Esc closes an open menu wherever the focus is; a menu closes when the focus leaves it | `keyboard.spec.js` "a menu opened with the mouse closes with Esc, and when the focus goes on" |
 | F36 | 11 | Cancel ends Python in the middle of a call. About once in a hundred cancels the ending Python still threw an error (`NoGilError`), and the page showed it as an error of its own, "Something Went Wrong", though the cancel had worked | What an ended Python still throws is taken and dropped | `states.spec.js` "an error the cancelled Python still throws while it ends is not an error of the page" |
+| F37 | 22 | Where the drawing starts between two pixels of the window (WebKit laid it out so), the readout of the pointer, the point the wheel zooms about and Measure were up to half a pixel off: the browser gives the pointer's place inside the drawing in whole pixels | The place is taken from the pointer's place in the window less the drawing's own edge | `preview.spec.js` "the wheel zooms about the place the mouse points at …", with the drawing moved by 0.4 px |
+| F38 | 22 | Where a scrollbar takes room (Windows, Linux, WebKit), a settings list that scrolls ended 12 px before the row with Basic and Advanced above it and the results and buttons under it. No test and no picture had shown it: Playwright hides Chromium's scrollbars | The page measures the list's scrollbar; the settings column is that much wider, and the rows above and under the list end where the settings end | `layout.spec.js`, every test of it: `playwright.config.js` now keeps Chromium's scrollbars |
+| F39 | 22 | In a window 320 px wide, with the window's and the list's scrollbars taking their room, the page was 4 px wider than the window and scrolled sideways (Dual), and a setting's None switch stood past the edge (Single) | Under 1000 px the slider of a number shrinks further, a None switch goes under the setting's name, and the results stand closer | `layout.spec.js` "… in a 640, a 360 and a 320 px window: one column, nothing scrolls sideways, nothing is broken or cut" |
 
 The four faults the owner reported while round 13 was being prepared (the search box out of line, the two button
 rows of the Dual preview broken, the results of the two sets not in columns, the silkscreen buttons) were fixed the
 same way and are held by `layout.spec.js`.
+
+## Round 22: the three browsers
+
+Only Chromium is on the computer the page was written on; Firefox and WebKit run in CI ("Web Tool Tests"). The
+first run of the whole suite there failed in 1 test on Chromium, 6 on Firefox and 9 on WebKit. What they were:
+
+| What the run showed | Where | What it was |
+|---|---|---|
+| The readout half a pixel off | WebKit, and Chromium on the CI machine | F37 |
+| The right edges of the settings panel 12 px apart | WebKit | F38 |
+| A group still cut to its card 450 ms after it opened | WebKit | The cut of F34 was ended by a clock; it now ends when the card has grown |
+| No word from a Python that was ended | WebKit | WebKit hands an ended worker's error to nobody, so F36 cannot happen there; the test takes both |
+| Shift + Tab from the page itself went to the text box used last | Firefox | The browser's way; the test starts at the last stop and goes back from there |
+| "Skipping unsupported feature name clipboard-write", "downloadable font: glyf: Glyph bbox was incorrect" | Firefox | Notes of the browser, on the frame of the blog page and on a font; the tests let them through by name |
+| The page crashed when a second help box was opened after the accessibility check had read the first | Firefox on the CI machine only | Not found. The three boxes are checked each on a page of its own |
+
+Since this round Chromium keeps its scrollbars in every test (`playwright.config.js`), and a click or a hover that
+cannot be done is named after 30 seconds.
 
 ## Round 25: the numbers
 
@@ -125,6 +146,7 @@ are listed for `main`.
 | A link longer than 20000 characters is ignored without a word | A link the page made is never that long |
 | A help box can cover the control below the one it belongs to | It closes when the mouse or the focus leaves |
 | On a board several hundred millimetres wide the copper is thinner than a pixel at Fit, and faint | Traces are drawn at their true width at every zoom; the wheel shows them |
+| Where scrollbars take room, a help box with a picture that is as tall as its room to a few pixels shows a scrollbar with nothing to scroll | The scrollbar makes the picture narrower and so shorter; the browser keeps the scrollbar it has laid out |
 | The points of `WCAG-EM.md`, section 5 | They are the owner's choices |
 
 ## Where the work left the plan

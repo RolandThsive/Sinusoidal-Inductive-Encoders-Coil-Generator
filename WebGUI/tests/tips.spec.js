@@ -260,13 +260,15 @@ for (const [w, h] of [[640, 512], [320, 256]]) {
 }
 
 test("a box taller than its room, opened with the keyboard: it names its keys, and Alt + the arrows scroll it", async ({ app, page }) => {
-  await page.setViewportSize({ width: 640, height: 512 });
+  // 440 px high: the box is well taller.  (At 512 it is as tall as the window to the pixel once its own scrollbar has
+  // made its picture narrower, so a browser that shows scrollbars has nothing to scroll there.)
+  await page.setViewportSize({ width: 640, height: 440 });
   await app.open();
   await page.click('#basic-tabs [data-key="RX"]');
   const dot = app.field("INSIDE_RADIUS_MM").locator(".info-dot"), pop = page.locator("#popover");
   // with the mouse the box has no line about keys
   await openTip(page, dot);
-  expect(await pop.evaluate((p) => p.scrollHeight > p.clientHeight + 1), "the box with its picture is taller than a 512 px window").toBe(true);
+  expect(await pop.evaluate((p) => p.scrollHeight > p.clientHeight + 1), "the box with its picture is taller than a 440 px window").toBe(true);
   await expect(pop.locator(".tip-scroll")).toHaveCount(0);
   await closeTip(page);
   // with the keyboard it has, and the keys work
@@ -275,7 +277,7 @@ test("a box taller than its room, opened with the keyboard: it names its keys, a
   await expect(dot).toBeFocused();
   await expect(pop).toBeVisible();
   await expect(pop.locator(".tip-scroll")).toHaveText(/Alt\s*\+\s*↓\s*scrolls this box/);
-  await insideWindow(page, pop, "640 x 512, by the keyboard");
+  await insideWindow(page, pop, "640 x 440, by the keyboard");
   await page.keyboard.press("Alt+ArrowDown");
   expect(await pop.evaluate((p) => p.scrollTop)).toBeGreaterThan(0);
   for (let i = 0; i < 12; i++) await page.keyboard.press("Alt+ArrowDown");
@@ -288,16 +290,19 @@ test("a box taller than its room, opened with the keyboard: it names its keys, a
   await expect(pop).toBeHidden();
 });
 
-test("axe finds nothing with a tip open", async ({ app, page }) => {
-  await app.open();
-  const found = [];
-  for (const target of [app.field("INNER_EDGE_RADIUS_MM").locator(".info-dot"), page.locator("#btn-generate"), page.locator("#btn-share")]) {
-    await openTip(page, target);
+/* One box a test, each on a page of its own.  Firefox on the CI runners ended the page ("Page crashed") whenever one
+   test opened a second box after axe had gone through the page with the first one open; no visitor runs axe. */
+for (const [name, where] of [["a setting", (app) => app.field("INNER_EDGE_RADIUS_MM").locator(".info-dot")], ["Generate", (app, page) => page.locator("#btn-generate")],
+  ["Share", (app, page) => page.locator("#btn-share")]]) {
+  test(`axe finds nothing with a tip open: ${name}`, async ({ app, page }) => {
+    await app.open();
+    await openTip(page, where(app, page));
     const r = await new AxeBuilder({ page }).withTags(TAGS).disableRules(["label-title-only"]).analyze();
-    found.push(...r.violations.filter((v) => !(v.id === "label-content-name-mismatch" && v.nodes.every((x) => x.target.join(" ") === "#btn-measure"))).map((v) => `${v.id} (${v.impact}) ${v.help} -> ${v.nodes.slice(0, 3).map((x) => x.target.join(" ")).join(" | ")}`));
-  }
-  expect(found).toEqual([]);
-});
+    await expect(page.locator("#popover"), "the box is still open after axe").toBeVisible();
+    expect(r.violations.filter((v) => !(v.id === "label-content-name-mismatch" && v.nodes.every((x) => x.target.join(" ") === "#btn-measure")))
+      .map((v) => `${v.id} (${v.impact}) ${v.help} -> ${v.nodes.slice(0, 3).map((x) => x.target.join(" ")).join(" | ")}`)).toEqual([]);
+  });
+}
 
 test("a dialog that closes opens no tip: not for the focus it hands back, not for the mouse resting on the button", async ({ app, page }) => {
   await app.open();

@@ -34,9 +34,13 @@ for (const mode of ["basic", "advanced"]) {
       seen.push(at);
     }
     expect(seen).toEqual(expected.stops);                             // all of them, once each, in the page's order
-    // and backwards from the end
+    // and backwards: from the last control to the one before it (not from "the page": where Shift+Tab goes from
+    // there is the browser's own matter, and Firefox goes to the text box the cursor was in last)
+    const last = expected.stops[expected.stops.length - 1];
+    expect(last).toBe("#report-link");
+    await page.focus(last);
     await page.keyboard.press("Shift+Tab");
-    expect(await focused(page)).toBe(expected.stops[expected.stops.length - 1]);
+    expect(await focused(page)).toBe(expected.stops[expected.stops.length - 2]);
   });
 }
 

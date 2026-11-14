@@ -122,7 +122,7 @@ export function audit() {
   const list = document.querySelector("#controls :is(#basic-panel, #advanced-panel):not([hidden])");
   if (list && R(list).height < 130) out.push(`the list of settings is ${Math.round(R(list).height)} px high`);
   const canvas = document.getElementById("canvas-wrap");
-  if (shown(canvas) && (R(canvas).height < 230 || R(canvas).width < (small ? 260 : 320))) out.push(`the drawing is ${Math.round(R(canvas).width)} x ${Math.round(R(canvas).height)} px`);
+  if (shown(canvas) && (R(canvas).height < 230 || R(canvas).width < (small ? 240 : 320))) out.push(`the drawing is ${Math.round(R(canvas).width)} x ${Math.round(R(canvas).height)} px`);
   const finds = document.getElementById("checks-list");
   if (shown(finds) && R(finds).height < 60) out.push(`the list of findings is ${Math.round(R(finds).height)} px high`);
   for (const id of ["controls", "preview", "checks"]) { const p = document.getElementById(id); if (shown(p) && R(p).bottom > Math.max(de.clientHeight, de.scrollHeight) + 0.5) out.push(`#${id} ends under the page`); }

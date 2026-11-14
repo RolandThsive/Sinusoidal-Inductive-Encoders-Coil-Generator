@@ -165,13 +165,16 @@ test("an error the cancelled Python still throws while it ends is not an error o
   await expect(page.locator("#run-card")).toBeVisible();
   await page.click("#btn-cancel");
   // the worker that was ended, cut off inside Python (seen about once in a hundred cancels: "NoGilError")
-  const taken = await page.evaluate(() => {
+  const said = await page.evaluate(() => {
     const e = new ErrorEvent("error", { message: "Uncaught NoGilError: Attempted to use PyProxy when Python GIL not held", cancelable: true });
+    let heard = false;
+    window.__workers[0].addEventListener("error", () => { heard = true; });
     window.__workers[0].dispatchEvent(e);
-    return e.defaultPrevented;                               // taken by the page: the browser does not report it to the window
+    return { heard, taken: e.defaultPrevented };
   });
   expect(await page.evaluate(() => window.__workers.length)).toBe(2);
-  expect(taken).toBe(true);
+  // taken by the page, so the browser does not report it to the window; WebKit hands an ended worker no event at all
+  expect(said.taken || !said.heard).toBe(true);
   await app.settled();
   await expect(page.locator("#crash-dialog")).toBeHidden();
   await app.generate();
