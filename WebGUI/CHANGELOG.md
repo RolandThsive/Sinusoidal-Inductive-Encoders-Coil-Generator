@@ -3,6 +3,11 @@
 What changed on the page a visitor sees. The newest version is on top. The generator's own changes are in the
 repository's releases.
 
+## 2.0.1
+
+- The grey line beside the note of a help box stands clear of the note's text again.
+- The Pictures view is put away for now. The two pictures are still in the zip and in All Files.
+
 ## 2.0: the remake
 
 The page was written again from the start. It now runs the desktop program itself, for both generators.
@@ -53,7 +58,7 @@ The page was written again from the start. It now runs the desktop program itsel
 
 ### Fixed
 
-The bug rounds before the release found and fixed 39 faults of the new page. They are listed, each with its
+The bug rounds before the release found and fixed 41 faults of the new page. They are listed, each with its
 test, in [docs/BugRounds.md](docs/BugRounds.md).
 
 ### Removed

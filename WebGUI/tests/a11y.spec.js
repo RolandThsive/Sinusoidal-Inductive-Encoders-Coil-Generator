@@ -61,6 +61,7 @@ test("the open menu, the dialogs, the pictures and full screen", async ({ app, p
   await page.click("#btn-files");
   found.push(...await failures(page, "all files"));
   await page.keyboard.press("Escape");
+  await page.evaluate(() => { document.querySelector('[data-view="pictures"]').hidden = false; });   // put away on the page, its code still tested
   await page.click('[data-view="pictures"]');
   found.push(...await failures(page, "pictures"));
   await page.click('[data-view="overlay"]');

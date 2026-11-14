@@ -92,6 +92,8 @@ test("a setting's tip shows its name, unit, the marked file value, the value in 
   await expect(pop.locator(".tip-foot")).toContainText("In the file: 15");
   await expect(pop.locator(".tip-foot a")).toHaveAttribute("href", /\/wiki\/Parameter-Reference-Single-Coil-Set-Generator$/);
   await expect(pop.locator(".tip-foot a")).toHaveCSS("text-decoration-line", "underline");
+  // the note's grey side line keeps its room from the text (bug round 27: the box's reset took the room away)
+  await expect(pop.locator(".tip-note")).toHaveCSS("padding-left", "8px");
 
   // the value in the file is the published one, whatever the page holds now
   await app.mode("advanced");

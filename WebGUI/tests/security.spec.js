@@ -18,6 +18,7 @@ test("the page carries the policy the build wrote, and a full visit breaks none 
   await app.mode("advanced");
   await page.fill("#find", "via");
   await page.fill("#find", "");
+  await page.evaluate(() => { document.querySelector('[data-view="pictures"]').hidden = false; });   // put away on the page, its code still tested
   await page.click('#view-tabs [data-view="pictures"]');
   await expect(page.locator("#pictures img").first()).toBeVisible();
   await page.click("#btn-files");

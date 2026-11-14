@@ -556,7 +556,7 @@ button.group-title.collapsed .chevron { transform: rotate(-90deg); }
 .popover.plain { white-space: pre-wrap; }
 .popover.rich, .popover.parts { display: grid; gap: 8px; padding: 12px 14px; }
 .popover.rich { width: min(360px, calc(100% - 12px)); }
-.popover p, .popover dl, .popover ul, .popover figure { margin: 0; padding: 0; }
+.popover :where(p, dl, ul, figure) { margin: 0; padding: 0; }
 .popover .mono-name { display: block; margin-bottom: 4px; }
 .tip-eyebrow { font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--accent); font-weight: 600; margin-bottom: -4px; }
 .tip-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; font-size: 14.5px; font-weight: 600; line-height: 1.25; }
@@ -660,9 +660,15 @@ dialog pre { font-family: var(--mono); font-size: 12px; white-space: pre-wrap; m
 .origin-dot { fill: currentColor; stroke: none; }
 .pictures { position: absolute; inset: 0; overflow: auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; padding: 12px; align-content: start; background: #fff; }
 .pictures .hint { grid-column: 1 / -1; text-align: center; margin-top: 40px; }
-.picture { margin: 0; }
-.picture a { display: block; }
+/* Each picture spans the two rows of its grid line, so both pictures share one picture row and one caption row: a
+   picture smaller than its neighbour sits in the middle of the row, and the two captions stand on the same line. */
+.picture { margin: 0; display: grid; grid-row: span 2; grid-template-rows: subgrid; }
+.picture a { display: block; align-self: center; }
 .picture img { display: block; width: 100%; height: auto; max-height: 62vh; object-fit: contain; }
+@media (orientation: portrait) {                    /* a portrait window: the pictures one above the other */
+  .pictures { grid-template-columns: minmax(0, 1fr); }
+  .picture img { max-height: 42vh; }
+}
 .picture figcaption { font-size: 12.5px; color: var(--text-2); text-align: center; padding-top: 4px; }
 
 /* ---- keyboard and screen readers ---------------------------------------------------- */

@@ -92,7 +92,7 @@ for (const [w, h] of SIZES) {
             }
           }
         }
-        for (const v of ["stator", "rotor", "pictures", "overlay"]) {
+        for (const v of ["stator", "rotor", "overlay"]) {      // Pictures is put away for now
           await page.click(`#preview [data-view="${v}"]`);
           await page.waitForTimeout(150);
           say((await page.evaluate(audit)).map((x) => `view ${v}: ${x}`));

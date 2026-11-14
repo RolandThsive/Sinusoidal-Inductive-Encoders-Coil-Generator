@@ -196,11 +196,21 @@ test("Overlay turns the rotor; Pictures shows the generator's two pictures and p
   await page.click('#view-tabs [data-view="stator"]');
   await expect(page.locator("#rotor-angle-box")).toBeHidden();
 
+  await expect(page.locator('#view-tabs [data-view="pictures"]'), "Pictures is put away for now").toBeHidden();
+  await page.evaluate(() => { document.querySelector('[data-view="pictures"]').hidden = false; });   // put away on the page, its code still tested
   await page.click('#view-tabs [data-view="pictures"]');
   const pictures = page.locator("#pictures img");
   await expect(pictures).toHaveCount(2);
   await pictures.evaluateAll((imgs) => Promise.all(imgs.map((i) => i.complete || new Promise((done) => { i.onload = i.onerror = done; }))));
   expect(await pictures.evaluateAll((imgs) => imgs.map((i) => i.naturalWidth > 0 && /^(Representative|Actual) picture of Coil_/.test(i.alt)))).toEqual([true, true]);
+  // side by side in a wide window: the two pictures share one row, centred on the same line, and the captions stand on one line
+  const boxes = () => page.locator("#pictures figure").evaluateAll((fs) => fs.map((f) => {
+    const a = f.querySelector("img").getBoundingClientRect(), c = f.querySelector("figcaption").getBoundingClientRect();
+    return { top: a.top, bottom: a.bottom, mid: (a.top + a.bottom) / 2, caption: c.top };
+  }));
+  let [one, two] = await boxes();
+  expect(Math.abs(one.mid - two.mid), "the pictures are centred on one line").toBeLessThan(2);
+  expect(Math.abs(one.caption - two.caption), "the captions stand on one line").toBeLessThan(2);
   for (const id of ["board-canvas", "canvas-tools", "readout", "layer-toggles", "silk-toggles", "rotor-angle-box"]) await expect(page.locator("#" + id)).toBeHidden();
   await expect(page.locator("#net-toggles .net-btn")).toHaveCount(0);
   // a picture opens in a new tab, as the file the generator wrote
@@ -211,6 +221,10 @@ test("Overlay turns the rotor; Pictures shows the generator's two pictures and p
   await page.click('#view-tabs [data-view="overlay"]');
   await expect(page.locator("#board-canvas")).toBeVisible();
   await expect(page.locator("#rotor-angle-box")).toBeVisible();
+  // a portrait window: the pictures one above the other
+  await page.click('#view-tabs [data-view="pictures"]');
+  await page.setViewportSize({ width: 900, height: 1500 });
+  await expect.poll(async () => { [one, two] = await boxes(); return two.top >= one.bottom; }, { message: "the second picture under the first" }).toBe(true);
 });
 
 test("Dual: Set 1 and Set 2 hide and bring out their own coils", async ({ app, page }) => {
