@@ -35,6 +35,7 @@ test.afterAll(async () => { await new Promise((done) => server.close(done)); });
 async function blog(page, problems) {
   await page.route(BLOG + "/**", (route) => route.continue());                 // the one other server a test may ask
   problems.allow(/Allow attribute will take precedence over 'allowfullscreen'/);   // Chromium's note on the frame's two attributes: both stay, for older browsers
+  problems.allow(/Skipping unsupported feature name .clipboard-write./);           // Firefox's note on the frame's allow list: it copies without being allowed to
   await page.addInitScript(() => {
     window.__copied = [];
     Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText: async (t) => { window.__copied.push(t); } } });

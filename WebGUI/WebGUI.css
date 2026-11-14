@@ -106,12 +106,14 @@ html.embedded .standalone-nav { display: none; }
 
 #workspace {
   display: grid; min-height: 0; gap: 12px;
-  grid-template-columns: 340px minmax(0, 1fr);             /* controls column: 340 px in Basic, 470 px in Advanced (below) */
+  /* controls column: 340 px in Basic, 470 px in Advanced (below), and the room the list's scrollbar takes: --bar is
+     12 px while the list scrolls in a browser that shows scrollbars, else 0 (measured by app/main.js) */
+  grid-template-columns: calc(340px + var(--bar, 0px)) minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr) 230px;                /* the preview takes the rest above a 230 px checks panel */
   grid-template-areas: "controls preview" "controls checks";
   transition: grid-template-columns 0.5s cubic-bezier(0.32, 0.72, 0, 1);   /* Apple-style ease-out */
 }
-#app.advanced #workspace { grid-template-columns: 470px minmax(0, 1fr); }
+#app.advanced #workspace { grid-template-columns: calc(470px + var(--bar, 0px)) minmax(0, 1fr); }
 #controls { grid-area: controls; }
 #preview { grid-area: preview; }
 #checks { grid-area: checks; }
@@ -129,9 +131,9 @@ html.embedded .standalone-nav { display: none; }
 }
 .panel h2 { font-size: 22px; line-height: 1.2; }
 /* The panel's title row stays in place while the settings under it scroll: the title at the left, Basic | Advanced at
-   the right (it chooses what the panel lists).  The 4 px at the right is the room the lists keep beside their
+   the right (it chooses what the panel lists).  The room at the right is what the lists keep beside and for their
    scrollbar, so the switch ends on the right edge of the tabs under it. */
-.controls-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 4px 10px 0; flex: none; }
+.controls-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 calc(4px + var(--bar, 0px)) 10px 0; flex: none; }
 #mode-switch { flex: none; }
 #mode-switch button { padding: 4px 10px; font-size: 13px; }
 
@@ -362,7 +364,7 @@ button.group-title.collapsed .chevron { transform: rotate(-90deg); }
 /* results under the controls */
 /* The results, the buttons and the progress line end 4 px before the panel's edge, on the right edge of the tabs and
    cards above them (the room the lists keep beside their scrollbar) */
-.results, .generate-row, #progress { margin-right: 4px; }
+.results, .generate-row, #progress { margin-right: calc(4px + var(--bar, 0px)); }
 .results { font-size: 12.5px; color: var(--text-2); border-top: 1px dashed var(--divider); padding: 8px 0 4px; margin-top: 6px; line-height: 1.6; }
 /* Dual: the row names at the panel's left edge, then one column per coil set.  The three columns are as wide as their
    words and stand at equal distances: the names start on the left edge, Set 2 ends on the right edge, and the two
@@ -733,6 +735,10 @@ input[type=color]:focus-visible, canvas:focus-visible, pre:focus-visible, .check
   #checks { min-height: 230px; flex: none; }
   .checks-list { max-height: 320px; }
   .controls-head { flex-wrap: wrap; row-gap: 6px; }
+  /* 320 px less the window's scrollbar and the list's: a setting's None switch goes under its name, the results stand closer */
+  .field-head { flex-wrap: wrap; row-gap: 2px; }
+  .num-row input[type=range] { width: 60px; min-width: 0; flex: 1 1 60px; }
+  .results dl { column-gap: 8px; }
   .segmented.wide button { padding-left: 2px; padding-right: 2px; }
   .auto-row { flex-wrap: wrap; row-gap: 6px; }
   #view-tabs button { padding-left: 8px; padding-right: 8px; }

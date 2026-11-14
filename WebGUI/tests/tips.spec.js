@@ -288,16 +288,19 @@ test("a box taller than its room, opened with the keyboard: it names its keys, a
   await expect(pop).toBeHidden();
 });
 
-test("axe finds nothing with a tip open", async ({ app, page }) => {
-  await app.open();
-  const found = [];
-  for (const target of [app.field("INNER_EDGE_RADIUS_MM").locator(".info-dot"), page.locator("#btn-generate"), page.locator("#btn-share")]) {
-    await openTip(page, target);
+/* One box a test, each on a page of its own.  Firefox on the CI runners ended the page ("Page crashed") whenever one
+   test opened a second box after axe had gone through the page with the first one open; no visitor runs axe. */
+for (const [name, where] of [["a setting", (app) => app.field("INNER_EDGE_RADIUS_MM").locator(".info-dot")], ["Generate", (app, page) => page.locator("#btn-generate")],
+  ["Share", (app, page) => page.locator("#btn-share")]]) {
+  test(`axe finds nothing with a tip open: ${name}`, async ({ app, page }) => {
+    await app.open();
+    await openTip(page, where(app, page));
     const r = await new AxeBuilder({ page }).withTags(TAGS).disableRules(["label-title-only"]).analyze();
-    found.push(...r.violations.filter((v) => !(v.id === "label-content-name-mismatch" && v.nodes.every((x) => x.target.join(" ") === "#btn-measure"))).map((v) => `${v.id} (${v.impact}) ${v.help} -> ${v.nodes.slice(0, 3).map((x) => x.target.join(" ")).join(" | ")}`));
-  }
-  expect(found).toEqual([]);
-});
+    await expect(page.locator("#popover"), "the box is still open after axe").toBeVisible();
+    expect(r.violations.filter((v) => !(v.id === "label-content-name-mismatch" && v.nodes.every((x) => x.target.join(" ") === "#btn-measure")))
+      .map((v) => `${v.id} (${v.impact}) ${v.help} -> ${v.nodes.slice(0, 3).map((x) => x.target.join(" ")).join(" | ")}`)).toEqual([]);
+  });
+}
 
 test("a dialog that closes opens no tip: not for the focus it hands back, not for the mouse resting on the button", async ({ app, page }) => {
   await app.open();

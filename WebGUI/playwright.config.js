@@ -8,7 +8,9 @@
 import { defineConfig, devices } from "@playwright/test";
 import { PAGE, PORT } from "./tests/site.mjs";
 
-const chromium = process.env.WEBGUI_CHROMIUM ? { launchOptions: { executablePath: process.env.WEBGUI_CHROMIUM } } : {};
+/* Chromium keeps its scrollbars, as a visitor's Chrome on Windows or Linux has them (Playwright would hide them): a
+   list that scrolls is then 12 px narrower, which the layout tests are there to see. */
+const chromium = { launchOptions: { ignoreDefaultArgs: ["--hide-scrollbars"], ...(process.env.WEBGUI_CHROMIUM ? { executablePath: process.env.WEBGUI_CHROMIUM } : {}) } };
 
 export default defineConfig({
   testDir: "tests",
@@ -22,7 +24,8 @@ export default defineConfig({
   workers: process.env.CI ? 2 : undefined,
   reporter: process.env.CI ? [["github"], ["list"], ["html", { open: "never", outputFolder: "playwright-report" }]] : [["list"]],
   webServer: { command: "node tests/serve.mjs", port: PORT, reuseExistingServer: !process.env.CI, timeout: 180000 },
-  use: { baseURL: PAGE, viewport: { width: 1440, height: 900 }, trace: "off", screenshot: "only-on-failure" },
+  // actionTimeout: a click or a hover that cannot be done is named after 30 s, not when the whole test runs out
+  use: { baseURL: PAGE, viewport: { width: 1440, height: 900 }, trace: "off", screenshot: "only-on-failure", actionTimeout: 30000 },
   projects: [
     { name: "chromium", use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 }, ...chromium } },
     { name: "firefox", use: { ...devices["Desktop Firefox"], viewport: { width: 1440, height: 900 } } },

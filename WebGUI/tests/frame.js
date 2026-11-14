@@ -85,8 +85,9 @@ class App {
 
 /* What each browser itself writes in the console when a file cannot be fetched (the tests that cut the CDN allow it). */
 export const UNREACHED = /Failed to load resource|Failed to fetch|net::ERR_|NetworkError|Cross-Origin Request Blocked|could not be loaded|Load failed|Loading module from|error loading dynamically imported module/i;
-/* Firefox's notice about the way Pyodide's own WebAssembly file was compiled: about that file, not about the page. */
-const BROWSER_NOTICES = [/WebAssembly exception handling 'try' instruction is deprecated/];
+/* Firefox's notices about the way Pyodide's own WebAssembly file was compiled, and about the boxes of some letters in
+   the handwriting font as its makers ship it (Firefox corrects them itself): about those files, not about the page. */
+const BROWSER_NOTICES = [/WebAssembly exception handling 'try' instruction is deprecated/, /downloadable font: glyf: Glyph bbox was incorrect/];
 
 export const test = base.extend({
   cdn: [async ({ context }, use) => {

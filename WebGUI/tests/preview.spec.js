@@ -30,8 +30,11 @@ const away = (page) => page.mouse.move(3, 3, { steps: 3 });
 
 test("the wheel zooms about the place the mouse points at, dragging moves the board, a double click and Fit bring it back", async ({ app, page }) => {
   await app.open();
+  // the drawing starts between two pixels, as it does with some fonts and zoom steps
+  await page.evaluate(() => Object.assign(document.getElementById("preview").style, { position: "relative", left: "0.4px", top: "0.4px" }));
   await page.click('#view-tabs [data-view="stator"]');
   const box = await page.locator("#board-canvas").boundingBox(), fit = await view(page);
+  expect(box.x % 1, "the drawing's left edge is between two pixels").not.toBe(0);
   // Fit: the whole board in the drawing, clear of the buttons that lie on it
   const [cx, cy, r] = fit.circle;
   expect(cx - r).toBeGreaterThanOrEqual(0); expect(cy - r).toBeGreaterThanOrEqual(0);
@@ -43,10 +46,11 @@ test("the wheel zooms about the place the mouse points at, dragging moves the bo
     expect(Math.hypot(Math.max(l - cx, 0, cx - (l + b.width)), Math.max(t - cy, 0, cy - (t + b.height))), `#${id} keeps out of the board's circle`).toBeGreaterThan(r - 0.6);
   }
   // the readout: millimetres from the board's centre, right and up counted positive
-  await page.mouse.move(box.x + cx + 30, box.y + cy - 30);
+  const mouse = [Math.round(box.x + cx + 30), Math.round(box.y + cy - 30)];                   // whole pixels, as the mouse gives them
+  await page.mouse.move(...mouse);
   const [, x, y] = /X: (-?[\d.]+) mm, Y: (-?[\d.]+) mm/.exec(await page.locator("#readout").innerText());
-  expect(+x).toBeCloseTo(30 * fit.dpr / fit.scale, 1);
-  expect(+y).toBeCloseTo(30 * fit.dpr / fit.scale, 1);
+  expect(+x).toBeCloseTo((mouse[0] - box.x - cx) * fit.dpr / fit.scale, 1);
+  expect(+y).toBeCloseTo((box.y + cy - mouse[1]) * fit.dpr / fit.scale, 1);
   // the wheel: the place under the mouse stays where it is
   const at = [Math.round(box.x + box.width * 0.3), Math.round(box.y + box.height * 0.4)];    // whole pixels, as the mouse gives them
   const onBoard = (v) => [((at[0] - box.x) * v.dpr - v.ox) / v.scale, ((at[1] - box.y) * v.dpr - v.oy) / v.scale];

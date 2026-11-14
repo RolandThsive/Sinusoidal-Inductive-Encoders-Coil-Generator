@@ -95,7 +95,23 @@ function switchGen(gen, run = true) {
   });
 }
 
+/* The room the list's scrollbar takes: 12 px while the list scrolls in a browser that shows scrollbars, 0 otherwise
+   (a short list, or a browser whose scrollbars lie over the page).  The style sheet makes the panel that much wider
+   and ends its title row and its bottom block that much earlier, so that everything in the panel ends on the line of
+   the list's cards, with the scrollbar alone to the right of them, and the cards keep their width. */
+function watchScrollbar() {
+  const lists = [$("basic-panel"), $("advanced-panel")];
+  const set = () => {
+    const list = lists.find((l) => !l.hidden && l.offsetWidth);
+    if (list) document.documentElement.style.setProperty("--bar", `${list.offsetWidth - list.clientWidth}px`);
+  };
+  const watch = new ResizeObserver(set);
+  lists.forEach((l) => watch.observe(l));
+  set();
+}
+
 function wire() {
+  watchScrollbar();
   wireMenu($("gen-switch"), (o) => switchGen(o.dataset.gen));
   $("btn-share").addEventListener("click", share);
   $("btn-export").addEventListener("click", exportFiles);
