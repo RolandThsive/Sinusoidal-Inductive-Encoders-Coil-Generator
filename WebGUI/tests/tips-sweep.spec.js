@@ -50,7 +50,8 @@ async function sweep(page, where, seen) {
         inside: b.left >= 0 && b.top >= 0 && b.right <= W + 0.5 && b.bottom <= H + 0.5,
         over: !(b.right <= c.left || b.left >= c.right || b.bottom <= c.top || b.top >= c.bottom),
         room: Math.max(c.top, H - c.bottom),                  // the larger room above or below the control
-        wide: p.scrollWidth > p.clientWidth + 1, out, scrolls: p.scrollHeight > p.clientHeight + 1, cut: !!p.style.maxHeight,
+        wide: p.scrollWidth > p.clientWidth + 1, out, scrolls: p.scrollHeight > p.clientHeight + 1,
+        cut: !!p.style.maxHeight || b.height >= H - 13,       // cut to the room beside its control, or (by the style sheet) to the window
         picture: img ? img.complete && img.naturalWidth > 0 : null };
     }, await node.elementHandle());
     if (!got.text.trim()) wrong.push(`${at}: empty`);
