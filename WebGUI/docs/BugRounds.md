@@ -29,7 +29,7 @@ file was written.
 | 16 | Screen reader and axe | Names and roles of every control in every state, live messages, axe in every state; target sizes, focus ring, text spacing | F25, F26, F27, F28 |
 | 17 | Help boxes, Single | Every help box opened at five window sizes: inside the window, not over its control, filled in, its picture loaded | Nothing |
 | 18 | Help boxes, Dual | The same for Dual: each box names its own coil set; the plain texts when `tips.json` is missing | Nothing |
-| 19 | The preview | Zoom about the mouse, moving, Fit, every layer, coil and set button, the silkscreen, the rotor angle, Measure with its 256 lines, Pictures, full screen, very small and very large boards | F30 |
+| 19 | The preview | Zoom about the mouse, moving, Fit, every layer, coil and set button, the silkscreen, the rotor angle, Measure with its 256 lines, Pictures, full screen, very small and very large boards | F30, F32 |
 | 20 | Downloads | The zip against the folder of a desktop run; one board alone; every file of All Files | Nothing |
 | 21 | Extremes | The longest names, the most loops, the smallest and the largest board, two and four layers | Nothing: the generator's checker answers each |
 | 22 | Browsers | The whole suite on Chromium, Firefox and WebKit | See below |
@@ -73,6 +73,7 @@ file was written.
 | F29 | 23 | A design link pasted into the address bar of the blog page, while it was open, did not reach the tool | The blog page hands it on | `embed.spec.js` |
 | F30 | 19 | A layer or coil button that was clicked kept its layer brought out after the mouse had left: the click had left the focus on the button | Only a focus reached with the keys brings a layer out | `preview.spec.js` "layers, vias and coils …" |
 | F31 | 23 | Inside the blog's frame the browser refused the `autofocus` of the No button of Sure / No and wrote an error in its console on every visit | The page gives No the focus itself when the question opens | `embed.spec.js` (nothing in the console), `keyboard.spec.js` (the question starts on No) |
+| F32 | 19 | A `Parameters.txt` that holds its value lists but not the copies of the parameter files (the reference boards of `regression/` are kept that way) gave "No parameter values found" | The value lists are read | `test_bridge.py` `test_a_record_without_its_copies_comes_back_from_its_value_lists` |
 
 The four faults the owner reported while round 13 was being prepared (the search box out of line, the two button
 rows of the Dual preview broken, the results of the two sets not in columns, the silkscreen buttons) were fixed the

@@ -735,7 +735,8 @@ def _literals(text, refused=None):
 
 def _record_parts(text):
     """The parameter files inside a Parameters.txt: [(file name, text)].  The verbatim copies ("##### File.py #####")
-    are taken where the record has them, else the value lists ("[File.py]")."""
+    are taken where the record has them, else the value lists ("[File.py]": indented lines `NAME = value`, up to
+    the first empty line).  A reference board of regression/ holds the lists only."""
     lines = text.split("\n")
     copies, lists = {}, {}
     cur, bucket = None, None
@@ -750,8 +751,14 @@ def _record_parts(text):
             cur, bucket = m.group(1), lists
             bucket.setdefault(cur, [])
             continue
-        if cur is not None:
-            bucket[cur].append(line)
+        if cur is None:
+            continue
+        if bucket is lists:
+            if not line.strip():
+                cur = None                                 # a value list ends at its first empty line
+                continue
+            line = line.strip()                            # its lines are indented; a parameter file's are not
+        bucket[cur].append(line)
     parts = dict(lists)
     parts.update(copies)
     return [(name, "\n".join(body)) for name, body in parts.items()]

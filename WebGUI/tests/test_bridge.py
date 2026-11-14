@@ -389,6 +389,34 @@ class ImportExport(unittest.TestCase):
             for name, value in names.items():
                 self.assertEqual(value, values[file][name], f"{file} {name}")
 
+    def test_a_record_without_its_copies_comes_back_from_its_value_lists(self):
+        """A record that holds the value lists only ("[File.py]" and indented lines): the reference boards of
+        regression/ are kept that way, and so is a record whose end was cut off."""
+        for mode, board in (("single", "Board_Parameters.py"), ("dual", "Dual_Board_Parameters.py")):
+            values = defaults(mode)
+            values[board]["AIR_GAP_MM"] = 1.5
+            result = json.loads(WG.run(mode, json.dumps(values)))
+            self.assertTrue(result["ok"], mode)
+            with open(os.path.join(result["folder"], "Parameters.txt"), encoding="utf-8") as fh:
+                record = fh.read()
+            lists = record[:record.index("PARAMETER FILES (verbatim copies)")]
+            self.assertNotIn("#####", lists)
+            got = json.loads(WG.read_import(json.dumps([{"name": "Parameters.txt", "text": lists}])))
+            self.assertEqual(got["mode"], mode)
+            self.assertEqual(got["ignored"], [], mode)
+            self.assertEqual(got["values"][board]["AIR_GAP_MM"], 1.5)
+            self.assertGreater(sum(len(v) for v in got["values"].values()), 60, mode)
+            for file, names in got["values"].items():
+                for name, value in names.items():
+                    self.assertEqual(value, values[file][name], f"{mode} {file} {name}")
+        board = os.path.join(REPO, "regression", "SingleCoilSetGenerator_regression",
+                             "Board018-edges-90-150-loops-8-subcoils-2", "Parameters.txt")
+        with open(board, encoding="utf-8") as fh:
+            got = json.loads(WG.read_import(json.dumps([{"name": "Parameters.txt", "text": fh.read()}])))
+        self.assertEqual(got["values"]["Board_Parameters.py"]["OUTER_EDGE_RADIUS_MM"], 75.0)
+        self.assertEqual(got["values"]["RX_Parameters.py"]["LOOPS"], 8)
+        self.assertIsNone(got["values"]["RX_Parameters.py"]["INSIDE_RADIUS_MM"])
+
     def test_a_name_of_another_version_is_reported_not_taken(self):
         text = "LOOPS = 3\nTX_START_ANGLE_DEG = 10\n"
         got = json.loads(WG.read_import(json.dumps([{"name": "RX_Parameters.py", "text": text}])))
