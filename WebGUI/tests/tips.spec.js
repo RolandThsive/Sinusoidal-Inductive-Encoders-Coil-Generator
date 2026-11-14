@@ -276,8 +276,10 @@ test("a box taller than its room, opened with the keyboard: it names its keys, a
   await expect(pop).toBeVisible();
   await expect(pop.locator(".tip-scroll")).toHaveText(/Alt\s*\+\s*↓\s*scrolls this box/);
   await insideWindow(page, pop, "640 x 512, by the keyboard");
-  await page.keyboard.press("Alt+ArrowDown"); await page.keyboard.press("Alt+ArrowDown");
-  expect(await pop.evaluate((p) => p.scrollTop)).toBeGreaterThan(60);
+  await page.keyboard.press("Alt+ArrowDown");
+  expect(await pop.evaluate((p) => p.scrollTop)).toBeGreaterThan(0);
+  for (let i = 0; i < 12; i++) await page.keyboard.press("Alt+ArrowDown");
+  expect(await pop.evaluate((p) => p.scrollTop + p.clientHeight >= p.scrollHeight - 1), "the keys reach the end of the box").toBe(true);
   await expect(pop).toBeVisible();
   await expect(dot).toBeFocused();
   for (let i = 0; i < 12; i++) await page.keyboard.press("Alt+ArrowUp");
