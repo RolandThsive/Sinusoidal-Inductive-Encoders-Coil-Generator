@@ -17,12 +17,15 @@ const CANVAS_MEASURE = "The generated boards, Measure is on. Arrow keys move the
 
 const swatch = (css) => el("span", { class: "sw", style: { background: `var(${css})` } });
 const chipKey = (e, act) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); act(); } };
+/* The focus brings a layer or a coil out as the mouse does, but only the keyboard's focus: a click leaves the focus
+   on its button too, and what it brought out would stay when the mouse has gone. */
+const byKeys = (enter) => enter && ((e) => { if (e.currentTarget.matches(":focus-visible")) enter(); });
 
 /* ---- layer chips: the copper layers, the vias, the silkscreen marks ----------------------------- */
 function chip({ off, locked, tip, icon, text, toggle, enter, leave }) {
   if (locked) return el("span", { class: "layer-chip locked", role: "switch", "aria-checked": "false", "aria-disabled": "true", ...tip }, icon, text);
   return el("span", { class: "layer-chip" + (off ? " off" : ""), role: "switch", tabindex: 0, "aria-checked": String(!off), ...tip,
-    "data-focus": `chip|${text}`, onclick: toggle, onkeydown: (e) => chipKey(e, toggle), onmouseenter: enter, onmouseleave: leave, onfocus: enter, onblur: leave }, icon, text);
+    "data-focus": `chip|${text}`, onclick: toggle, onkeydown: (e) => chipKey(e, toggle), onmouseenter: enter, onmouseleave: leave, onfocus: byKeys(enter), onblur: leave }, icon, text);
 }
 function renderLayerToggles() {
   // the copper layers and the vias stand beside the view tabs; the two silkscreen sides under them, in the drawing's
@@ -68,7 +71,7 @@ const NET_BUTTONS = [
 const SET_ICON = { 1: "M9 4.5 A2.5 2.5 0 1 1 8.99 4.5", 2: "M9 1 A6 6 0 1 1 8.99 1" };
 function netButton({ off, text, icon, tip, toggle, enter, leave, focus }) {
   return el("button", { type: "button", class: "net-btn" + (off ? " off" : ""), role: "switch", "aria-checked": String(!off), ...tip, "data-focus": focus,
-    onclick: toggle, onmouseenter: enter, onmouseleave: leave, onfocus: enter, onblur: leave },
+    onclick: toggle, onmouseenter: enter, onmouseleave: leave, onfocus: byKeys(enter), onblur: leave },
     svg("svg", { viewBox: "0 0 18 14", "aria-hidden": "true" }, svg("path", { d: icon })), text);
 }
 function renderNetToggles() {

@@ -268,7 +268,7 @@ html.embedded .standalone-nav { display: none; }
 .stepper input { width: 64px; border: 0; border-left: 1px solid var(--divider); border-right: 1px solid var(--divider);
   text-align: center; font: inherit; font-variant-numeric: tabular-nums; color: var(--text); padding: 4px 2px; outline: none; }
 .stepper input:focus { background: var(--cream); }
-input[type=range] { -webkit-appearance: none; appearance: none; flex: 1; height: 22px; margin: 0; background: transparent; min-width: 60px; }
+input[type=range] { -webkit-appearance: none; appearance: none; flex: 1; height: 24px; margin: 0; background: transparent; min-width: 60px; }
 input[type=range]::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: rgba(0, 0, 0, 0.14); }
 input[type=range]::-moz-range-track { height: 4px; border-radius: 2px; background: rgba(0, 0, 0, 0.14); }
 input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; box-sizing: border-box; width: 20px; height: 20px; margin-top: -8px; border-radius: 50%;
@@ -514,9 +514,9 @@ button.group-title.collapsed .chevron { transform: rotate(-90deg); }
 .counts .e { color: var(--error); font-weight: 600; }
 .counts .w { color: var(--warning); font-weight: 600; }
 .counts .ok { color: #2E7D32; font-weight: 600; }
-/* narrow checks panel (portrait monitors, small laptops): the counts line shortens instead of wrapping,
-   and the download buttons keep their size */
-.checks-head > .counts { display: block; line-height: 34px; flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* the counts line stands in the middle of the 34 px head line (17 px of text, 8.5 px above and below); a line too
+   long for its room (wider letter spacing set by the reader) goes on to a second line: none of it is cut off */
+.checks-head > .counts { display: block; line-height: 17px; padding: 8.5px 0; flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
 .download-box { position: relative; width: 264px; flex: none; }
 .download-box .primary-btn { min-height: 34px; width: 100%; }
 /* the board buttons hang below Download Zip without pushing the list down: the list starts right under the header
@@ -703,7 +703,7 @@ input[type=color]:focus-visible, canvas:focus-visible, pre:focus-visible, .check
    download box and the gap.  1010 px: the title, the longest counts line, Info, Run Text and the download box */
 @container (max-width: 1010px) {
   .checks-head { flex-wrap: wrap; row-gap: 6px; }
-  .checks-head > .counts { order: 10; flex: 0 0 calc(100% - 280px); display: block; white-space: normal; line-height: 1.45; min-height: 0; padding-top: 6px; }
+  .checks-head > .counts { order: 10; flex: 0 0 calc(100% - 280px); display: block; line-height: 1.45; min-height: 0; padding: 6px 0 0; }
   .checks-head > .pacifico { margin-right: auto; }
 }
 /* narrower still (Advanced in a 1024 px window): the title line, the counts, then the four download buttons in one

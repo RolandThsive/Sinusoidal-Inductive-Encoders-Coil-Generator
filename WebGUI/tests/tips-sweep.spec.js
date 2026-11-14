@@ -41,6 +41,7 @@ async function sweep(page, where, seen) {
     await node.hover();
     try { await expect(pop).toBeVisible({ timeout: 3000 }); } catch (e) { wrong.push(`${at}: no box opened`); continue; }
     seen.add(id);
+    await pop.locator("img").evaluateAll((imgs) => Promise.all(imgs.map((i) => i.complete || new Promise((done) => { i.onload = i.onerror = done; setTimeout(done, 8000); }))));
     const got = await pop.evaluate((p, x) => {
       const b = p.getBoundingClientRect(), c = x.getBoundingClientRect(), W = document.documentElement.clientWidth, H = document.documentElement.clientHeight;
       const out = [...p.querySelectorAll("*")].filter((e) => { const r = e.getBoundingClientRect(); return r.width && (r.right > b.right + 1 || r.left < b.left - 1); }).length;
@@ -88,7 +89,8 @@ for (const [w, h] of SIZES) {
       test.skip(!process.env.SWEEP, "the slow sweep of every tip: SWEEP=1 npx playwright test tips-sweep");
       test.setTimeout(45 * 60 * 1000);
       await page.setViewportSize({ width: w, height: h });
-      await app.open(gen === "dual" ? "#dual=" : "");
+      await app.open(gen === "dual" ? "#dual=" : "", { settle: false });
+      await app.settled(900000);                               // the sweep often runs beside other long runs
       const seen = new Set(), where = `${gen} ${w}x${h}`;
       const wrong = await everyTab(page, "basic", `${where} Basic`, seen);
       for (const v of ["stator", "rotor", "pictures", "overlay"]) {

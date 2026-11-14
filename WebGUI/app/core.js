@@ -107,7 +107,12 @@ export function toast(text, ms = 2600) {
   const t = $("toast");
   t.textContent = text; t.hidden = false;
   say(text);
-  clearTimeout(toastTimer); toastTimer = setTimeout(() => (t.hidden = true), ms);
+  // a long message stays long enough to be read (70 ms a letter), and any message stays while the mouse rests on it
+  const stay = Math.max(ms, 1500 + 70 * text.length);
+  const later = () => { clearTimeout(toastTimer); toastTimer = setTimeout(() => (t.hidden = true), stay); };
+  t.onmouseenter = () => clearTimeout(toastTimer);
+  t.onmouseleave = later;
+  later();
 }
 export function say(text) {
   const s = $("sr-status");
@@ -121,6 +126,7 @@ export function confirmBox(text, yes = "Sure") {
   $("confirm-text").textContent = text;
   $("confirm-yes").textContent = yes;
   d.showModal();
+  $("confirm-no").focus();      // not the autofocus attribute: inside the blog's frame the browser refuses it, with an error in its console
   // The answer is taken when it is given (a button, or Esc), and handed on when the dialog has closed.  The browser
   // sends "close" a moment after the dialog closed: asked again within that moment, the close of the asking before
   // arrives while this one is open, and is not this one's answer.

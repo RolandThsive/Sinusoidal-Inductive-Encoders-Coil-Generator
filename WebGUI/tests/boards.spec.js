@@ -5,6 +5,7 @@
 
        BOARDS=all npx playwright test boards --project=chromium            (inside WebGUI/)
        BOARDS=all BOARDS_SUITE=dual npx playwright test boards              (one suite only)
+       BOARDS=all BOARDS_SUITE=dual BOARDS_FROM=56 npx playwright test boards     (go on from Board056)
 
    With BOARDS=all the two KiCad project files of the zip are compared as well, character for character. */
 import fs from "node:fs";
@@ -28,7 +29,9 @@ function boardFolder(suite, id) {
 }
 
 function everyBoard(suite) {
-  return fs.readdirSync(path.join(REPO, "regression", SUITES[suite].folder)).filter((n) => /^Board\d+-/.test(n)).sort().map((n) => n.split("-")[0]);
+  const from = +(process.env.BOARDS_FROM || 1);
+  return fs.readdirSync(path.join(REPO, "regression", SUITES[suite].folder)).filter((n) => /^Board\d+-/.test(n)).sort().map((n) => n.split("-")[0])
+    .filter((id) => +id.slice(5) >= from);
 }
 
 for (const [suite, { boards }] of Object.entries(SUITES)) {

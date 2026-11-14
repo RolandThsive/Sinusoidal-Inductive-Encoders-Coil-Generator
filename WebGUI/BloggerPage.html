@@ -75,6 +75,9 @@
   frame.addEventListener("load", function () {
     frame.contentWindow.postMessage({ coilgenPage: location.href.split("#")[0], coilgenHash: location.hash }, appOrigin);
   });
-  frame.src = APP_URL + (/^#(single|dual|d)=/.test(location.hash) ? location.hash : "");
+  var design = function () { return /^#(single|dual|d)=/.test(location.hash) ? location.hash : ""; };
+  frame.src = APP_URL + design();
+  // a design link pasted into the address bar of this page while it is open: the tool gets it, and opens it
+  window.addEventListener("hashchange", function () { if (design()) frame.src = APP_URL + design(); });
 })();
 </script>

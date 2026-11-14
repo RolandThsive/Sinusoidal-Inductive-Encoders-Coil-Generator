@@ -4,7 +4,7 @@ import { test, expect } from "./frame.js";
 
 const TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa", "best-practice"];
 
-/* Two findings of axe that are not failures of the page (docs/Accessibility.md says the same):
+/* Two findings of axe that are not failures of the page (docs/WCAG-EM.md, 2.5.3):
    label-title-only   axe takes a label that is scrolled out of the settings column for a hidden one, so the rule's
                       result follows the scroll position; every input is named by its visible label (rule "label").
    the Measure button its picture is a ruler with the digits 0 to 3; they are part of the picture, not a label. */
