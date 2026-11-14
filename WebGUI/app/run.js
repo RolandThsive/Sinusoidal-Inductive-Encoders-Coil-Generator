@@ -4,7 +4,7 @@
    printed last and the seconds, and afterwards its findings in its own words.  A run cannot be stopped from outside,
    so Cancel ends the Python worker and starts a new one. */
 
-import { $, el, clear, state, M, fmt, plural, same, clone, toast, say, textBox, download, job, tipOf } from "./core.js";
+import { $, keepFocus, el, clear, state, M, fmt, plural, same, clone, toast, say, textBox, download, job, tipOf } from "./core.js";
 import { ask, cancel as cancelEngine } from "./engine.js";
 import { onChange, scheduleChecks, where, v, hasSets } from "./model.js";
 import { reveal, canReveal } from "./pages.js";
@@ -17,14 +17,16 @@ const TYPES = { ".svg": "image/svg+xml", ".txt": "text/plain", ".zip": "applicat
 const hooks = { onGood: null, onBusy: null };
 
 /* ---- the run card ------------------------------------------------------------------------------- */
-let ticker = null, runStart = 0, cancelling = false;
+let ticker = null, runStart = 0, cancelling = false, focusBack = null;
 function setBusy(on, word) {
+  if (on) focusBack = keepFocus();                             // the button that started the run is switched off now
   state.busy = on;
   $("progress").classList.toggle("busy", on);
   $("btn-generate").disabled = on || !state.ready;
   $("btn-check").disabled = on || !state.ready;
   if (word) $("btn-generate").textContent = word;
   if (hooks.onBusy) hooks.onBusy(on);
+  if (!on && focusBack) { focusBack(); focusBack = null; }
 }
 function openRunCard(gen, checkOnly) {
   clear($("run-steps"));

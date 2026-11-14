@@ -291,6 +291,9 @@ input[type=range]:focus-visible::-moz-range-thumb { box-shadow: var(--metal-shad
 .text-input:focus { background: var(--cream); border-color: var(--accent); }
 .auto-row { display: flex; gap: 10px; align-items: center; }
 .auto-row .stepper input { width: 70px; }
+.pair-row { flex-wrap: wrap; row-gap: 6px; }                   /* a setting of two numbers: Page Size, width and height */
+.pair-word { font-size: 13px; color: var(--text-2); }
+.pair-row .stepper + .pair-word { margin-left: 8px; }
 
 /* Roland's dropdown */
 .dropdown { position: relative; }

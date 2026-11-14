@@ -292,7 +292,7 @@ export function initTips() {
   document.addEventListener("close", (e) => { if (e.target instanceof HTMLDialogElement) { hide(); quiet = true; } }, true);
   document.addEventListener("focusin", (e) => {
     if (inBox(e.target)) return;
-    if (afterDialog && !e.target.closest("dialog")) { hide(); return; }
+    if ((afterDialog && !e.target.closest("dialog")) || state.handingFocus) { hide(); return; }    // nor the focus the page itself puts back
     const node = owner(e.target);
     if (node && e.target.matches(":focus-visible")) ask(node, e.target.closest(".info-dot") ? 0 : 200); else hide();
   });

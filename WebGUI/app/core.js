@@ -79,12 +79,26 @@ export const state = {
   gen: "single",                  // which generator: "single" or "dual"
   view: "basic",                  // which settings are shown: "basic" or "advanced"
   ready: false, busy: false,
+  handingFocus: false,            // the page itself is putting the focus back (keepFocus): no help box for it
   showInfo: false,
   hostPage: undefined,            // the address the blog page sent us, used by Share
   modes: { single: modeState(), dual: modeState() },
   build: null,                    // version.json
 };
 export const M = () => state.modes[state.gen];
+
+/* A control that is switched off while it has the focus loses it: the browser puts the focus on the page itself, and
+   a keyboard user has to find the way back.  keepFocus() notes who has the focus now; the function it returns hands
+   it back once the control works again, unless the visitor has moved on meanwhile.  No help box opens for that. */
+export function keepFocus() {
+  const had = document.activeElement;
+  return () => {
+    const at = document.activeElement;
+    if (!had || had === document.body || !had.isConnected || had.disabled || (at && at !== document.body)) return;
+    state.handingFocus = true;
+    try { had.focus({ preventScroll: true }); } finally { state.handingFocus = false; }
+  };
+}
 
 /* ---- messages ---------------------------------------------------------------------------------- */
 let toastTimer;
@@ -106,9 +120,26 @@ export function confirmBox(text, yes = "Sure") {
   const d = $("confirm-dialog");
   $("confirm-text").textContent = text;
   $("confirm-yes").textContent = yes;
-  d.returnValue = "";
   d.showModal();
-  return new Promise((resolve) => d.addEventListener("close", () => resolve(d.returnValue === "yes"), { once: true }));
+  // The answer is taken when it is given (a button, or Esc), and handed on when the dialog has closed.  The browser
+  // sends "close" a moment after the dialog closed: asked again within that moment, the close of the asking before
+  // arrives while this one is open, and is not this one's answer.
+  return new Promise((resolve) => {
+    const form = d.querySelector("form");
+    let answer = null;
+    const given = (yes) => { answer = yes; form.removeEventListener("submit", onSubmit); d.removeEventListener("cancel", onCancel); };
+    const onSubmit = (e) => given(!!e.submitter && e.submitter.value === "yes");
+    const onCancel = () => given(false);
+    const onClose = () => {
+      if (answer === null) { if (d.open) return; answer = false; }
+      d.removeEventListener("close", onClose);
+      given(answer);
+      resolve(answer);
+    };
+    form.addEventListener("submit", onSubmit);
+    d.addEventListener("cancel", onCancel);
+    d.addEventListener("close", onClose);
+  });
 }
 
 /* A dialog with a long text (the run's text) and a Copy button. */

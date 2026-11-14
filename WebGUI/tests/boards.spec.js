@@ -35,11 +35,15 @@ for (const [suite, { boards }] of Object.entries(SUITES)) {
   if (ALL && process.env.BOARDS_SUITE && process.env.BOARDS_SUITE !== suite) continue;
   for (const id of ALL ? everyBoard(suite) : boards) {
     const folder = boardFolder(suite, id);
-    test(`${suite} ${path.basename(folder)}: the browser makes the reference board`, async ({ app }) => {
+    test(`${suite} ${path.basename(folder)}: the browser makes the reference board`, async ({ app, page }) => {
+      if (ALL) test.setTimeout(1500000);                            // a board of 16 loops takes minutes in a browser that shares its computer
       await app.open();
       const files = fs.readdirSync(folder).filter((n) => n.endsWith("_Parameters.py")).map((n) => path.join(folder, n));
-      await app.import(files);                                      // a Dual board's files switch the page to Dual
-      await app.generate();
+      await page.setInputFiles("#import-file", files);              // a Dual board's files switch the page to Dual
+      await page.waitForFunction(() => document.documentElement.dataset.state !== "ready", null, { timeout: 5000 }).catch(() => {});
+      await app.settled(ALL ? 600000 : undefined);
+      await page.click("#btn-generate");
+      await app.settled(ALL ? 1200000 : undefined);
       await expect(app.findings("error")).toHaveCount(0);
       for (const [part, button] of [["Stator", "#btn-dl-stator"], ["Rotor", "#btn-dl-rotor"]]) {
         const made = await app.download(button);

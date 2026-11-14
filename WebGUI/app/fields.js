@@ -76,7 +76,7 @@ function dropdown({ view, file, name, options, value, pick }) {
     "data-focus": key(file, name, "menu"), ...names, "aria-labelledby": `${names["aria-labelledby"]} ${valueId}` },
     el("span", { id: valueId }, choiceText(name, value)), el("span", { class: "arrow", "aria-hidden": "true" }, "▾"));
   const items = options.map((o) => el("button", { type: "button", role: "option", tabindex: -1, class: same(o, value) ? "on" : "",
-    "aria-selected": String(same(o, value)), onclick: () => { open(false); pick(o); } }, choiceText(name, o)));
+    "aria-selected": String(same(o, value)), onclick: () => { open(false); btn.focus(); pick(o); } }, choiceText(name, o)));   // the focus goes back to the menu's button
   menu.append(...items);
   function open(on, focusItem) {
     closeMenus(dd);
@@ -243,9 +243,12 @@ export function txLayoutField(view, set = M().set) {
 }
 
 /* ---- Advanced ------------------------------------------------------------------------------------ */
-function stepper({ file, name, value, step = 0.001, integer = false, disabled = false, min = null, commit }) {
+/* part: for a setting of two numbers (a page's width and height), which of them: {id, word} */
+function stepper({ file, name, value, step = 0.001, integer = false, disabled = false, min = null, commit, part = null }) {
   const text = value == null ? "" : boxText(value), num = typeof value === "number" ? value : 0;   // a text from a file: − and + count from 0
-  const input = el("input", { type: "text", inputmode: "decimal", value: text, disabled, autocomplete: "off", "data-focus": key(file, name, "text"), ...labelled("a", file, name) });
+  const tag = part ? part.word.toLowerCase() + "-" : "", names = labelled("a", file, name);
+  if (part) names["aria-labelledby"] += ` ${part.id}`;
+  const input = el("input", { type: "text", inputmode: "decimal", value: text, disabled, autocomplete: "off", "data-focus": key(file, name, tag + "text"), ...names });
   if (text.length > 5) input.style.setProperty("width", `${text.length + 2}ch`);       // 3500000 Hz fits
   const done = (x) => {
     if (!Number.isFinite(x)) { notNumber(input, text); return; }
@@ -253,11 +256,11 @@ function stepper({ file, name, value, step = 0.001, integer = false, disabled = 
     commit(Math.round(x * 1e6) / 1e6);
   };
   input.addEventListener("change", () => done(typedNumber(input.value)));
-  const label = labelOf(name).text;
+  const label = labelOf(name).text + (part ? ` ${part.word}` : "");
   return el("span", { class: "stepper" },
-    el("button", { type: "button", disabled, "aria-label": `${label}: less`, "data-focus": key(file, name, "less"),
+    el("button", { type: "button", disabled, "aria-label": `${label}: less`, "data-focus": key(file, name, tag + "less"),
       onclick: () => done(min == null ? num - step : Math.max(min, num - step)) }, "−"), input,
-    el("button", { type: "button", disabled, "aria-label": `${label}: more`, "data-focus": key(file, name, "more"),
+    el("button", { type: "button", disabled, "aria-label": `${label}: more`, "data-focus": key(file, name, tag + "more"),
       onclick: () => done(num + step) }, "+"));
 }
 
@@ -332,6 +335,18 @@ export function advancedWidget(p) {
       switchRow({ on: isNone, word: "None", focus: key(file, name, "auto"), label: `${labelOf(name).text}: None`,
         change: (on) => { if (on) { m.lastNumbers[file][name] = v; set(null); } else set(m.lastNumbers[file][name] ?? (typeof startVal(file, name) === "string" ? startVal(file, name) : "")); } }),
       t);
+  }
+  if (k === "pair") {
+    /* two numbers in one setting: PAGE_SIZE_MM = (width, height) */
+    const pair = Array.isArray(v) && v.length === 2 ? v : [v, v];              // a value of another kind (from a file) is shown as it is
+    const row = el("div", { class: "auto-row pair-row" });
+    ["Width", "Height"].forEach((word, i) => {
+      const id = `${idOf("a", file, name)}-${word.toLowerCase()}`;
+      row.append(el("span", { class: "pair-word", id }, word),
+        stepper({ file, name, value: pair[i], step: stepOf(p), part: { id, word },
+          commit: (x) => { const now = [typeof pair[0] === "number" ? pair[0] : x, typeof pair[1] === "number" ? pair[1] : x]; now[i] = x; set(now); } }));
+    });
+    return row;
   }
   if (k === "rotor_layers") return layerSwitches(p, v, ["F.Cu", "B.Cu"], set);
   if (k === "layer_list") return layerSwitches(p, v, COPPER.filter((cu) => (o.values || COPPER).includes(cu)), set);

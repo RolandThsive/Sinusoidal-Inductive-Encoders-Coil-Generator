@@ -8,7 +8,7 @@
    The order of a visit: Python is loaded (the CDN first, this site's own copy if the CDN does not answer), the
    chosen generator's tables are read, a design from the link is put on them, and the generator runs once. */
 
-import { $, state, M, toast, confirmBox, copyText, closeOnOutsideClick, wireMenu, closeMenus, el, clear, setPhase, during } from "./core.js";
+import { $, keepFocus, state, M, toast, confirmBox, copyText, closeOnOutsideClick, wireMenu, closeMenus, el, clear, setPhase, during } from "./core.js";
 import { configure, start } from "./engine.js";
 import { loadMode, onChange, where, val, setOne, resetAll, refreshChecks } from "./model.js";
 import { initPages, showGenerator } from "./pages.js";
@@ -72,11 +72,13 @@ function showAll() {
   showBoards();
 }
 /* While the other generator's settings are read nothing else can be started: not a second switch, not a run. */
-let switching = false;
+let switching = false, focusBack = null;
 function lockForSwitch(on) {
+  if (on) focusBack = keepFocus();                 // the menu's button, which is switched off meanwhile
   switching = on;
   for (const id of ["gen-btn", "btn-generate", "btn-check"]) $(id).disabled = on || state.busy || !state.ready;
   if (on) closeMenus();
+  else if (focusBack) { focusBack(); focusBack = null; }
 }
 function switchGen(gen, run = true) {
   if (gen === state.gen || state.busy || !state.ready || switching) return Promise.resolve();

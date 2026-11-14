@@ -14,7 +14,7 @@ function namesIn(file) {
   return out;
 }
 /* Not listed on the page: the Output block (fixed on the web) and Strict (the switch beside Generate). */
-const FIXED = ["OUTPUT_DIR", "STATOR_FILE", "ROTOR_FILE", "CENTER_X_MM", "CENTER_Y_MM", "PAGE_SIZE_MM", "GENERATOR_MODE"];
+const FIXED = ["OUTPUT_DIR", "STATOR_FILE", "ROTOR_FILE", "GENERATOR_MODE"];
 const FOLDER = { single: "Single Coil Set Generator", dual: "Dual Coil Set Generator" };
 const AGGREGATE = { single: "Parameters.py", dual: "Dual_Parameters.py" };
 
@@ -147,6 +147,37 @@ test("a box shows its number whole: what stands in the box is what the generator
   await app.field("AIR_GAP_MM").locator("button", { hasText: "+" }).click();           // Basic steps in thousandths
   await app.settled();
   await expect(gap).toHaveValue("1.236");
+});
+
+test("the board's place on the KiCad page: Center X, Center Y and Page Size are settings like the others", async ({ app, page }) => {
+  await app.open();
+  await app.mode("advanced");
+  const size = app.field("PAGE_SIZE_MM");
+  const boxes = size.locator("input[type=text]");
+  await expect(boxes).toHaveCount(2);                                                 // width and height
+  await expect(boxes.nth(0)).toHaveValue("200");
+  await expect(boxes.nth(1)).toHaveValue("200");
+  await expect(boxes.nth(0)).toHaveAccessibleName(/Page Size.*Width/);
+  await expect(boxes.nth(1)).toHaveAccessibleName(/Page Size.*Height/);
+  await boxes.nth(0).fill("300"); await boxes.nth(0).press("Tab"); await app.settled();
+  await size.locator("input[type=text]").nth(1).fill("250"); await size.locator("input[type=text]").nth(1).press("Tab"); await app.settled();
+  await app.type("CENTER_X_MM", "150");
+  await app.type("CENTER_Y_MM", "120");
+  await app.generate();
+  await expect(app.findings("error")).toHaveCount(0);
+  const stator = (await app.download("#btn-dl-stator")).bytes.toString("utf8");
+  expect(stator).toContain('(paper "User" 300.0 250.0)');
+  expect(stator).toContain("(gr_circle (center 150 120)");
+  const files = unzip((await app.download("#btn-export")).bytes);
+  const board = Object.entries(files).find(([n]) => n.endsWith("Board_Parameters.py"))[1].toString("utf8");
+  expect(board).toMatch(/^PAGE_SIZE_MM\s*=\s*\(300, 250\)/m);
+  expect(board).toMatch(/^CENTER_X_MM\s*=\s*150\b/m);
+  // a width that is no size gets the generator's words under the setting
+  await size.locator("input[type=text]").nth(0).fill("-5"); await size.locator("input[type=text]").nth(0).press("Tab"); await app.settled();
+  await expect(size.locator(".field-error")).toBeVisible();
+  await size.locator(".reset-one").click(); await app.settled();
+  await expect(size.locator("input[type=text]").nth(0)).toHaveValue("200");
+  await expect(size.locator(".field-error")).toBeHidden();
 });
 
 test("None: the switch of Board Inner Radius hands the value to the generator, in both views", async ({ app, page }) => {

@@ -55,8 +55,8 @@ MODES = {
              "silk_file": "Dual_SilkScreenSuggestion_Parameters.py",
              "silk_step": "Dual_Generator.Stator.Dual_LeadCutting_SilkscreenSuggestion"},
 }
-# Shown, but not editable: they only name files and place the board on the KiCad page.
-READ_ONLY = {"OUTPUT_DIR", "STATOR_FILE", "ROTOR_FILE", "CENTER_X_MM", "CENTER_Y_MM", "PAGE_SIZE_MM"}
+# Not settings of the page: they name the folder and the files of a run, and the page gives a run its own.
+READ_ONLY = {"OUTPUT_DIR", "STATOR_FILE", "ROTOR_FILE"}
 # The silkscreen step checks its own settings (Settings._check) and keeps no table of them.  These three are the
 # ones that are not a plain switch or a number above 0; the tests hold this table against the step's own check.
 SILK_KINDS = {"SILKSCREEN_SIDES": ("choice", {"values": ["both", "top", "bottom"], "ci": True}),
