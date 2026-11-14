@@ -112,6 +112,8 @@ export class BoardView {
     this.view = { scale: 4, ox: 0, oy: 0 };
     this.measure = false; this.mA = null; this.mB = null;
     this.mLocked = [];               // measured lines kept with the S key: [[A, B], ...], at most MAX_LOCKED
+    this.mKey = null;                // Measure with the keys: where the cross stands (board mm), once an arrow key moved it
+    this.onMeasured = null;          // called as (n, length in mm) when line n gets its second point, and (0, 0) for a first point
     this.hasBoard = false;           // true once setBoards has run (WebGUI.js tests it to tell a failed run from no run)
     this.originBoost = false;        // the Origin button is hovered
     this.viaBoost = false;           // the Vias chip is hovered
@@ -215,9 +217,8 @@ export class BoardView {
     }, { passive: false });
     c.addEventListener("mousedown", (e) => {
       if (this.measure) {
-        const p = this.toBoard(e.offsetX, e.offsetY);
-        if (!this.mA || this.mB) { this.mA = p; this.mB = null; } else this.mB = p;
-        this.draw();
+        this.mKey = null;                                    // the mouse measures now: the keys' cross goes
+        this._measurePoint(this.toBoard(e.offsetX, e.offsetY));
         return;
       }
       drag = { x: e.clientX, y: e.clientY, ox: this.view.ox, oy: this.view.oy };
@@ -233,20 +234,29 @@ export class BoardView {
     });
     window.addEventListener("mouseup", () => { drag = null; c.classList.remove("dragging"); });
     c.addEventListener("mousemove", (e) => {
-      const [x, y] = this.toBoard(e.offsetX, e.offsetY);
-      // X right and Y up, from the origin (the board centre); KiCad's y points down
-      const dx = x - this.center[0], dy = this.center[1] - y;
-      const f = (v) => (Math.abs(v) < 0.005 ? 0 : v).toFixed(2);       // no "-0.00"
-      let text = `X: ${f(dx)} mm, Y: ${f(dy)} mm`;
-      if (this.measure && this.mA && !this.mB) text += `, Distance: ${Math.hypot(x - this.mA[0], y - this.mA[1]).toFixed(3)} mm`;
-      this.readout.textContent = text;
+      this._readoutAt(this.toBoard(e.offsetX, e.offsetY));
     });
     c.addEventListener("mouseleave", () => (this.readout.textContent = ""));
     c.addEventListener("dblclick", () => this.fit());
-    // the keyboard: arrows move the board, + and - zoom about the middle, 0 fits it
+    // the keyboard: arrows move the board, + and - zoom about the middle, 0 fits it.  While Measure is on the arrows
+    // move a cross over the board instead (10 px a press, 1 px with Shift) and Enter or Space sets a point where it
+    // stands: what the mouse does with two clicks.
     c.addEventListener("keydown", (e) => {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
-      const step = 40 * (window.devicePixelRatio || 1), move = { ArrowLeft: [step, 0], ArrowRight: [-step, 0], ArrowUp: [0, step], ArrowDown: [0, -step] }[e.key];
+      const dpr = window.devicePixelRatio || 1;
+      const dir = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key];
+      if (this.measure && (dir || e.key === "Enter" || e.key === " ")) {
+        if (!this.mKey) this.mKey = [(c.width / 2 - this.view.ox) / this.view.scale, (c.height / 2 - this.view.oy) / this.view.scale];
+        if (dir) {
+          const mm = (e.shiftKey ? 1 : 10) * dpr / this.view.scale;
+          this.mKey = [this.mKey[0] + dir[0] * mm, this.mKey[1] + dir[1] * mm];
+        } else this._measurePoint([...this.mKey]);
+        this._readoutAt(this.mKey);
+        e.preventDefault();
+        this.draw();
+        return;
+      }
+      const step = 40 * dpr, move = dir && [-dir[0] * step, -dir[1] * step];
       if (move) { this.view.ox += move[0]; this.view.oy += move[1]; }
       else if (e.key === "+" || e.key === "=" || e.key === "-") {
         const k = e.key === "-" ? 1 / 1.25 : 1.25, x = c.width / 2, y = c.height / 2;
@@ -405,6 +415,22 @@ export class BoardView {
     ctx.beginPath(); ctx.arc(cx, cy, 3.9 * px, 0, 2 * Math.PI); ctx.stroke();        // ring: about 9 px across
   }
 
+  /* A point of the line being measured (a click, or Enter with the keys): the first starts a line, the second ends it. */
+  _measurePoint(p) {
+    if (!this.mA || this.mB) { this.mA = p; this.mB = null; } else this.mB = p;
+    if (this.onMeasured) this.onMeasured(this.mB ? this.mLocked.length + 1 : 0, this.mB ? Math.hypot(this.mB[0] - this.mA[0], this.mB[1] - this.mA[1]) : 0);
+    this.draw();
+  }
+  /* The readout for a place on the board (mm): X right and Y up from the origin (the board centre; KiCad's y points
+     down), and the distance from the first point while a line is being measured. */
+  _readoutAt([x, y]) {
+    const dx = x - this.center[0], dy = this.center[1] - y;
+    const f = (v) => (Math.abs(v) < 0.005 ? 0 : v).toFixed(2);         // no "-0.00"
+    let text = `X: ${f(dx)} mm, Y: ${f(dy)} mm`;
+    if (this.measure && this.mA && !this.mB) text += `, Distance: ${Math.hypot(x - this.mA[0], y - this.mA[1]).toFixed(3)} mm`;
+    this.readout.textContent = text;
+  }
+
   /* S key: keep the finished line on screen and start a new one.  Returns the number kept, or 0 if there was no
      finished line or the limit is reached. */
   lockMeasure() {
@@ -420,12 +446,19 @@ export class BoardView {
     if (this.mA) this.mA = this.mB = null; else this.mLocked.pop();
     this.draw();
   }
-  clearMeasure() { this.mA = this.mB = null; this.mLocked = []; }
+  clearMeasure() { this.mA = this.mB = null; this.mLocked = []; this.mKey = null; }
 
   _drawMeasure(px) {
     if (!this.measure) return;
     this.mLocked.forEach(([a, b], i) => this._drawLine(px, a, b, i + 1));
     if (this.mA) this._drawLine(px, this.mA, this.mB, this.mLocked.length + 1);   // the line being drawn is the next one
+    if (this.mKey) {                                       // the keys' cross: 9 px arms, white under the accent colour
+      const ctx = this.ctx, [x, y] = this.mKey, arm = 9 * px;
+      for (const [width, colour] of [[3.5 * px, "rgba(255,255,255,0.9)"], [1.5 * px, cssVar("--accent")]]) {
+        ctx.lineWidth = width; ctx.strokeStyle = colour;
+        ctx.beginPath(); ctx.moveTo(x - arm, y); ctx.lineTo(x + arm, y); ctx.moveTo(x, y - arm); ctx.lineTo(x, y + arm); ctx.stroke();
+      }
+    }
   }
   _drawLine(px, a, b, n) {                                // line n: end dots, the line, "Ln: length"
     const ctx = this.ctx;

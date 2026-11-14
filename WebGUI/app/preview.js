@@ -3,13 +3,17 @@
 
    Everything here changes only what is shown: the boards and the downloads stay as the generator made them. */
 
-import { $, el, svg, clear, M, toast, markChoices, wireChoices, tipOf } from "./core.js";
+import { $, el, svg, clear, M, toast, say, markChoices, wireChoices, tipOf } from "./core.js";
 import { BoardView, LAYER_INFO, SILK_LAYERS } from "./boardview.js";
 import { hasSets, where } from "./model.js";
 import { COPPER, CU_NAME } from "./labels.js";
 
 export let view = null;
 let shows = "overlay";                       // what the panel shows: stator | rotor | overlay | pictures
+/* what a screen reader is told about the drawing: the keys it takes, which change while Measure is on */
+const CANVAS_LABEL = "The generated boards. Arrow keys move the board, plus and minus zoom, 0 fits it.";
+const CANVAS_MEASURE = "The generated boards, Measure is on. Arrow keys move the cross, Shift for small steps; Enter sets a point; "
+  + "S keeps the line, Z removes the last one; plus and minus zoom, 0 fits the board.";
 
 const swatch = (css) => el("span", { class: "sw", style: { background: `var(${css})` } });
 const chipKey = (e, act) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); act(); } };
@@ -173,11 +177,13 @@ export function initPreview() {
   renderLayerToggles();
   renderNetToggles();
   $("btn-fit").addEventListener("click", () => view.fit());
+  view.onMeasured = (n, mm) => say(n ? `Line ${n}: ${mm.toFixed(3)} mm` : "First point set");
   $("btn-measure").addEventListener("click", (e) => {
     view.measure = !view.measure; view.clearMeasure();     // switching Measure off or on clears every line
     e.currentTarget.classList.toggle("on", view.measure);
     e.currentTarget.setAttribute("aria-pressed", String(view.measure));
     $("measure-help").hidden = !view.measure;              // the S / Z keys, while measuring
+    $("board-canvas").setAttribute("aria-label", view.measure ? CANVAS_MEASURE : CANVAS_LABEL);
     $("board-canvas").classList.toggle("measuring", view.measure);
     view.draw();
   });

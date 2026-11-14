@@ -460,6 +460,7 @@ CONTROLS = {
     "btn-fullscreen-on": {"lead": "Leave full screen.", "keys": ["Esc"]},
     "btn-fit": {"lead": "Fit the board to the preview.", "keys": ["0"], "keysNote": "or a double click"},
     "btn-measure": {"lead": "Measure a distance: click two points on the board.",
+                    "note": "With the keys, on the drawing: the arrow keys move a cross (Shift for small steps), Enter sets a point.",
                     "keys": ["S"], "keysNote": "locks the line, Z removes the last one"},
     "readout": {"lead": "The position of the mouse on the board, from the board centre."},
     "rotor-angle": {"lead": "Turn the rotor over the stator.", "note": "The preview only: the boards are unchanged."},

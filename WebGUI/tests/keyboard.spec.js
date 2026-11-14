@@ -126,3 +126,35 @@ test("the generator menu, a setting's menu and the dialogs give the focus back t
   expect(await focused(page)).toBe("#gen-btn");
   expect(await app.counts()).toContain("DualCoil_");
 });
+
+test("Measure with the keys: the arrows move a cross over the board, Enter sets the two points of a line", async ({ app, page }) => {
+  await app.open();
+  await page.focus("#btn-measure");
+  await page.keyboard.press("Enter");
+  await expect(page.locator("#btn-measure")).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator("#board-canvas")).toHaveAttribute("aria-label", /Measure is on/);
+  await page.focus("#board-canvas");
+  await page.keyboard.press("Enter");                                 // the first point, in the middle of the drawing
+  await expect(page.locator("#sr-status")).toHaveText("First point set");
+  const distance = async () => +/Distance: ([\d.]+) mm/.exec(await page.locator("#readout").innerText())[1];
+  expect(await distance()).toBe(0);
+  for (let i = 0; i < 5; i++) await page.keyboard.press("ArrowRight");
+  const five = await distance();
+  expect(five).toBeGreaterThan(0);
+  await page.keyboard.press("Shift+ArrowRight");                      // a small step: a tenth of a step
+  expect(await distance()).toBeCloseTo(five * 51 / 50, 2);
+  await page.keyboard.press("Shift+ArrowLeft");
+  for (let i = 0; i < 5; i++) await page.keyboard.press("ArrowDown"); // 5 right and 5 down: the diagonal
+  expect(await distance()).toBeCloseTo(five * Math.SQRT2, 2);
+  await page.keyboard.press("Enter");                                 // the second point: the line is measured
+  await expect(page.locator("#sr-status")).toHaveText(/^Line 1: \d+\.\d{3} mm$/);
+  expect(+/Line 1: ([\d.]+) mm/.exec(await page.locator("#sr-status").innerText())[1]).toBeCloseTo(five * Math.SQRT2, 2);
+  await page.keyboard.press("s");                                     // kept; the next line is line 2
+  await page.keyboard.press("Enter");
+  await page.keyboard.press("ArrowUp");
+  await page.keyboard.press("Enter");
+  await expect(page.locator("#sr-status")).toHaveText(/^Line 2: /);
+  await page.focus("#btn-measure");
+  await page.keyboard.press("Enter");                                 // Measure off: the arrows move the board again
+  await expect(page.locator("#board-canvas")).toHaveAttribute("aria-label", /Arrow keys move the board/);
+});
