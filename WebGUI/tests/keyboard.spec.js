@@ -144,6 +144,7 @@ test("a menu opened with the mouse closes with Esc, and when the focus goes on",
   // Tab from the open menu's button: the focus goes on, the menu closes
   await page.click("#gen-btn");
   await expect(page.locator(".dropdown.open")).toHaveCount(1);
+  await page.focus("#gen-btn");                                       // where a click leaves it in most browsers
   await page.keyboard.press("Tab");
   await expect(page.locator(".dropdown.open")).toHaveCount(0);
   // a setting's menu, the same

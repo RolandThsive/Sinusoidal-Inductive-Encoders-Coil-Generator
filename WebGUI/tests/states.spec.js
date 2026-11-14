@@ -164,7 +164,7 @@ test("an error the cancelled Python still throws while it ends is not an error o
   await page.click("#btn-generate");
   await expect(page.locator("#run-card")).toBeVisible();
   await page.click("#btn-cancel");
-  // the worker that was ended, cut off inside Python (seen once in a few hundred cancels: "NoGilError")
+  // the worker that was ended, cut off inside Python (seen about once in a hundred cancels: "NoGilError")
   const taken = await page.evaluate(() => {
     const e = new ErrorEvent("error", { message: "Uncaught NoGilError: Attempted to use PyProxy when Python GIL not held", cancelable: true });
     window.__workers[0].dispatchEvent(e);
