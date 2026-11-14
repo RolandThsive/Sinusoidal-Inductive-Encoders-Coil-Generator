@@ -1,5 +1,6 @@
-# Dependabot proposes, once a week, a pull request when a newer numpy, a newer CI tool (requirements.txt) or a newer
-# version of an action used by the workflows comes out.  Each proposal runs the whole CI before it can be merged.
+# Dependabot proposes, once a week, a pull request when a newer numpy, a newer CI tool (requirements.txt), a newer
+# version of an action used by the workflows or a newer test tool of the web tool comes out.  Each proposal runs its
+# checks before it can be merged: the whole CI on main, the web tool's tests on its working branch.
 version: 2
 updates:
   - package-ecosystem: pip
@@ -22,3 +23,14 @@ updates:
     groups:
       actions:
         patterns: ["*"]
+
+  # The test tools of the web tool (WebGUI/package.json on the working branch of the web tool)
+  - package-ecosystem: npm
+    directory: "/WebGUI"
+    target-branch: WebUI_modifs
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "Web tool"
