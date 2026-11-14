@@ -12,19 +12,31 @@
 - [TX Profiles](TX-Profiles.md)
 - [Choosing A Rotor And Stator](Choosing-A-Rotor-And-Stator.md)
 
-**Design Guide**
+**Design Guide - Single Coil Set Generator**
 - [Stator Features](Stator-Features.md)
 - [Rotor Features](Rotor-Features.md)
 - [Board Features](Board-Features.md)
+- [Silkscreen](Silkscreen.md)
 - [Quick Guide To Parameters Selections](Quick-Guide-To-Parameters-Selections.md)
 
+**Design Guide - Dual Coil Set Generator**
+- [Stator Features](Stator-Features-Dual-Coil-Set-Generator.md)
+- [Rotor Features](Rotor-Features-Dual-Coil-Set-Generator.md)
+- [Board Features](Board-Features-Dual-Coil-Set-Generator.md)
+- [Dual Layout](Dual-Layout.md)
+- [Silkscreen](Silkscreen-Dual-Coil-Set-Generator.md)
+- [Quick Guide To Parameters Selections](Quick-Guide-To-Parameters-Selections-Dual-Coil-Set-Generator.md)
+
 **Reference**
-- [Parameter Reference](Parameter-Reference.md)
+- [Parameter Reference Single Coil Set Generator](Parameter-Reference-Single-Coil-Set-Generator.md)
+- [Parameter Reference Dual Coil Set Generator](Parameter-Reference-Dual-Coil-Set-Generator.md)
 - [Checks, Errors And Warnings](Checks-Errors-And-Warnings.md)
 - [Electrical Estimate](Electrical-Estimate.md)
 - [Suggestive Analysis And Optimization](Suggestive-Analysis-And-Optimization.md)
 - [Project Output Organization](Project-Output-Organization.md)
+- [Output Pictures](Output-Pictures.md)
 - [KiCad Compatibility](KiCad-Compatibility.md)
+- [Regression Testing](Regression-Testing.md)
 
 **Research And Community**
 - [Glossary](Glossary.md)

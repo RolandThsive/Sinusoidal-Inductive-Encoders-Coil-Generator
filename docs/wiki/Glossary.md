@@ -1,4 +1,4 @@
-# 21. Glossary
+# 31. Glossary
 
 | Term | Meaning |
 |---|---|
@@ -25,7 +25,7 @@
 | **Chord tolerance** | The largest gap, in mm, allowed between the true curve and its chord. RX, TX and rotor each have their own setting (`RX_`, `TX_`, `ROTOR_CHORD_TOLERANCE_MM`, default and minimum 0.001 mm). |
 | **Auto steps** | The "auto" setting of `STEPS_PER_LOOP`, `TX_STEPS` and `ROTOR_ARC_STEPS_PER_SECTOR`: the generator picks the number of chords or points from the chord tolerance. A whole number is used exactly. |
 | **Stepped diagonal** | TX turn shape: concentric circles joined by straight steps (the default). |
-| **Stepped arc** | TX turn shape: concentric circles joined by arcs centred on the terminal via, as on the receiver makers' reference boards. |
+| **Stepped arc** | TX turn shape: concentric circles joined by arcs centred on the terminal via. |
 | **Spiral** | TX turn shape: one smooth Archimedean spiral. |
 | **Step angle** | The angle of the steps of a `stepped_diagonal` TX turn, measured from the turn. |
 | **Arc radius** | The radius of the innermost arc of a `stepped_arc` TX (`TX_STEPPED_ARC_RADIUS_MM`). |
@@ -41,9 +41,27 @@
 | **Ideal-screen model** | The rotor copper is taken as a perfect screen of the TX flux; this gives an upper estimate of the drop in TX inductance. |
 | **Tank** | The TX coil plus its capacitors; the oscillator runs at the tank's resonant frequency. |
 | **Receiver IC** | The chip that drives the TX and reads the RX coils. Its limits for the electrical estimate are set in `IC_Parameters.py`. |
-| **KiCad net** | A named electrical connection in the board. The coils use nets `TX`, SIN (`2`) and COS (`1`). |
+| **KiCad net** | A named electrical connection in the board. The coils use nets `TX`, SIN (`2`) and COS (`1`); a dual board `SIN_1`, `COS_1`, `TX_1`, `SIN_2`, `COS_2` and `TX_2`. |
 | **DRC** | KiCad's design-rule check. It cannot see TX-to-TX shorts because all TX turns are one net. |
+| **Single Coil Set Generator** | The generator in `Generators/Single Coil Set Generator/`: one coil set (TX, SIN and COS) on a stator, and its rotor. |
+| **Dual Coil Set Generator** | The generator in `Generators/Dual Coil Set Generator/`: two coil sets on one 4-layer stator and one rotor disc with two rings, each set built by the Single Coil Set Generator's own code. |
+| **Set 1, set 2** | The two coil sets of a dual board: set 1 inside, set 2 outside. Each has its own RX pair, TX ring and IC, and its files end in 1 or 2 (`Dual_RX1_Parameters.py`, ...). |
+| **Coarse and fine track** | On a dual board, set 1 is the coarse track (1 loop by default): its absolute angle says which period of the fine track (set 2, 16 loops by default) the rotor is in, and the fine track gives the resolution. The coarse error must stay below 180 / `LOOPS` of set 2 degrees. |
+| **Ring 1, ring 2** | The two rings of copper sectors on the dual rotor disc, facing set 1 and set 2. |
+| **`DUAL_MODE`** | No longer used. It chose which radii of a dual board you give; the generator now takes whatever you give and places the rest (see [Dual Layout](Dual-Layout.md)). |
+| **Track gap** | `TRACK_GAP_MM`: the copper-free ring between the two sets of a dual board. |
+| **Band split** | `BAND_SPLIT`: when no RX band is given, set 1's share of the free width for the two RX bands. |
+| **Combination** | Which of the five layout values of a dual board (the two RX bands, the bore, the outline, `TRACK_GAP_MM`) are given: 32 combinations, 26 of which build (see [Dual Layout](Dual-Layout.md)). |
+| **Terminal angle** | `TERMINAL_1_DEG`, `TERMINAL_2_DEG`: where each set's TX ends sit on a dual board; each set is turned to put them there. |
+| **Silkscreen suggestion** | The marks the last step of a run draws on the stator's silkscreen: where to break each RX coil and where the TX ends get their vias, with the lead names. Guidance only; no copper is changed. |
+| **Lead name** | The name written next to a via site of the silkscreen suggestion: `SIN_1`, `COS_2`, `TX_1 TOP`, ... (on a dual board `SIN1_1`, `TX2_2 IN2`, ...). |
+| **Representative picture** | `<folder name>_Representative.svg`: a picture of the written boards for people, with a title, a legend, and the copper under Top drawn wider so it shows. See [Output Pictures](Output-Pictures.md). |
+| **Actual picture** | `<folder name>_Actual.svg`: the copper of the written boards at its true size, 1:1 in mm, one Inkscape layer per copper layer, with no text. See [Output Pictures](Output-Pictures.md). |
+| **Blind via** | A via between two neighbouring layers that does not go through the board (`VIA_TYPE = "blind"`, 4 layers only). A via between the two inner layers is a buried via. |
+| **Regression test** | A test that runs a generator and compares what it writes with frozen references, so a change that alters the boards is noticed. |
+
+[<img align="right" src="https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/logo/Logo_1_V2.png" alt="Sinusoidal Coil Generator logo, click to see it spin" width="72">](https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/logo/Logo_1_V2_rotor_spin_400px.webp)
 
 | Previous | Next |
 |:---|---:|
-| [KiCad Compatibility](KiCad-Compatibility.md) | [Immediate Next Steps](Immediate-Next-Steps.md) |
+| [Regression Testing](Regression-Testing.md) | [Immediate Next Steps](Immediate-Next-Steps.md) |

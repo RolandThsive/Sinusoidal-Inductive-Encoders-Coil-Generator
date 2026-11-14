@@ -1,0 +1,21 @@
+# Text files keep LF line endings on every checkout, Windows included: the generators write LF, and the regression
+# references are compared character for character.
+* text=auto eol=lf
+
+# The boards are plain text, so git stores a changed board as the difference to the one before. GitHub treats them as
+# generated: their diffs start folded in a pull request, and they stay out of the language statistics.
+*.kicad_pcb text eol=lf linguist-generated=true
+
+# Binary files are never touched
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.gz binary
+*.pdf binary
+*.ttf binary
+*.otf binary
+*.woff binary
+*.woff2 binary
+*.ico binary
