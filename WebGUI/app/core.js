@@ -204,6 +204,14 @@ export function closeMenus(keep) {
   });
 }
 document.addEventListener("click", () => closeMenus());
+/* Esc closes an open menu wherever the focus is (a menu opened with the mouse has it on its button, or nowhere), and
+   a menu closes when the focus goes on to something else. */
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape" || !document.querySelector(".dropdown.open")) return;
+  e.preventDefault();
+  closeMenus();
+});
+document.addEventListener("focusin", (e) => closeMenus(e.target.closest(".dropdown")));
 
 /* A menu that is written in the page: a .dropdown with its button and a listbox of option buttons.  pick(option) is
    called for a choice; options that are disabled are shown greyed out and cannot be reached. */

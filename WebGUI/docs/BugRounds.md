@@ -21,21 +21,21 @@ file was written.
 | 8 | Share links | There and back for both generators, links of the old page (`#d=`), broken, too long and hostile links | F3, F19 |
 | 9 | Import and export | `.txt`, `.py` and `.zip` of both generators, files of the other generator, damaged and very large files, values no setting can hold | F14, F15, F16, F17 |
 | 10 | What is typed | Letters, pasted text, exponents, decimal commas, minus signs, very long text, empty boxes, text beyond the basic plane | F4, F13, F18 |
-| 11 | Run states | Generate twice, Cancel at each step, a change or Reset during a run, a crash of the generator and what follows | Nothing new (tests added) |
+| 11 | Run states | Generate twice, Cancel at each step, a change or Reset during a run, a crash of the generator and what follows | F36 |
 | 12 | Loading | CDN refused, never answering, sending a changed file; no source at all; offline after loading; a reload in the middle of a run | Nothing new (tests added) |
-| 13 | Layout | 13 computer window sizes in both views of both generators, measured: common lines, nothing cut off, nothing overlapping | F5, F6, F7, and the four the owner reported before it |
+| 13 | Layout | 13 computer window sizes in both views of both generators, measured: common lines, nothing cut off, nothing overlapping | F5, F6, F7, F34, and the four the owner reported before it |
 | 14 | Zoom and reflow | 200 % and 400 %, nine small and low windows | F8, F9 |
-| 15 | Keyboard only | The whole work with keys in both views: order, no traps, where the focus goes after a run, a menu, a dialog | F20, F21, F22, F23 |
+| 15 | Keyboard only | The whole work with keys in both views: order, no traps, where the focus goes after a run, a menu, a dialog | F20, F21, F22, F23, F35 |
 | 16 | Screen reader and axe | Names and roles of every control in every state, live messages, axe in every state; target sizes, focus ring, text spacing | F25, F26, F27, F28 |
 | 17 | Help boxes, Single | Every help box opened at five window sizes: inside the window, not over its control, filled in, its picture loaded | F33 |
 | 18 | Help boxes, Dual | The same for Dual: each box names its own coil set; the plain texts when `tips.json` is missing | Nothing |
 | 19 | The preview | Zoom about the mouse, moving, Fit, every layer, coil and set button, the silkscreen, the rotor angle, Measure with its 256 lines, Pictures, full screen, very small and very large boards | F30, F32 |
 | 20 | Downloads | The zip against the folder of a desktop run; one board alone; every file of All Files | Nothing |
 | 21 | Extremes | The longest names, the most loops, the smallest and the largest board, two and four layers | Nothing: the generator's checker answers each |
-| 22 | Browsers | The whole suite on Chromium, Firefox and WebKit | See below |
+| 22 | Browsers | The whole suite on Chromium, Firefox and WebKit | See "Round 22" below |
 | 23 | The blog page | The tool in the frame of `BloggerPage.html` on another site: its size, Share, a link through the blog, the security policy inside the frame, a phone | F29, F31 |
 | 24 | Security | The ASVS list point by point (`ASVS-L1.md`), no violation of the policy in any test, the link lock, hostile names and contents | Nothing new |
-| 25 | Performance | First view, cold and warm load, run times, memory after 20 runs | See below |
+| 25 | Performance | First view, cold and warm load, run times, memory after 20 runs | Nothing; the numbers are under "Round 25" below |
 | 26 | Earlier bugs | What versions V1 to V18 of the old page fixed, tried on the new one | Nothing |
 
 ## The faults, each with its test
@@ -75,10 +75,32 @@ file was written.
 | F31 | 23 | Inside the blog's frame the browser refused the `autofocus` of the No button of Sure / No and wrote an error in its console on every visit | The page gives No the focus itself when the question opens | `embed.spec.js` (nothing in the console), `keyboard.spec.js` (the question starts on No) |
 | F32 | 19 | A `Parameters.txt` that holds its value lists but not the copies of the parameter files (the reference boards of `regression/` are kept that way) gave "No parameter values found" | The value lists are read | `test_bridge.py` `test_a_record_without_its_copies_comes_back_from_its_value_lists` |
 | F33 | 17 | A help box taller than its room (at 200 % zoom, the boxes with a picture) scrolls inside: with the mouse wheel only | Alt + ↓ and Alt + ↑ scroll it, and a box opened with the keyboard says so | `tips.spec.js` "a box taller than its room, opened with the keyboard …" |
+| F34 | 13 | A folded group of Advanced (Automatic Rotor, Custom Rotor) that opens showed all its settings at once, over the group under it, for the third of a second its card takes to grow | The settings are cut to the card while it grows | `layout.spec.js` "a group that opens does not lie over the block under it while it grows" |
+| F35 | 15 | A menu opened with the mouse (the generator menu, a setting's menu) did not close with Esc, and stayed open when Tab took the focus on | Esc closes an open menu wherever the focus is; a menu closes when the focus leaves it | `keyboard.spec.js` "a menu opened with the mouse closes with Esc, and when the focus goes on" |
+| F36 | 11 | Cancel ends Python in the middle of a call. Once in several hundred cancels the ending Python still threw an error (`NoGilError`), and the page showed it as an error of its own, "Something Went Wrong", though the cancel had worked | What an ended Python still throws is taken and dropped | `states.spec.js` "an error the cancelled Python still throws while it ends is not an error of the page" |
 
 The four faults the owner reported while round 13 was being prepared (the search box out of line, the two button
 rows of the Dual preview broken, the results of the two sets not in columns, the silkscreen buttons) were fixed the
 same way and are held by `layout.spec.js`.
+
+## Round 25: the numbers
+
+Measured in Chromium on a computer with four cores, the site and Python served from the same machine (so a first
+and a second visit differ only by the browser's cache; on the live site a first visit also downloads Python, 16 MB
+of files before the server packs them).
+
+| What | Single | Dual |
+|---|---|---|
+| Largest paint of the first view | 164 ms (second visit 116 ms) | 152 ms |
+| Layout shift until the first board stands | 0.009 | 0.011 |
+| From the address to the first board | 6.5 s | 25 s |
+| One run, 20 in a row | 2.6 to 3.1 s | 19.5 to 22.5 s |
+| Memory of the whole browser, before and after the 20 runs | 1033 and 1028 MB | 1044 and 1037 MB |
+| The page's own memory, before and after | 9 and 9 MB | 10 and 13 MB |
+
+The suite holds the first two on every run (`perf.spec.js`: largest paint at most 2.5 s, layout shift at most 0.1).
+Dual's time is the generator's: its silkscreen suggestion step takes most of a run. The 20 runs ended with no
+error and the memory did not grow.
 
 ## Matters of the generator
 

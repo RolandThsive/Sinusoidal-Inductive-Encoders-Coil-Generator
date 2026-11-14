@@ -162,6 +162,11 @@ function foldRotorBlocks(mode) {
 function applyFolds() {
   document.querySelectorAll("#advanced-controls [data-group]").forEach((n) => {
     const folded = M().folded.has(n.dataset.group);
+    // an opening card keeps its settings cut to its growing height, so that they do not lie over the block under it
+    if (!folded && n.classList.contains("collapsed") && n.classList.contains("group-card")) {
+      n.classList.add("opening");
+      setTimeout(() => n.classList.remove("opening"), 400);
+    }
     n.classList.toggle("collapsed", folded);
     if (n.tagName === "BUTTON") n.setAttribute("aria-expanded", String(!folded));
   });

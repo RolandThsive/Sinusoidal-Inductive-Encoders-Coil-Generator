@@ -154,6 +154,30 @@ test("Cancel at each step of a run: the page comes back every time, and the next
   expect((await app.download("#btn-download")).bytes.length).toBeGreaterThan(10000);
 });
 
+test("an error the cancelled Python still throws while it ends is not an error of the page", async ({ app, page }) => {
+  await page.addInitScript(() => {                           // every worker the page starts is kept, to speak for it later
+    window.__workers = [];
+    const Real = window.Worker;
+    window.Worker = class extends Real { constructor(...a) { super(...a); window.__workers.push(this); } };
+  });
+  await app.open();
+  await page.click("#btn-generate");
+  await expect(page.locator("#run-card")).toBeVisible();
+  await page.click("#btn-cancel");
+  // the worker that was ended, cut off inside Python (seen once in a few hundred cancels: "NoGilError")
+  const taken = await page.evaluate(() => {
+    const e = new ErrorEvent("error", { message: "Uncaught NoGilError: Attempted to use PyProxy when Python GIL not held", cancelable: true });
+    window.__workers[0].dispatchEvent(e);
+    return e.defaultPrevented;                               // taken by the page: the browser does not report it to the window
+  });
+  expect(await page.evaluate(() => window.__workers.length)).toBe(2);
+  expect(taken).toBe(true);
+  await app.settled();
+  await expect(page.locator("#crash-dialog")).toBeHidden();
+  await app.generate();
+  await expect(app.findings("error")).toHaveCount(0);
+});
+
 test("offline after the page has loaded: runs, the other view and Export need no network", async ({ app, page, context }) => {
   await app.open();
   await context.setOffline(true);

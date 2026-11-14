@@ -127,6 +127,36 @@ test("the generator menu, a setting's menu and the dialogs give the focus back t
   expect(await app.counts()).toContain("DualCoil_");
 });
 
+test("a menu opened with the mouse closes with Esc, and when the focus goes on", async ({ app, page }) => {
+  await app.open();
+  // the generator menu: a click opens it, the focus is not in its list
+  await page.click("#gen-btn");
+  await expect(page.locator(".dropdown.open")).toHaveCount(1);
+  expect(await page.evaluate(() => !!document.activeElement.closest('[role="listbox"]'))).toBe(false);
+  await page.keyboard.press("Escape");
+  await expect(page.locator(".dropdown.open")).toHaveCount(0);
+  await expect(page.locator("#gen-btn")).toHaveAttribute("aria-expanded", "false");
+  // with the focus nowhere, as in a browser that does not focus a clicked button
+  await page.click("#gen-btn");
+  await page.evaluate(() => document.activeElement.blur());
+  await page.keyboard.press("Escape");
+  await expect(page.locator(".dropdown.open")).toHaveCount(0);
+  // Tab from the open menu's button: the focus goes on, the menu closes
+  await page.click("#gen-btn");
+  await expect(page.locator(".dropdown.open")).toHaveCount(1);
+  await page.keyboard.press("Tab");
+  await expect(page.locator(".dropdown.open")).toHaveCount(0);
+  // a setting's menu, the same
+  await app.mode("advanced");
+  await app.tab("TX");
+  const menu = page.locator("#advanced-panel .dropdown-btn").first();
+  await menu.click();
+  await expect(page.locator("#advanced-panel .dropdown.open")).toHaveCount(1);
+  await page.keyboard.press("Escape");
+  await expect(page.locator("#advanced-panel .dropdown.open")).toHaveCount(0);
+  await expect(page.locator("#checks-list .check.error")).toHaveCount(0);
+});
+
 test("Measure with the keys: the arrows move a cross over the board, Enter sets the two points of a line", async ({ app, page }) => {
   await app.open();
   await page.focus("#btn-measure");

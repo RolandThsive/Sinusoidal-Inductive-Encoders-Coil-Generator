@@ -342,6 +342,7 @@ input[type=range]:focus-visible::-moz-range-thumb { box-shadow: var(--metal-shad
 .group-inner { min-height: 0; }
 .group-card.collapsed { grid-template-rows: 0fr; padding-top: 0; padding-bottom: 0; opacity: 0.6; }
 .group-card.collapsed .group-inner { overflow: hidden; visibility: hidden; transition: visibility 0s 0.35s; }
+.group-card.opening .group-inner { overflow: hidden; }
 .group-title { font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase; color: var(--text-3); font-weight: 600; margin: 14px 4px -4px; }
 button.group-title { display: flex; align-items: center; gap: 6px; background: none; border: 0; padding: 0; cursor: pointer; font-family: inherit; }
 button.group-title:hover { color: var(--accent); }

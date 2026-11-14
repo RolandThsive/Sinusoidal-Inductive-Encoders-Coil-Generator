@@ -165,3 +165,21 @@ test("Single: the results are two pairs of name and value, from the panel's left
     for (let i = 0; i < 6; i++) expect(got.values[i].t, `${mode}: a value on the line of its name`).toBe(got.names[i].t);
   }
 });
+
+test("a group that opens does not lie over the block under it while it grows", async ({ app, page }) => {
+  await app.open();
+  await app.mode("advanced");
+  await page.click('#adv-tabs [data-key="Rotor"]');
+  const fold = page.locator(".group-title.foldable.collapsed:visible").first();
+  await fold.scrollIntoViewIfNeeded();
+  await fold.click();
+  const wrong = [];
+  for (let i = 0; i < 6; i++) {                              // six looks during the third of a second the card takes to open
+    wrong.push(...await page.evaluate(audit));
+    await page.waitForTimeout(40);
+  }
+  expect([...new Set(wrong)]).toEqual([]);
+  await page.waitForTimeout(500);
+  expect(await page.locator(".group-card.opening").count(), "the cut ends with the opening").toBe(0);
+  expect(await page.evaluate(audit)).toEqual([]);
+});

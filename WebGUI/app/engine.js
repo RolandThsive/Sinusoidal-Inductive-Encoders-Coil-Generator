@@ -32,7 +32,7 @@ function spawn() {
     else p.reject(new Error(m.error));
   };
   worker.onerror = (e) => {
-    if (mine !== worker) return;
+    if (mine !== worker) { e.preventDefault(); return; }           // a worker that was cancelled: see stop()
     const error = new Error("The Python worker stopped: " + (e.message || "it could not be started"));
     failAll(error);
     if (onCrash) onCrash(error);
@@ -48,8 +48,14 @@ export function ask(cmd, args, onLine) {
   });
 }
 
+/* End the worker.  Python may be cut off in the middle of a call, and what the dying worker then throws is no error
+   of the page: it is taken here, or the browser would hand it on to the page as an error of its own. */
 function stop() {
-  if (worker) { worker.onmessage = worker.onerror = null; worker.terminate(); worker = null; }
+  if (!worker) return;
+  worker.onmessage = null;
+  worker.onerror = (e) => e.preventDefault();
+  worker.terminate();
+  worker = null;
 }
 
 /* Load Python from `from`.  Rejects when the worker fails, or (wait > 0) when Pyodide's own script has not arrived
