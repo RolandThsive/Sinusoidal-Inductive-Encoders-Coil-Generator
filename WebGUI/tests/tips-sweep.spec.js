@@ -94,6 +94,7 @@ for (const [w, h] of SIZES) {
       await app.settled(900000);                               // the sweep often runs beside other long runs
       const seen = new Set(), where = `${gen} ${w}x${h}`;
       const wrong = await everyTab(page, "basic", `${where} Basic`, seen);
+      await page.evaluate(() => { document.querySelector('[data-view="pictures"]').hidden = false; });   // put away on the page, its code still tested
       for (const v of ["stator", "rotor", "pictures", "overlay"]) {
         await page.click(`#preview [data-view="${v}"]`);
         wrong.push(...await sweep(page, `${where} view ${v}`, new Set()));

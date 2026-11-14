@@ -3,6 +3,14 @@
 What changed on the page a visitor sees. The newest version is on top. The generator's own changes are in the
 repository's releases.
 
+## 2.0.1
+
+- The grey line beside the note of a help box stands clear of the note's text again.
+- The Pictures view is put away for now. The two pictures are still in the zip and in All Files.
+- The help box of the generator menu opens beside the menu, never over its list.
+- In the drawing's corner, the silkscreen chips stand close under the copper chips, and the coil buttons further down.
+- In a portrait window the title is put away, to give the buttons room.
+
 ## 2.0: the remake
 
 The page was written again from the start. It now runs the desktop program itself, for both generators.
@@ -53,7 +61,7 @@ The page was written again from the start. It now runs the desktop program itsel
 
 ### Fixed
 
-The bug rounds before the release found and fixed 39 faults of the new page. They are listed, each with its
+The bug rounds before the release found and fixed 43 faults of the new page. They are listed, each with its
 test, in [docs/BugRounds.md](docs/BugRounds.md).
 
 ### Removed
