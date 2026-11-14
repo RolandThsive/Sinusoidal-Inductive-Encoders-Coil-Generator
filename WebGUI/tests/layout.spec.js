@@ -59,12 +59,12 @@ for (const [w, h] of SIZES) {
         if (v.files.r > v.zip.r) v.zip = v.files;             // a narrow Checks panel: the four download buttons in one line, All Files last
         say(off(v, "r", ["canvas", "zip"]));
         // the layer chips: the copper layers and the vias on the line of the view tabs; the two silkscreen sides under
-        // them, on the line of the Fullscreen button; the Sin / Cos / TX buttons under those
+        // them, close (bug round 27); the Sin / Cos / TX buttons further under those
         const rows = await page.evaluate(() => ["#layer-toggles", "#silk-toggles"].map((s) => [...document.querySelector(s).children].map((c) => Math.round(c.getBoundingClientRect().top))));
         expect(rows.map((r) => r.length), "copper layers and vias, then the two silkscreen sides").toEqual([5, 2]);
         for (const r of rows) if (new Set(r).size !== 1) wrong.push(`${mode}: a line of layer chips is broken`);
         const mid = (b) => (b.t + b.b) / 2;
-        if (Math.abs(mid(v.silk) - mid(v.icons)) > NEAR) wrong.push(`${mode}: the silkscreen chips are not on the line of the Fullscreen button`);
+        if (!(v.silk.t - v.copper.b < v.nets.t - v.silk.b)) wrong.push(`${mode}: the silkscreen chips are not closer to the copper chips than to the coil buttons`);
         if (v.copper.r - v.copper.l < v.tabs.r - v.tabs.l || Math.abs(mid(v.copper) - mid(v.tabs)) > NEAR) { if (w >= 1440) wrong.push(`${mode}: the copper chips are not on the line of the view tabs`); }
         if (v.silk.t < v.copper.b || v.nets.t < v.silk.b) wrong.push(`${mode}: copper chips, silkscreen chips and coil buttons are not one under the other`);
         if (v.tools.t - Math.max(v.tabs.b, v.copper.b) > 24) wrong.push(`${mode}: a gap between the view tabs (or the chips under them) and the Fullscreen button`);
