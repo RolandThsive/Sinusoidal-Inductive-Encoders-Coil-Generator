@@ -13,7 +13,7 @@ Units: millimetres, degrees.  Nothing in this file is computed - edit values onl
 #   - 1 loop gives true 0-360 deg absolute output; higher counts give
 #     proportionally finer angular resolution/accuracy per degree.
 #   (1 loop = 1 full sine period = 2 lobes: one positive and one negative.)
-LOOPS = 4
+LOOPS = 1
 
 # Radial band occupied by the RX copper (centre line of the traces): the RX coils swing between
 # its inside and outside radius.  Give it in ONE of two ways (the other pair = None):
@@ -29,8 +29,8 @@ LOOPS = 4
 # board edges (INNER_EDGE_RADIUS_MM and OUTER_EDGE_RADIUS_MM, Board_Parameters.py, must then be set).
 # With the band given, a board edge that is None is calculated from it; a board edge that is set is
 # used as given (it must leave the usual margins - the checker says how much is needed).
-INSIDE_RADIUS_MM  = None
-OUTSIDE_RADIUS_MM = None
+INSIDE_RADIUS_MM  = 16.2
+OUTSIDE_RADIUS_MM = 21.4
 RX_R_BASE_MM      = None
 RX_A_MM           = None
 
@@ -38,8 +38,8 @@ RX_TRACE_WIDTH_MM = 0.2
 
 # Net names. Phases 0 and 2 (sine, +/-) form one coil, phases 1 and 3
 # (cosine, +/-) form the other.
-RX_NET_PHASE_0_2 = "SIN_Signal"
-RX_NET_PHASE_1_3 = "COS_Signal"
+RX_NET_PHASE_0_2 = "2"
+RX_NET_PHASE_1_3 = "1"
 
 
 # =============================================================================
@@ -150,7 +150,7 @@ RX_TABS           = "all"
 # On a layer with TX turns the TX makes way for every finger (go-around or stitched,
 # TX_Parameters.py).
 RX_TAB_LAYER      = "auto"
-RX_TAB_LENGTH_MM  = 5       # finger reaches OUTSIDE_RADIUS + this (r = 24.4 mm on the example
+RX_TAB_LENGTH_MM  = 3.0     # finger reaches OUTSIDE_RADIUS + this (r = 24.4 mm on the example
                             # board).  It must clear the outermost TX turn (and, when the TX goes
                             # around the fingers, the outermost bracket): the checks say how long
 RX_TAB_WIDTH_MM   = 1.0     # spacing of the two finger legs (snapped to polyline nodes).

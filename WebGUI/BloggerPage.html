@@ -5,9 +5,12 @@
   coil generator, and puts a Back and a Home button at the top right.  The generator itself is served from the
   GitHub repository (GitHub Pages) and runs in the visitor's browser; phones get a short message instead.
 
-  Change APP_URL below if the GitHub Pages address changes.
+  Change APP_URL below if the GitHub Pages address changes (and the font address in the style block with it).
+  Nothing is loaded from any other server: the title's font comes from the tool's own site.
 -->
 <style>
+  @font-face { font-family: "Permanent Marker"; font-style: normal; font-weight: 400; font-display: swap;
+    src: url("https://rolandthsive.github.io/Sinusoidal-Inductive-Encoders-Coil-Generator/WebGUI/fonts/PermanentMarker.woff2") format("woff2"); }
   html, body { overflow: hidden !important; height: 100% !important; }
   body * { visibility: hidden !important; }                      /* the blog stays, unseen and unclickable */
   #coilgen-shell, #coilgen-shell * { visibility: visible !important; }
@@ -29,7 +32,6 @@
   #coilgen-shell.phone #coilgen-phone { display: block; }
   #coilgen-shell.phone #coilgen-frame { display: none; }
 </style>
-<link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap" rel="stylesheet">
 
 <div id="coilgen-shell">
   <iframe id="coilgen-frame" title="Sinusoidal Inductive Encoder Coil Generator" allow="fullscreen; clipboard-write" allowfullscreen></iframe>
@@ -67,11 +69,15 @@
   var touchOnly = window.matchMedia("(pointer: coarse)").matches && !window.matchMedia("(any-pointer: fine)").matches;
   if (touchOnly) { shell.className = "phone"; return; }
 
-  // The tool: the page's address (for Share Link) and a shared design (#d=...) are passed on to it.
+  // The tool: the page's address (for Share Link) and a shared design (#single=..., #dual=..., or #d=... of an
+  // older link) are passed on to it.
   var appOrigin = new URL(APP_URL, location.href).origin;
   frame.addEventListener("load", function () {
     frame.contentWindow.postMessage({ coilgenPage: location.href.split("#")[0], coilgenHash: location.hash }, appOrigin);
   });
-  frame.src = APP_URL + (location.hash.indexOf("#d=") === 0 ? location.hash : "");
+  var design = function () { return /^#(single|dual|d)=/.test(location.hash) ? location.hash : ""; };
+  frame.src = APP_URL + design();
+  // a design link pasted into the address bar of this page while it is open: the tool gets it, and opens it
+  window.addEventListener("hashchange", function () { if (design()) frame.src = APP_URL + design(); });
 })();
 </script>

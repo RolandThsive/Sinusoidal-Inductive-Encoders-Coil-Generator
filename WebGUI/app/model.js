@@ -8,7 +8,7 @@
    A category ("Board", "RX", "TX", "Rotor", "IC", "Silk") is what a tab shows.  Single has one file per category;
    Dual has one board file, one silkscreen file and, for RX, TX, Rotor and IC, one file per coil set. */
 
-import { state, M, same, clone, job } from "./core.js";
+import { state, M, same, clone, job, has } from "./core.js";
 import { ask } from "./engine.js";
 
 export const CATS = ["Board", "RX", "TX", "Rotor", "IC", "Silk"];
@@ -42,11 +42,11 @@ export const catHasSets = (cat) => M().files.some((f) => f.cat === cat && f.set 
    (Dual: ROTOR_MODE is the board's, ROTOR_AUTO_DUTY is each rotor ring's) */
 export function where(name, set = M().set) {
   const m = M();
-  const own = m.files.find((f) => f.set === set && name in m.params[f.file]);
-  const any = own || m.files.find((f) => f.set === 0 && name in m.params[f.file]);
+  const own = m.files.find((f) => f.set === set && has(m.params[f.file], name));
+  const any = own || m.files.find((f) => f.set === 0 && has(m.params[f.file], name));
   return any ? any.file : null;
 }
-export const param = (file, name) => (M().params[file] || {})[name];
+export const param = (file, name) => (has(M().params[file] || {}, name) ? M().params[file][name] : undefined);
 export const val = (file, name) => (M().values[file] || {})[name];
 export const startVal = (file, name) => (M().start[file] || {})[name];
 export const isChanged = (file, name) => !same(val(file, name), startVal(file, name));
@@ -126,7 +126,7 @@ export function setValues(changes, from) {
   if (from !== "import" && from !== "reset" && from !== "share") changes = withBandRules(changes);
   let any = false;
   for (const [file, name, x] of changes) {
-    if (!m.params[file] || !(name in m.params[file]) || m.params[file][name].readOnly) continue;
+    if (!has(m.params, file) || !has(m.params[file], name) || m.params[file][name].readOnly) continue;
     if (!same(m.values[file][name], x)) { m.values[file][name] = x; any = true; }
   }
   if (!any) return false;

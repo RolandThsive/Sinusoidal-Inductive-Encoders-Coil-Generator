@@ -37,7 +37,7 @@ class App {
     await this.page.click(`#gen-list [data-gen="${gen}"]`);
     await this.settled();
   }
-  async mode(mode) { await this.page.click(`#mode-switch [data-mode="${mode}"]`); }
+  async mode(mode) { await this.page.click(`#mode-switch [data-mode="${mode}"]`); await this.settled(); }
   async tab(key, set) {
     const view = await this.page.evaluate(() => (document.getElementById("advanced-panel").hidden ? "basic" : "adv"));
     await this.page.click(`#${view}-tabs [data-key="${key}"]`);
@@ -52,6 +52,15 @@ class App {
     const box = this.field(name).locator("input[type=text]").first();
     await box.fill(String(text));
     await box.press("Tab");
+    await this.settled();
+  }
+  /* The text a setting's box shows (Advanced). */
+  value(name) { return this.field(name).locator("input[type=text]").first().inputValue(); }
+  /* Reset: every setting back to its published value (answers the question the page asks). */
+  async reset() {
+    await this.page.click("#btn-reset");
+    await this.page.click("#confirm-yes");
+    await expect(this.toast()).toHaveText("Back to the starting design");
     await this.settled();
   }
   async generate() { await this.page.click("#btn-generate"); await this.settled(); }
@@ -73,6 +82,11 @@ class App {
   }
   toast() { return this.page.locator("#toast"); }
 }
+
+/* What each browser itself writes in the console when a file cannot be fetched (the tests that cut the CDN allow it). */
+export const UNREACHED = /Failed to load resource|Failed to fetch|net::ERR_|NetworkError|Cross-Origin Request Blocked|could not be loaded|Load failed|Loading module from|error loading dynamically imported module/i;
+/* Firefox's notice about the way Pyodide's own WebAssembly file was compiled: about that file, not about the page. */
+const BROWSER_NOTICES = [/WebAssembly exception handling 'try' instruction is deprecated/];
 
 export const test = base.extend({
   cdn: [async ({ context }, use) => {
@@ -98,7 +112,7 @@ export const test = base.extend({
   }, { auto: true }],
 
   problems: [async ({ page, cdn }, use) => {
-    const found = [], allowed = [];
+    const found = [], allowed = [...BROWSER_NOTICES];
     page.on("console", (m) => { if (m.type() === "error" || m.type() === "warning") found.push(`console ${m.type()}: ${m.text()}`); });
     page.on("pageerror", (e) => found.push(`page error: ${e.message}`));
     await page.addInitScript(() => {

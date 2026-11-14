@@ -24,10 +24,27 @@ function fill(e, attrs, kids) {
   return e;
 }
 export function clear(node) { node.replaceChildren(); return node; }
+/* The attributes of a help box whose words change with the page (app/tips.js): its id in tips.json, the values it
+   shows, and the plain text that is shown when tips.json has no such tip. */
+export function tipOf(id, text, args) {
+  const a = { "data-tip-id": id, "data-tip": text || null };
+  if (args) a["data-tip-args"] = JSON.stringify(args);
+  return a;
+}
 
 export function same(a, b) { return JSON.stringify(a) === JSON.stringify(b); }
 export function clone(x) { return JSON.parse(JSON.stringify(x)); }
 export function fmt(x) { return typeof x === "number" ? String(Math.round(x * 1000) / 1000) : String(x); }
+/* a value as its box shows it: the whole number, as the generator gets it (fmt is for worked-out numbers) */
+export const boxText = (x) => (Array.isArray(x) ? `(${x.join(", ")})` : String(x));
+/* a name of the object itself, not one every object has ("constructor", "__proto__"): names can come from a link */
+export const has = (obj, name) => Object.prototype.hasOwnProperty.call(obj, name);
+/* The number a typed text stands for: digits with a decimal point or one decimal comma, a sign and an exponent
+   allowed ("0,25", "-1.5", "3.5e6").  NaN for anything else: "1,5 mm", "1.2.3" and "abc" are not read as their start. */
+export function typedNumber(text) {
+  const t = String(text).replace(/\s+/g, "");
+  return /^[-+]?(\d+([.,]\d*)?|[.,]\d+)(e[-+]?\d+)?$/i.test(t) ? Number(t.replace(",", ".")) : NaN;
+}
 export function plural(n, word) { return `${n} ${word}${n === 1 ? "" : "s"}`; }
 
 /* ---- state ------------------------------------------------------------------------------------- */
@@ -62,12 +79,26 @@ export const state = {
   gen: "single",                  // which generator: "single" or "dual"
   view: "basic",                  // which settings are shown: "basic" or "advanced"
   ready: false, busy: false,
+  handingFocus: false,            // the page itself is putting the focus back (keepFocus): no help box for it
   showInfo: false,
   hostPage: undefined,            // the address the blog page sent us, used by Share
   modes: { single: modeState(), dual: modeState() },
   build: null,                    // version.json
 };
 export const M = () => state.modes[state.gen];
+
+/* A control that is switched off while it has the focus loses it: the browser puts the focus on the page itself, and
+   a keyboard user has to find the way back.  keepFocus() notes who has the focus now; the function it returns hands
+   it back once the control works again, unless the visitor has moved on meanwhile.  No help box opens for that. */
+export function keepFocus() {
+  const had = document.activeElement;
+  return () => {
+    const at = document.activeElement;
+    if (!had || had === document.body || !had.isConnected || had.disabled || (at && at !== document.body)) return;
+    state.handingFocus = true;
+    try { had.focus({ preventScroll: true }); } finally { state.handingFocus = false; }
+  };
+}
 
 /* ---- messages ---------------------------------------------------------------------------------- */
 let toastTimer;
@@ -76,7 +107,12 @@ export function toast(text, ms = 2600) {
   const t = $("toast");
   t.textContent = text; t.hidden = false;
   say(text);
-  clearTimeout(toastTimer); toastTimer = setTimeout(() => (t.hidden = true), ms);
+  // a long message stays long enough to be read (70 ms a letter), and any message stays while the mouse rests on it
+  const stay = Math.max(ms, 1500 + 70 * text.length);
+  const later = () => { clearTimeout(toastTimer); toastTimer = setTimeout(() => (t.hidden = true), stay); };
+  t.onmouseenter = () => clearTimeout(toastTimer);
+  t.onmouseleave = later;
+  later();
 }
 export function say(text) {
   const s = $("sr-status");
@@ -89,9 +125,27 @@ export function confirmBox(text, yes = "Sure") {
   const d = $("confirm-dialog");
   $("confirm-text").textContent = text;
   $("confirm-yes").textContent = yes;
-  d.returnValue = "";
   d.showModal();
-  return new Promise((resolve) => d.addEventListener("close", () => resolve(d.returnValue === "yes"), { once: true }));
+  $("confirm-no").focus();      // not the autofocus attribute: inside the blog's frame the browser refuses it, with an error in its console
+  // The answer is taken when it is given (a button, or Esc), and handed on when the dialog has closed.  The browser
+  // sends "close" a moment after the dialog closed: asked again within that moment, the close of the asking before
+  // arrives while this one is open, and is not this one's answer.
+  return new Promise((resolve) => {
+    const form = d.querySelector("form");
+    let answer = null;
+    const given = (yes) => { answer = yes; form.removeEventListener("submit", onSubmit); d.removeEventListener("cancel", onCancel); };
+    const onSubmit = (e) => given(!!e.submitter && e.submitter.value === "yes");
+    const onCancel = () => given(false);
+    const onClose = () => {
+      if (answer === null) { if (d.open) return; answer = false; }
+      d.removeEventListener("close", onClose);
+      given(answer);
+      resolve(answer);
+    };
+    form.addEventListener("submit", onSubmit);
+    d.addEventListener("cancel", onCancel);
+    d.addEventListener("close", onClose);
+  });
 }
 
 /* A dialog with a long text (the run's text) and a Copy button. */
@@ -150,6 +204,14 @@ export function closeMenus(keep) {
   });
 }
 document.addEventListener("click", () => closeMenus());
+/* Esc closes an open menu wherever the focus is (a menu opened with the mouse has it on its button, or nowhere), and
+   a menu closes when the focus goes on to something else. */
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape" || !document.querySelector(".dropdown.open")) return;
+  e.preventDefault();
+  closeMenus();
+});
+document.addEventListener("focusin", (e) => closeMenus(e.target.closest(".dropdown")));
 
 /* A menu that is written in the page: a .dropdown with its button and a listbox of option buttons.  pick(option) is
    called for a choice; options that are disabled are shown greyed out and cannot be reached. */

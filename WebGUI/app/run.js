@@ -4,7 +4,7 @@
    printed last and the seconds, and afterwards its findings in its own words.  A run cannot be stopped from outside,
    so Cancel ends the Python worker and starts a new one. */
 
-import { $, el, clear, state, M, fmt, plural, same, clone, toast, say, textBox, download, job } from "./core.js";
+import { $, keepFocus, el, clear, state, M, fmt, plural, same, clone, toast, say, textBox, download, job, tipOf } from "./core.js";
 import { ask, cancel as cancelEngine } from "./engine.js";
 import { onChange, scheduleChecks, where, v, hasSets } from "./model.js";
 import { reveal, canReveal } from "./pages.js";
@@ -17,20 +17,23 @@ const TYPES = { ".svg": "image/svg+xml", ".txt": "text/plain", ".zip": "applicat
 const hooks = { onGood: null, onBusy: null };
 
 /* ---- the run card ------------------------------------------------------------------------------- */
-let ticker = null, runStart = 0, cancelling = false;
+let ticker = null, runStart = 0, cancelling = false, focusBack = null;
 function setBusy(on, word) {
+  if (on) focusBack = keepFocus();                             // the button that started the run is switched off now
   state.busy = on;
   $("progress").classList.toggle("busy", on);
   $("btn-generate").disabled = on || !state.ready;
   $("btn-check").disabled = on || !state.ready;
   if (word) $("btn-generate").textContent = word;
   if (hooks.onBusy) hooks.onBusy(on);
+  if (!on && focusBack) { focusBack(); focusBack = null; }
 }
 function openRunCard(gen, checkOnly) {
   clear($("run-steps"));
   $("run-title").textContent = checkOnly ? "Checking" : "Generating";
   $("run-line").textContent = checkOnly ? "Checking the settings…" : "Starting the generator…";
   $("run-card").hidden = false;
+  $("checks-list").removeAttribute("role");
   clear($("checks-list")).append(el("p", { class: "hint" }, "The generator is running. Its findings appear here when it is done."));
   $("btn-cancel").hidden = false;
   $("btn-cancel").disabled = false;
@@ -129,7 +132,7 @@ function message(item) {
     for (const part of line.split(/\b([A-Z][A-Z0-9_]{2,})\b/)) {
       const file = names.has(part) ? where(part, set) : null;
       if (file && canReveal(file, part)) {
-        box.append(el("button", { type: "button", class: "param-link", "data-tip": "Show this setting", onclick: () => reveal(file, part) }, part));
+        box.append(el("button", { type: "button", class: "param-link", ...tipOf("param-link", "Show this setting"), onclick: () => reveal(file, part) }, part));
       } else if (part) box.append(part);
     }
   });
@@ -163,6 +166,7 @@ export function renderChecks() {
       el("span", { class: "msg" }, "The generator stopped with an error of its own. ",
         el("button", { type: "button", class: "param-link", onclick: () => showCrash("The generator stopped with an error of its own.", r.crash) }, "Show the details"))));
   }
+  if (shown.length || r.crash) list.setAttribute("role", "list"); else list.removeAttribute("role");   // a list only while it holds findings
   if (!shown.length && !r.crash) list.append(el("p", { class: "hint" }, r.ok ? (ni ? "Nothing to report. Turn on Info to see the generator's notes." : "Nothing to report.") : "See Run Text for what the generator printed."));
 }
 
@@ -208,19 +212,23 @@ export function renderResults() {
   const of = (k) => {
     if (s) return s[k] || {};
     const n = v("LOOPS", k || 1);                              // no run yet, or the settings changed since: Loops gives the range
-    return { range: n ? `${fmt(360 / n)}°` : "" };
+    return { range: typeof n === "number" && n > 0 ? `${fmt(360 / n)}°` : "" };
   };
   const rows = RESULT_ROWS.filter(([, key]) => sets.some((k) => of(k)[key]));
   const board = s && (s[-1] || {}).board;
   if (dual) {
+    // names | room | Set 1 | room | Set 2: the two empty columns share the room, so the three columns of words stand
+    // at equal distances from the panel's left edge to its right edge; the board's line is centred under the two sets
+    const room = () => el("td", { class: "room" });
     const table = el("table", {},
-      el("thead", {}, el("tr", {}, el("td", {}), el("th", { scope: "col" }, "Set 1 · Inner"), el("th", { scope: "col" }, "Set 2 · Outer"))),
-      el("tbody", {}, rows.map(([label, key, tip]) => el("tr", {}, el("th", { scope: "row", "data-tip": tip }, label), sets.map((k) => el("td", {}, of(k)[key] || "–")))),
-        board ? el("tr", {}, el("th", { scope: "row" }, "Board"), el("td", { colspan: 2 }, board)) : null));
+      el("thead", {}, el("tr", {}, el("td", {}), room(), el("th", { scope: "col" }, "Set 1 · Inner"), room(), el("th", { scope: "col" }, "Set 2 · Outer"))),
+      el("tbody", {}, rows.map(([label, key, tip]) => el("tr", {}, el("th", { scope: "row", ...tipOf(`result-${key}`, tip) }, label),
+        sets.map((k) => [room(), el("td", {}, of(k)[key] || "–")]))),
+        board ? el("tr", {}, el("th", { scope: "row" }, "Board"), room(), el("td", { colspan: 3 }, board)) : null));
     box.append(table);
   } else {
     const list = el("dl", {});
-    for (const [label, key, tip] of rows) list.append(el("dt", { "data-tip": tip }, label), el("dd", {}, of(0)[key]));
+    for (const [label, key, tip] of rows) list.append(el("dt", tipOf(`result-${key}`, tip), label), el("dd", {}, of(0)[key]));
     if (board) list.append(el("dt", {}, "Board"), el("dd", {}, board));
     box.append(list);
   }
@@ -239,9 +247,13 @@ export function updateStale() {
     b.disabled = !(ready && good[part]);
     b.dataset.tip = m.stale ? "The settings changed: press Generate first"
       : `Download only the ${part} board of this run (${good ? good.name + "_" : ""}${BOARD_FILE[part]}.kicad_pcb), ready to open in KiCad`;
+    b.dataset.tipId = m.stale ? "btn-download-stale" : `btn-dl-${part}`;
+    b.dataset.tipArgs = JSON.stringify({ name: good ? good.name : null });
   }
   $("btn-download").disabled = !ready;
   $("btn-download").dataset.tip = m.stale ? "The settings changed: press Generate first" : ZIP_TIP + (good ? `\nThis run: ${good.name}.zip` : "");
+  $("btn-download").dataset.tipId = m.stale ? "btn-download-stale" : "btn-download";
+  $("btn-download").dataset.tipArgs = JSON.stringify({ name: good ? good.name : null });
   $("btn-files").disabled = !ready;
 }
 /* The notice sits in the Checks header, centred between the run name (the counts) and the Info switch.  It is one

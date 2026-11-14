@@ -3,50 +3,63 @@
 
    Everything here changes only what is shown: the boards and the downloads stay as the generator made them. */
 
-import { $, el, svg, clear, M, toast, markChoices, wireChoices } from "./core.js";
+import { $, el, svg, clear, M, toast, say, markChoices, wireChoices, tipOf } from "./core.js";
 import { BoardView, LAYER_INFO, SILK_LAYERS } from "./boardview.js";
 import { hasSets, where } from "./model.js";
 import { COPPER, CU_NAME } from "./labels.js";
 
 export let view = null;
 let shows = "overlay";                       // what the panel shows: stator | rotor | overlay | pictures
+/* what a screen reader is told about the drawing: the keys it takes, which change while Measure is on */
+const CANVAS_LABEL = "The generated boards. Arrow keys move the board, plus and minus zoom, 0 fits it.";
+const CANVAS_MEASURE = "The generated boards, Measure is on. Arrow keys move the cross, Shift for small steps; Enter sets a point; "
+  + "S keeps the line, Z removes the last one; plus and minus zoom, 0 fits the board.";
 
 const swatch = (css) => el("span", { class: "sw", style: { background: `var(${css})` } });
 const chipKey = (e, act) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); act(); } };
+/* The focus brings a layer or a coil out as the mouse does, but only the keyboard's focus: a click leaves the focus
+   on its button too, and what it brought out would stay when the mouse has gone. */
+const byKeys = (enter) => enter && ((e) => { if (e.currentTarget.matches(":focus-visible")) enter(); });
 
 /* ---- layer chips: the copper layers, the vias, the silkscreen marks ----------------------------- */
 function chip({ off, locked, tip, icon, text, toggle, enter, leave }) {
-  if (locked) return el("span", { class: "layer-chip locked", role: "switch", "aria-checked": "false", "aria-disabled": "true", "data-tip": tip }, icon, text);
-  return el("span", { class: "layer-chip" + (off ? " off" : ""), role: "switch", tabindex: 0, "aria-checked": String(!off), "data-tip": tip,
-    "data-focus": `chip|${text}`, onclick: toggle, onkeydown: (e) => chipKey(e, toggle), onmouseenter: enter, onmouseleave: leave, onfocus: enter, onblur: leave }, icon, text);
+  if (locked) return el("span", { class: "layer-chip locked", role: "switch", "aria-checked": "false", "aria-disabled": "true", ...tip }, icon, text);
+  return el("span", { class: "layer-chip" + (off ? " off" : ""), role: "switch", tabindex: 0, "aria-checked": String(!off), ...tip,
+    "data-focus": `chip|${text}`, onclick: toggle, onkeydown: (e) => chipKey(e, toggle), onmouseenter: enter, onmouseleave: leave, onfocus: byKeys(enter), onblur: leave }, icon, text);
 }
 function renderLayerToggles() {
-  const box = $("layer-toggles"), focused = document.activeElement && box.contains(document.activeElement) ? document.activeElement.dataset.focus : null;
-  clear(box);
+  // the copper layers and the vias stand beside the view tabs; the two silkscreen sides under them, in the drawing's
+  // top right corner, on the line of the Fullscreen button
+  const copper = $("layer-toggles"), silk = $("silk-toggles"), at = document.activeElement;
+  const focused = at && (copper.contains(at) || silk.contains(at)) ? at.dataset.focus : null;
+  clear(copper); clear(silk);
   const present = view.layersPresent();                     // null before the first board: every chip works
   for (const cu of COPPER) {
     const name = CU_NAME[cu], off = view.hidden.has(cu);
-    box.append(chip({ off, locked: present && !present.has(cu), icon: swatch(LAYER_INFO[cu].css), text: name,
-      tip: present && !present.has(cu) ? `This board has no copper on the ${name} layer (${cu})`
-        : off ? `Show the ${name} copper (${cu})` : `Hover to highlight the ${name} copper (${cu}), click to hide it (the preview only)`,
+    copper.append(chip({ off, locked: present && !present.has(cu), icon: swatch(LAYER_INFO[cu].css), text: name,
+      tip: present && !present.has(cu) ? tipOf("layer-missing", `This board has no copper on the ${name} layer (${cu})`, { layer: name, cu })
+        : off ? tipOf("layer-off", `Show the ${name} copper (${cu})`, { layer: name, cu })
+          : tipOf("layer", `Hover to highlight the ${name} copper (${cu}), click to hide it (the preview only)`, { layer: name, cu }),
       toggle: () => { view.toggleLayer(cu); view.setLayerHighlight(null); renderLayerToggles(); },
       enter: () => { if (!view.hidden.has(cu)) view.setLayerHighlight(cu); }, leave: () => view.setLayerHighlight(null) }));
   }
   // vias: hide / show like a layer; hovering makes tiny vias big enough to see (preview only)
   const viasOff = view.hidden.has("Vias");
-  box.append(chip({ off: viasOff, icon: el("span", { class: "via-icon" }), text: "Vias",
-    tip: viasOff ? "Show the vias" : "Show or hide the vias. Hover to enlarge small vias to at least 6 px (the preview only, the boards are unchanged)",
+  copper.append(chip({ off: viasOff, icon: el("span", { class: "via-icon" }), text: "Vias",
+    tip: viasOff ? tipOf("vias-off", "Show the vias")
+      : tipOf("vias", "Show or hide the vias. Hover to enlarge small vias to at least 6 px (the preview only, the boards are unchanged)"),
     toggle: () => { view.setViaBoost(false); view.toggleLayer("Vias"); renderLayerToggles(); },
     enter: () => { if (!view.hidden.has("Vias")) view.setViaBoost(true); }, leave: () => view.setViaBoost(false) }));
   // the silkscreen suggestion: where to cut the traces and place the lead vias (drawn on the board's silkscreen)
   for (const layer of SILK_LAYERS) {
     const side = layer === "F.SilkS" ? "Top" : "Bottom", off = view.hidden.has(layer), none = view.hasBoard && !view.hasSilk(layer);
-    box.append(chip({ off, locked: none, icon: swatch("--silk"), text: `Silk ${side}`,
-      tip: none ? `This board has no silkscreen marks on its ${side.toLowerCase()} side (${layer})`
-        : off ? `Show the silkscreen suggestion on the ${side.toLowerCase()} side (${layer})` : `Hide the silkscreen suggestion on the ${side.toLowerCase()} side (${layer}; the preview only)`,
+    silk.append(chip({ off, locked: none, icon: swatch("--silk"), text: `Silk ${side}`,
+      tip: none ? tipOf("silk-missing", `This board has no silkscreen marks on its ${side.toLowerCase()} side (${layer})`, { side: side.toLowerCase(), cu: layer })
+        : off ? tipOf("silk-off", `Show the silkscreen suggestion on the ${side.toLowerCase()} side (${layer})`, { side: side.toLowerCase(), cu: layer })
+          : tipOf("silk", `Hide the silkscreen suggestion on the ${side.toLowerCase()} side (${layer}; the preview only)`, { side: side.toLowerCase(), cu: layer }),
       toggle: () => { view.toggleLayer(layer); renderLayerToggles(); } }));
   }
-  if (focused) { const again = [...box.querySelectorAll("[data-focus]")].find((n) => n.dataset.focus === focused); if (again) again.focus(); }
+  if (focused) { const again = [...copper.querySelectorAll("[data-focus]"), ...silk.querySelectorAll("[data-focus]")].find((n) => n.dataset.focus === focused); if (again) again.focus(); }
 }
 
 /* ---- Sin / Cos / TX Loops, Set 1 / Set 2 (top right) and Origin (beside Fit) -------------------- */
@@ -57,8 +70,8 @@ const NET_BUTTONS = [
 ];
 const SET_ICON = { 1: "M9 4.5 A2.5 2.5 0 1 1 8.99 4.5", 2: "M9 1 A6 6 0 1 1 8.99 1" };
 function netButton({ off, text, icon, tip, toggle, enter, leave, focus }) {
-  return el("button", { type: "button", class: "net-btn" + (off ? " off" : ""), role: "switch", "aria-checked": String(!off), "data-tip": tip, "data-focus": focus,
-    onclick: toggle, onmouseenter: enter, onmouseleave: leave, onfocus: enter, onblur: leave },
+  return el("button", { type: "button", class: "net-btn" + (off ? " off" : ""), role: "switch", "aria-checked": String(!off), ...tip, "data-focus": focus,
+    onclick: toggle, onmouseenter: enter, onmouseleave: leave, onfocus: byKeys(enter), onblur: leave },
     svg("svg", { viewBox: "0 0 18 14", "aria-hidden": "true" }, svg("path", { d: icon })), text);
 }
 function renderNetToggles() {
@@ -68,14 +81,14 @@ function renderNetToggles() {
     for (const n of NET_BUTTONS) {
       const off = view.hiddenNets.has(n.role);
       box.append(netButton({ off, text: n.text, icon: n.icon, focus: `net|${n.role}`,
-        tip: off ? `Show ${n.what}` : `Hover to highlight ${n.what}, click to hide it (the preview only)`,
+        tip: off ? tipOf("net-off", `Show ${n.what}`, { what: n.what }) : tipOf("net", `Hover to highlight ${n.what}, click to hide it (the preview only)`, { what: n.what }),
         toggle: () => { view.toggleNet(n.role); view.setHighlight(null); renderNetToggles(); },
         enter: () => { if (!view.hiddenNets.has(n.role)) view.setHighlight(n.role); }, leave: () => view.setHighlight(null) }));
     }
     if (hasSets()) for (const k of [1, 2]) {
       const off = view.hiddenSets.has(k), what = `coil set ${k} (the ${k === 1 ? "inner" : "outer"} one)`;
       box.append(netButton({ off, text: `Set ${k}`, icon: SET_ICON[k], focus: `set|${k}`,
-        tip: off ? `Show ${what}` : `Hover to highlight ${what}, click to hide it (the preview only)`,
+        tip: off ? tipOf("net-off", `Show ${what}`, { what }) : tipOf("net", `Hover to highlight ${what}, click to hide it (the preview only)`, { what }),
         toggle: () => { view.toggleSet(k); view.setSetHighlight(null); renderNetToggles(); },
         enter: () => { if (!view.hiddenSets.has(k)) view.setSetHighlight(k); }, leave: () => view.setSetHighlight(null) }));
     }
@@ -84,7 +97,7 @@ function renderNetToggles() {
   const slot = clear($("origin-slot"));
   slot.append(el("button", { type: "button", class: "glass-btn small icon-btn" + (view.showOrigin ? "" : " off"), role: "switch",
     "aria-checked": String(view.showOrigin), "aria-label": "Origin", "data-focus": "origin",
-    "data-tip": view.showOrigin ? "The board centre (origin). Hover to highlight it, click to hide it" : "Show the board centre (origin)",
+    ...(view.showOrigin ? tipOf("origin", "The board centre (origin). Hover to highlight it, click to hide it") : tipOf("origin-off", "Show the board centre (origin)")),
     onclick: () => { view.toggleOrigin(); view.setOriginBoost(false); renderNetToggles(); },
     onmouseenter: () => { if (view.showOrigin) view.setOriginBoost(true); }, onmouseleave: () => view.setOriginBoost(false) },
     svg("svg", { viewBox: "0 0 24 24", "aria-hidden": "true" }, svg("circle", { cx: 12, cy: 12, r: 2.6, class: "origin-dot" }), svg("circle", { cx: 12, cy: 12, r: 6.5 }))));
@@ -109,7 +122,7 @@ function renderPictures() {
     if (!f) continue;
     any = true;
     box.append(el("figure", { class: "picture" },
-      el("a", { href: m.pictures[f.name], target: "_blank", rel: "noopener", "data-tip": "Open this picture in a new tab" },
+      el("a", { href: m.pictures[f.name], target: "_blank", rel: "noopener", ...tipOf("picture-open", "Open this picture in a new tab") },
         el("img", { src: m.pictures[f.name], alt: `${p.title} picture of ${g.name}: ${p.note.toLowerCase()}` })),
       el("figcaption", {}, el("b", {}, p.title), ` · ${p.note}`)));
   }
@@ -123,7 +136,7 @@ function pickView(mode) {
   markChoices($("view-tabs"), (b) => b.dataset.view === mode);
   $("board-canvas").hidden = pictures;
   $("pictures").hidden = !pictures;
-  for (const id of ["canvas-tools", "readout", "layer-toggles"]) $(id).hidden = pictures;
+  for (const id of ["canvas-tools", "readout", "layer-toggles", "silk-toggles"]) $(id).hidden = pictures;
   $("rotor-angle-box").hidden = mode !== "overlay";
   if (pictures) renderPictures();
   else view.setMode(mode);
@@ -156,16 +169,24 @@ export function showBoards(fit = true) {
 
 export function initPreview() {
   view = new BoardView($("board-canvas"), $("readout"));     // opens on Overlay
+  // the buttons that lie on the drawing, as boxes in the canvas's own pixels: Fit keeps the board clear of them
+  view.keepClear = () => {
+    const c = $("board-canvas").getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+    return ["canvas-tools", "silk-toggles", "net-toggles", "rotor-angle-box", "readout"].map((id) => $(id).getBoundingClientRect()).filter((b) => b.width && b.height)
+      .map((b) => ({ l: (b.left - c.left) * dpr, t: (b.top - c.top) * dpr, r: (b.right - c.left) * dpr, b: (b.bottom - c.top) * dpr }));
+  };
   wireChoices($("view-tabs"), (b) => pickView(b.dataset.view));
   markChoices($("view-tabs"), (b) => b.dataset.view === shows);
   renderLayerToggles();
   renderNetToggles();
   $("btn-fit").addEventListener("click", () => view.fit());
+  view.onMeasured = (n, mm) => say(n ? `Line ${n}: ${mm.toFixed(3)} mm` : "First point set");
   $("btn-measure").addEventListener("click", (e) => {
     view.measure = !view.measure; view.clearMeasure();     // switching Measure off or on clears every line
     e.currentTarget.classList.toggle("on", view.measure);
     e.currentTarget.setAttribute("aria-pressed", String(view.measure));
     $("measure-help").hidden = !view.measure;              // the S / Z keys, while measuring
+    $("board-canvas").setAttribute("aria-label", view.measure ? CANVAS_MEASURE : CANVAS_LABEL);
     $("board-canvas").classList.toggle("measuring", view.measure);
     view.draw();
   });
@@ -181,6 +202,7 @@ export function initPreview() {
     b.querySelector("path").setAttribute("d", on ? "M8 3v5H3M16 3v5h5M21 16h-5v5M3 16h5v5" : "M3 8V3h5M16 3h5v5M21 16v5h-5M8 21H3v-5");
     b.setAttribute("aria-label", on ? "Exit Fullscreen" : "Fullscreen");
     b.dataset.tip = on ? "Leave full screen (Esc)" : "";
+    b.dataset.tipId = on ? "btn-fullscreen-on" : "btn-fullscreen";
     setTimeout(() => view.resize(), 100);
   });
   $("rotor-angle").addEventListener("input", (e) => { view.setRotorAngle(+e.target.value); $("rotor-angle-out").textContent = `${e.target.value}°`; });

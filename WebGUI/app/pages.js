@@ -8,11 +8,11 @@
    Dual has two coil sets: the tabs are the same categories, and a Set 1 | Set 2 switch says whose RX, TX, Rotor and IC
    settings are shown. */
 
-import { $, el, clear, state, M, fmt, plural, wireChoices, markChoices } from "./core.js";
+import { $, el, clear, state, M, fmt, plural, wireChoices, markChoices, job, tipOf } from "./core.js";
 import { CATS, onChange, onChecked, hasSets, fileOf, catHasSets, where, v, isChanged, changedIn, BAND_RADII, BAND_CENTRE } from "./model.js";
-import { groupTitle, labelOf, ROTOR_MODE_GROUPS } from "./labels.js";
+import { groupTitle, labelOf, choiceText, ROTOR_MODE_GROUPS } from "./labels.js";
 import { numberField, segmentedField, boolField, txLayoutField, advancedField } from "./fields.js";
-import { TOOLTIPS } from "./paramtips.js";
+import { tipWords } from "./tips.js";
 
 const BASIC_CATS = ["Board", "RX", "TX", "Rotor"];
 // every setting Basic can change (Advanced lists all of them, these included); the others are counted in the note
@@ -35,7 +35,8 @@ function drawTabs(box, cats, current, panel, what) {
   for (const cat of cats) {
     const n = m.files.filter((f) => f.cat === cat).reduce((a, f) => a + f.parameters.filter((p) => listed(p) && isChanged(f.file, p.name)).length, 0);
     box.append(el("button", { type: "button", role: "tab", "data-key": cat, "aria-controls": panel,
-      "data-tip": `${what} of ${TAB_WORDS[cat]}` + (n ? ` (${plural(n, "setting")} changed)` : "") },
+      ...tipOf("tab", `${what} of ${TAB_WORDS[cat]}` + (n ? ` (${plural(n, "setting")} changed)` : ""),
+        { what, file: TAB_WORDS[cat], changed: n ? plural(n, "setting") : null }) },
       cat, n ? el("span", { class: "tab-dot", "aria-label": `${plural(n, "setting")} changed` }) : null));
   }
   markChoices(box, (b) => b.dataset.key === current);
@@ -48,7 +49,7 @@ function drawSetSwitch(box, cat) {
   for (const k of [1, 2]) {
     const n = changedIn(fileOf(cat, k));
     box.append(el("button", { type: "button", role: "radio", "data-key": k,
-      "data-tip": `The ${cat} settings of coil set ${k} (the ${k === 1 ? "inner" : "outer"} one)` },
+      ...tipOf("set", `The ${cat} settings of coil set ${k} (the ${k === 1 ? "inner" : "outer"} one)`, { cat, set: k, which: k === 1 ? "inner" : "outer" }) },
       SET_WORDS[k], n ? el("span", { class: "tab-dot", "aria-label": `${plural(n, "setting")} changed` }) : null));
   }
   markChoices(box, (b) => +b.dataset.key === M().set);
@@ -56,9 +57,10 @@ function drawSetSwitch(box, cat) {
 
 /* ---- Basic ---------------------------------------------------------------------------------------- */
 function noteFor(name) {
-  if (name === "LOOPS") { const n = v("LOOPS"); return `Range: ${fmt(n ? 360 / n : 360)}°`; }
-  if (name === "RX_SUBCOILS") return v("RX_SUBCOILS") > 1 ? `Split: ${fmt(v("RX_SUBCOIL_SPLIT_ELEC_DEG"))}° el` : "";
-  if (name === "TX_TURNS") return `Total: ${String(v("TX_WIRING")).toLowerCase() === "series" ? v("TX_TURNS") * 2 : v("TX_TURNS")}`;
+  const number = (x) => typeof x === "number" && Number.isFinite(x);     // a file can hand a text where a number belongs: no note then
+  if (name === "LOOPS") { const n = v("LOOPS"); return number(n) ? `Range: ${fmt(n > 0 ? 360 / n : 360)}°` : ""; }
+  if (name === "RX_SUBCOILS") return number(v("RX_SUBCOILS")) && v("RX_SUBCOILS") > 1 && number(v("RX_SUBCOIL_SPLIT_ELEC_DEG")) ? `Split: ${fmt(v("RX_SUBCOIL_SPLIT_ELEC_DEG"))}° el` : "";
+  if (name === "TX_TURNS") return number(v("TX_TURNS")) ? `Total: ${String(v("TX_WIRING")).toLowerCase() === "series" ? v("TX_TURNS") * 2 : v("TX_TURNS")}` : "";
   if (name === "RX_BAND") {                                    // which of the three ways the band is given (BandLayout.py)
     if (BAND_RADII.every((n) => v(n) !== null)) return "From the radii";
     if (BAND_CENTRE.every((n) => v(n) !== null)) return "From R Base and A";
@@ -141,7 +143,8 @@ function groupBlock(box, title, params, foldable, withCards) {
   if (foldable) {
     box.append(el("button", { type: "button", class: "group-title foldable" + (folded ? " collapsed" : ""), "data-group": title, "aria-expanded": String(!folded),
       "data-focus": `group|${title}`,
-      "data-tip": `Show or hide the ${title.startsWith("Custom") ? "custom" : "automatic"} rotor settings (used when Rotor Mode is ${ROTOR_MODE_GROUPS[title]})`,
+      ...tipOf("rotor-fold", `Show or hide the ${title.startsWith("Custom") ? "custom" : "automatic"} rotor settings (used when Rotor Mode is ${ROTOR_MODE_GROUPS[title]})`,
+        { kind: title.startsWith("Custom") ? "custom" : "automatic", mode: choiceText("ROTOR_MODE", ROTOR_MODE_GROUPS[title]) }),
       onclick: () => { if (m.folded.has(title)) m.folded.delete(title); else m.folded.add(title); applyFolds(); } },
       el("span", { class: "chevron", "aria-hidden": "true" }), title));
   } else box.append(el("div", { class: "group-title" }, title));
@@ -159,6 +162,11 @@ function foldRotorBlocks(mode) {
 function applyFolds() {
   document.querySelectorAll("#advanced-controls [data-group]").forEach((n) => {
     const folded = M().folded.has(n.dataset.group);
+    // an opening card keeps its settings cut to its growing height, so that they do not lie over the block under it
+    if (!folded && n.classList.contains("collapsed") && n.classList.contains("group-card")) {
+      n.classList.add("opening");
+      setTimeout(() => n.classList.remove("opening"), 400);
+    }
     n.classList.toggle("collapsed", folded);
     if (n.tagName === "BUTTON") n.setAttribute("aria-expanded", String(!folded));
   });
@@ -167,7 +175,7 @@ function applyFolds() {
 /* what a setting is found by: its Python name, its label, its group and its help text */
 function haystack(f, p) {
   const l = labelOf(p.name);
-  return `${p.name} ${p.name.replace(/_/g, " ")} ${l.text} ${groupTitle(p.heading, f.cat)} ${TOOLTIPS[p.name] || p.help || ""}`.toLowerCase();
+  return `${p.name} ${p.name.replace(/_/g, " ")} ${l.text} ${groupTitle(p.heading, f.cat)} ${tipWords(p)}`.toLowerCase();
 }
 function renderFound(box, words) {
   const m = M();
@@ -237,7 +245,7 @@ export function markFields() {
 }
 
 /* ---- Basic | Advanced ---------------------------------------------------------------------------- */
-let viewTimer = null;
+let viewTimer = null, fading = false;
 export function setView(view, animate = true) {
   if (view === state.view) return;
   state.view = view;
@@ -245,6 +253,7 @@ export function setView(view, animate = true) {
   const show = () => {
     $("basic-panel").hidden = state.view !== "basic";
     $("advanced-panel").hidden = state.view !== "advanced";
+    showTitle();
     render();
   };
   $("app").classList.toggle("advanced", view === "advanced");
@@ -257,12 +266,14 @@ export function setView(view, animate = true) {
   ctr.classList.remove("enter");
   ctr.classList.add("leave");
   clearTimeout(viewTimer);
+  if (!fading) { fading = true; job(1); }                  // the page is "busy" until the new controls have faded in
   viewTimer = setTimeout(() => {
     adv.style.removeProperty("width");
     show();
     ctr.classList.remove("leave");
     void ctr.offsetWidth;                                  // restart the fade-in
     ctr.classList.add("enter");
+    viewTimer = setTimeout(() => { fading = false; job(-1); }, 400);
   }, 180);
 }
 
@@ -308,7 +319,11 @@ export function initPages() {
 /* the generator was changed (Single | Dual): show its settings, where the visitor left them */
 export function showGenerator() {
   $("find").value = M().find;
-  $("basic-title").textContent = hasSets() ? "Controls · Dual" : "Controls";
-  $("adv-title").textContent = hasSets() ? "All Parameters · Dual" : "All Parameters";
+  showTitle();
   render();
+}
+/* the panel's title: what it lists (Basic: the controls, Advanced: every parameter) and, for Dual, the generator */
+function showTitle() {
+  $("controls-title").textContent = (state.view === "advanced" ? "All Parameters" : "Controls") + (hasSets() ? " · Dual" : "");
+  $("app").classList.toggle("dual", hasSets());            // the page keeps a little more height for the two sets' results
 }

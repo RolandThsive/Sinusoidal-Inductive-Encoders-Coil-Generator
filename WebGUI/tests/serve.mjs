@@ -28,7 +28,8 @@ const server = http.createServer((req, res) => {
   if (file !== SITE && !file.startsWith(SITE + path.sep)) { res.writeHead(403); res.end(); return; }
   fs.readFile(file, (err, data) => {
     if (err) { res.writeHead(404, { "content-type": "text/plain" }); res.end("not found"); return; }
-    res.writeHead(200, { "content-type": typeOf(file), "cache-control": "no-store", "x-content-type-options": "nosniff" });
+    // access-control-allow-origin: as GitHub Pages sends it, so the blog page can load the title's font from the tool's site
+    res.writeHead(200, { "content-type": typeOf(file), "cache-control": "no-store", "x-content-type-options": "nosniff", "access-control-allow-origin": "*" });
     res.end(data);
   });
 });

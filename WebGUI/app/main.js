@@ -8,7 +8,7 @@
    The order of a visit: Python is loaded (the CDN first, this site's own copy if the CDN does not answer), the
    chosen generator's tables are read, a design from the link is put on them, and the generator runs once. */
 
-import { $, state, M, toast, confirmBox, copyText, closeOnOutsideClick, wireMenu, closeMenus, el, clear, setPhase, during } from "./core.js";
+import { $, keepFocus, state, M, toast, confirmBox, copyText, closeOnOutsideClick, wireMenu, closeMenus, el, clear, setPhase, during } from "./core.js";
 import { configure, start } from "./engine.js";
 import { loadMode, onChange, where, val, setOne, resetAll, refreshChecks } from "./model.js";
 import { initPages, showGenerator } from "./pages.js";
@@ -71,14 +71,26 @@ function showAll() {
   showRun();
   showBoards();
 }
+/* While the other generator's settings are read nothing else can be started: not a second switch, not a run. */
+let switching = false, focusBack = null;
+function lockForSwitch(on) {
+  if (on) focusBack = keepFocus();                 // the menu's button, which is switched off meanwhile
+  switching = on;
+  for (const id of ["gen-btn", "btn-generate", "btn-check"]) $(id).disabled = on || state.busy || !state.ready;
+  if (on) closeMenus();
+  else if (focusBack) { focusBack(); focusBack = null; }
+}
 function switchGen(gen, run = true) {
-  if (gen === state.gen || state.busy || !state.ready) return Promise.resolve();
+  if (gen === state.gen || state.busy || !state.ready || switching) return Promise.resolve();
   return during(async () => {
-    try { await loadMode(gen); }
-    catch (e) { showCrash(`The ${gen} generator's settings could not be read.`, String(e.message || e)); return; }
-    state.gen = gen;
-    showAll();
-    await refreshChecks();
+    lockForSwitch(true);
+    try {
+      try { await loadMode(gen); }
+      catch (e) { showCrash(`The ${gen} generator's settings could not be read.`, String(e.message || e)); return; }
+      state.gen = gen;
+      showAll();
+      await refreshChecks();
+    } finally { lockForSwitch(false); }
     if (run && !M().result) await generate();        // its first board, as the page does for Single when it opens
   });
 }
@@ -105,7 +117,11 @@ function wire() {
   $("nav-back").addEventListener("click", (e) => { e.preventDefault(); if (history.length > 1) history.back(); else location.href = BLOG_HOME; });
   $("text-copy").addEventListener("click", () => copyText($("text-body").textContent));
   for (const id of ["text-dialog", "files-dialog"]) closeOnOutsideClick($(id));
-  document.addEventListener("keydown", (e) => { if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); generate(); } });
+  document.addEventListener("keydown", (e) => {
+    if (!(e.ctrlKey || e.metaKey) || e.key !== "Enter") return;
+    e.preventDefault();
+    if (!switching && !document.querySelector("dialog[open]")) generate();      // not behind an open dialog
+  });
   onChange(syncStrict);
 }
 
@@ -171,5 +187,9 @@ window.addEventListener("message", (e) => {
   if (typeof e.data.coilgenPage === "string" && /^https?:\/\//.test(e.data.coilgenPage)) state.hostPage = e.data.coilgenPage.slice(0, 500);
   if (typeof e.data.coilgenHash === "string" && !state.ready && readHash(e.data.coilgenHash)) history.replaceState(null, "", e.data.coilgenHash);
 });
+
+// a design link pasted into the address bar of the open page changes only the part after the #, and the browser does
+// not load the page again by itself: the page does, and opens the link as on a first visit
+window.addEventListener("hashchange", () => { if (readHash(location.hash)) location.reload(); });
 
 main();

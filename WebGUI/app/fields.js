@@ -5,7 +5,7 @@
    take the keyboard carries data-focus, a name that stays the same when the page is drawn again, so the keyboard stays
    where it was. */
 
-import { el, svg, same, fmt, M, wireChoices, markChoices, closeMenus } from "./core.js";
+import { el, svg, same, fmt, boxText, M, wireChoices, markChoices, closeMenus, tipOf, toast, typedNumber } from "./core.js";
 import { val, startVal, where, setValues, setOne, bandLock, numberFor } from "./model.js";
 import { labelOf, choiceText, stepOf, LAYER_NUM_CU, CU_NAME, COPPER } from "./labels.js";
 import { LAYER_INFO } from "./boardview.js";
@@ -18,6 +18,12 @@ const NONE_TIPS = {
   RX_R_BASE_MM: "None: the RX band is given by its inside and outside radius, or fitted to the board edges. R Base and A go together",
   RX_A_MM: "None: the RX band is given by its inside and outside radius, or fitted to the board edges. R Base and A go together",
 };
+
+/* The help box of a None or Auto switch: that line of the setting's own help; of a locked one, why it is locked. */
+function switchTip(name, choice, lock) {
+  if (lock) return tipOf("none-locked", lock, { pair: (/set by (.+?)\. /.exec(lock) || [])[1] });
+  return tipOf("none", choice === "None" ? NONE_TIPS[name] : null, { setting: name, choice });
+}
 
 const key = (file, name, part) => `${file}|${name}|${part}`;
 const idOf = (view, file, name) => `${view}-${file.replace(/_Parameters\.py$/, "")}-${name}`;
@@ -43,12 +49,12 @@ export function fieldBox(view, file, name, head, body, cls = "") {
 const labelled = (view, file, name) => ({ "aria-labelledby": `${idOf(view, file, name)}-label`, "aria-describedby": `${idOf(view, file, name)}-error` });
 
 /* a switch with a word beside it */
-function switchRow({ on, word, focus, cls = "", disabled = false, tip = null, label = null, change }) {
+function switchRow({ on, word, focus, cls = "", disabled = false, tip = null, label = null, change }) {   // tip: tipOf(...)
   const cb = el("input", { type: "checkbox", role: "switch", "data-focus": focus, disabled, "aria-label": label });
   cb.checked = !!on;
   const text = el("span", {}, typeof word === "function" ? word(cb.checked) : word);
   cb.addEventListener("change", () => { if (typeof word === "function") text.textContent = word(cb.checked); change(cb.checked); });
-  return el("label", { class: `switch-row ${cls}`.trim(), "data-tip": tip }, el("span", { class: "switch" }, cb, el("span", { class: "knob" })), text);
+  return el("label", { class: `switch-row ${cls}`.trim(), ...(tip || {}) }, el("span", { class: "switch" }, cb, el("span", { class: "knob" })), text);
 }
 
 /* a row of choices of which one is on */
@@ -64,11 +70,13 @@ function segmented({ view, file, name, options, value, focus = "seg", pick }) {
 function dropdown({ view, file, name, options, value, pick }) {
   const dd = el("div", { class: "dropdown" });
   const menu = el("div", { class: "dropdown-content", role: "listbox", ...labelled(view, file, name) });
+  const names = labelled(view, file, name), valueId = `${idOf(view, file, name)}-value`;
+  // the button is named by the setting's label and by the choice it shows ("TX Shape Stepped Diagonal")
   const btn = el("button", { type: "button", class: "dropdown-btn", "aria-haspopup": "listbox", "aria-expanded": "false",
-    "data-focus": key(file, name, "menu"), ...labelled(view, file, name) },
-    el("span", {}, choiceText(name, value)), el("span", { class: "arrow", "aria-hidden": "true" }, "▾"));
+    "data-focus": key(file, name, "menu"), ...names, "aria-labelledby": `${names["aria-labelledby"]} ${valueId}` },
+    el("span", { id: valueId }, choiceText(name, value)), el("span", { class: "arrow", "aria-hidden": "true" }, "▾"));
   const items = options.map((o) => el("button", { type: "button", role: "option", tabindex: -1, class: same(o, value) ? "on" : "",
-    "aria-selected": String(same(o, value)), onclick: () => { open(false); pick(o); } }, choiceText(name, o)));
+    "aria-selected": String(same(o, value)), onclick: () => { open(false); btn.focus(); pick(o); } }, choiceText(name, o)));   // the focus goes back to the menu's button
   menu.append(...items);
   function open(on, focusItem) {
     closeMenus(dd);
@@ -91,13 +99,20 @@ function dropdown({ view, file, name, options, value, pick }) {
   return dd;
 }
 
+/* A number box with something typed into it that is not a number: the value stays, and the page says so. */
+function notNumber(input, back) {
+  const typed = input.value.trim();
+  input.value = back;
+  if (typed) toast(`“${typed.slice(0, 24)}” is not a number: the value stays ${back}`, 4000);
+}
+
 /* ---- Basic -------------------------------------------------------------------------------------- */
 /* Basic's fields change a value with from = "basic": the page then leaves the Basic controls as they are (a slider
    being dragged must not be drawn again under the mouse). */
 function noneSwitch(file, name, on) {
   const lock = bandLock(file, name);
   return switchRow({ on, word: lock ? "None · Locked" : "None", focus: key(file, name, "none"), cls: "small none-switch" + (lock ? " locked" : ""),
-    disabled: !!lock, tip: lock || NONE_TIPS[name], label: `${labelOf(name).text}: None`,
+    disabled: !!lock, tip: switchTip(name, "None", lock), label: `${labelOf(name).text}: None`,
     change: (checked) => {
       if (checked) M().lastNumbers[file][name] = val(file, name);
       setOne(file, name, checked ? null : numberFor(file, name), "basic-none");
@@ -108,28 +123,32 @@ export function numberField({ file, name, label, unit, min, max, step, sliderSte
   const v = val(file, name), isNone = v === null;
   const shown = isNone ? numberFor(file, name) : v;            // a None field keeps showing the number it would return to
   const aria = labelled("b", file, name);
-  const input = el("input", { type: "text", inputmode: "decimal", value: isNone ? "None" : fmt(v), disabled: isNone, autocomplete: "off",
+  const input = el("input", { type: "text", inputmode: "decimal", value: isNone ? "None" : boxText(v), disabled: isNone, autocomplete: "off",
     "data-focus": key(file, name, "text"), ...aria });
   const range = slider ? el("input", { type: "range", min: slider[0], max: slider[1], step: sliderStep, value: shown, disabled: isNone,
     "data-focus": key(file, name, "range"), ...aria }) : null;
   const clamp = (x) => Math.min(max, Math.max(min, x));
+  const fit = () => { if (input.value.length > 7) input.style.setProperty("width", `${input.value.length + 1}ch`); else input.style.removeProperty("width"); };
+  fit();                                                       // a value with more places than Basic's steps (typed in Advanced) is shown whole
+  const now = () => { const x = val(file, name); return typeof x === "number" ? x : min; };       // a value of another kind (from a file): count from the lowest
   const commit = (x, src) => {
-    if (!Number.isFinite(x)) { input.value = fmt(val(file, name)); return; }
+    if (!Number.isFinite(x)) { notNumber(input, boxText(val(file, name))); return; }
     x = clamp(Math.round(x / step) * step);
     x = Math.round(x * 1000) / 1000;
-    input.value = fmt(x);
+    input.value = boxText(x);
+    fit();
     if (range && src !== "range") range.value = x;
     setOne(file, name, x, "basic");
   };
-  input.addEventListener("change", () => commit(parseFloat(input.value), "change"));
+  input.addEventListener("change", () => commit(typedNumber(input.value), "change"));
   input.addEventListener("keydown", (e) => {
-    if (e.key === "ArrowUp" || e.key === "ArrowDown") { e.preventDefault(); commit((parseFloat(input.value) || 0) + (e.key === "ArrowUp" ? step : -step)); }
+    if (e.key === "ArrowUp" || e.key === "ArrowDown") { e.preventDefault(); commit((typedNumber(input.value) || 0) + (e.key === "ArrowUp" ? step : -step)); }
   });
   if (range) range.addEventListener("input", () => commit(parseFloat(range.value), "range"));
   const stepper = el("span", { class: "stepper" },
-    el("button", { type: "button", "aria-label": `${label}: less`, disabled: isNone, "data-focus": key(file, name, "less"), onclick: () => commit(val(file, name) - step) }, "−"),
+    el("button", { type: "button", "aria-label": `${label}: less`, disabled: isNone, "data-focus": key(file, name, "less"), onclick: () => commit(now() - step) }, "−"),
     input,
-    el("button", { type: "button", "aria-label": `${label}: more`, disabled: isNone, "data-focus": key(file, name, "more"), onclick: () => commit(val(file, name) + step) }, "+"));
+    el("button", { type: "button", "aria-label": `${label}: more`, disabled: isNone, "data-focus": key(file, name, "more"), onclick: () => commit(now() + step) }, "+"));
   const head = fieldHead("b", file, name, label, unit ? `(${unit})` : "",
     note !== undefined ? el("span", { class: "field-note", "data-note": name }, note) : null,
     none ? noneSwitch(file, name, isNone) : null);
@@ -200,7 +219,9 @@ function presetCard(p, v, selected, i, set) {
     if (tx.includes(n)) for (let j = 0; j < 3; j++) pic.append(svg("rect", { x: 64 + j * 10, y: y - 2.2, width: 7, height: 4.4, rx: 1, class: "card-tx", style: colour }));
   });
   return el("button", { type: "button", class: "slide" + (selected ? " selected" : ""), role: "radio", "aria-checked": String(selected),
-    "data-tip": `${p.name}: ${p.note}`, "data-key": i, "data-focus": key(`set${set}`, "TX_LAYOUT", p.id) },
+    ...tipOf(`preset:${p.id}`, `${p.name}: ${p.note}`, { name: p.name, layers: p.layers, sets: Object.entries(p.set).map(([k, x]) =>
+      [labelOf(k).text, choiceText(k, x) + (k === "TX_LAYER_B" && p.set.TX_WIRING === "single" ? " (not used by a one-layer TX)" : "")]) }),
+    "data-key": i, "data-focus": key(`set${set}`, "TX_LAYOUT", p.id) },
     pic, el("span", { class: "slide-name" }, p.name));
 }
 /* The cards of the board's layer count, for one coil set; view: "b" (Basic) or "a" (Advanced). */
@@ -222,22 +243,25 @@ export function txLayoutField(view, set = M().set) {
 }
 
 /* ---- Advanced ------------------------------------------------------------------------------------ */
-function stepper({ file, name, value, step = 0.001, integer = false, disabled = false, min = null, commit }) {
-  const text = value == null ? "" : fmt(value);
-  const input = el("input", { type: "text", inputmode: "decimal", value: text, disabled, autocomplete: "off", "data-focus": key(file, name, "text"), ...labelled("a", file, name) });
+/* part: for a setting of two numbers (a page's width and height), which of them: {id, word} */
+function stepper({ file, name, value, step = 0.001, integer = false, disabled = false, min = null, commit, part = null }) {
+  const text = value == null ? "" : boxText(value), num = typeof value === "number" ? value : 0;   // a text from a file: − and + count from 0
+  const tag = part ? part.word.toLowerCase() + "-" : "", names = labelled("a", file, name);
+  if (part) names["aria-labelledby"] += ` ${part.id}`;
+  const input = el("input", { type: "text", inputmode: "decimal", value: text, disabled, autocomplete: "off", "data-focus": key(file, name, tag + "text"), ...names });
   if (text.length > 5) input.style.setProperty("width", `${text.length + 2}ch`);       // 3500000 Hz fits
   const done = (x) => {
-    if (!Number.isFinite(x)) { input.value = text; return; }
+    if (!Number.isFinite(x)) { notNumber(input, text); return; }
     if (integer) x = Math.round(x);
     commit(Math.round(x * 1e6) / 1e6);
   };
-  input.addEventListener("change", () => done(parseFloat(input.value)));
-  const label = labelOf(name).text;
+  input.addEventListener("change", () => done(typedNumber(input.value)));
+  const label = labelOf(name).text + (part ? ` ${part.word}` : "");
   return el("span", { class: "stepper" },
-    el("button", { type: "button", disabled, "aria-label": `${label}: less`, "data-focus": key(file, name, "less"),
-      onclick: () => done(min == null ? (value ?? 0) - step : Math.max(min, (value ?? 0) - step)) }, "−"), input,
-    el("button", { type: "button", disabled, "aria-label": `${label}: more`, "data-focus": key(file, name, "more"),
-      onclick: () => done((value ?? 0) + step) }, "+"));
+    el("button", { type: "button", disabled, "aria-label": `${label}: less`, "data-focus": key(file, name, tag + "less"),
+      onclick: () => done(min == null ? num - step : Math.max(min, num - step)) }, "−"), input,
+    el("button", { type: "button", disabled, "aria-label": `${label}: more`, "data-focus": key(file, name, tag + "more"),
+      onclick: () => done(num + step) }, "+"));
 }
 
 // the number a step setting shows when its Auto switch is turned off (the values before the chord tolerances)
@@ -258,9 +282,10 @@ function choiceWidget(p, v, set, disabled = false) {
 
 function layerSwitches(p, v, layers, set) {
   const box = el("div", { class: "auto-row wrap", role: "group", ...labelled("a", p.file, p.name) });
+  const list = Array.isArray(v) ? v : [];                      // a value of another kind (from a file) shows as no layer
   for (const cu of layers) {
-    box.append(switchRow({ on: (v || []).includes(cu), word: CU_NAME[cu], focus: key(p.file, p.name, cu),
-      change: (on) => { const now = new Set(v || []); if (on) now.add(cu); else now.delete(cu); set(layers.filter((x) => now.has(x))); } }));
+    box.append(switchRow({ on: list.includes(cu), word: CU_NAME[cu], focus: key(p.file, p.name, cu),
+      change: (on) => { const now = new Set(list); if (on) now.add(cu); else now.delete(cu); set(layers.filter((x) => now.has(x))); } }));
   }
   return box;
 }
@@ -297,13 +322,13 @@ export function advancedWidget(p) {
     const back = isAuto ? (none ? numberFor(file, name) : (m.lastNumbers[file][name] ?? fallback)) : v;
     return el("div", { class: "auto-row" },
       switchRow({ on: isAuto, word: lock ? `${word} · Locked` : word, focus: key(file, name, "auto"), cls: lock ? "locked" : "", disabled: !!lock,
-        tip: lock || (none ? NONE_TIPS[name] : null), label: `${labelOf(name).text}: ${word}`,
+        tip: switchTip(name, none ? "None" : "auto", lock), label: `${labelOf(name).text}: ${word}`,
         change: (on) => { if (on) { m.lastNumbers[file][name] = typeof v === "number" ? v : back; set(none ? null : "auto"); } else set(back); } }),
       stepper({ file, name, value: isAuto ? null : v, step: stepOf(p), integer: k === "steps" || k === "auto_or_int", disabled: isAuto, commit: set }));
   }
   if (k === "str_or_none") {
     const isNone = v === null;
-    const t = el("input", { class: "text-input", value: isNone ? "" : v, disabled: isNone, autocomplete: "off", spellcheck: "false",
+    const t = el("input", { class: "text-input", value: isNone ? "" : boxText(v), disabled: isNone, autocomplete: "off", spellcheck: "false",
       "data-focus": key(file, name, "text"), ...labelled("a", file, name) });
     t.addEventListener("change", () => set(t.value));
     return el("div", { class: "auto-row" },
@@ -311,18 +336,30 @@ export function advancedWidget(p) {
         change: (on) => { if (on) { m.lastNumbers[file][name] = v; set(null); } else set(m.lastNumbers[file][name] ?? (typeof startVal(file, name) === "string" ? startVal(file, name) : "")); } }),
       t);
   }
+  if (k === "pair") {
+    /* two numbers in one setting: PAGE_SIZE_MM = (width, height) */
+    const pair = Array.isArray(v) && v.length === 2 ? v : [v, v];              // a value of another kind (from a file) is shown as it is
+    const row = el("div", { class: "auto-row pair-row" });
+    ["Width", "Height"].forEach((word, i) => {
+      const id = `${idOf("a", file, name)}-${word.toLowerCase()}`;
+      row.append(el("span", { class: "pair-word", id }, word),
+        stepper({ file, name, value: pair[i], step: stepOf(p), part: { id, word },
+          commit: (x) => { const now = [typeof pair[0] === "number" ? pair[0] : x, typeof pair[1] === "number" ? pair[1] : x]; now[i] = x; set(now); } }));
+    });
+    return row;
+  }
   if (k === "rotor_layers") return layerSwitches(p, v, ["F.Cu", "B.Cu"], set);
   if (k === "layer_list") return layerSwitches(p, v, COPPER.filter((cu) => (o.values || COPPER).includes(cu)), set);
   if (k === "colour") {
     const ok = typeof v === "string" && /^#[0-9a-f]{6}$/i.test(v);
     const picker = el("input", { type: "color", class: "colour-input", value: ok ? v.toLowerCase() : "#ffffff", "data-focus": key(file, name, "pick"), ...labelled("a", file, name) });
-    const t = el("input", { class: "text-input short", value: v ?? "", autocomplete: "off", spellcheck: "false", "data-focus": key(file, name, "text"), ...labelled("a", file, name) });
+    const t = el("input", { class: "text-input short", value: v == null ? "" : boxText(v), autocomplete: "off", spellcheck: "false", "data-focus": key(file, name, "text"), ...labelled("a", file, name) });
     picker.addEventListener("change", () => set(picker.value.toUpperCase()));
     t.addEventListener("change", () => set(/^#[0-9a-f]{6}$/i.test(t.value.trim()) ? t.value.trim().toUpperCase() : t.value));
     return el("div", { class: "auto-row" }, picker, t);
   }
   // str, net, file
-  const t = el("input", { class: "text-input", value: v ?? "", autocomplete: "off", spellcheck: "false", "data-focus": key(file, name, "text"), ...labelled("a", file, name) });
+  const t = el("input", { class: "text-input", value: v == null ? "" : boxText(v), autocomplete: "off", spellcheck: "false", "data-focus": key(file, name, "text"), ...labelled("a", file, name) });
   t.addEventListener("change", () => set(t.value));
   return t;
 }
@@ -330,9 +367,10 @@ export function advancedWidget(p) {
 /* One setting of Advanced: its name, its Python name, the way back to the published value, and its control. */
 export function advancedField(p) {
   const lab = labelOf(p.name);
-  const head = fieldHead("a", p.file, p.name, lab.text, lab.unit,
+  // the name in the file and the arrow are one piece: on a narrow panel they go to the next line together
+  const head = fieldHead("a", p.file, p.name, lab.text, lab.unit, el("span", { class: "field-side" },
     el("span", { class: "field-note" }, el("span", { class: "mono-name" }, p.name)),
-    el("button", { type: "button", class: "reset-one", "aria-label": `${lab.text}: back to the starting value`, "data-tip": "Back to the starting value",
-      "data-focus": key(p.file, p.name, "reset"), onclick: () => setOne(p.file, p.name, startVal(p.file, p.name), "advanced") }, "↺"));
+    el("button", { type: "button", class: "reset-one", "aria-label": `${lab.text}: back to the starting value`, ...tipOf("reset-one", "Back to the starting value"),
+      "data-focus": key(p.file, p.name, "reset"), onclick: () => setOne(p.file, p.name, startVal(p.file, p.name), "advanced") }, "↺")));
   return fieldBox("a", p.file, p.name, head, advancedWidget(p));
 }
