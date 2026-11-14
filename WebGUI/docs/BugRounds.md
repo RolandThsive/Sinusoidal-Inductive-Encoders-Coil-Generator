@@ -146,6 +146,7 @@ are listed for `main`.
 | A link longer than 20000 characters is ignored without a word | A link the page made is never that long |
 | A help box can cover the control below the one it belongs to | It closes when the mouse or the focus leaves |
 | On a board several hundred millimetres wide the copper is thinner than a pixel at Fit, and faint | Traces are drawn at their true width at every zoom; the wheel shows them |
+| Where scrollbars take room, a help box with a picture that is as tall as its room to a few pixels shows a scrollbar with nothing to scroll | The scrollbar makes the picture narrower and so shorter; the browser keeps the scrollbar it has laid out |
 | The points of `WCAG-EM.md`, section 5 | They are the owner's choices |
 
 ## Where the work left the plan
