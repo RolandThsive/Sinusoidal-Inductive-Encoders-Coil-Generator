@@ -100,6 +100,7 @@ are listed for `main`.
 | During a second run the counts line still shows the result before | It changes when the run ends; the board is marked as old meanwhile |
 | A link longer than 20000 characters is ignored without a word | A link the page made is never that long |
 | A help box can cover the control below the one it belongs to | It closes when the mouse or the focus leaves |
+| On a board several hundred millimetres wide the copper is thinner than a pixel at Fit, and faint | Traces are drawn at their true width at every zoom; the wheel shows them |
 | The points of `WCAG-EM.md`, section 5 | They are the owner's choices |
 
 ## Where the work left the plan
