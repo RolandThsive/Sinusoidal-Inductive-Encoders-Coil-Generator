@@ -40,18 +40,25 @@ This branch is kept equal to the newest Web GUI work:
 
 ## How the screenshots were made
 
-Screenshots for review (portrait and landscape) were taken with Playwright and the Chromium that ships with it:
+Screenshots for review are taken with Playwright and its Chromium:
 
-1. Serve the repository root with any static server (the same `serve.py` works).
-2. Open `WebGUI/index.html` in a headless Chromium at the wanted window size (for example 1600 x 950 landscape and
-   1080 x 1920 portrait), wait until the Generate button is enabled and the progress bar is idle, then call
-   `page.screenshot`.
-3. To show a state, click the controls first: a `+` stepper makes the "Settings changed" notice appear; Advanced
-   parameters are the fields `[data-name=NAME]` under the tabs `#adv-tabs button`; the layer chips are `.layer-chip`.
-4. Tooltips hide on scroll, so move the mouse onto the info dot after the last scroll and wait about a second.
+1. Start the tester (above), or any static server on a folder made by `WebGUI/tools/build_site.py`.
+2. Open `/WebGUI/` in a headless Chromium at the wanted window size (for example 1440 x 900, or 1080 x 1920 for a
+   screen standing upright) and wait until `document.documentElement.dataset.state` is `ready`: Python has loaded
+   and the first board stands. Then call `page.screenshot`. The Dual generator is the address with `#dual=` at
+   its end.
+3. To show a state, click the controls first: Advanced is `#mode-switch [data-mode="advanced"]`, its tabs are
+   `#adv-tabs [data-key]`, a setting is `#advanced-panel .field[data-name="NAME"]`, the layer buttons are
+   `.layer-chip`, the views of the preview are `#preview [data-view]`.
+4. A help box opens when the mouse rests on a control, at once on an (i) (`.info-dot`), and closes when the page
+   scrolls: move the mouse onto the control after the last scroll and wait about a second.
 
 ## Checks before a design goes live
 
-- The default design generates with no warnings (about 0.2 to 0.4 s).
-- Import then Export gives back the same parameter files.
-- The page works at 1920, 1600, 1100 and 1080 px wide, and the top bar keeps one line.
+- The tests pass: `python -m unittest WebGUI/tests/test_bridge.py` from the repository folder, and
+  `npx playwright test` inside `WebGUI/` (after `npm ci`). The slower rounds are listed in
+  `WebGUI/docs/BugRounds.md`, "How to run a round again".
+- The starting design of both generators builds with no warnings (Single in about 3 s, Dual in about 20 s).
+- Import, then Export, gives back the same parameter files.
+- The page keeps its layout from 2560 x 1440 down to 320 x 256:
+  `LAYOUT=all npx playwright test layout --project=chromium`.
