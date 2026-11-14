@@ -163,18 +163,16 @@ function applyFolds() {
   document.querySelectorAll("#advanced-controls [data-group]").forEach((n) => {
     const folded = M().folded.has(n.dataset.group);
     // an opening card keeps its settings cut to its growing height, so that they do not lie over the block under it
-    if (!folded && n.classList.contains("collapsed") && n.classList.contains("group-card") && parseFloat(getComputedStyle(n).transitionDuration)) {
-      const opened = (e) => {                                 // the card has its height (or, after 1.5 s, the browser never said so)
-        if (e && (e.target !== n || e.propertyName !== "grid-template-rows")) return;
-        n.classList.remove("opening");
-        n.removeEventListener("transitionend", opened);
-        clearTimeout(late);
-      };
-      const late = setTimeout(opened, 1500);
-      n.classList.add("opening");
-      n.addEventListener("transitionend", opened);
-    }
+    const opens = !folded && n.classList.contains("collapsed") && n.classList.contains("group-card") && parseFloat(getComputedStyle(n).transitionDuration);
+    if (opens) n.classList.add("opening");
     n.classList.toggle("collapsed", folded);
+    if (opens) {
+      getComputedStyle(n).gridTemplateRows;                  // the growing starts now, so that it can be waited for
+      const grow = n.getAnimations().filter((a) => a.transitionProperty === "grid-template-rows").map((a) => a.finished);
+      const opened = () => { n.classList.remove("opening"); clearTimeout(late); };
+      const late = setTimeout(opened, 5000);                 // a card that has grown and is still cut hides nothing
+      Promise.allSettled(grow).then(opened);                 // grown, or folded again on the way
+    }
     if (n.tagName === "BUTTON") n.setAttribute("aria-expanded", String(!folded));
   });
 }

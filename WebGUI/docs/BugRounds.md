@@ -79,7 +79,7 @@ file was written.
 | F35 | 15 | A menu opened with the mouse (the generator menu, a setting's menu) did not close with Esc, and stayed open when Tab took the focus on | Esc closes an open menu wherever the focus is; a menu closes when the focus leaves it | `keyboard.spec.js` "a menu opened with the mouse closes with Esc, and when the focus goes on" |
 | F36 | 11 | Cancel ends Python in the middle of a call. About once in a hundred cancels the ending Python still threw an error (`NoGilError`), and the page showed it as an error of its own, "Something Went Wrong", though the cancel had worked | What an ended Python still throws is taken and dropped | `states.spec.js` "an error the cancelled Python still throws while it ends is not an error of the page" |
 | F37 | 22 | Where the drawing starts between two pixels of the window (WebKit laid it out so), the readout of the pointer, the point the wheel zooms about and Measure were up to half a pixel off: the browser gives the pointer's place inside the drawing in whole pixels | The place is taken from the pointer's place in the window less the drawing's own edge | `preview.spec.js` "the wheel zooms about the place the mouse points at …", with the drawing moved by 0.4 px |
-| F38 | 22 | Where a scrollbar takes room (Windows, Linux, WebKit), a settings list that scrolls ended 12 px before the row with Basic and Advanced above it and the results and buttons under it. No test and no picture had shown it: Playwright hides Chromium's scrollbars | The page measures the list's scrollbar; the settings column is that much wider, and the rows above and under the list end where the settings end | `layout.spec.js`, every test of it: `playwright.config.js` now keeps Chromium's scrollbars |
+| F38 | 22 | Where a scrollbar takes room (Windows, Linux, WebKit), a settings list that scrolls ended 12 px before the row with Basic and Advanced above it and the results and buttons under it. No test and no picture had shown it: Playwright hides Chromium's scrollbars | The page measures the list's scrollbar (in the frame after a change); the settings column is that much wider, and the rows above and under the list end where the settings end | `layout.spec.js`, every test of it: `playwright.config.js` now keeps Chromium's scrollbars |
 | F39 | 22 | In a window 320 px wide, with the window's and the list's scrollbars taking their room, the page was 4 px wider than the window and scrolled sideways (Dual), and a setting's None switch stood past the edge (Single) | Under 1000 px the slider of a number shrinks further, a None switch goes under the setting's name, and the results stand closer | `layout.spec.js` "… in a 640, a 360 and a 320 px window: one column, nothing scrolls sideways, nothing is broken or cut" |
 
 The four faults the owner reported while round 13 was being prepared (the search box out of line, the two button
@@ -89,7 +89,8 @@ same way and are held by `layout.spec.js`.
 ## Round 22: the three browsers
 
 Only Chromium is on the computer the page was written on; Firefox and WebKit run in CI ("Web Tool Tests"). The
-first run of the whole suite there failed in 1 test on Chromium, 6 on Firefox and 9 on WebKit. What they were:
+first run of the whole suite there failed in 1 test on Chromium, 6 on Firefox and 9 on WebKit; the second, after
+the fixes, in 2 on Firefox and 6 on WebKit; the third in 2 on Firefox; the fourth in 1 on WebKit. What they were:
 
 | What the run showed | Where | What it was |
 |---|---|---|
@@ -99,7 +100,12 @@ first run of the whole suite there failed in 1 test on Chromium, 6 on Firefox an
 | No word from a Python that was ended | WebKit | WebKit hands an ended worker's error to nobody, so F36 cannot happen there; the test takes both |
 | Shift + Tab from the page itself went to the text box used last | Firefox | The browser's way; the test starts at the last stop and goes back from there |
 | "Skipping unsupported feature name clipboard-write", "downloadable font: glyf: Glyph bbox was incorrect" | Firefox | Notes of the browser, on the frame of the blog page and on a font; the tests let them through by name |
-| The page crashed when a second help box was opened after the accessibility check had read the first | Firefox on the CI machine only | Not found. The three boxes are checked each on a page of its own |
+| The page crashed while the accessibility check read it with the help box of Generate or of Share open | Firefox on the CI machine only, every time | Tried rule by rule: only axe's rules `hidden-content` and `label` end the page, and only with one of those two boxes open. Firefox leaves the two rules out of that test; the page without a box is read with every rule |
+| "ResizeObserver loop completed with undelivered notifications" | WebKit, Dual | The measuring of F38 widened the column inside the observer, which then saw it again; it now measures in the next frame. The page had already passed this notice over |
+| The help box the keyboard opened on the Top chip lay over the silkscreen chips the test clicked next | WebKit | The test puts the box away with Esc, as a visitor would |
+| A measure of a small window taken while WebKit was still laying out the new size | WebKit, once | The small-window test measures again for up to 4 s while something is wrong |
+| An opened group, and the column after a scrollbar came, measured while WebKit was still moving them | WebKit | The layout tests wait for the page's transitions to end. The column no longer slides when a scrollbar comes, and an opening group is cut until its growing has ended, however long that takes |
+| The "Cancelled" message was gone before a slow browser had its new Python | Firefox, once | The test reads the message at once |
 
 Since this round Chromium keeps its scrollbars in every test (`playwright.config.js`), and a click or a hover that
 cannot be done is named after 30 seconds.

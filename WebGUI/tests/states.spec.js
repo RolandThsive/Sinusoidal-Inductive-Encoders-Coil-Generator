@@ -172,7 +172,7 @@ test("an error the cancelled Python still throws while it ends is not an error o
     window.__workers[0].dispatchEvent(e);
     return { heard, taken: e.defaultPrevented };
   });
-  expect(await page.evaluate(() => window.__workers.length)).toBe(2);
+  await expect.poll(() => page.evaluate(() => window.__workers.length), { message: "Cancel starts a new Python" }).toBe(2);
   // taken by the page, so the browser does not report it to the window; WebKit hands an ended worker no event at all
   expect(said.taken || !said.heard).toBe(true);
   await app.settled();

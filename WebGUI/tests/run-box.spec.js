@@ -26,9 +26,9 @@ test("Cancel in the box ends a run and the page works again", async ({ app, page
   await page.click("#btn-generate");
   await expect(page.locator("#run-card")).toBeVisible();
   await page.click("#btn-cancel");
+  await expect(app.toast()).toHaveText("Cancelled");                       // at once: it is gone before a slow browser has its new Python
   await app.settled();
   await expect(page.locator("#run-card")).toBeHidden();
-  await expect(app.toast()).toHaveText("Cancelled");
   expect(await app.counts()).toBe(before);                                 // the last board is still the one shown
   await expect(page.locator("#btn-download")).toBeEnabled();
   await app.generate();
