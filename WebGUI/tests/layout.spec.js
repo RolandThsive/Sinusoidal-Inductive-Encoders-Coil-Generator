@@ -194,6 +194,16 @@ test("a group that opens does not lie over the block under it while it grows", a
   expect(await page.evaluate(audit)).toEqual([]);
 });
 
+test("a portrait window puts the title away, and screen readers still find it as the page's heading", async ({ app, page }) => {
+  await app.open();
+  const title = page.locator("#topbar h1");
+  expect((await title.boundingBox()).width, "a landscape window shows the title").toBeGreaterThan(100);
+  await page.setViewportSize({ width: 1080, height: 1920 });
+  await expect.poll(async () => (await title.boundingBox()).width, { message: "a portrait window puts it away" }).toBeLessThanOrEqual(1);
+  await expect(page.getByRole("heading", { level: 1, name: "Sinusoidal Inductive Encoder Coil Generator" })).toHaveCount(1);
+  expect(await page.evaluate(audit)).toEqual([]);
+});
+
 /* The smallest windows, with the scrollbars a visitor's browser shows: the window's own takes 15 px of the width and
    the list's 12 px more (a 1280 px screen at 400 % zoom is 320 px wide). */
 for (const gen of ["single", "dual"]) {
