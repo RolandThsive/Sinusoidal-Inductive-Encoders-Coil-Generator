@@ -255,7 +255,14 @@ function show(node) {
   shownFor = node;
   if (!node.hasAttribute("aria-describedby")) node.setAttribute("aria-describedby", "popover");
   place(pop, node);
+  // taller than its room, it scrolls inside: the mouse has its wheel; opened by the keyboard's focus, the box says its keys
+  const at = document.activeElement;
+  if (scrolls(pop) && at && node.contains(at) && at.matches(":focus-visible")) {
+    pop.prepend(el("div", { class: "tip-keys tip-scroll" }, el("kbd", {}, "Alt"), "+", el("kbd", {}, "↓"), el("span", {}, "scrolls this box")));
+    place(pop, node);
+  }
 }
+const scrolls = (pop) => pop.scrollHeight > pop.clientHeight + 1;
 function owner(t) {
   const node = t && t.closest ? t.closest("[data-tip], [data-tip-id], [data-help]") : null;
   return node && node.classList.contains("dropdown-btn") && node.closest(".dropdown.open") ? null : node;   // not under an open menu
@@ -300,6 +307,13 @@ export function initTips() {
   document.addEventListener("mousedown", (e) => { if (!inBox(e.target)) { hide(); quiet = true; } });
   document.addEventListener("scroll", (e) => { if (!inBox(e.target)) hide(); }, true);   // a scroll inside the box keeps it
   window.addEventListener("resize", hide);
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && (shownFor || pending)) hide(); }, true);
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && (shownFor || pending)) { hide(); return; }
+    const pop = $("popover");                                // Alt + an arrow scrolls a box that is taller than its room
+    if (shownFor && e.altKey && (e.key === "ArrowDown" || e.key === "ArrowUp") && scrolls(pop)) {
+      e.preventDefault(); e.stopPropagation();
+      pop.scrollTop += e.key === "ArrowDown" ? 60 : -60;
+    }
+  }, true);
   loadTips();
 }

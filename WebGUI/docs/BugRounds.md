@@ -27,7 +27,7 @@ file was written.
 | 14 | Zoom and reflow | 200 % and 400 %, nine small and low windows | F8, F9 |
 | 15 | Keyboard only | The whole work with keys in both views: order, no traps, where the focus goes after a run, a menu, a dialog | F20, F21, F22, F23 |
 | 16 | Screen reader and axe | Names and roles of every control in every state, live messages, axe in every state; target sizes, focus ring, text spacing | F25, F26, F27, F28 |
-| 17 | Help boxes, Single | Every help box opened at five window sizes: inside the window, not over its control, filled in, its picture loaded | Nothing |
+| 17 | Help boxes, Single | Every help box opened at five window sizes: inside the window, not over its control, filled in, its picture loaded | F33 |
 | 18 | Help boxes, Dual | The same for Dual: each box names its own coil set; the plain texts when `tips.json` is missing | Nothing |
 | 19 | The preview | Zoom about the mouse, moving, Fit, every layer, coil and set button, the silkscreen, the rotor angle, Measure with its 256 lines, Pictures, full screen, very small and very large boards | F30, F32 |
 | 20 | Downloads | The zip against the folder of a desktop run; one board alone; every file of All Files | Nothing |
@@ -74,6 +74,7 @@ file was written.
 | F30 | 19 | A layer or coil button that was clicked kept its layer brought out after the mouse had left: the click had left the focus on the button | Only a focus reached with the keys brings a layer out | `preview.spec.js` "layers, vias and coils …" |
 | F31 | 23 | Inside the blog's frame the browser refused the `autofocus` of the No button of Sure / No and wrote an error in its console on every visit | The page gives No the focus itself when the question opens | `embed.spec.js` (nothing in the console), `keyboard.spec.js` (the question starts on No) |
 | F32 | 19 | A `Parameters.txt` that holds its value lists but not the copies of the parameter files (the reference boards of `regression/` are kept that way) gave "No parameter values found" | The value lists are read | `test_bridge.py` `test_a_record_without_its_copies_comes_back_from_its_value_lists` |
+| F33 | 17 | A help box taller than its room (at 200 % zoom, the boxes with a picture) scrolls inside: with the mouse wheel only | Alt + ↓ and Alt + ↑ scroll it, and a box opened with the keyboard says so | `tips.spec.js` "a box taller than its room, opened with the keyboard …" |
 
 The four faults the owner reported while round 13 was being prepared (the search box out of line, the two button
 rows of the Dual preview broken, the results of the two sets not in columns, the silkscreen buttons) were fixed the
@@ -101,7 +102,6 @@ are listed for `main`.
 | During a second run the counts line still shows the result before | It changes when the run ends; the board is marked as old meanwhile |
 | A link longer than 20000 characters is ignored without a word | A link the page made is never that long |
 | A help box can cover the control below the one it belongs to | It closes when the mouse or the focus leaves |
-| A help box taller than its room scrolls inside, with the mouse wheel only | This happens at 200 % zoom and more, mostly for the five boxes with a picture; the keyboard cannot scroll it |
 | On a board several hundred millimetres wide the copper is thinner than a pixel at Fit, and faint | Traces are drawn at their true width at every zoom; the wheel shows them |
 | The points of `WCAG-EM.md`, section 5 | They are the owner's choices |
 

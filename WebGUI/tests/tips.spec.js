@@ -259,6 +259,33 @@ for (const [w, h] of [[640, 512], [320, 256]]) {
   });
 }
 
+test("a box taller than its room, opened with the keyboard: it names its keys, and Alt + the arrows scroll it", async ({ app, page }) => {
+  await page.setViewportSize({ width: 640, height: 512 });
+  await app.open();
+  await page.click('#basic-tabs [data-key="RX"]');
+  const dot = app.field("INSIDE_RADIUS_MM").locator(".info-dot"), pop = page.locator("#popover");
+  // with the mouse the box has no line about keys
+  await openTip(page, dot);
+  expect(await pop.evaluate((p) => p.scrollHeight > p.clientHeight + 1), "the box with its picture is taller than a 512 px window").toBe(true);
+  await expect(pop.locator(".tip-scroll")).toHaveCount(0);
+  await closeTip(page);
+  // with the keyboard it has, and the keys work
+  await dot.focus();
+  await page.keyboard.press("Shift+Tab"); await page.keyboard.press("Tab");
+  await expect(dot).toBeFocused();
+  await expect(pop).toBeVisible();
+  await expect(pop.locator(".tip-scroll")).toHaveText(/Alt\s*\+\s*↓\s*scrolls this box/);
+  await insideWindow(page, pop, "640 x 512, by the keyboard");
+  await page.keyboard.press("Alt+ArrowDown"); await page.keyboard.press("Alt+ArrowDown");
+  expect(await pop.evaluate((p) => p.scrollTop)).toBeGreaterThan(60);
+  await expect(pop).toBeVisible();
+  await expect(dot).toBeFocused();
+  for (let i = 0; i < 12; i++) await page.keyboard.press("Alt+ArrowUp");
+  expect(await pop.evaluate((p) => p.scrollTop)).toBe(0);
+  await page.keyboard.press("Escape");
+  await expect(pop).toBeHidden();
+});
+
 test("axe finds nothing with a tip open", async ({ app, page }) => {
   await app.open();
   const found = [];

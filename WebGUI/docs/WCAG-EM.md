@@ -69,7 +69,7 @@ Of the 55 criteria of levels A and AA: met 42, met in part 3 (1.4.11, 2.2.1, 2.5
 
 | # | Criterion | Level | Result | How |
 |---|---|---|---|---|
-| 2.1.1 | Keyboard | A | Met | Everything can be done with keys: `keyboard.spec.js`. On the drawing the arrow keys move the board, + and - zoom, 0 fits it; with Measure on the arrows move a cross and Enter sets a point. What the mouse shows by hovering (a layer or a coil brought out, a help box) the focus shows too. |
+| 2.1.1 | Keyboard | A | Met | Everything can be done with keys: `keyboard.spec.js`. On the drawing the arrow keys move the board, + and - zoom, 0 fits it; with Measure on the arrows move a cross and Enter sets a point. What the mouse shows by hovering (a layer or a coil brought out, a help box) the focus shows too. A help box taller than its room scrolls with Alt + ↓ and Alt + ↑, and says so. |
 | 2.1.2 | No keyboard trap | A | Met | Tab goes through the page and comes round again; a dialog closes with Esc and hands the focus back. |
 | 2.1.4 | Character key shortcuts | A | Met | S and Z work only while Measure is on, which its button switches off, and never while a box is typed in. +, - and 0 work only while the drawing has the focus. |
 | 2.2.1 | Timing adjustable | A | Met in part | Nothing has a time limit. The short message at the bottom goes away by itself: it stays at least 2.6 s, longer for a longer text (70 ms a letter), and as long as the mouse rests on it, and a screen reader is told it (`role="status"`). What matters for a board never stands only there: findings are in Checks, a refused value under its setting. A reader who needs more time than that for a message about an import has no way to ask for it. |
