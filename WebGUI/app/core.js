@@ -178,7 +178,7 @@ export function closeOnOutsideClick(dialog) {
 /* A row of choices of which one is on (role radiogroup or tablist): the arrow keys move between them and choose, Tab
    enters and leaves the row once.  `pick(button)` is called for a click and for an arrow key. */
 export function wireChoices(box, pick) {
-  const items = () => [...box.querySelectorAll("button:not(:disabled)")];
+  const items = () => [...box.querySelectorAll("button:not(:disabled):not([hidden])")];
   box.addEventListener("click", (e) => { const b = e.target.closest("button"); if (b && box.contains(b) && !b.disabled) pick(b); });
   box.addEventListener("keydown", (e) => {
     const list = items(), i = list.indexOf(document.activeElement);
@@ -222,6 +222,7 @@ export function wireMenu(dd, pick) {
     closeMenus(dd);
     dd.classList.toggle("open", on);
     btn.setAttribute("aria-expanded", String(on));
+    if (on) document.dispatchEvent(new Event("menuopen"));     // a help box that is open puts itself away
     if (on && focusItem) (items().find((i) => i.classList.contains("on")) || items()[0]).focus();
   }
   btn.addEventListener("click", (e) => { e.stopPropagation(); open(!dd.classList.contains("open"), e.detail === 0); });

@@ -11,6 +11,7 @@ export function audit() {
   const out = [], NEAR = 0.75;
   const R = (e) => e.getBoundingClientRect();
   const shown = (e) => e.offsetParent !== null && R(e).width > 0 && R(e).height > 0
+    && getComputedStyle(e).clipPath !== "inset(50%)"                                           // kept for screen readers only, as .sr-only
     && (e.checkVisibility ? e.checkVisibility({ opacityProperty: true, visibilityProperty: true }) : getComputedStyle(e).visibility !== "hidden");   // a closed menu is not shown
   const words = (e) => (e.getAttribute("aria-label") || e.textContent || e.value || e.placeholder || "").trim().replace(/\s+/g, " ").slice(0, 24);
   const name = (e) => (e.id ? "#" + e.id : (e.dataset.name || e.dataset.tipId || e.dataset.key || e.dataset.help || String(e.className).split(" ")[0] || e.tagName.toLowerCase())) + (words(e) ? ` "${words(e)}"` : "");
