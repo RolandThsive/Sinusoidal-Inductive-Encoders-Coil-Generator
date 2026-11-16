@@ -10,5 +10,5 @@ numpy==2.5.4; python_version >= "3.12"
 # The tools of the checks the CI runs: lint, coverage and the security audit.  The generators and the regression
 # suites do not use them (the suites need only the standard library's unittest).
 ruff==0.17.4
-coverage==7.17.2
+coverage==7.17.3
 pip-audit==2.10.1
