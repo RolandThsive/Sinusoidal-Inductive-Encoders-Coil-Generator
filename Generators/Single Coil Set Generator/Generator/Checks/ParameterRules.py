@@ -87,7 +87,7 @@ _add(_B, "TANK_CAP_SERIES", "choice", values=("e6", "e12", "e24"), ci=True, opti
 _add(_B, "GENERATOR_MODE", "choice", values=("normal", "strict"), ci=True, optional=True, default="normal")
 
 # ---- RX_Parameters.py
-_add(_RX, "LOOPS", "int", lo=1, hi=16)
+_add(_RX, "LOOPS", "int", lo=1, hi=32)
 _add(_RX, "INSIDE_RADIUS_MM", "num_or_none", lo=0, lo_ex=True)
 _add(_RX, "OUTSIDE_RADIUS_MM", "num_or_none", lo=0, lo_ex=True)
 _add(_RX, "RX_R_BASE_MM", "num_or_none", optional=True, default=None, lo=0, lo_ex=True)

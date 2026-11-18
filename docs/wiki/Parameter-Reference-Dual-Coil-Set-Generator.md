@@ -121,7 +121,7 @@ vias and clearance.
 
 | Name | Set 1 | Set 2 | Meaning |
 |---|---|---|---|
-| `LOOPS` | 1 | 16 | Electrical periods per turn, 1 to 16. Set 1 is the coarse, absolute track; set 2 the fine one. Set 1's angle error must stay below 180 / `LOOPS` of set 2 degrees |
+| `LOOPS` | 1 | 16 | Electrical periods per turn, 1 to 32 (32 needs the set's RX band to start at about r = 24 mm or more). Set 1 is the coarse, absolute track; set 2 the fine one. Set 1's angle error must stay below 180 / `LOOPS` of set 2 degrees |
 | `INSIDE_RADIUS_MM`, `OUTSIDE_RADIUS_MM` | 8.45, 11.7 | 18.0, 23.9 | The band as a radii pair (with `RX_R_BASE_MM`, `RX_A_MM` = None) |
 | `RX_R_BASE_MM`, `RX_A_MM` | None, None | None, None | The band as centre and half width: `RX_R_BASE_MM ± RX_A_MM` (with the radii pair = None). All four None: the generator places the band ([Dual Layout](Dual-Layout.md)) |
 | `RX_TRACE_WIDTH_MM` | 0.15 | 0.15 | RX trace width |

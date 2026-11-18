@@ -6,7 +6,7 @@
 | Programming Language | Pure Python 3 with numpy |
 | Generators | Single Coil Set Generator: one coil set on a board. Dual Coil Set Generator: two coil sets (a coarse inner track and a fine outer track, each with its own IC) on one 4-layer board, and one rotor disc with two rings, built with the Single Coil Set Generator's own code |
 | Output | Stator and rotor as `.kicad_pcb` files, a full record of every value used, and two SVG pictures of the boards: a Representative one to look at and an Actual one with the copper 1:1 in mm (see [Output Pictures](Output-Pictures.md)) |
-| RX Loops | 1 to 16 electrical periods per mechanical turn |
+| RX Loops | 1 to 32 electrical periods per mechanical turn |
 | RX Phases | Four phases only: SIN and COS pairs, each with a positive and a negative half |
 | RX Profiles | `equal_area`, `cosine_r` (limaçon); a field-compensated profile is research underway |
 | RX Sub-Coils | 1 to 3 per coil, mainly for miniature 1-loop coils |
@@ -42,6 +42,11 @@ fitted between them) and `RX_TAB_LENGTH_MM = 5` (this TX needs fingers of at lea
 | 1 | 12 mm | 1–2 mm | 1 mm up to (outer radius − 10 mm) | 12 mm | RX band width |
 | 4 | 13 mm | 2 mm | 2 mm up to (outer radius − 10 mm) | 30 mm | RX band width and tip vias; with fingers on every tip, a TX window under a finger would reach the TX terminal on smaller boards |
 | 16 | 26 mm | 12 mm | 12 mm up to 14 mm on a 27 mm board, up to (outer radius − 11 mm) on boards of 28 to 33 mm, and up to (outer radius − 10 mm) from 34 mm | none up to 40 mm | Tip vias crowd at small bore radii: a quarter loop needs at least 1.2 mm of arc at the RX inner edge |
+
+32 loops (not part of the grid above): the tip vias need twice the radius of 16 loops. Measured on the regression
+boards: with the settings above and `RX_TABS = "single"`, an RX band of 32 ... 40 mm (board edges 30 / 46 mm) builds
+without a warning; with 0.6 / 0.3 mm vias and 0.15 mm traces and clearance on 4 layers the RX band can start at
+about 24 mm. Fingers on every tip (`RX_TABS = "all"`) do not fit at 32 loops on these boards.
 
 All radii are board edges (`INNER_EDGE_RADIUS_MM`, `OUTER_EDGE_RADIUS_MM`). Most boards in the
 pictures of this wiki have board edges of 30 and 50 mm. Smaller vias, fewer TX turns or

@@ -9,7 +9,7 @@ Units: millimetres, degrees.  Nothing in this file is computed - edit values onl
 Layers are numbered 1 = Top, 2 = Inner 1, 3 = Inner 2, 4 = Bottom (PCB_LAYERS, Dual_Board_Parameters.py).
 """
 
-# LOOPS = electrical periods per mechanical turn (1 ... 16).  The outer set is the fine one: its LOOPS
+# LOOPS = electrical periods per mechanical turn (1 ... 32).  The outer set is the fine one: its LOOPS
 # periods set the resolution, and the inner set's absolute angle says which period the rotor is in.  The inner
 # set's angle error must stay below half an outer period (180 / LOOPS mechanical degrees).
 LOOPS = 16
