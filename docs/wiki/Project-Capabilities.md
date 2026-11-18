@@ -46,7 +46,10 @@ fitted between them) and `RX_TAB_LENGTH_MM = 5` (this TX needs fingers of at lea
 32 loops (not part of the grid above): the tip vias need twice the radius of 16 loops. Measured on the regression
 boards: with the settings above and `RX_TABS = "single"`, an RX band of 32 ... 40 mm (board edges 30 / 46 mm) builds
 without a warning; with 0.6 / 0.3 mm vias and 0.15 mm traces and clearance on 4 layers the RX band can start at
-about 24 mm. Fingers on every tip (`RX_TABS = "all"`) do not fit at 32 loops on these boards.
+about 30 mm (at 26 mm a tip via beside the finger keeps only 0.085 mm, which the record warns about), and set 2 of
+the Dual Coil Set Generator at about 24 mm. Fingers on every tip (`RX_TABS = "all"`) do not fit at 32 loops on these
+boards. The lead-cut silkscreen usually finds no room for a two-via break on a 32-loop single board; it says so for
+each RX coil ("no spot on ...") and that coil is cut by hand.
 
 All radii are board edges (`INNER_EDGE_RADIUS_MM`, `OUTER_EDGE_RADIUS_MM`). Most boards in the
 pictures of this wiki have board edges of 30 and 50 mm. Smaller vias, fewer TX turns or

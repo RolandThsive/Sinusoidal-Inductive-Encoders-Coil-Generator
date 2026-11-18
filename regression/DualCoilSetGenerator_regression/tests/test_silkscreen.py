@@ -49,10 +49,10 @@ class DrawnIntoTheFile(unittest.TestCase):
                 if not res.silk_on():
                     continue
                 if case.endswith("-min-radius"):
-                    self.assertTrue(res.has(r"set 2: no spot on"), "the run says that set 2's coils got no break")
-                    self.assertFalse(res.has(r"set 1: no spot on"), "set 1 still gets its breaks")
+                    self.assertRegex(res.record, r"set 2: no spot on", "the run says that set 2's coils got no break")
+                    self.assertNotRegex(res.record, r"set 1: no spot on", "set 1 still gets its breaks")
                     continue
-                self.assertFalse(res.has("no spot on"), "every coil got a break")
+                self.assertNotIn("no spot on", res.record, "every coil got a break")
 
     def test_breaks_near_each_sets_terminal(self):
         """Set 1's RX breaks lie within SILKSCREEN_SEARCH_SPAN_DEG of TERMINAL_1_DEG (the left), set 2's of

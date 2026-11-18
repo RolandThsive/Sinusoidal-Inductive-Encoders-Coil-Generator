@@ -69,13 +69,13 @@ VIA_TYPE = "through"
 
 # ---- board outline (Edge.Cuts circles) --------------------------------------
 INNER_EDGE_INSET_MM   = 1.2         # centre hole radius = RX band start - this ...
-INNER_EDGE_RADIUS_MM  = 24.0        # ... or set a fixed radius here: the hole gets exactly this radius.
+INNER_EDGE_RADIUS_MM  = 28.0        # ... or set a fixed radius here: the hole gets exactly this radius.
                                     # RX band given (RX_Parameters.py): both are used as given - the hole
                                     #   must be at least INNER_EDGE_INSET_MM inside the band.
                                     # RX band None: the band starts INNER_EDGE_INSET_MM outside the hole.
                                     # None = the formula above.
 OUTER_EDGE_OFFSET_MM  = 4.0         # outer edge = RX band end + this ...
-OUTER_EDGE_RADIUS_MM  = 38.0        # ... or set a fixed radius here: the board edge gets exactly this radius.
+OUTER_EDGE_RADIUS_MM  = 42.0        # ... or set a fixed radius here: the board edge gets exactly this radius.
                                     # RX band given (RX_Parameters.py): both are used as given - the edge
                                     #   must leave at least the room the rule below needs.
                                     # RX band None: the band ends where the rule below would have put this

@@ -41,6 +41,6 @@ ROTOR_AUTO_COPPER_LAYERS    = ["F.Cu"]   # layer(s) carrying this ring's sectors
 ROTOR_CUSTOM_SECTORS            = 1
 ROTOR_CUSTOM_DUTY               = 0.5
 ROTOR_CUSTOM_START_ANGLE_DEG    = 0.0
-ROTOR_CUSTOM_INNER_RADIUS_MM    = 20.0   # the values here are what "according_to_stator" computes for the default board
+ROTOR_CUSTOM_INNER_RADIUS_MM    = 20.2   # the values here are what "according_to_stator" computes for the default board
 ROTOR_CUSTOM_OUTER_RADIUS_MM    = 24.5
 ROTOR_CUSTOM_COPPER_LAYERS      = ["F.Cu"]

@@ -424,6 +424,26 @@
   "Dual Coil Set Generator/Board105-layout-09-rx2-vias-100-deg/Stator.kicad_pcb": {
    "track_dangling (warning)": 4
   },
+  "Dual Coil Set Generator/Board106-rx2-32-loops/Rotor.kicad_pcb": {},
+  "Dual Coil Set Generator/Board106-rx2-32-loops/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Coil Set Generator/Board107-rx2-32-loops-2-layer/Rotor.kicad_pcb": {},
+  "Dual Coil Set Generator/Board107-rx2-32-loops-2-layer/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Coil Set Generator/Board108-rx2-32-loops-min-radius/Rotor.kicad_pcb": {},
+  "Dual Coil Set Generator/Board108-rx2-32-loops-min-radius/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Coil Set Generator/Board109-rx2-32-loops-R146-custom-rotor/Rotor.kicad_pcb": {},
+  "Dual Coil Set Generator/Board109-rx2-32-loops-R146-custom-rotor/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Coil Set Generator/Board110-rx2-32-loops-parallel-tx/Rotor.kicad_pcb": {},
+  "Dual Coil Set Generator/Board110-rx2-32-loops-parallel-tx/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
   "Single Coil Set Generator fresh run/Rotor.kicad_pcb": {},
   "Single Coil Set Generator fresh run/Stator.kicad_pcb": {
    "track_dangling (warning)": 2
@@ -842,6 +862,18 @@
   },
   "Single Coil Set Generator/Board104-silkscreen-loops-4-four-layer/Rotor.kicad_pcb": {},
   "Single Coil Set Generator/Board104-silkscreen-loops-4-four-layer/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Coil Set Generator/Board105-loops-32/Rotor.kicad_pcb": {},
+  "Single Coil Set Generator/Board105-loops-32/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Coil Set Generator/Board106-loops-32-four-layer-thin-traces/Rotor.kicad_pcb": {},
+  "Single Coil Set Generator/Board106-loops-32-four-layer-thin-traces/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Coil Set Generator/Board107-loops-32-cosine-r-no-fingers/Rotor.kicad_pcb": {},
+  "Single Coil Set Generator/Board107-loops-32-cosine-r-no-fingers/Stator.kicad_pcb": {
    "track_dangling (warning)": 2
   }
  },
@@ -1270,6 +1302,26 @@
   "Dual Coil Set Generator/Board105-layout-09-rx2-vias-100-deg/Stator.kicad_pcb": {
    "track_dangling (warning)": 4
   },
+  "Dual Coil Set Generator/Board106-rx2-32-loops/Rotor.kicad_pcb": {},
+  "Dual Coil Set Generator/Board106-rx2-32-loops/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Coil Set Generator/Board107-rx2-32-loops-2-layer/Rotor.kicad_pcb": {},
+  "Dual Coil Set Generator/Board107-rx2-32-loops-2-layer/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Coil Set Generator/Board108-rx2-32-loops-min-radius/Rotor.kicad_pcb": {},
+  "Dual Coil Set Generator/Board108-rx2-32-loops-min-radius/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Coil Set Generator/Board109-rx2-32-loops-R146-custom-rotor/Rotor.kicad_pcb": {},
+  "Dual Coil Set Generator/Board109-rx2-32-loops-R146-custom-rotor/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Coil Set Generator/Board110-rx2-32-loops-parallel-tx/Rotor.kicad_pcb": {},
+  "Dual Coil Set Generator/Board110-rx2-32-loops-parallel-tx/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
   "Single Coil Set Generator fresh run/Rotor.kicad_pcb": {},
   "Single Coil Set Generator fresh run/Stator.kicad_pcb": {
    "track_dangling (warning)": 2
@@ -1688,6 +1740,18 @@
   },
   "Single Coil Set Generator/Board104-silkscreen-loops-4-four-layer/Rotor.kicad_pcb": {},
   "Single Coil Set Generator/Board104-silkscreen-loops-4-four-layer/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Coil Set Generator/Board105-loops-32/Rotor.kicad_pcb": {},
+  "Single Coil Set Generator/Board105-loops-32/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Coil Set Generator/Board106-loops-32-four-layer-thin-traces/Rotor.kicad_pcb": {},
+  "Single Coil Set Generator/Board106-loops-32-four-layer-thin-traces/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Coil Set Generator/Board107-loops-32-cosine-r-no-fingers/Rotor.kicad_pcb": {},
+  "Single Coil Set Generator/Board107-loops-32-cosine-r-no-fingers/Stator.kicad_pcb": {
    "track_dangling (warning)": 2
   }
  },
@@ -2116,6 +2180,26 @@
   "Dual Coil Set Generator/Board105-layout-09-rx2-vias-100-deg/Stator.kicad_pcb": {
    "track_dangling (warning)": 4
   },
+  "Dual Coil Set Generator/Board106-rx2-32-loops/Rotor.kicad_pcb": {},
+  "Dual Coil Set Generator/Board106-rx2-32-loops/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Coil Set Generator/Board107-rx2-32-loops-2-layer/Rotor.kicad_pcb": {},
+  "Dual Coil Set Generator/Board107-rx2-32-loops-2-layer/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Coil Set Generator/Board108-rx2-32-loops-min-radius/Rotor.kicad_pcb": {},
+  "Dual Coil Set Generator/Board108-rx2-32-loops-min-radius/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Coil Set Generator/Board109-rx2-32-loops-R146-custom-rotor/Rotor.kicad_pcb": {},
+  "Dual Coil Set Generator/Board109-rx2-32-loops-R146-custom-rotor/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
+  "Dual Coil Set Generator/Board110-rx2-32-loops-parallel-tx/Rotor.kicad_pcb": {},
+  "Dual Coil Set Generator/Board110-rx2-32-loops-parallel-tx/Stator.kicad_pcb": {
+   "track_dangling (warning)": 4
+  },
   "Single Coil Set Generator fresh run/Rotor.kicad_pcb": {},
   "Single Coil Set Generator fresh run/Stator.kicad_pcb": {
    "track_dangling (warning)": 2
@@ -2534,6 +2618,18 @@
   },
   "Single Coil Set Generator/Board104-silkscreen-loops-4-four-layer/Rotor.kicad_pcb": {},
   "Single Coil Set Generator/Board104-silkscreen-loops-4-four-layer/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Coil Set Generator/Board105-loops-32/Rotor.kicad_pcb": {},
+  "Single Coil Set Generator/Board105-loops-32/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Coil Set Generator/Board106-loops-32-four-layer-thin-traces/Rotor.kicad_pcb": {},
+  "Single Coil Set Generator/Board106-loops-32-four-layer-thin-traces/Stator.kicad_pcb": {
+   "track_dangling (warning)": 2
+  },
+  "Single Coil Set Generator/Board107-loops-32-cosine-r-no-fingers/Rotor.kicad_pcb": {},
+  "Single Coil Set Generator/Board107-loops-32-cosine-r-no-fingers/Stator.kicad_pcb": {
    "track_dangling (warning)": 2
   }
  }

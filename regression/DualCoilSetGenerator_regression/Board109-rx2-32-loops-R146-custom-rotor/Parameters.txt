@@ -16,7 +16,7 @@ layout: both RX bands given, at least MIN_CLEARANCE_MM apart; bore and outline f
 
 WARNINGS OF THIS RUN
 --------------------
-  ROTOR_CUSTOM_INNER_RADIUS_MM conflicts with ROTOR_CUSTOM_OUTER_RADIUS_MM, INSIDE_RADIUS_MM and OUTSIDE_RADIUS_MM: set 1: the rotor copper (20 ... 24.5 mm) does not cover the whole RX band (20.5 ... 25.9 mm): the signal drops and distorts near the uncovered edge
+  ROTOR_CUSTOM_INNER_RADIUS_MM conflicts with ROTOR_CUSTOM_OUTER_RADIUS_MM, INSIDE_RADIUS_MM and OUTSIDE_RADIUS_MM: set 1: the rotor copper (20.2 ... 24.5 mm) does not cover the whole RX band (20.5 ... 25.9 mm): the signal drops and distorts near the uncovered edge
   ROTOR_CUSTOM_INNER_RADIUS_MM conflicts with ROTOR_CUSTOM_OUTER_RADIUS_MM, INSIDE_RADIUS_MM and OUTSIDE_RADIUS_MM: set 2: the rotor copper (27.8 ... 37 mm) does not cover the whole RX band (28 ... 38 mm): the signal drops and distorts near the uncovered edge
   ROTOR_2_TO_RX1_MM conflicts with ROTOR_CUSTOM_INNER_RADIUS_MM: ring 2 starts at r = 27.80 mm and set 1's RX copper ends at r = 26.20 mm: 1.60 mm apart, less than ROTOR_2_TO_RX1_MM (2 mm). The fine target adds a ripple of 32 per turn to the coarse signal. Shorten ring 2 (ROTOR_CUSTOM_INNER_RADIUS_MM in Dual_Rotor2_Parameters.py), widen TRACK_GAP_MM, or move the RX1 band in
 
@@ -66,8 +66,8 @@ Dual rotor (custom): ring 1 1 sector(s), ring 2 32 sector(s); bore r = 19.5, out
   both rings start at their own set's RX pattern zero (ROTOR_START_ANGLE_ZERO = "rx_zero"), so the coarse and the fine track read 0 at the same shaft angle and turn the same way (no nominal zero shift: the coarse-to-fine decision tolerates at most +-180/LOOPS of set 2 degrees of it); the firmware still has to calibrate the residual at the nominal air gap
 Ring 1, sector start measured from set 1's RX pattern zero (45.00 deg, ROTOR_START_ANGLE_ZERO = "rx_zero"):
   Rotor (custom): 1 sector(s), metal fraction 0.5 (180.00 deg mechanical each)
-    copper r = 20.00 ... 24.50 mm on F.Cu, 174 chords per arc
-    RX band r = 20.5 ... 25.9 mm: the copper reaches 0.50 mm past the band at the inner edge and 1.40 mm short of the band at the outer edge
+    copper r = 20.20 ... 24.50 mm on F.Cu, 174 chords per arc
+    RX band r = 20.5 ... 25.9 mm: the copper reaches 0.30 mm past the band at the inner edge and 1.40 mm short of the band at the outer edge
     TX turns r = 26.625 ... 27.125 mm (copper): the rotor copper ends 2.12 mm inside the TX ring (it does not cover the TX turns)
     solder mask: stays over the copper (ROTOR_SOLDER_MASK_EXPANSION_MM = -1), no mask openings
     outline r = 39.0, bore r = 19.5
@@ -86,13 +86,13 @@ Ring 2, sector start measured from set 2's RX pattern zero (352.97 deg, ROTOR_ST
 
 SET 1: ELECTRICAL ESTIMATE  (receiver IC IPS2550; model only, not checked on hardware)
   TX coil     L = 2.098 uH with the rotor away
-              L = 1.893 uH with the rotor at the 1 mm air gap (-9.8 %: an upper estimate of the drop)
+              L = 1.900 uH with the rotor at the 1 mm air gap (-9.4 %: an upper estimate of the drop)
               R = 2.22 ohm DC (4 turn(s), 0.68 m of 0.15 mm x 35 um copper), up to about 2x that at 3 MHz
-  tank        for 3 MHz with the rotor in place: 2 x 2.97 nF, from TX1 and from TX2 to ground (= 1.49 nF across the coil)
-              nearest standard C0G (E12): 2 x 2.7 nF -> 3.15 MHz (2.99 rotor away);  2 x 3.3 nF -> 2.85 MHz (2.70 rotor away)
+  tank        for 3 MHz with the rotor in place: 2 x 2.96 nF, from TX1 and from TX2 to ground (= 1.48 nF across the coil)
+              nearest standard C0G (E12): 2 x 2.7 nF -> 3.14 MHz (2.99 rotor away);  2 x 3.3 nF -> 2.84 MHz (2.70 rotor away)
               oscillator with the exact capacitors: 2.85 MHz with the rotor away, 3.00 MHz with it  (IPS2550 range 2 ... 5.6 MHz: OK)
               (the true frequency with the rotor lies between the two: the drop is an upper estimate)
-              Q = 8 ... 16, parallel resistance 287 ohm ... 573 ohm  (IPS2550 needs >= 250 ohm: OK)
+              Q = 8 ... 16, parallel resistance 289 ohm ... 578 ohm  (IPS2550 needs >= 250 ohm: OK)
   (each set is estimated on its own: the other set's TX ring and rotor ring are not in the estimate)
 
 SET 2: ELECTRICAL ESTIMATE  (receiver IC IPS2550; model only, not checked on hardware)
@@ -264,7 +264,7 @@ PARAMETER VALUES USED
   ROTOR_CUSTOM_SECTORS          = 1
   ROTOR_CUSTOM_DUTY             = 0.5
   ROTOR_CUSTOM_START_ANGLE_DEG  = 0.0
-  ROTOR_CUSTOM_INNER_RADIUS_MM  = 20.0
+  ROTOR_CUSTOM_INNER_RADIUS_MM  = 20.2
   ROTOR_CUSTOM_OUTER_RADIUS_MM  = 24.5
   ROTOR_CUSTOM_COPPER_LAYERS    = ['F.Cu']
 
@@ -382,7 +382,7 @@ THE TWO SETS AS HANDED TO THE SINGLE GENERATOR (its names)
   ROTOR_CUSTOM_SECTORS           = 1
   ROTOR_CUSTOM_DUTY              = 0.5
   ROTOR_CUSTOM_START_ANGLE_DEG   = 0.0
-  ROTOR_CUSTOM_INNER_RADIUS_MM   = 20.0
+  ROTOR_CUSTOM_INNER_RADIUS_MM   = 20.2
   ROTOR_CUSTOM_OUTER_RADIUS_MM   = 24.5
   ROTOR_CUSTOM_COPPER_LAYERS     = ['F.Cu']
   ROTOR_CUSTOM_OUTLINE_RADIUS_MM = 39.0

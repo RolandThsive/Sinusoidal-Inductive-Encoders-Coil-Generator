@@ -64,7 +64,7 @@ under construction on the [`analyser_and_optimizer` branch](https://github.com/R
 
 | Name | Default | Range | Meaning |
 |---|---|---|---|
-| `LOOPS` | 1 | 1 to 32 | Electrical periods per mechanical turn, and the number of rotor sectors. Unique range = 360° / `LOOPS`. 32 loops need an RX band from about r = 24 mm (0.6 mm vias, 0.15 mm traces and clearance) or 32 mm (the 0.8 mm / 0.2 mm defaults). |
+| `LOOPS` | 1 | 1 to 32 | Electrical periods per mechanical turn, and the number of rotor sectors. Unique range = 360° / `LOOPS`. 32 loops need an RX band from about r = 30 mm (4 layers, 0.6 mm vias, 0.15 mm traces and clearance) or 32 mm (the 0.8 mm / 0.2 mm defaults). |
 | `INSIDE_RADIUS_MM`, `OUTSIDE_RADIUS_MM` | 16.2, 21.4 | > 0 or None | The inner and outer radius of the RX band (centre line of the traces). With all four band values None, the band is fitted to the board edges: it starts `INNER_EDGE_INSET_MM` outside the centre hole and ends where the TX turns, the TX tail, the bridging fingers and the margins leave room. |
 | `RX_R_BASE_MM`, `RX_A_MM` | None, None | > 0 or None | The band by its centre (`r_base`) and swing (`A`): band = `r_base − A` to `r_base + A`. Signal grows about with `r_base × A`. |
 | `RX_TRACE_WIDTH_MM` | 0.2 | > 0 | RX trace width. |
