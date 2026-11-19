@@ -39,9 +39,9 @@ would join the two coils into one net.
 
 ### 16.2.1 Loops
 
-`LOOPS` is set for each set, from 1 to 16. The inner set is the coarse one: with 1 loop it gives a true 0 to 360°
+`LOOPS` is set for each set, from 1 to 32. The inner set is the coarse one: with 1 loop it gives a true 0 to 360°
 output that tells the outer set's periods apart. The outer set's loops set the resolution. The coarse angle error must
-stay below half an outer period, which is 180 / `LOOPS` of set 2 mechanical degrees (±11.25° for 16 loops).
+stay below half an outer period, which is 180 / `LOOPS` of set 2 mechanical degrees (±11.25° for 16 loops, ±5.625° for 32).
 
 ![Dual Stator 1: Outer Set Loops](https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/images/dual_stator_1_loops.png)
 

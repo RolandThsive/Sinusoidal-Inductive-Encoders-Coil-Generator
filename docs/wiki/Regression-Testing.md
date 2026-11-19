@@ -102,9 +102,10 @@ holds the two to the same values on every reference board, so each checks the ot
 
 ## 30.4 On Every Pull Request (CI)
 
-The workflow `.github/workflows/ci.yml` runs on every pull request, after every push to `main` and every night (so a new
-Python, NumPy or runner image that breaks the generators is noticed even while no one is changing them). A new push to a
-pull request cancels the run still going for it.
+The workflow `.github/workflows/ci.yml` runs on every pull request into `main`, after every push to `main` and every night
+(so a new Python, NumPy or runner image that breaks the generators is noticed even while no one is changing them). A new
+push to a pull request cancels the run still going for it. Pull requests into the web tool's branch `WebUI` run the web
+tool's own tests instead ([Web Tool](Web-Tool.md)).
 
 | Check | What it runs | What it catches |
 |---|---|---|
@@ -117,7 +118,8 @@ pull request cancels the run still going for it.
 
 Two more workflows check the dependencies and the code's security: `security.yml` (pip-audit on the pins, and GitHub's
 dependency review on pull requests) and `codeql.yml` (GitHub's CodeQL analysis). Dependabot (`.github/dependabot.yml`)
-proposes updates of NumPy, the CI tools and the actions once a week. Every action is pinned to a full commit hash and
+proposes updates of NumPy, the CI tools and the actions once a week, and of the web tool's test tools on its working
+branch. Every action is pinned to a full commit hash and
 the workflows get a read-only token.
 
 The same checks run locally:

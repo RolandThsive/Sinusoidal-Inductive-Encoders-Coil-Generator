@@ -37,6 +37,23 @@ class DrawnIntoTheFile(unittest.TestCase):
         self.assertFalse(res.has("no free place was found"), "every name found a free place on the default board")
         self.assertFalse(res.has("no spot on"), "every coil got a break")
 
+    def test_32_loop_boards_get_every_rx_break(self):
+        """At 32 loops the RX traces of the four phases are packed tightest: every 32-loop board of the run still gets
+        a break on each RX coil, in both sets (the TX end's via sites depend on the room at the board edge, not on the
+        loops).  On the board whose fine band starts at the smallest radius 32 loops build at (-min-radius) the four
+        phases leave no room for two through vias side by side anywhere in set 2's band: there the run must say so
+        (and the other set still gets its marks)."""
+        for case in [n for n in H.BOARDS if "-32-loops" in n]:
+            with self.subTest(case=case):
+                res = H.board(case)
+                if not res.silk_on():
+                    continue
+                if case.endswith("-min-radius"):
+                    self.assertRegex(res.record, r"set 2: no spot on", "the run says that set 2's coils got no break")
+                    self.assertNotRegex(res.record, r"set 1: no spot on", "set 1 still gets its breaks")
+                    continue
+                self.assertNotIn("no spot on", res.record, "every coil got a break")
+
     def test_breaks_near_each_sets_terminal(self):
         """Set 1's RX breaks lie within SILKSCREEN_SEARCH_SPAN_DEG of TERMINAL_1_DEG (the left), set 2's of
         TERMINAL_2_DEG (the right): the record names the angles and the dots confirm them."""
@@ -79,9 +96,11 @@ class DrawnIntoTheFile(unittest.TestCase):
 
     def test_suggested_via_sites_have_room_on_every_layer(self):
         """A suggested via keeps the clearance from every other net and every via, with the larger via and clearance
-        of the two sets (the default board, and the board whose sets have vias and a clearance of their own)."""
-        boards = ["Board001-default"] + [n for n in H.BOARDS if n.endswith("-vias-per-set-blind-set1")]
+        of the two sets (the default board, the board whose sets have vias and a clearance of their own, and every
+        32-loop board of the run, where the RX traces are packed tightest)."""
+        boards = ["Board001-default"] + [n for n in H.S.boards(every=True) if n.endswith("-vias-per-set-blind-set1")]
         self.assertEqual(len(boards), 2)
+        boards += [n for n in H.BOARDS if "-32-loops" in n]
         for name in boards:
             res = H.board(name)
             b = res.stator

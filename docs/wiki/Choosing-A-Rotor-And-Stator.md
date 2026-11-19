@@ -30,7 +30,7 @@ period of the sensor lines up with one electrical period of the motor.
 default) and a fine outer set (16 loops by default) on one stator, each read by its own receiver IC, and one rotor disc
 with a ring for each set. The coarse angle says which period of the fine track the rotor is in, and the fine track gives
 the resolution. This works as long as the coarse angle error stays below half a fine period: 180 / `LOOPS` of the fine
-set mechanical degrees (±11.25° for 16 loops). Keep the coarse rotor ring away from the fine RX band, or it adds an
+set mechanical degrees (±11.25° for 16 loops, ±5.625° for 32). Keep the coarse rotor ring away from the fine RX band, or it adds an
 error once per turn that no fine-track calibration removes (see
 [Rotor Features - Dual Coil Set Generator](Rotor-Features-Dual-Coil-Set-Generator.md#173-distances-between-the-rings)).
 

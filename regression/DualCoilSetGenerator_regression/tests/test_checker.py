@@ -17,6 +17,13 @@ import harness as H
 from harness import BAND1, BAND2_CENTRE, NO_EDGES, DELETE, base, combination
 
 B1_CENTRE_TOO = {"RX1.RX_R_BASE_MM": 12.875, "RX1.RX_A_MM": 3.175}
+# set 2 at 32 loops on the R_146 fine band (RX2 28 ... 38 mm) with RX1 at 18.5 ... 23.9 mm (room for the automatic
+# rotor rings and their 2 mm gap), TX 2 + 3 turns per layer,
+# on Board001-default's other values
+LOOPS_32 = {"RX2.LOOPS": 32, "TX1.TX_TURNS": 2, "TX2.TX_TURNS": 3, "RX1.INSIDE_RADIUS_MM": 18.5, "RX1.OUTSIDE_RADIUS_MM": 23.9,
+            "RX2.INSIDE_RADIUS_MM": 28.0, "RX2.OUTSIDE_RADIUS_MM": 38.0, "BOARD.PAGE_SIZE_MM": (200, 200),
+            "ROTOR2.ROTOR_CUSTOM_SECTORS": 32}
+
 CASES = [
     # ------------------------------------------------------------------ the repository's own files
     ("default_passes", {}, 0, [r"layout: both RX bands given, at least MIN_CLEARANCE_MM apart; bore and outline from "
@@ -143,7 +150,14 @@ CASES = [
     ("err_tank_cap_series_e48", base(**{"BOARD.TANK_CAP_SERIES": "e48"}), 1, [r"ERROR", r"TANK_CAP_SERIES"], []),
     ("info_ic_name_missing_in_ic1", base(**{"IC1.IC_NAME": DELETE}), 0, [r"IC_NAME is not in Dual_IC1_Parameters.py", r"CHECK PASSED"], [r"ERROR"]),
     # --------------------------------------------------------- the Single Coil Set Generator's checks on each set
-    ("err_set2_loops_17", base(**{"RX2.LOOPS": 17}), 1, [r"ERROR.*set 2: LOOPS", r"Dual_RX2_Parameters\.py"], []),
+    ("err_set2_loops_33", base(**{"RX2.LOOPS": 33}), 1, [r"ERROR.*set 2: LOOPS = 33", r"Dual_RX2_Parameters\.py"], []),
+    ("err_set1_loops_33", base(**{"RX1.LOOPS": 33}), 1, [r"ERROR.*set 1: LOOPS = 33", r"Dual_RX1_Parameters\.py"], []),
+    # 32 loops on set 2: the R_146 bands (RX2 28 ... 38 mm) build clean; the BASE board's band (from r = 19 mm) is
+    # warned about before building and its tip vias then touch the other phases
+    ("set2_loops_32_accepted", LOOPS_32, 0, [r"CHECK PASSED"], [r"ERROR", r"LOOPS = 32", r"from other copper"]),
+    ("set2_loops_32_tight_band_warns_then_stops", base(**{"RX2.LOOPS": 32}), 1,
+     [r"WARNING LOOPS conflicts with RX_R_BASE_MM and RX_A_MM\n\s+set 2: at the inner radius a quarter of one loop is only 0\.\d+ mm of arc for 32 loops",
+      r"ERROR   set 2: a via (sits only|touches)", r"Nothing was written"], []),
     ("err_set1_tx_pitch_text", base(**{"TX1.TX_PITCH_MM": "0.6"}), 1, [r"ERROR.*set 1: TX_PITCH_MM", r"Dual_TX1_Parameters\.py"], []),
     ("err_set1_rx_layers_equal", base(**{"RX1.RX_LAYER_A": 2, "RX1.RX_LAYER_B": 2}), 1, [r"ERROR   RX_LAYER_A conflicts with RX_LAYER_B\n\s+set 1: the two RX layers must be different"], []),
     ("err_set2_drill_too_big", base(**{"BOARD.VIA_DRILL_MM": 0.8}), 1, [r"ERROR   VIA_DRILL_MM conflicts with VIA_DIAMETER_MM\n\s+set 1: the drill",

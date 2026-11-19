@@ -15,7 +15,7 @@ gap at every angle.
 
 ### 11.1.1 Loops
 
-`LOOPS` sets the number of electrical periods per mechanical turn, from 1 to 16. One loop gives a
+`LOOPS` sets the number of electrical periods per mechanical turn, from 1 to 32. One loop gives a
 true absolute 0–360° sensor. More loops divide the turn into finer periods for higher resolution.
 
 ![Stator 1: RX Loops](https://raw.githubusercontent.com/RolandThsive/Inductive-Encoder-Sinusoidal-Coil-Generator/main/docs/images/stator_1_loops.png)

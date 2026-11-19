@@ -6,6 +6,7 @@ fallbacks, the font, the search for the TX end, the name placer that keeps names
 
 import math
 import os
+import re
 import shutil
 import tempfile
 import unittest
@@ -71,27 +72,48 @@ class DrawnIntoTheFile(unittest.TestCase):
 
     def test_suggested_via_sites_have_room(self):
         """Each dot (a suggested via) keeps MIN_CLEARANCE_MM from every copper of another net than its own coil
-        and from every existing via, as the record claims; measured on the file."""
-        res = H.board("Board001-default")
-        b = res.stator
-        need = res.params["MIN_CLEARANCE_MM"]
-        via_r = res.params["VIA_DIAMETER_MM"] / 2.0
-        _l, dots = silk_items(b, "F.SilkS")
-        for c in dots:
-            p = np.array(c["centre"])
-            P = np.repeat(p[None, :], len(b.seg), axis=0)
-            d = RT.point_segment_distance(P, b.seg[:, 0:2], b.seg[:, 2:4]) - b.seg[:, 4] / 2.0 - via_r
-            # the trace being cut (own net, within a via gap of the dot) does not count
-            own = np.zeros(len(b.seg), dtype=bool)
-            near = d < need
-            if near.any():
-                nets = set(b.seg_net[near].tolist())
-                self.assertEqual(len(nets), 1, f"a dot at {c['centre']} is within {need} mm of nets {nets}")
-                own = b.seg_net == nets.pop()
-            self.assertGreaterEqual(float(d[~own].min()), need - 1e-6, f"dot at {c['centre']}")
-            if len(b.via):
-                dv = np.hypot(b.via[:, 0] - p[0], b.via[:, 1] - p[1]) - b.via[:, 2] / 2.0 - via_r
-                self.assertGreaterEqual(float(dv.min()), need - 1e-6, f"dot at {c['centre']} too close to a via")
+        and from every existing via, as the record claims; measured on the file (the default board and every 32-loop
+        board of the run, where the RX traces are packed tightest)."""
+        for case in ["Board001-default"] + [n for n in H.BOARDS if "-loops-32" in n]:
+            with self.subTest(case=case):
+                res = H.board(case)
+                b = res.stator
+                need = res.params["MIN_CLEARANCE_MM"]
+                via_r = res.params["VIA_DIAMETER_MM"] / 2.0
+                _l, dots = silk_items(b, "F.SilkS")
+                for c in dots:
+                    p = np.array(c["centre"])
+                    P = np.repeat(p[None, :], len(b.seg), axis=0)
+                    d = RT.point_segment_distance(P, b.seg[:, 0:2], b.seg[:, 2:4]) - b.seg[:, 4] / 2.0 - via_r
+                    # the trace being cut (own net, within a via gap of the dot) does not count
+                    own = np.zeros(len(b.seg), dtype=bool)
+                    near = d < need
+                    if near.any():
+                        nets = set(b.seg_net[near].tolist())
+                        self.assertEqual(len(nets), 1, f"a dot at {c['centre']} is within {need} mm of nets {nets}")
+                        own = b.seg_net == nets.pop()
+                    self.assertGreaterEqual(float(d[~own].min()), need - 1e-6, f"dot at {c['centre']}")
+                    if len(b.via):
+                        dv = np.hypot(b.via[:, 0] - p[0], b.via[:, 1] - p[1]) - b.via[:, 2] / 2.0 - via_r
+                        self.assertGreaterEqual(float(dv.min()), need - 1e-6, f"dot at {c['centre']} too close to a via")
+
+    def test_32_loop_boards_say_which_rx_breaks_are_missing(self):
+        """At 32 loops the RX traces are packed so tightly that a break with two through vias rarely fits on a
+        single board (a wider SILKSCREEN_SEARCH_SPAN_DEG or a smaller SILKSCREEN_BREAK_SEPARATION_MM does not help:
+        tried on r 30 ... 49 with 2 and 4 layers).  The generator must never skip a coil silently: each RX coil
+        (1 and 2) either gets its break or is named in a "no spot on" warning that tells to cut it by hand, the
+        file still holds the suggestion, and the board is written."""
+        for case in [n for n in H.BOARDS if "-loops-32" in n]:
+            with self.subTest(case=case):
+                res = H.board(case)
+                if not res.silk.get("SILKSCREEN_SUGGESTION", True):
+                    continue
+                self.assertIn("suggestion(s) drawn into the stator file", res.record)
+                missing = re.findall(r"WARNING no spot on (\S+) within .* or cut the coil by hand", res.record)
+                self.assertEqual(len(missing), len(set(missing)), "a coil is named twice")
+                self.assertLessEqual(set(missing), {"1", "2"}, "only RX coils 1 and 2 can miss a break")
+                self.assertEqual(res.record.count("no spot on"), len(missing),
+                                 "every missing break gives the cut-by-hand advice")
 
     def test_top_only_with_dots_on_every_via(self):
         res = H.board("Board013-silkscreen-top-dots-on-all")
