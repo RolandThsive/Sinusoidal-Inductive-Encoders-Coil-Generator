@@ -306,6 +306,35 @@ class Nets(unittest.TestCase):
                         self.assertLess(math.hypot(mx - cx, my - cy), limit, f"set {k} {coil} centroid off")
 
 
+    def test_rx_tip_vias_repeat_every_period(self):
+        """Symmetry and phase of every set with one sub-coil and two or more loops (1 ... 32): on each RX band edge
+        the coil's tip vias sit at two angles of the electrical period, half a period apart, with LOOPS vias at each
+        (one per period: the pattern repeats exactly every 360 / LOOPS degrees), and the cosine coil's tips sit a
+        quarter period from the sine coil's."""
+        for case in cases():
+            with self.subTest(case=case):
+                res, b = H.board(case), H.board(case).stator
+                for k in (1, 2):
+                    n, sub = res.p(f"RX{k}", "LOOPS"), res.p(f"RX{k}", "RX_SUBCOILS")
+                    if n < 2 or sub != 1:
+                        continue
+                    period, nets, tips = 360.0 / n, set_nets(res, k), {}
+                    edges = ("inner",) if fingers(res, k) else ("inner", "outer")   # finger vias lie past the band
+                    for coil in ("SIN", "COS"):
+                        pat = RT.tip_via_pattern(b.via[b.via_net == nets[coil]], b.centre, n)
+                        for edge in edges:
+                            groups = pat[edge]
+                            full = sorted(a for a, c in groups if c == n)
+                            self.assertEqual(len(full), 2, f"set {k} {coil} {edge} tips: {groups} ({n} loops)")
+                            self.assertAlmostEqual(RT.period_offset(full[0], full[1], period), period / 2, delta=0.05,
+                                                   msg=f"set {k} {coil} {edge}: the two tips of a lobe")
+                            tips[coil, edge] = full[0]
+                    for edge in edges:
+                        d = RT.period_offset(tips["SIN", edge], tips["COS", edge], period / 2)
+                        self.assertAlmostEqual(min(d, period / 2 - d), period / 4, delta=0.05,
+                                               msg=f"set {k} {edge}: cosine a quarter period from sine")
+
+
 class Vias(unittest.TestCase):
     """VIA_TYPE (Dual_Board_Parameters.py, or a set's own in its RX file).  A through via is written with F.Cu and
     B.Cu; a via of a set with "blind" vias (on a 4-layer board) carries KiCad's blind token and the two layers that

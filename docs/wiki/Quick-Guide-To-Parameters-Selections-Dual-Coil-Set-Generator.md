@@ -111,7 +111,7 @@ thing at a time:
 
 | Choice | Default | Why |
 |---|---|---|
-| Loops | Set 1: 1, set 2: 16 | The coarse track gives the absolute angle; its error must stay below 180 / `LOOPS` of set 2 degrees (±11.25° for 16 loops) |
+| Loops | Set 1: 1, set 2: 16 | The coarse track gives the absolute angle; its error must stay below 180 / `LOOPS` of set 2 degrees (±11.25° for 16 loops, ±5.625° for 32) |
 | Layers | RX on Top + Inner-1, TX on Top + Inner-2, both sets | Leaves Bottom free for set 1's leads to cross set 2 |
 | TX | Series, 4 turns per layer, pitch 0.35 mm, traces 0.15 mm | Enough inductance at 3 MHz for the inner tank; every turn of TX1 pushes set 2 out. A parallel ring needs a pitch of at least 0.43 mm with 0.6 mm vias |
 | TX ends | `TERMINAL_1_DEG` 180, `TERMINAL_2_DEG` 0 | Opposite sides, so the two sets' breakouts stay apart |

@@ -16,6 +16,10 @@ D = H.DELETE
 FOUR = {"PCB_LAYERS": 4, "TX_WIRING": "series", "TX_LAYER_A": 1, "TX_LAYER_B": 2, "RX_LAYER_A": 3, "RX_LAYER_B": 4,
         "RX_TABS": "none"}
 FOUR_BLIND = dict(FOUR, VIA_TYPE="blind", VIA_DIAMETER_MM=0.4, VIA_DRILL_MM=0.15)
+# a 32-loop board with room for its tip vias (the README's board size table): RX band 32 ... 40 mm, one finger per coil
+LOOPS_32 = {"LOOPS": 32, "INNER_EDGE_RADIUS_MM": 30.0, "OUTER_EDGE_RADIUS_MM": 46.0, "INSIDE_RADIUS_MM": 32.0,
+            "OUTSIDE_RADIUS_MM": 40.0, "RX_TABS": "single"}
+
 CASES = [
     # ------------------------------------------------------------------ the defaults
     ("default_passes", {}, 0, [r"parameters OK", r"stator built", r"rotor built", r"no warnings", r"CHECK PASSED"],
@@ -31,7 +35,15 @@ CASES = [
     ("num_above_limit", {"EDGE_LINE_WIDTH_MM": 2.0}, 1, [r"ERROR.*EDGE_LINE_WIDTH_MM"], []),
     ("int_as_float", {"LOOPS": 2.5}, 1, [r"ERROR.*LOOPS"], []),
     ("int_zero", {"LOOPS": 0}, 1, [r"ERROR.*LOOPS"], []),
-    ("int_above_limit", {"LOOPS": 17}, 1, [r"ERROR.*LOOPS"], []),
+    ("int_above_limit", {"LOOPS": 33}, 1, [r"ERROR   LOOPS = 33: must be between 1 and 32"], []),
+    # 32 loops: on a board large enough for the tip vias (RX band from r = 32 mm) it builds clean; on the default band
+    # (r = 16.2 mm) the check warns before building and the build stops; fingers on every tip meet the TX windows
+    ("int_at_limit_32", dict(LOOPS_32), 0, [r"CHECK PASSED"], [r"ERROR", r"WARNING"]),
+    ("loops_32_small_band_warns_then_stops", {"LOOPS": 32}, 1,
+     [r"WARNING LOOPS conflicts with INSIDE_RADIUS_MM\n\s+at the inner radius a quarter of one loop is only 0\.80 mm of arc for 32 loops",
+      r"ERROR   LOOPS conflicts with RX_SUBCOILS", r"junction vias", r"Nothing was written"], []),
+    ("loops_32_fingers_on_every_tip_short", dict(LOOPS_32, RX_TABS="all"), 1,
+     [r"ERROR   an RX bridging finger comes within -\d\.\d+ mm of TX copper", r"Nothing was written"], []),
     ("choice_bad_number", {"PCB_LAYERS": 3}, 1, [r"ERROR.*PCB_LAYERS"], []),
     ("choice_case_sensitive", {"RX_PROFILE": "Equal_Area"}, 1, [r"ERROR.*RX_PROFILE"], []),
     ("choice_bad_text", {"TX_WIRING": "double"}, 1, [r"ERROR.*TX_WIRING"], []),

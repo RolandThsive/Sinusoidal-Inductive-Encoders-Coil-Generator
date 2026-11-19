@@ -430,6 +430,37 @@ class _UnionFind:
             self.parent[ra] = rb
 
 
+def tip_via_pattern(vias, centre, loops, tol_mm=0.01, tol_deg=0.02):
+    """The tip vias of one RX coil (the vias on the innermost and the outermost via radius of the net: the generator
+    puts every inner tip via on the RX band start and every outer one on its end), sorted by where they fall inside
+    one electrical period.  vias: rows (x, y, ...) of the coil's vias; loops: the coil's LOOPS.  Returns
+    {"inner": [(angle in the period, count), ...], "outer": [...]}: each list the distinct angles (within tol_deg,
+    measured round the period) and how many vias sit at each.  A coil of `loops` identical periods has two angles
+    per edge with `loops` vias each (a lobe's tips, half a period apart)."""
+    v = np.asarray(vias, dtype=float)
+    cx, cy = centre
+    r = np.hypot(v[:, 0] - cx, v[:, 1] - cy)
+    period = 360.0 / loops
+    out = {}
+    for edge, at in (("inner", r.min()), ("outer", r.max())):
+        a = np.degrees(np.arctan2(v[:, 1] - cy, v[:, 0] - cx))[np.abs(r - at) < tol_mm] % period
+        groups = []                                   # [angle, count], the angle of the group's first via
+        for x in np.sort(a):
+            for g in groups:
+                if abs((x - g[0] + period / 2) % period - period / 2) < tol_deg:
+                    g[1] += 1
+                    break
+            else:
+                groups.append([float(x), 1])
+        out[edge] = [(g[0], g[1]) for g in groups]
+    return out
+
+
+def period_offset(a, b, period):
+    """b - a, folded into [0, period)."""
+    return (b - a) % period
+
+
 def connectivity(board, net_id, tol=1e-3):
     """How the copper of one net hangs together.  Segment ends meet where the written coordinates are equal (the
     writer prints the same float the same way); a via of the net joins, on every layer, each segment of the net

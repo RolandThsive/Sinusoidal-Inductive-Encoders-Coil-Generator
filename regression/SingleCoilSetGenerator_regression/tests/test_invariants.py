@@ -196,6 +196,33 @@ class Nets(unittest.TestCase):
                                         f"({mx - cx:.3f}, {my - cy:.3f})")
 
 
+    def test_rx_tip_vias_repeat_every_period(self):
+        """Symmetry and phase with one sub-coil and two or more loops (1 ... 32): on each RX band edge a coil's tip
+        vias sit at two angles of the electrical period, half a period apart, with LOOPS vias at each (the pattern
+        repeats exactly every 360 / LOOPS degrees), and the cosine coil's tips sit a quarter period from the sine
+        coil's.  With fingers only the inner edge counts (the finger vias lie past the band)."""
+        for case in cases():
+            with self.subTest(case=case):
+                res, b = H.board(case), H.board(case).stator
+                n = res.params["LOOPS"]
+                if n < 2 or res.params["RX_SUBCOILS"] != 1:
+                    continue
+                period, tips = 360.0 / n, {}
+                edges = ("inner",) if str(res.params["RX_TABS"]).lower() != "none" else ("inner", "outer")
+                for coil, name in (("SIN", "RX_NET_PHASE_0_2"), ("COS", "RX_NET_PHASE_1_3")):
+                    pat = RT.tip_via_pattern(b.via[b.via_net == b.net_id[res.params[name]]], b.centre, n)
+                    for edge in edges:
+                        full = sorted(a for a, c in pat[edge] if c == n)
+                        self.assertEqual(len(full), 2, f"{coil} {edge} tips: {pat[edge]} ({n} loops)")
+                        self.assertAlmostEqual(RT.period_offset(full[0], full[1], period), period / 2, delta=0.05,
+                                               msg=f"{coil} {edge}: the two tips of a lobe")
+                        tips[coil, edge] = full[0]
+                for edge in edges:
+                    d = RT.period_offset(tips["SIN", edge], tips["COS", edge], period / 2)
+                    self.assertAlmostEqual(min(d, period / 2 - d), period / 4, delta=0.05,
+                                           msg=f"{edge}: cosine a quarter period from sine")
+
+
 class Vias(unittest.TestCase):
     """VIA_TYPE.  A through via is written with the layers F.Cu and B.Cu whatever it joins; with VIA_TYPE = "blind" on a
     4-layer board every via is written with KiCad's blind token and the two layers that carry its net's copper at that

@@ -68,7 +68,7 @@ walk-through: [Getting Started](https://github.com/RolandThsive/Inductive-Encode
 
 ## What Works
 
-- **Stator:** 1 to 16 loops, two RX profiles, 1 to 3 sub-coils, bridging fingers; TX on one or two layers, single,
+- **Stator:** 1 to 32 loops, two RX profiles, 1 to 3 sub-coils, bridging fingers; TX on one or two layers, single,
   series or parallel, with stepped-diagonal, stepped-arc or spiral turns; the TX terminal is placed automatically.
 - **Rotor:** generated from the stator, or fully custom.
 - **Board:** 2 or 4 copper layers; through vias, or blind vias on 4-layer boards.
