@@ -7,7 +7,7 @@ Units: millimetres, degrees.  Nothing in this file is computed - edit values onl
 # =============================================================================
 # SIZE AND PERIODICITY
 # =============================================================================
-# LOOPS = number of electrical periods (sine waves) per mechanical turn (1 ... 16).
+# LOOPS = number of electrical periods (sine waves) per mechanical turn (1 ... 32).
 #   - It is also the number of metal sectors the rotor must have.
 #   - Unique absolute range of the sensor = 360 / LOOPS degrees.
 #   - 1 loop gives true 0-360 deg absolute output; higher counts give

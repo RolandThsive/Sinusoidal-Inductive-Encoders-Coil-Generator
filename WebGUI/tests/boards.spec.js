@@ -39,7 +39,7 @@ for (const [suite, { boards }] of Object.entries(SUITES)) {
   for (const id of ALL ? everyBoard(suite) : boards) {
     const folder = boardFolder(suite, id);
     test(`${suite} ${path.basename(folder)}: the browser makes the reference board`, async ({ app, page }) => {
-      if (ALL) test.setTimeout(1500000);                            // a board of 16 loops takes minutes in a browser that shares its computer
+      if (ALL) test.setTimeout(1500000);                            // a board of 32 loops takes minutes in a browser that shares its computer
       await app.open();
       const files = fs.readdirSync(folder).filter((n) => n.endsWith("_Parameters.py")).map((n) => path.join(folder, n));
       await page.setInputFiles("#import-file", files);              // a Dual board's files switch the page to Dual

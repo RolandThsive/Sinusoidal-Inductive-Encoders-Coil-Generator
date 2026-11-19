@@ -83,7 +83,7 @@ const BASIC_PAGES = {
     num("AIR_GAP_MM", { label: "Air Gap", unit: "mm", min: 0.1, max: 10, step: 0.001, sliderStep: 0.1, slider: [0.2, 5] }),
   ],
   RX: () => [
-    num("LOOPS", { label: "Loops", min: 1, max: 16, step: 1, slider: [1, 16], note: noteFor("LOOPS"), ticks: ["1", "4", "8", "12", "16"] }),
+    num("LOOPS", { label: "Loops", min: 1, max: 32, step: 1, slider: [1, 32], note: noteFor("LOOPS"), ticks: ["1", "8", "16", "24", "32"] }),
     seg("RX_SUBCOILS", { label: "RX Sub-Coils", options: [[1, "1 (None)"], [2, "2"], [3, "3"]], note: noteFor("RX_SUBCOILS") }),
     el("div", { class: "group-title with-note" }, "RX Band", el("span", { class: "field-note", "data-note": "RX_BAND" }, noteFor("RX_BAND"))),
     num("INSIDE_RADIUS_MM", { label: "RX Inside Radius", unit: "mm", min: 0.1, max: 250, step: 0.001, sliderStep: 0.1, slider: [5, 150], none: true }),

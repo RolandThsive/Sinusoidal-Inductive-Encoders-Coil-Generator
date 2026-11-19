@@ -9,7 +9,7 @@ Units: millimetres, degrees.  Nothing in this file is computed - edit values onl
 Layers are numbered 1 = Top, 2 = Inner 1, 3 = Inner 2, 4 = Bottom (PCB_LAYERS, Dual_Board_Parameters.py).
 """
 
-# LOOPS = electrical periods per mechanical turn (1 ... 16).  The inner set is the coarse, absolute one:
+# LOOPS = electrical periods per mechanical turn (1 ... 32).  The inner set is the coarse, absolute one:
 # 1 loop gives a true 0-360 deg output, which tells the outer set's periods apart.
 LOOPS = 1
 

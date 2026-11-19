@@ -226,7 +226,7 @@ test("a value that makes the generator stop with an error of its own: the page s
   // the setting itself carries the generator's words for its value
   await app.mode("advanced");
   await app.tab("RX", 2);
-  await expect(app.field("LOOPS").locator(".field-error")).toContainText("must be between 1 and 16");
+  await expect(app.field("LOOPS").locator(".field-error")).toContainText("must be between 1 and 32");
   // put right, the generator runs again: Python has not been harmed
   await app.type("LOOPS", "4");
   await app.generate();

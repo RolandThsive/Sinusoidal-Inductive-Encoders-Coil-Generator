@@ -1,10 +1,11 @@
 # GitHub's CodeQL security analysis of the Python code (its default queries; ruff covers code quality): on every pull
-# request, after each push to main and every Monday.  Its findings appear under Security > Code scanning.
+# request into main, after each push to main and every Monday.  Its findings appear under Security > Code scanning.
 
 name: CodeQL
 
 on:
   pull_request:
+    branches: [main]
   push:
     branches: [main]
   schedule:

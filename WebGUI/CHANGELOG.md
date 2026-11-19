@@ -3,6 +3,10 @@
 What changed on the page a visitor sees. The newest version is on top. The generator's own changes are in the
 repository's releases.
 
+## 2.0.2
+
+- Up to 32 loops in both generators, as on the desktop. The Basic Loops box and slider run to 32. On a band too small for that many loops, the page shows the generator's own message.
+
 ## 2.0.1
 
 - The grey line beside the note of a help box stands clear of the note's text again.
